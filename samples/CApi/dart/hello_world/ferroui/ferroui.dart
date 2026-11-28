@@ -290,8 +290,8 @@ void runApp(void Function() start) {
 
 const int _abiVersion = 1;
 const int _bufferTooSmall = -14;
-const int _apiFingerprint = -7664809914081695520;
-const int _selectionFingerprint = -659205828669880482;
+const int _apiFingerprint = -4387658432560162436;
+const int _selectionFingerprint = 5031981251879184649;
 
 void _registerTypes() {
   for (final entry in const ['ferro_type_button', 'ferro_type_stack_panel', 'ferro_type_text_block', 'ferro_type_window']) {
@@ -618,98 +618,98 @@ extension type InputElement._(int handle) implements Interactive {
       _subscribe(handle, 26, (sender) => handler(InputElement._(sender)));
   /// KeyDown: the sender is valid for the call. Defines the `KeyDown` event.
   Subscription onKeyDown(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 31, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 33, (sender) => handler(InputElement._(sender)));
   /// KeyUp: the sender is valid for the call. Defines the `KeyUp` event.
   Subscription onKeyUp(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 32, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 34, (sender) => handler(InputElement._(sender)));
   /// LosingFocus: the sender is valid for the call. Defines the `LosingFocus` event.
   Subscription onLosingFocus(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 34, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 36, (sender) => handler(InputElement._(sender)));
   /// LostFocus: the sender is valid for the call. Defines the `LostFocus` event.
   Subscription onLostFocus(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 35, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 37, (sender) => handler(InputElement._(sender)));
   /// Pinch: the sender is valid for the call. Defines the `Pinch` event.
   Subscription onPinch(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 45, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 47, (sender) => handler(InputElement._(sender)));
   /// PinchEnded: the sender is valid for the call. Defines the `PinchEnded` event.
   Subscription onPinchEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 46, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 48, (sender) => handler(InputElement._(sender)));
   /// PointerCaptureChanging: the sender is valid for the call. Defines the
   /// `PointerCaptureChanging` routed event.
   Subscription onPointerCaptureChanging(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 47, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 49, (sender) => handler(InputElement._(sender)));
   /// PointerCaptureLost: the sender is valid for the call. Defines the `PointerCaptureLost`
   /// routed event.
   Subscription onPointerCaptureLost(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 48, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 50, (sender) => handler(InputElement._(sender)));
   /// PointerEntered: the sender is valid for the call. Defines the `PointerEntered` event.
   Subscription onPointerEntered(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 49, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 51, (sender) => handler(InputElement._(sender)));
   /// PointerExited: the sender is valid for the call. Defines the `PointerExited` event.
   Subscription onPointerExited(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 51, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 53, (sender) => handler(InputElement._(sender)));
   /// PointerMoved: the sender is valid for the call. Defines the `PointerMoved` event.
   Subscription onPointerMoved(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 53, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 55, (sender) => handler(InputElement._(sender)));
   /// PointerPressed: the sender is valid for the call. Defines the `PointerPressed` event.
   Subscription onPointerPressed(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 54, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 56, (sender) => handler(InputElement._(sender)));
   /// PointerReleased: the sender is valid for the call. Defines the `PointerReleased` event.
   Subscription onPointerReleased(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 55, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 57, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureMagnify: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureMagnify` event.
   Subscription onPointerTouchPadGestureMagnify(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 56, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 58, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureRotate: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureRotate` event.
   Subscription onPointerTouchPadGestureRotate(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 57, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 59, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureSwipe: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureSwipe` event.
   Subscription onPointerTouchPadGestureSwipe(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 58, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 60, (sender) => handler(InputElement._(sender)));
   /// PointerWheelChanged: the sender is valid for the call. Defines the `PointerWheelChanged`
   /// event.
   Subscription onPointerWheelChanged(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 59, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 61, (sender) => handler(InputElement._(sender)));
   /// PullGesture: the sender is valid for the call. Defines the `PullGesture` event.
   Subscription onPullGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 60, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 62, (sender) => handler(InputElement._(sender)));
   /// PullGestureEnded: the sender is valid for the call. Defines the `PullGestureEnded` event.
   Subscription onPullGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 61, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 63, (sender) => handler(InputElement._(sender)));
   /// RightTapped: the sender is valid for the call. Defines the `RightTapped` event.
   Subscription onRightTapped(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 67, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 69, (sender) => handler(InputElement._(sender)));
   /// ScrollGesture: the sender is valid for the call. Defines the `ScrollGesture` event.
   Subscription onScrollGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 69, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 71, (sender) => handler(InputElement._(sender)));
   /// ScrollGestureEnded: the sender is valid for the call. Defines the `ScrollGestureEnded`
   /// event.
   Subscription onScrollGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 70, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 72, (sender) => handler(InputElement._(sender)));
   /// ScrollGestureInertiaStarting: the sender is valid for the call. Defines the
   /// `ScrollGestureInertiaStarting` event.
   Subscription onScrollGestureInertiaStarting(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 71, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 73, (sender) => handler(InputElement._(sender)));
   /// SwipeGesture: the sender is valid for the call. Defines the `SwipeGesture` event.
   Subscription onSwipeGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 78, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 80, (sender) => handler(InputElement._(sender)));
   /// SwipeGestureEnded: the sender is valid for the call. Defines the `SwipeGestureEnded`
   /// event.
   Subscription onSwipeGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 79, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 81, (sender) => handler(InputElement._(sender)));
   /// Tapped: the sender is valid for the call. Defines the `Tapped` event.
   Subscription onTapped(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 80, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 82, (sender) => handler(InputElement._(sender)));
   /// TextInput: the sender is valid for the call. Defines the `TextInput` event.
   Subscription onTextInput(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 87, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 89, (sender) => handler(InputElement._(sender)));
   /// TextInputMethodClientRequested: the sender is valid for the call. Defines the
   /// `TextInputMethodClientRequested` event.
   Subscription onTextInputMethodClientRequested(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 88, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 90, (sender) => handler(InputElement._(sender)));
 }
 
 /// Base class for controls. The control class extends [`InputElement`] and adds the following
@@ -731,17 +731,17 @@ extension type Control._(int handle) implements InputElement {
   set tagObject(FerroObject value) => _setObject(handle, 872, value.handle);
   /// Loaded: the sender is valid for the call. Defines the `Loaded` event.
   Subscription onLoaded(void Function(Control sender) handler) =>
-      _subscribe(handle, 33, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 35, (sender) => handler(Control._(sender)));
   /// RequestBringIntoView: the sender is valid for the call. Event raised when an element
   /// wishes to be scrolled into view.
   Subscription onRequestBringIntoView(void Function(Control sender) handler) =>
-      _subscribe(handle, 66, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 68, (sender) => handler(Control._(sender)));
   /// SizeChanged: the sender is valid for the call. Defines the `SizeChanged` event.
   Subscription onSizeChanged(void Function(Control sender) handler) =>
-      _subscribe(handle, 75, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 77, (sender) => handler(Control._(sender)));
   /// Unloaded: the sender is valid for the call. Defines the `Unloaded` event.
   Subscription onUnloaded(void Function(Control sender) handler) =>
-      _subscribe(handle, 92, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 94, (sender) => handler(Control._(sender)));
 }
 
 /// A lookless control whose visual appearance is defined by its `Template`.
@@ -798,7 +798,7 @@ extension type TemplatedControl._(int handle) implements Control {
   /// TemplateApplied: the sender is valid for the call. Defines the `TemplateApplied` routed
   /// event.
   Subscription onTemplateApplied(void Function(TemplatedControl sender) handler) =>
-      _subscribe(handle, 81, (sender) => handler(TemplatedControl._(sender)));
+      _subscribe(handle, 83, (sender) => handler(TemplatedControl._(sender)));
 }
 
 /// Displays content according to an [`IDataTemplate`].
@@ -886,7 +886,7 @@ extension type StackPanel._(int handle) implements Panel {
   /// VerticalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `VerticalSnapPointsChanged` event.
   Subscription onVerticalSnapPointsChanged(void Function(StackPanel sender) handler) =>
-      _subscribe(handle, 94, (sender) => handler(StackPanel._(sender)));
+      _subscribe(handle, 96, (sender) => handler(StackPanel._(sender)));
 }
 
 /// A control that displays a block of text.
@@ -1068,9 +1068,9 @@ extension type Window._(int handle) implements WindowBase {
   /// WindowClosed: the sender is valid for the call. Routed event that can be used for global
   /// tracking of window destruction.
   Subscription onWindowClosed(void Function(Window sender) handler) =>
-      _subscribe(handle, 95, (sender) => handler(Window._(sender)));
+      _subscribe(handle, 97, (sender) => handler(Window._(sender)));
   /// WindowOpened: the sender is valid for the call. Routed event that can be used for global
   /// tracking of opening windows.
   Subscription onWindowOpened(void Function(Window sender) handler) =>
-      _subscribe(handle, 96, (sender) => handler(Window._(sender)));
+      _subscribe(handle, 98, (sender) => handler(Window._(sender)));
 }

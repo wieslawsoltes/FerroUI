@@ -612,6 +612,53 @@ fn system_high_contrast_selects_the_high_contrast_variant_of_the_theme_and_follo
 }
 
 #[test]
+fn system_high_contrast_overrides_a_local_window_theme_choice() {
+    let settings = Rc::new(DefaultPlatformSettings::new());
+    let _app = UnitTestApplication::start(TestServices::styled_window().with_platform_settings(settings.clone()));
+    let application = Application::current().expect("the application");
+    FerroLocator::current_mutable()
+        .bind::<dyn IThemeVariantHost>()
+        .to_constant(application.as_theme_variant_host());
+    let high_contrast = Some(ThemeVariant::new("TestHighContrast", Some(ThemeVariant::dark())));
+    ThemeVariant::set_high_contrast_variant(high_contrast.clone());
+
+    let window = crate::Window::new();
+    let following_window = crate::Window::new();
+    window.show();
+    following_window.show();
+    let light = Some(ThemeVariant::light());
+    let dark = Some(ThemeVariant::dark());
+    window.set_requested_theme_variant(dark.clone());
+    assert_eq!(window.actual_theme_variant(), dark);
+    assert_eq!(following_window.actual_theme_variant(), light);
+
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Dark));
+    assert_eq!(window.actual_theme_variant(), high_contrast);
+    assert_eq!(following_window.actual_theme_variant(), high_contrast);
+    window.set_requested_theme_variant(light.clone());
+    assert_eq!(window.actual_theme_variant(), high_contrast);
+    assert_eq!(window.requested_theme_variant(), light);
+    settings.set_color_values(PlatformColorValues::new().with_theme_variant(PlatformThemeVariant::Dark));
+    assert_eq!(window.actual_theme_variant(), light);
+    assert_eq!(following_window.actual_theme_variant(), dark);
+
+    let custom = ThemeVariant::new("Custom", None);
+    window.set_requested_theme_variant(Some(custom.clone()));
+    settings.set_color_values(high_contrast_values(PlatformThemeVariant::Dark));
+    assert_eq!(window.actual_theme_variant(), Some(custom));
+    window.set_requested_theme_variant(Some(ThemeVariant::default()));
+    assert_eq!(window.actual_theme_variant(), high_contrast);
+    settings.set_color_values(PlatformColorValues::new());
+    application.set_requested_theme_variant(dark.clone());
+    assert_eq!(window.actual_theme_variant(), dark);
+    assert_eq!(following_window.actual_theme_variant(), dark);
+
+    window.close();
+    following_window.close();
+    ThemeVariant::set_high_contrast_variant(None);
+}
+
+#[test]
 fn a_high_contrast_variant_set_while_high_contrast_is_on_applies_at_once() {
     let (_app, settings, application) = start_with_simulated_settings();
     settings.set_color_values(high_contrast_values(PlatformThemeVariant::Dark));

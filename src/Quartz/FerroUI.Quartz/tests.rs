@@ -632,3 +632,28 @@ fn system_font_descriptors_preserve_all_standard_weights_in_the_ui_family() {
         assert!(styles.iter().any(|f| f.weight().0 == weight));
     }
 }
+
+#[test]
+fn draw_color_composes_over_the_clip_independently_of_the_transform() {
+    use ferroui_base::media::{imaging::BitmapBlendingMode, Color};
+    let bitmap = Bitmap::new(PixelSize::new(20, 20), Vector::new(96., 96.));
+    let mut draw = bitmap.drawing(false, None);
+    draw.clear(Colors::WHITE);
+    draw.set_transform(Matrix::create_translation(100., 100.));
+    draw.draw_color(Color::from_uint32(0x80ff0000), BitmapBlendingMode::SourceOver);
+    draw.draw_color(Colors::BLUE, BitmapBlendingMode::Destination);
+    draw.set_transform(Matrix::IDENTITY);
+    draw.push_clip(Rect::new(0., 0., 10., 20.));
+    draw.draw_color(Colors::LIME, BitmapBlendingMode::Source);
+    draw.pop_clip();
+    draw.dispose();
+    let pixels = bitmap.pixels();
+    let at = |x: usize, y: usize| -> [u8; 4] {
+        let start = (y * 20 + x) * 4;
+        [pixels[start], pixels[start + 1], pixels[start + 2], pixels[start + 3]]
+    };
+    let (inside, outside) = (at(5, 10), at(15, 10));
+    assert!(inside[1] >= 254 && inside[0] <= 1 && inside[2] <= 1 && inside[3] == 255, "{inside:?}");
+    // Half-transparent red over white, away from the replaced half.
+    assert!(outside[0] > 110 && outside[0] < 145 && outside[2] >= 254 && outside[3] == 255, "{outside:?}");
+}

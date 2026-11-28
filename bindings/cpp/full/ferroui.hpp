@@ -224,7 +224,7 @@ protected:
     Self& self() noexcept { return static_cast<Self&>(*this); }
 };
 
-inline constexpr std::int64_t api_fingerprint = -7664809914081695520;
+inline constexpr std::int64_t api_fingerprint = -4387658432560162436;
 inline constexpr std::int64_t selection_fingerprint = 0;
 
 /// Background sources for acrylic.
@@ -1650,171 +1650,171 @@ public:
     /// KeyDown: the handler takes the object, and may return `true` for handled. Defines the
     /// `KeyDown` event.
     template <class Handler>
-    Self& on_key_down(Handler&& handler) { detail::subscribe<Self>(this->handle(), 31, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_key_down(Handler&& handler) { detail::subscribe<Self>(this->handle(), 33, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_key_down(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 31, std::forward<Handler>(handler))); }
+    Subscription subscribe_key_down(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 33, std::forward<Handler>(handler))); }
     /// KeyUp: the handler takes the object, and may return `true` for handled. Defines the `KeyUp`
     /// event.
     template <class Handler>
-    Self& on_key_up(Handler&& handler) { detail::subscribe<Self>(this->handle(), 32, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_key_up(Handler&& handler) { detail::subscribe<Self>(this->handle(), 34, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_key_up(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 32, std::forward<Handler>(handler))); }
+    Subscription subscribe_key_up(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 34, std::forward<Handler>(handler))); }
     /// LosingFocus: the handler takes the object, and may return `true` for handled. Defines the
     /// `LosingFocus` event.
     template <class Handler>
-    Self& on_losing_focus(Handler&& handler) { detail::subscribe<Self>(this->handle(), 34, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_losing_focus(Handler&& handler) { detail::subscribe<Self>(this->handle(), 36, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_losing_focus(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 34, std::forward<Handler>(handler))); }
+    Subscription subscribe_losing_focus(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 36, std::forward<Handler>(handler))); }
     /// LostFocus: the handler takes the object, and may return `true` for handled. Defines the
     /// `LostFocus` event.
     template <class Handler>
-    Self& on_lost_focus(Handler&& handler) { detail::subscribe<Self>(this->handle(), 35, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_lost_focus(Handler&& handler) { detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_lost_focus(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 35, std::forward<Handler>(handler))); }
+    Subscription subscribe_lost_focus(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler))); }
     /// Pinch: the handler takes the object, and may return `true` for handled. Defines the `Pinch`
     /// event.
     template <class Handler>
-    Self& on_pinch(Handler&& handler) { detail::subscribe<Self>(this->handle(), 45, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pinch(Handler&& handler) { detail::subscribe<Self>(this->handle(), 47, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pinch(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 45, std::forward<Handler>(handler))); }
+    Subscription subscribe_pinch(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 47, std::forward<Handler>(handler))); }
     /// PinchEnded: the handler takes the object, and may return `true` for handled. Defines the
     /// `PinchEnded` event.
     template <class Handler>
-    Self& on_pinch_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pinch_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 48, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pinch_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler))); }
+    Subscription subscribe_pinch_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 48, std::forward<Handler>(handler))); }
     /// PointerCaptureChanging: the handler takes the object, and may return `true` for handled.
     /// Defines the `PointerCaptureChanging` routed event.
     template <class Handler>
-    Self& on_pointer_capture_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 47, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_capture_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 49, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_capture_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 47, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_capture_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 49, std::forward<Handler>(handler))); }
     /// PointerCaptureLost: the handler takes the object, and may return `true` for handled. Defines
     /// the `PointerCaptureLost` routed event.
     template <class Handler>
-    Self& on_pointer_capture_lost(Handler&& handler) { detail::subscribe<Self>(this->handle(), 48, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_capture_lost(Handler&& handler) { detail::subscribe<Self>(this->handle(), 50, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_capture_lost(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 48, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_capture_lost(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 50, std::forward<Handler>(handler))); }
     /// PointerEntered: the handler takes the object, and may return `true` for handled. Defines the
     /// `PointerEntered` event.
     template <class Handler>
-    Self& on_pointer_entered(Handler&& handler) { detail::subscribe<Self>(this->handle(), 49, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_entered(Handler&& handler) { detail::subscribe<Self>(this->handle(), 51, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_entered(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 49, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_entered(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 51, std::forward<Handler>(handler))); }
     /// PointerExited: the handler takes the object, and may return `true` for handled. Defines the
     /// `PointerExited` event.
     template <class Handler>
-    Self& on_pointer_exited(Handler&& handler) { detail::subscribe<Self>(this->handle(), 51, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_exited(Handler&& handler) { detail::subscribe<Self>(this->handle(), 53, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_exited(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 51, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_exited(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 53, std::forward<Handler>(handler))); }
     /// PointerMoved: the handler takes the object, and may return `true` for handled. Defines the
     /// `PointerMoved` event.
     template <class Handler>
-    Self& on_pointer_moved(Handler&& handler) { detail::subscribe<Self>(this->handle(), 53, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_moved(Handler&& handler) { detail::subscribe<Self>(this->handle(), 55, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_moved(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 53, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_moved(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 55, std::forward<Handler>(handler))); }
     /// PointerPressed: the handler takes the object, and may return `true` for handled. Defines the
     /// `PointerPressed` event.
     template <class Handler>
-    Self& on_pointer_pressed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 54, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_pressed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 56, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_pressed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 54, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_pressed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 56, std::forward<Handler>(handler))); }
     /// PointerReleased: the handler takes the object, and may return `true` for handled. Defines
     /// the `PointerReleased` event.
     template <class Handler>
-    Self& on_pointer_released(Handler&& handler) { detail::subscribe<Self>(this->handle(), 55, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_released(Handler&& handler) { detail::subscribe<Self>(this->handle(), 57, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_released(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 55, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_released(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 57, std::forward<Handler>(handler))); }
     /// PointerTouchPadGestureMagnify: the handler takes the object, and may return `true` for
     /// handled. Defines the `PointerTouchPadGestureMagnify` event.
     template <class Handler>
-    Self& on_pointer_touch_pad_gesture_magnify(Handler&& handler) { detail::subscribe<Self>(this->handle(), 56, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_touch_pad_gesture_magnify(Handler&& handler) { detail::subscribe<Self>(this->handle(), 58, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_touch_pad_gesture_magnify(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 56, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_touch_pad_gesture_magnify(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 58, std::forward<Handler>(handler))); }
     /// PointerTouchPadGestureRotate: the handler takes the object, and may return `true` for
     /// handled. Defines the `PointerTouchPadGestureRotate` event.
     template <class Handler>
-    Self& on_pointer_touch_pad_gesture_rotate(Handler&& handler) { detail::subscribe<Self>(this->handle(), 57, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_touch_pad_gesture_rotate(Handler&& handler) { detail::subscribe<Self>(this->handle(), 59, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_touch_pad_gesture_rotate(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 57, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_touch_pad_gesture_rotate(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 59, std::forward<Handler>(handler))); }
     /// PointerTouchPadGestureSwipe: the handler takes the object, and may return `true` for
     /// handled. Defines the `PointerTouchPadGestureSwipe` event.
     template <class Handler>
-    Self& on_pointer_touch_pad_gesture_swipe(Handler&& handler) { detail::subscribe<Self>(this->handle(), 58, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_touch_pad_gesture_swipe(Handler&& handler) { detail::subscribe<Self>(this->handle(), 60, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_touch_pad_gesture_swipe(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 58, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_touch_pad_gesture_swipe(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 60, std::forward<Handler>(handler))); }
     /// PointerWheelChanged: the handler takes the object, and may return `true` for handled.
     /// Defines the `PointerWheelChanged` event.
     template <class Handler>
-    Self& on_pointer_wheel_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 59, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_wheel_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 61, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_wheel_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 59, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_wheel_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 61, std::forward<Handler>(handler))); }
     /// PullGesture: the handler takes the object, and may return `true` for handled. Defines the
     /// `PullGesture` event.
     template <class Handler>
-    Self& on_pull_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 60, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pull_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 62, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pull_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 60, std::forward<Handler>(handler))); }
+    Subscription subscribe_pull_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 62, std::forward<Handler>(handler))); }
     /// PullGestureEnded: the handler takes the object, and may return `true` for handled. Defines
     /// the `PullGestureEnded` event.
     template <class Handler>
-    Self& on_pull_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 61, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pull_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 63, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pull_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 61, std::forward<Handler>(handler))); }
+    Subscription subscribe_pull_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 63, std::forward<Handler>(handler))); }
     /// RightTapped: the handler takes the object, and may return `true` for handled. Defines the
     /// `RightTapped` event.
     template <class Handler>
-    Self& on_right_tapped(Handler&& handler) { detail::subscribe<Self>(this->handle(), 67, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_right_tapped(Handler&& handler) { detail::subscribe<Self>(this->handle(), 69, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_right_tapped(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 67, std::forward<Handler>(handler))); }
+    Subscription subscribe_right_tapped(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 69, std::forward<Handler>(handler))); }
     /// ScrollGesture: the handler takes the object, and may return `true` for handled. Defines the
     /// `ScrollGesture` event.
     template <class Handler>
-    Self& on_scroll_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 69, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_scroll_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 71, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_scroll_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 69, std::forward<Handler>(handler))); }
+    Subscription subscribe_scroll_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 71, std::forward<Handler>(handler))); }
     /// ScrollGestureEnded: the handler takes the object, and may return `true` for handled. Defines
     /// the `ScrollGestureEnded` event.
     template <class Handler>
-    Self& on_scroll_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 70, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_scroll_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 72, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_scroll_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 70, std::forward<Handler>(handler))); }
+    Subscription subscribe_scroll_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 72, std::forward<Handler>(handler))); }
     /// ScrollGestureInertiaStarting: the handler takes the object, and may return `true` for
     /// handled. Defines the `ScrollGestureInertiaStarting` event.
     template <class Handler>
-    Self& on_scroll_gesture_inertia_starting(Handler&& handler) { detail::subscribe<Self>(this->handle(), 71, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_scroll_gesture_inertia_starting(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_scroll_gesture_inertia_starting(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 71, std::forward<Handler>(handler))); }
+    Subscription subscribe_scroll_gesture_inertia_starting(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
     /// SwipeGesture: the handler takes the object, and may return `true` for handled. Defines the
     /// `SwipeGesture` event.
     template <class Handler>
-    Self& on_swipe_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 78, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_swipe_gesture(Handler&& handler) { detail::subscribe<Self>(this->handle(), 80, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_swipe_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 78, std::forward<Handler>(handler))); }
+    Subscription subscribe_swipe_gesture(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 80, std::forward<Handler>(handler))); }
     /// SwipeGestureEnded: the handler takes the object, and may return `true` for handled. Defines
     /// the `SwipeGestureEnded` event.
     template <class Handler>
-    Self& on_swipe_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 79, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_swipe_gesture_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 81, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_swipe_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 79, std::forward<Handler>(handler))); }
+    Subscription subscribe_swipe_gesture_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 81, std::forward<Handler>(handler))); }
     /// Tapped: the handler takes the object, and may return `true` for handled. Defines the
     /// `Tapped` event.
     template <class Handler>
-    Self& on_tapped(Handler&& handler) { detail::subscribe<Self>(this->handle(), 80, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_tapped(Handler&& handler) { detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_tapped(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 80, std::forward<Handler>(handler))); }
+    Subscription subscribe_tapped(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler))); }
     /// TextInput: the handler takes the object, and may return `true` for handled. Defines the
     /// `TextInput` event.
     template <class Handler>
-    Self& on_text_input(Handler&& handler) { detail::subscribe<Self>(this->handle(), 87, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_input(Handler&& handler) { detail::subscribe<Self>(this->handle(), 89, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_input(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 87, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_input(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 89, std::forward<Handler>(handler))); }
     /// TextInputMethodClientRequested: the handler takes the object, and may return `true` for
     /// handled. Defines the `TextInputMethodClientRequested` event.
     template <class Handler>
-    Self& on_text_input_method_client_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 88, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_input_method_client_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 90, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_input_method_client_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 88, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_input_method_client_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 90, std::forward<Handler>(handler))); }
 };
 
 class InputElement final : public InputElementApi<InputElement> {
@@ -1845,27 +1845,27 @@ public:
     /// Loaded: the handler takes the object, and may return `true` for handled. Defines the
     /// `Loaded` event.
     template <class Handler>
-    Self& on_loaded(Handler&& handler) { detail::subscribe<Self>(this->handle(), 33, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_loaded(Handler&& handler) { detail::subscribe<Self>(this->handle(), 35, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_loaded(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 33, std::forward<Handler>(handler))); }
+    Subscription subscribe_loaded(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 35, std::forward<Handler>(handler))); }
     /// RequestBringIntoView: the handler takes the object, and may return `true` for handled. Event
     /// raised when an element wishes to be scrolled into view.
     template <class Handler>
-    Self& on_request_bring_into_view(Handler&& handler) { detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_request_bring_into_view(Handler&& handler) { detail::subscribe<Self>(this->handle(), 68, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_request_bring_into_view(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler))); }
+    Subscription subscribe_request_bring_into_view(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 68, std::forward<Handler>(handler))); }
     /// SizeChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `SizeChanged` event.
     template <class Handler>
-    Self& on_size_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_size_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 77, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_size_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
+    Subscription subscribe_size_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 77, std::forward<Handler>(handler))); }
     /// Unloaded: the handler takes the object, and may return `true` for handled. Defines the
     /// `Unloaded` event.
     template <class Handler>
-    Self& on_unloaded(Handler&& handler) { detail::subscribe<Self>(this->handle(), 92, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_unloaded(Handler&& handler) { detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_unloaded(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 92, std::forward<Handler>(handler))); }
+    Subscription subscribe_unloaded(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler))); }
 };
 
 class Control final : public ControlApi<Control> {
@@ -2267,9 +2267,9 @@ public:
     /// TemplateApplied: the handler takes the object, and may return `true` for handled. Defines
     /// the `TemplateApplied` routed event.
     template <class Handler>
-    Self& on_template_applied(Handler&& handler) { detail::subscribe<Self>(this->handle(), 81, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_template_applied(Handler&& handler) { detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_template_applied(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 81, std::forward<Handler>(handler))); }
+    Subscription subscribe_template_applied(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler))); }
 };
 
 class TemplatedControl final : public TemplatedControlApi<TemplatedControl> {
@@ -2362,15 +2362,15 @@ public:
     /// that should be raised by containers when their selection state changes to notify the parent
     /// [`SelectingItemsControl`] that their selection state has changed.
     template <class Handler>
-    Self& on_is_selected_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 29, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_is_selected_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 31, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_is_selected_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 29, std::forward<Handler>(handler))); }
+    Subscription subscribe_is_selected_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 31, std::forward<Handler>(handler))); }
     /// SelectionChanged: the handler takes the object, and may return `true` for handled. Defines
     /// the `SelectionChanged` event.
     template <class Handler>
-    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
 };
 
 class SelectingItemsControl final : public SelectingItemsControlApi<SelectingItemsControl> {
@@ -2677,21 +2677,21 @@ public:
     /// `QuerySubmitted` event: a FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`,
     /// raised when Enter submits the text of the box.
     template <class Handler>
-    Self& on_query_submitted(Handler&& handler) { detail::subscribe<Self>(this->handle(), 62, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_query_submitted(Handler&& handler) { detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_query_submitted(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 62, std::forward<Handler>(handler))); }
+    Subscription subscribe_query_submitted(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler))); }
     /// SelectionChanged: the handler takes the object, and may return `true` for handled. Defines
     /// the `SelectionChanged` event.
     template <class Handler>
-    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
     /// TextChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `TextChanged` event.
     template <class Handler>
-    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler))); }
 };
 
 class AutoCompleteBox final : public AutoCompleteBoxApi<AutoCompleteBox> {
@@ -3316,9 +3316,9 @@ public:
     /// Spin: the handler takes the object, and may return `true` for handled. Defines the `Spin`
     /// routed event.
     template <class Handler>
-    Self& on_spin(Handler&& handler) { detail::subscribe<Self>(this->handle(), 76, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_spin(Handler&& handler) { detail::subscribe<Self>(this->handle(), 78, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_spin(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 76, std::forward<Handler>(handler))); }
+    Subscription subscribe_spin(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 78, std::forward<Handler>(handler))); }
 };
 
 class Spinner final : public SpinnerApi<Spinner> {
@@ -3633,9 +3633,9 @@ public:
     /// PageNavigationSystemBackButtonPressed: the handler takes the object, and may return `true`
     /// for handled. Defines the routed event raised when the system back button is pressed.
     template <class Handler>
-    Self& on_page_navigation_system_back_button_pressed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_page_navigation_system_back_button_pressed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 41, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_page_navigation_system_back_button_pressed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler))); }
+    Subscription subscribe_page_navigation_system_back_button_pressed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 41, std::forward<Handler>(handler))); }
 };
 
 class Page final : public PageApi<Page> {
@@ -3679,9 +3679,9 @@ public:
     /// SelectionChanged: the handler takes the object, and may return `true` for handled. Defines
     /// the `SelectionChanged` routed event.
     template <class Handler>
-    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
 };
 
 class SelectingMultiPage final : public SelectingMultiPageApi<SelectingMultiPage> {
@@ -3739,9 +3739,9 @@ public:
     /// IsCheckedChanged: the handler takes the object, and may return `true` for handled. Defines
     /// the `IsCheckedChanged` event.
     template <class Handler>
-    Self& on_is_checked_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_is_checked_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_is_checked_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler))); }
+    Subscription subscribe_is_checked_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler))); }
 };
 
 class ToggleButton final : public ToggleButtonApi<ToggleButton> {
@@ -4219,15 +4219,15 @@ public:
     /// Opened: the handler takes the object, and may return `true` for handled. Defines the
     /// `Opened` routed event.
     template <class Handler>
-    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler))); }
+    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler))); }
     /// Opening: the handler takes the object, and may return `true` for handled. Defines the
     /// `Opening` routed event.
     template <class Handler>
-    Self& on_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 38, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 40, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 38, std::forward<Handler>(handler))); }
+    Subscription subscribe_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 40, std::forward<Handler>(handler))); }
 };
 
 class CommandBar final : public CommandBarApi<CommandBar> {
@@ -4708,9 +4708,9 @@ public:
     /// Opened: the handler takes the object, and may return `true` for handled. Defines the
     /// `Opened` event.
     template <class Handler>
-    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler))); }
+    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler))); }
 };
 
 class MenuBase final : public MenuBaseApi<MenuBase> {
@@ -5382,9 +5382,9 @@ public:
     /// Opened: the handler takes the object, and may return `true` for handled. Defines the
     /// `Opened` routed event.
     template <class Handler>
-    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 37, std::forward<Handler>(handler))); }
+    Subscription subscribe_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 39, std::forward<Handler>(handler))); }
 };
 
 class DrawerPage final : public DrawerPageApi<DrawerPage> {
@@ -6815,6 +6815,18 @@ public:
     /// StretchDirection. Defines the `StretchDirection` property.
     StretchDirection stretch_direction() const { return static_cast<StretchDirection>(detail::get_i64(this->handle(), 839)); }
     Self& stretch_direction(StretchDirection value_) { detail::check(ferro_set_i64(this->handle(), 839, static_cast<std::int64_t>(value_))); return this->self(); }
+    /// ImageFailed: the handler takes the object, and may return `true` for handled. Defines the
+    /// `ImageFailed` event.
+    template <class Handler>
+    Self& on_image_failed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler)); return this->self(); }
+    template <class Handler>
+    Subscription subscribe_image_failed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler))); }
+    /// ImageOpened: the handler takes the object, and may return `true` for handled. Defines the
+    /// `ImageOpened` event.
+    template <class Handler>
+    Self& on_image_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 29, std::forward<Handler>(handler)); return this->self(); }
+    template <class Handler>
+    Subscription subscribe_image_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 29, std::forward<Handler>(handler))); }
 };
 
 class Image final : public ImageApi<Image> {
@@ -7327,9 +7339,9 @@ public:
     /// VerticalSnapPointsChanged: the handler takes the object, and may return `true` for handled.
     /// Defines the `VerticalSnapPointsChanged` event.
     template <class Handler>
-    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler))); }
+    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler))); }
 };
 
 class VirtualizingStackPanel final : public VirtualizingStackPanelApi<VirtualizingStackPanel> {
@@ -7973,21 +7985,21 @@ public:
     /// Defines the `PastingFromClipboard` event. The event is raised with
     /// [`PastingFromClipboardEventArgs`].
     template <class Handler>
-    Self& on_pasting_from_clipboard(Handler&& handler) { detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pasting_from_clipboard(Handler&& handler) { detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pasting_from_clipboard(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler))); }
+    Subscription subscribe_pasting_from_clipboard(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler))); }
     /// TextChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `TextChanged` event.
     template <class Handler>
-    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler))); }
     /// TextChanging: the handler takes the object, and may return `true` for handled. Defines the
     /// `TextChanging` event.
     template <class Handler>
-    Self& on_text_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler))); }
 };
 
 class TextBox final : public TextBoxApi<TextBox> {
@@ -8168,21 +8180,21 @@ public:
     /// PointerEnteredItem: the handler takes the object, and may return `true` for handled. Defines
     /// the `PointerEnteredItem` event.
     template <class Handler>
-    Self& on_pointer_entered_item(Handler&& handler) { detail::subscribe<Self>(this->handle(), 50, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_entered_item(Handler&& handler) { detail::subscribe<Self>(this->handle(), 52, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_entered_item(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 50, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_entered_item(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 52, std::forward<Handler>(handler))); }
     /// PointerExitedItem: the handler takes the object, and may return `true` for handled. Defines
     /// the `PointerExitedItem` event.
     template <class Handler>
-    Self& on_pointer_exited_item(Handler&& handler) { detail::subscribe<Self>(this->handle(), 52, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pointer_exited_item(Handler&& handler) { detail::subscribe<Self>(this->handle(), 54, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pointer_exited_item(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 52, std::forward<Handler>(handler))); }
+    Subscription subscribe_pointer_exited_item(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 54, std::forward<Handler>(handler))); }
     /// SubmenuOpened: the handler takes the object, and may return `true` for handled. Defines the
     /// `SubmenuOpened` event.
     template <class Handler>
-    Self& on_submenu_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 77, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_submenu_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 79, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_submenu_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 77, std::forward<Handler>(handler))); }
+    Subscription subscribe_submenu_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 79, std::forward<Handler>(handler))); }
 };
 
 class MenuItem final : public MenuItemApi<MenuItem> {
@@ -8885,9 +8897,9 @@ public:
     /// NotificationClosed: the handler takes the object, and may return `true` for handled. Defines
     /// the `NotificationClosed` event.
     template <class Handler>
-    Self& on_notification_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 36, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_notification_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 38, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_notification_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 36, std::forward<Handler>(handler))); }
+    Subscription subscribe_notification_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 38, std::forward<Handler>(handler))); }
 };
 
 class NotificationCard final : public NotificationCardApi<NotificationCard> {
@@ -9099,9 +9111,9 @@ public:
     /// ValueChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `ValueChanged` event.
     template <class Handler>
-    Self& on_value_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_value_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_value_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler))); }
+    Subscription subscribe_value_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler))); }
 };
 
 class NumericUpDown final : public NumericUpDownApi<NumericUpDown> {
@@ -9691,9 +9703,9 @@ public:
     /// SelectedIndexChanged: the handler takes the object, and may return `true` for handled.
     /// Defines the `SelectedIndexChanged` event.
     template <class Handler>
-    Self& on_selected_index_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 72, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selected_index_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 74, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selected_index_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 72, std::forward<Handler>(handler))); }
+    Subscription subscribe_selected_index_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 74, std::forward<Handler>(handler))); }
 };
 
 class PipsPager final : public PipsPagerApi<PipsPager> {
@@ -9897,9 +9909,9 @@ public:
     /// VerticalSnapPointsChanged: the handler takes the object, and may return `true` for handled.
     /// Defines the `VerticalSnapPointsChanged` event.
     template <class Handler>
-    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler))); }
+    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler))); }
 };
 
 class PivotPanel final : public PivotPanelApi<PivotPanel> {
@@ -10322,9 +10334,9 @@ public:
     /// ValueChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `ValueChanged` event.
     template <class Handler>
-    Self& on_value_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_value_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_value_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler))); }
+    Subscription subscribe_value_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler))); }
 };
 
 class RangeBase final : public RangeBaseApi<RangeBase> {
@@ -10990,9 +11002,9 @@ public:
     /// RefreshRequested: the handler takes the object, and may return `true` for handled. Defines
     /// the `RefreshRequested` event.
     template <class Handler>
-    Self& on_refresh_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_refresh_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_refresh_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler))); }
+    Subscription subscribe_refresh_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler))); }
 };
 
 class RefreshContainer final : public RefreshContainerApi<RefreshContainer> {
@@ -11026,15 +11038,15 @@ public:
     /// RefreshCompleted: the handler takes the object, and may return `true` for handled. Defines
     /// the `RefreshCompleted` event.
     template <class Handler>
-    Self& on_refresh_completed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 63, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_refresh_completed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 65, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_refresh_completed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 63, std::forward<Handler>(handler))); }
+    Subscription subscribe_refresh_completed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 65, std::forward<Handler>(handler))); }
     /// RefreshStarted: the handler takes the object, and may return `true` for handled. Defines the
     /// `RefreshStarted` event.
     template <class Handler>
-    Self& on_refresh_started(Handler&& handler) { detail::subscribe<Self>(this->handle(), 65, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_refresh_started(Handler&& handler) { detail::subscribe<Self>(this->handle(), 67, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_refresh_started(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 65, std::forward<Handler>(handler))); }
+    Subscription subscribe_refresh_started(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 67, std::forward<Handler>(handler))); }
 };
 
 class RefreshInfoProvider final : public RefreshInfoProviderApi<RefreshInfoProvider> {
@@ -11056,9 +11068,9 @@ public:
     /// RefreshRequested: the handler takes the object, and may return `true` for handled. Defines
     /// the `RefreshRequested` event.
     template <class Handler>
-    Self& on_refresh_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_refresh_requested(Handler&& handler) { detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_refresh_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 64, std::forward<Handler>(handler))); }
+    Subscription subscribe_refresh_requested(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 66, std::forward<Handler>(handler))); }
 };
 
 class RefreshVisualizer final : public RefreshVisualizerApi<RefreshVisualizer> {
@@ -11384,9 +11396,9 @@ public:
     /// VerticalSnapPointsChanged: the handler takes the object, and may return `true` for handled.
     /// Defines the `VerticalSnapPointsChanged` event.
     template <class Handler>
-    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_vertical_snap_points_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 94, std::forward<Handler>(handler))); }
+    Subscription subscribe_vertical_snap_points_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler))); }
 };
 
 class StackPanel final : public StackPanelApi<StackPanel> {
@@ -11585,44 +11597,44 @@ public:
     Subscription subscribe_cutting_to_clipboard(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 13, std::forward<Handler>(handler))); }
     /// PastingFromClipboard: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_pasting_from_clipboard(Handler&& handler) { detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pasting_from_clipboard(Handler&& handler) { detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pasting_from_clipboard(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler))); }
+    Subscription subscribe_pasting_from_clipboard(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 46, std::forward<Handler>(handler))); }
     /// SelectionChanged: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
     /// SelectionChanging: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_selection_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 74, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 76, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 74, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 76, std::forward<Handler>(handler))); }
     /// TextChanged: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 82, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler))); }
     /// TextChanging: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_text_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_changing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 83, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_changing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler))); }
     /// TextCompositionChanged: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_text_composition_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_composition_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 86, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_composition_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 84, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_composition_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 86, std::forward<Handler>(handler))); }
     /// TextCompositionEnded: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_text_composition_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_composition_ended(Handler&& handler) { detail::subscribe<Self>(this->handle(), 87, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_composition_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 85, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_composition_ended(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 87, std::forward<Handler>(handler))); }
     /// TextCompositionStarted: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_text_composition_started(Handler&& handler) { detail::subscribe<Self>(this->handle(), 86, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_text_composition_started(Handler&& handler) { detail::subscribe<Self>(this->handle(), 88, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_text_composition_started(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 86, std::forward<Handler>(handler))); }
+    Subscription subscribe_text_composition_started(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 88, std::forward<Handler>(handler))); }
 };
 
 class RichEditBox final : public RichEditBoxApi<RichEditBox> {
@@ -11761,14 +11773,14 @@ public:
     Subscription subscribe_context_menu_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 10, std::forward<Handler>(handler))); }
     /// IsTextTrimmedChanged: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_is_text_trimmed_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_is_text_trimmed_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 32, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_is_text_trimmed_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler))); }
+    Subscription subscribe_is_text_trimmed_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 32, std::forward<Handler>(handler))); }
     /// SelectionChanged: the handler takes the object, and may return `true` for handled.
     template <class Handler>
-    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_selection_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 73, std::forward<Handler>(handler))); }
+    Subscription subscribe_selection_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 75, std::forward<Handler>(handler))); }
 };
 
 class RichTextBlock final : public RichTextBlockApi<RichTextBlock> {
@@ -12194,9 +12206,9 @@ public:
     /// ScrollChanged: the handler takes the object, and may return `true` for handled. Defines the
     /// `ScrollChanged` event.
     template <class Handler>
-    Self& on_scroll_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 68, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_scroll_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 70, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_scroll_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 68, std::forward<Handler>(handler))); }
+    Subscription subscribe_scroll_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 70, std::forward<Handler>(handler))); }
 };
 
 class ScrollViewer final : public ScrollViewerApi<ScrollViewer> {
@@ -12635,27 +12647,27 @@ public:
     /// PaneClosed: the handler takes the object, and may return `true` for handled. Defines the
     /// `PaneClosed` event.
     template <class Handler>
-    Self& on_pane_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 40, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pane_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 42, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pane_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 40, std::forward<Handler>(handler))); }
+    Subscription subscribe_pane_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 42, std::forward<Handler>(handler))); }
     /// PaneClosing: the handler takes the object, and may return `true` for handled. Defines the
     /// `PaneClosing` event.
     template <class Handler>
-    Self& on_pane_closing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 41, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pane_closing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 43, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pane_closing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 41, std::forward<Handler>(handler))); }
+    Subscription subscribe_pane_closing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 43, std::forward<Handler>(handler))); }
     /// PaneOpened: the handler takes the object, and may return `true` for handled. Defines the
     /// `PaneOpened` event.
     template <class Handler>
-    Self& on_pane_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 42, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pane_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pane_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 42, std::forward<Handler>(handler))); }
+    Subscription subscribe_pane_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 44, std::forward<Handler>(handler))); }
     /// PaneOpening: the handler takes the object, and may return `true` for handled. Defines the
     /// `PaneOpening` event.
     template <class Handler>
-    Self& on_pane_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 43, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_pane_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 45, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_pane_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 43, std::forward<Handler>(handler))); }
+    Subscription subscribe_pane_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 45, std::forward<Handler>(handler))); }
 };
 
 class SplitView final : public SplitViewApi<SplitView> {
@@ -14079,9 +14091,9 @@ public:
     /// IsCheckedChanged: the handler takes the object, and may return `true` for handled. Defines
     /// the `IsCheckedChanged` event.
     template <class Handler>
-    Self& on_is_checked_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_is_checked_changed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_is_checked_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 28, std::forward<Handler>(handler))); }
+    Subscription subscribe_is_checked_changed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 30, std::forward<Handler>(handler))); }
 };
 
 class ToggleSplitButton final : public ToggleSplitButtonApi<ToggleSplitButton> {
@@ -14190,9 +14202,9 @@ public:
     /// `ToolTipClosing` event as handled does not cancel closing the tooltip. Once the tooltip is
     /// displayed, closing the tooltip is done only in response to user interaction with the UI.
     template <class Handler>
-    Self& on_tool_tip_closing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 89, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_tool_tip_closing(Handler&& handler) { detail::subscribe<Self>(this->handle(), 91, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_tool_tip_closing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 89, std::forward<Handler>(handler))); }
+    Subscription subscribe_tool_tip_closing(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 91, std::forward<Handler>(handler))); }
     /// ToolTipOpening: the handler takes the object, and may return `true` for handled. The event
     /// raised when a tooltip is going to be shown on an element. To prevent a tooltip from
     /// appearing in the UI, your handler for `ToolTipOpening` can mark the event data as cancelled.
@@ -14204,9 +14216,9 @@ public:
     /// not have the effect of closing the tooltip, and will instead create an undesirable visual
     /// artifact in the UI.
     template <class Handler>
-    Self& on_tool_tip_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 90, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_tool_tip_opening(Handler&& handler) { detail::subscribe<Self>(this->handle(), 92, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_tool_tip_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 90, std::forward<Handler>(handler))); }
+    Subscription subscribe_tool_tip_opening(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 92, std::forward<Handler>(handler))); }
 };
 
 class ToolTip final : public ToolTipApi<ToolTip> {
@@ -14370,9 +14382,9 @@ public:
     /// TransitionCompleted: the handler takes the object, and may return `true` for handled.
     /// Defines the `TransitionCompleted` routed event.
     template <class Handler>
-    Self& on_transition_completed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 91, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_transition_completed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_transition_completed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 91, std::forward<Handler>(handler))); }
+    Subscription subscribe_transition_completed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 93, std::forward<Handler>(handler))); }
 };
 
 class TransitioningContentControl final : public TransitioningContentControlApi<TransitioningContentControl> {
@@ -14867,15 +14879,15 @@ public:
     /// WindowClosed: the handler takes the object, and may return `true` for handled. Routed event
     /// that can be used for global tracking of window destruction.
     template <class Handler>
-    Self& on_window_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_window_closed(Handler&& handler) { detail::subscribe<Self>(this->handle(), 97, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_window_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 95, std::forward<Handler>(handler))); }
+    Subscription subscribe_window_closed(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 97, std::forward<Handler>(handler))); }
     /// WindowOpened: the handler takes the object, and may return `true` for handled. Routed event
     /// that can be used for global tracking of opening windows.
     template <class Handler>
-    Self& on_window_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler)); return this->self(); }
+    Self& on_window_opened(Handler&& handler) { detail::subscribe<Self>(this->handle(), 98, std::forward<Handler>(handler)); return this->self(); }
     template <class Handler>
-    Subscription subscribe_window_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 96, std::forward<Handler>(handler))); }
+    Subscription subscribe_window_opened(Handler&& handler) { return Subscription(detail::subscribe<Self>(this->handle(), 98, std::forward<Handler>(handler))); }
 };
 
 class Window final : public WindowApi<Window> {

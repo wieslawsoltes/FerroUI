@@ -174,7 +174,7 @@ impl IAssetLoader for StandardAssetLoader {
             return resources
                 .keys()
                 .filter(|key| key.starts_with(&path))
-                .filter_map(|key| UriRef::parse_absolute(&format!("{ASSET_SCHEME}://{name}{key}")).ok())
+                .filter_map(|key| UriRef::parse_absolute(&format!("{ASSET_SCHEME}://{name}{}", escape_path(key))).ok())
                 .collect();
         }
 
@@ -188,6 +188,13 @@ impl IAssetLoader for StandardAssetLoader {
     fn invalidate_assembly_cache_all(&self) {
         self.assembly_descriptor_resolver.invalidate_assembly_cache_all();
     }
+}
+
+/// `path` with the characters that a URI path does not keep as they are escaped (`%`, `#` and `?`),
+/// so that the URI of an asset names it whatever characters its name has; the parser of the URI
+/// escapes the others (spaces, other characters than ASCII).
+fn escape_path(path: &str) -> String {
+    path.replace('%', "%25").replace('#', "%23").replace('?', "%3F")
 }
 
 #[cfg(test)]
@@ -341,6 +348,16 @@ mod tests {
         let base = asset_url("asset-loader-folder-app/d.png");
         assert_eq!(1, loader.get_assets(&relative, Some(&base)).len());
         assert!(loader.get_assets(&relative, None).is_empty());
+    }
+
+    #[test]
+    fn enumerated_assets_round_trip_reserved_path_characters() {
+        register_assets("asset-loader-reserved", &[("Images/tone #?%25.png", b"image")]);
+        let loader = StandardAssetLoader::new(None);
+        let assets = loader.get_assets(&asset("asset-loader-reserved/Images"), None);
+        assert_eq!(assets.len(), 1);
+        assert_eq!(assets[0].path(), "/Images/tone%20%23%3F%2525.png");
+        assert!(loader.exists(&UriRef::from(assets[0].clone()), None));
     }
 
     #[test]

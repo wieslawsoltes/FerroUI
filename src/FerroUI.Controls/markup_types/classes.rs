@@ -382,6 +382,10 @@ ferro_class_info!(Image {
     markup: {
         namespace: "FerroUI.Controls",
         content: Source,
+        fields: [
+            ImageOpenedEvent: RoutedEvent<RoutedEventArgs> => || *Image::image_opened_event(),
+            ImageFailedEvent: RoutedEvent<ImageFailedEventArgs> => || *Image::image_failed_event(),
+        ],
     },
 });
 
@@ -1398,6 +1402,13 @@ ferro_markup_type!(class RoutedEventOf<CancelRoutedEventArgs> as "RoutedEvent`1"
     generic: "RoutedEvent`1" [CancelRoutedEventArgs],
 });
 
+ferro_markup_type!(class RoutedEventOf<ImageFailedEventArgs> as "RoutedEvent`1" {
+    namespace: "FerroUI.Interactivity",
+    handles: [RoutedEvent<ImageFailedEventArgs>, Option<RoutedEvent<ImageFailedEventArgs>>],
+    base: RoutedEvent,
+    generic: "RoutedEvent`1" [ImageFailedEventArgs],
+});
+
 ferro_markup_type!(class RoutedEventOf<PageSelectionChangedEventArgs> as "RoutedEvent`1" {
     namespace: "FerroUI.Interactivity",
     handles: [RoutedEvent<PageSelectionChangedEventArgs>, Option<RoutedEvent<PageSelectionChangedEventArgs>>],
@@ -1619,6 +1630,7 @@ ferro_markup_type!(class TransitionCompletedEventArgs {
 /// untyped routed event, with the untyped value conversions of the current thread.
 pub(super) fn register_value_types() {
     ValueTypes::register_cast::<RoutedEvent<CancelRoutedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
+    ValueTypes::register_cast::<RoutedEvent<ImageFailedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<PageSelectionChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RangeBaseValueChangedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
     ValueTypes::register_cast::<RoutedEvent<RefreshRequestedEventArgs>, RoutedEvent>(|event| event.as_routed_event());
@@ -1639,6 +1651,7 @@ pub(super) fn register_value_types() {
 pub(super) const TYPES: &[&MarkupType] = &[
     <Design as MarkupTyped>::MARKUP,
     <RoutedEventOf<CancelRoutedEventArgs> as MarkupTyped>::MARKUP,
+    <RoutedEventOf<ImageFailedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<PageSelectionChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RangeBaseValueChangedEventArgs> as MarkupTyped>::MARKUP,
     <RoutedEventOf<RefreshRequestedEventArgs> as MarkupTyped>::MARKUP,

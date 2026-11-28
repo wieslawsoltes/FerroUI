@@ -281,8 +281,8 @@ namespace FerroUI.Bindings
     {
         internal const int AbiVersion = 1;
         internal const int BufferTooSmall = -14;
-        internal const long ApiFingerprint = -7664809914081695520L;
-        internal const long SelectionFingerprint = -659205828669880482L;
+        internal const long ApiFingerprint = -4387658432560162436L;
+        internal const long SelectionFingerprint = 5031981251879184649L;
 
         [global::System.Runtime.InteropServices.LibraryImport(Library)] private static partial long ferro_type_button();
         [global::System.Runtime.InteropServices.LibraryImport(Library)] private static partial long ferro_type_stack_panel();
@@ -659,88 +659,88 @@ namespace FerroUI.Bindings
             Native.Subscribe(self.Handle, 26, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>KeyDown: the sender is valid for the call. Defines the `KeyDown` event.</summary>
         public static Subscription OnKeyDown<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 31, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 33, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>KeyUp: the sender is valid for the call. Defines the `KeyUp` event.</summary>
         public static Subscription OnKeyUp<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 32, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 34, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>LosingFocus: the sender is valid for the call. Defines the `LosingFocus` event.</summary>
         public static Subscription OnLosingFocus<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 34, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 36, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>LostFocus: the sender is valid for the call. Defines the `LostFocus` event.</summary>
         public static Subscription OnLostFocus<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 35, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 37, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>Pinch: the sender is valid for the call. Defines the `Pinch` event.</summary>
         public static Subscription OnPinch<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 45, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 47, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PinchEnded: the sender is valid for the call. Defines the `PinchEnded` event.</summary>
         public static Subscription OnPinchEnded<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 46, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 48, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerCaptureChanging: the sender is valid for the call. Defines the `PointerCaptureChanging` routed event.</summary>
         public static Subscription OnPointerCaptureChanging<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 47, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 49, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerCaptureLost: the sender is valid for the call. Defines the `PointerCaptureLost` routed event.</summary>
         public static Subscription OnPointerCaptureLost<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 48, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 50, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerEntered: the sender is valid for the call. Defines the `PointerEntered` event.</summary>
         public static Subscription OnPointerEntered<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 49, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 51, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerExited: the sender is valid for the call. Defines the `PointerExited` event.</summary>
         public static Subscription OnPointerExited<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 51, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 53, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerMoved: the sender is valid for the call. Defines the `PointerMoved` event.</summary>
         public static Subscription OnPointerMoved<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 53, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 55, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerPressed: the sender is valid for the call. Defines the `PointerPressed` event.</summary>
         public static Subscription OnPointerPressed<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 54, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 56, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerReleased: the sender is valid for the call. Defines the `PointerReleased` event.</summary>
         public static Subscription OnPointerReleased<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 55, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 57, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerTouchPadGestureMagnify: the sender is valid for the call. Defines the `PointerTouchPadGestureMagnify` event.</summary>
         public static Subscription OnPointerTouchPadGestureMagnify<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 56, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 58, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerTouchPadGestureRotate: the sender is valid for the call. Defines the `PointerTouchPadGestureRotate` event.</summary>
         public static Subscription OnPointerTouchPadGestureRotate<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 57, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 59, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerTouchPadGestureSwipe: the sender is valid for the call. Defines the `PointerTouchPadGestureSwipe` event.</summary>
         public static Subscription OnPointerTouchPadGestureSwipe<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 58, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 60, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PointerWheelChanged: the sender is valid for the call. Defines the `PointerWheelChanged` event.</summary>
         public static Subscription OnPointerWheelChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 59, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 61, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PullGesture: the sender is valid for the call. Defines the `PullGesture` event.</summary>
         public static Subscription OnPullGesture<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 60, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 62, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>PullGestureEnded: the sender is valid for the call. Defines the `PullGestureEnded` event.</summary>
         public static Subscription OnPullGestureEnded<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 61, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 63, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>RightTapped: the sender is valid for the call. Defines the `RightTapped` event.</summary>
         public static Subscription OnRightTapped<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 67, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 69, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>ScrollGesture: the sender is valid for the call. Defines the `ScrollGesture` event.</summary>
         public static Subscription OnScrollGesture<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 69, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 71, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>ScrollGestureEnded: the sender is valid for the call. Defines the `ScrollGestureEnded` event.</summary>
         public static Subscription OnScrollGestureEnded<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 70, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 72, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>ScrollGestureInertiaStarting: the sender is valid for the call. Defines the `ScrollGestureInertiaStarting` event.</summary>
         public static Subscription OnScrollGestureInertiaStarting<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 71, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 73, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>SwipeGesture: the sender is valid for the call. Defines the `SwipeGesture` event.</summary>
         public static Subscription OnSwipeGesture<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 78, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 80, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>SwipeGestureEnded: the sender is valid for the call. Defines the `SwipeGestureEnded` event.</summary>
         public static Subscription OnSwipeGestureEnded<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 79, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 81, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>Tapped: the sender is valid for the call. Defines the `Tapped` event.</summary>
         public static Subscription OnTapped<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 80, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 82, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>TextInput: the sender is valid for the call. Defines the `TextInput` event.</summary>
         public static Subscription OnTextInput<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 87, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 89, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>TextInputMethodClientRequested: the sender is valid for the call. Defines the `TextInputMethodClientRequested` event.</summary>
         public static Subscription OnTextInputMethodClientRequested<T>(this T self, global::System.Action<T> handler) where T : struct, IInputElement =>
-            Native.Subscribe(self.Handle, 88, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 90, sender => handler(Native.Wrap<T>(sender)));
     }
 
     /// <summary>Base class for controls. The control class extends [`InputElement`] and adds the following features: - A `Tag` property to allow user-defined data to be attached to the control.</summary>
@@ -768,16 +768,16 @@ namespace FerroUI.Bindings
         public static T Tag<T>(this T self, IFerroObject value) where T : struct, IControl { Native.Check(Native.ferro_set_handle(self.Handle, 872, value?.Handle ?? 0)); return self; }
         /// <summary>Loaded: the sender is valid for the call. Defines the `Loaded` event.</summary>
         public static Subscription OnLoaded<T>(this T self, global::System.Action<T> handler) where T : struct, IControl =>
-            Native.Subscribe(self.Handle, 33, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 35, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>RequestBringIntoView: the sender is valid for the call. Event raised when an element wishes to be scrolled into view.</summary>
         public static Subscription OnRequestBringIntoView<T>(this T self, global::System.Action<T> handler) where T : struct, IControl =>
-            Native.Subscribe(self.Handle, 66, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 68, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>SizeChanged: the sender is valid for the call. Defines the `SizeChanged` event.</summary>
         public static Subscription OnSizeChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IControl =>
-            Native.Subscribe(self.Handle, 75, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 77, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>Unloaded: the sender is valid for the call. Defines the `Unloaded` event.</summary>
         public static Subscription OnUnloaded<T>(this T self, global::System.Action<T> handler) where T : struct, IControl =>
-            Native.Subscribe(self.Handle, 92, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 94, sender => handler(Native.Wrap<T>(sender)));
     }
 
     /// <summary>A lookless control whose visual appearance is defined by its `Template`.</summary>
@@ -841,7 +841,7 @@ namespace FerroUI.Bindings
         public static T Padding<T>(this T self, string value) where T : struct, ITemplatedControl { Native.SetString(self.Handle, 621, value); return self; }
         /// <summary>TemplateApplied: the sender is valid for the call. Defines the `TemplateApplied` routed event.</summary>
         public static Subscription OnTemplateApplied<T>(this T self, global::System.Action<T> handler) where T : struct, ITemplatedControl =>
-            Native.Subscribe(self.Handle, 81, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 83, sender => handler(Native.Wrap<T>(sender)));
     }
 
     /// <summary>Displays content according to an [`IDataTemplate`].</summary>
@@ -961,7 +961,7 @@ namespace FerroUI.Bindings
             Native.Subscribe(self.Handle, 27, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>VerticalSnapPointsChanged: the sender is valid for the call. Defines the `VerticalSnapPointsChanged` event.</summary>
         public static Subscription OnVerticalSnapPointsChanged<T>(this T self, global::System.Action<T> handler) where T : struct, IStackPanel =>
-            Native.Subscribe(self.Handle, 94, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 96, sender => handler(Native.Wrap<T>(sender)));
     }
 
     /// <summary>A control that displays a block of text.</summary>
@@ -1163,10 +1163,10 @@ namespace FerroUI.Bindings
         public static T WindowState<T>(this T self, global::FerroUI.Bindings.WindowState value) where T : struct, IWindow { Native.Check(Native.ferro_set_i64(self.Handle, 1064, (long)value)); return self; }
         /// <summary>WindowClosed: the sender is valid for the call. Routed event that can be used for global tracking of window destruction.</summary>
         public static Subscription OnWindowClosed<T>(this T self, global::System.Action<T> handler) where T : struct, IWindow =>
-            Native.Subscribe(self.Handle, 95, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 97, sender => handler(Native.Wrap<T>(sender)));
         /// <summary>WindowOpened: the sender is valid for the call. Routed event that can be used for global tracking of opening windows.</summary>
         public static Subscription OnWindowOpened<T>(this T self, global::System.Action<T> handler) where T : struct, IWindow =>
-            Native.Subscribe(self.Handle, 96, sender => handler(Native.Wrap<T>(sender)));
+            Native.Subscribe(self.Handle, 98, sender => handler(Native.Wrap<T>(sender)));
     }
 
 }

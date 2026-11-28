@@ -1062,6 +1062,16 @@ impl IDrawingContextImpl for HeadlessDrawingContextStub {
 
     fn clear(&mut self, _color: Color) {}
 
+    fn draw_color(
+        &mut self,
+        color: Color,
+        _blend: ferroui_base::media::imaging::BitmapBlendingMode,
+    ) {
+        // This backend intentionally has no raster target, as for every other
+        // drawing command. Pixel tests install a real rendering backend.
+        self.clear(color);
+    }
+
     fn draw_bitmap(&mut self, _source: &dyn IBitmapImpl, _opacity: f64, _source_rect: Rect, _dest_rect: Rect) {}
 
     fn draw_bitmap_with_mask(

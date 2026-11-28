@@ -1250,6 +1250,29 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.sink().fill(&path, Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::new(Mix::Normal, Compose::Copy), false);
     }
 
+    fn draw_color(
+        &mut self,
+        color: Color,
+        blend: ferroui_base::media::imaging::BitmapBlendingMode,
+    ) {
+        let path = self.target_path();
+        let color = Color::from_argb(
+            (f64::from(color.a) * self.current_opacity) as u8,
+            color.r,
+            color.g,
+            color.b,
+        );
+        let paint = VelloScenePaint::solid(to_color(color));
+        self.sink().fill(
+            &path,
+            Fill::NonZero,
+            Affine::IDENTITY,
+            &paint,
+            to_blend_mode(blend),
+            false,
+        );
+    }
+
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         // A surface of the device of the scene is drawn from where it is.
         #[cfg(any(feature = "hybrid", feature = "gpu"))]

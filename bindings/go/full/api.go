@@ -2,7 +2,7 @@
 
 package ferroui
 
-const apiFingerprint int64 = -7664809914081695520
+const apiFingerprint int64 = -4387658432560162436
 const selectionFingerprint int64 = 0
 
 // AcrylicBackgroundSource: Background sources for acrylic.
@@ -1742,166 +1742,166 @@ func (o InputElement) OnHolding(handler func(InputElement)) (Subscription, error
 // OnKeyDown subscribes to KeyDown; the sender is valid for the call. Defines the `KeyDown`
 // event.
 func (o InputElement) OnKeyDown(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 31, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 33, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnKeyUp subscribes to KeyUp; the sender is valid for the call. Defines the `KeyUp` event.
 func (o InputElement) OnKeyUp(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 32, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 34, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnLosingFocus subscribes to LosingFocus; the sender is valid for the call. Defines the
 // `LosingFocus` event.
 func (o InputElement) OnLosingFocus(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 34, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 36, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnLostFocus subscribes to LostFocus; the sender is valid for the call. Defines the
 // `LostFocus` event.
 func (o InputElement) OnLostFocus(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 35, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 37, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPinch subscribes to Pinch; the sender is valid for the call. Defines the `Pinch` event.
 func (o InputElement) OnPinch(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 45, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 47, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPinchEnded subscribes to PinchEnded; the sender is valid for the call. Defines the
 // `PinchEnded` event.
 func (o InputElement) OnPinchEnded(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 46, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 48, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerCaptureChanging subscribes to PointerCaptureChanging; the sender is valid for the
 // call. Defines the `PointerCaptureChanging` routed event.
 func (o InputElement) OnPointerCaptureChanging(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 47, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 49, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerCaptureLost subscribes to PointerCaptureLost; the sender is valid for the call.
 // Defines the `PointerCaptureLost` routed event.
 func (o InputElement) OnPointerCaptureLost(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 48, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 50, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerEntered subscribes to PointerEntered; the sender is valid for the call. Defines the
 // `PointerEntered` event.
 func (o InputElement) OnPointerEntered(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 49, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 51, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerExited subscribes to PointerExited; the sender is valid for the call. Defines the
 // `PointerExited` event.
 func (o InputElement) OnPointerExited(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 51, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 53, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerMoved subscribes to PointerMoved; the sender is valid for the call. Defines the
 // `PointerMoved` event.
 func (o InputElement) OnPointerMoved(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 53, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 55, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerPressed subscribes to PointerPressed; the sender is valid for the call. Defines the
 // `PointerPressed` event.
 func (o InputElement) OnPointerPressed(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 54, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 56, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerReleased subscribes to PointerReleased; the sender is valid for the call. Defines
 // the `PointerReleased` event.
 func (o InputElement) OnPointerReleased(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 55, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 57, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerTouchPadGestureMagnify subscribes to PointerTouchPadGestureMagnify; the sender is
 // valid for the call. Defines the `PointerTouchPadGestureMagnify` event.
 func (o InputElement) OnPointerTouchPadGestureMagnify(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 56, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 58, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerTouchPadGestureRotate subscribes to PointerTouchPadGestureRotate; the sender is
 // valid for the call. Defines the `PointerTouchPadGestureRotate` event.
 func (o InputElement) OnPointerTouchPadGestureRotate(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 57, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 59, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerTouchPadGestureSwipe subscribes to PointerTouchPadGestureSwipe; the sender is valid
 // for the call. Defines the `PointerTouchPadGestureSwipe` event.
 func (o InputElement) OnPointerTouchPadGestureSwipe(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 58, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 60, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPointerWheelChanged subscribes to PointerWheelChanged; the sender is valid for the call.
 // Defines the `PointerWheelChanged` event.
 func (o InputElement) OnPointerWheelChanged(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 59, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 61, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPullGesture subscribes to PullGesture; the sender is valid for the call. Defines the
 // `PullGesture` event.
 func (o InputElement) OnPullGesture(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 60, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 62, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnPullGestureEnded subscribes to PullGestureEnded; the sender is valid for the call. Defines
 // the `PullGestureEnded` event.
 func (o InputElement) OnPullGestureEnded(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 61, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 63, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnRightTapped subscribes to RightTapped; the sender is valid for the call. Defines the
 // `RightTapped` event.
 func (o InputElement) OnRightTapped(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 67, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 69, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnScrollGesture subscribes to ScrollGesture; the sender is valid for the call. Defines the
 // `ScrollGesture` event.
 func (o InputElement) OnScrollGesture(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 69, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 71, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnScrollGestureEnded subscribes to ScrollGestureEnded; the sender is valid for the call.
 // Defines the `ScrollGestureEnded` event.
 func (o InputElement) OnScrollGestureEnded(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 70, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 72, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnScrollGestureInertiaStarting subscribes to ScrollGestureInertiaStarting; the sender is
 // valid for the call. Defines the `ScrollGestureInertiaStarting` event.
 func (o InputElement) OnScrollGestureInertiaStarting(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 71, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 73, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnSwipeGesture subscribes to SwipeGesture; the sender is valid for the call. Defines the
 // `SwipeGesture` event.
 func (o InputElement) OnSwipeGesture(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 78, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 80, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnSwipeGestureEnded subscribes to SwipeGestureEnded; the sender is valid for the call.
 // Defines the `SwipeGestureEnded` event.
 func (o InputElement) OnSwipeGestureEnded(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 79, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 81, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnTapped subscribes to Tapped; the sender is valid for the call. Defines the `Tapped` event.
 func (o InputElement) OnTapped(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 80, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 82, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnTextInput subscribes to TextInput; the sender is valid for the call. Defines the
 // `TextInput` event.
 func (o InputElement) OnTextInput(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 87, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 89, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // OnTextInputMethodClientRequested subscribes to TextInputMethodClientRequested; the sender is
 // valid for the call. Defines the `TextInputMethodClientRequested` event.
 func (o InputElement) OnTextInputMethodClientRequested(handler func(InputElement)) (Subscription, error) {
-	return subscribe(o.h, 88, func(sender Object) { handler(As[InputElement](sender)) })
+	return subscribe(o.h, 90, func(sender Object) { handler(As[InputElement](sender)) })
 }
 
 // Control: Base class for controls. The control class extends [`InputElement`] and adds the
@@ -1938,25 +1938,25 @@ func (o Control) SetTagObject(value Wrapper) error { return setObject(o.h, 872, 
 
 // OnLoaded subscribes to Loaded; the sender is valid for the call. Defines the `Loaded` event.
 func (o Control) OnLoaded(handler func(Control)) (Subscription, error) {
-	return subscribe(o.h, 33, func(sender Object) { handler(As[Control](sender)) })
+	return subscribe(o.h, 35, func(sender Object) { handler(As[Control](sender)) })
 }
 
 // OnRequestBringIntoView subscribes to RequestBringIntoView; the sender is valid for the call.
 // Event raised when an element wishes to be scrolled into view.
 func (o Control) OnRequestBringIntoView(handler func(Control)) (Subscription, error) {
-	return subscribe(o.h, 66, func(sender Object) { handler(As[Control](sender)) })
+	return subscribe(o.h, 68, func(sender Object) { handler(As[Control](sender)) })
 }
 
 // OnSizeChanged subscribes to SizeChanged; the sender is valid for the call. Defines the
 // `SizeChanged` event.
 func (o Control) OnSizeChanged(handler func(Control)) (Subscription, error) {
-	return subscribe(o.h, 75, func(sender Object) { handler(As[Control](sender)) })
+	return subscribe(o.h, 77, func(sender Object) { handler(As[Control](sender)) })
 }
 
 // OnUnloaded subscribes to Unloaded; the sender is valid for the call. Defines the `Unloaded`
 // event.
 func (o Control) OnUnloaded(handler func(Control)) (Subscription, error) {
-	return subscribe(o.h, 92, func(sender Object) { handler(As[Control](sender)) })
+	return subscribe(o.h, 94, func(sender Object) { handler(As[Control](sender)) })
 }
 
 // TextBlock: A control that displays a block of text.
@@ -2394,7 +2394,7 @@ func TemplatedControlSetIsTemplateFocusTarget(target Wrapper, value bool) error 
 // OnTemplateApplied subscribes to TemplateApplied; the sender is valid for the call. Defines
 // the `TemplateApplied` routed event.
 func (o TemplatedControl) OnTemplateApplied(handler func(TemplatedControl)) (Subscription, error) {
-	return subscribe(o.h, 81, func(sender Object) { handler(As[TemplatedControl](sender)) })
+	return subscribe(o.h, 83, func(sender Object) { handler(As[TemplatedControl](sender)) })
 }
 
 // ItemsControl: Displays a collection of items.
@@ -2509,13 +2509,13 @@ func (o SelectingItemsControl) SetWrapSelection(value bool) error { return setBo
 // that should be raised by containers when their selection state changes to notify the parent
 // [`SelectingItemsControl`] that their selection state has changed.
 func (o SelectingItemsControl) OnIsSelectedChanged(handler func(SelectingItemsControl)) (Subscription, error) {
-	return subscribe(o.h, 29, func(sender Object) { handler(As[SelectingItemsControl](sender)) })
+	return subscribe(o.h, 31, func(sender Object) { handler(As[SelectingItemsControl](sender)) })
 }
 
 // OnSelectionChanged subscribes to SelectionChanged; the sender is valid for the call. Defines
 // the `SelectionChanged` event.
 func (o SelectingItemsControl) OnSelectionChanged(handler func(SelectingItemsControl)) (Subscription, error) {
-	return subscribe(o.h, 73, func(sender Object) { handler(As[SelectingItemsControl](sender)) })
+	return subscribe(o.h, 75, func(sender Object) { handler(As[SelectingItemsControl](sender)) })
 }
 
 // AlwaysSelectedTestSelectorDisablingFirstContainers:
@@ -2830,19 +2830,19 @@ func (o AutoCompleteBox) SetValueMemberBinding(value string) error { return setS
 // `QuerySubmitted` event: a FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`,
 // raised when Enter submits the text of the box.
 func (o AutoCompleteBox) OnQuerySubmitted(handler func(AutoCompleteBox)) (Subscription, error) {
-	return subscribe(o.h, 62, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
+	return subscribe(o.h, 64, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
 }
 
 // OnSelectionChanged subscribes to SelectionChanged; the sender is valid for the call. Defines
 // the `SelectionChanged` event.
 func (o AutoCompleteBox) OnSelectionChanged(handler func(AutoCompleteBox)) (Subscription, error) {
-	return subscribe(o.h, 73, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
+	return subscribe(o.h, 75, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
 }
 
 // OnTextChanged subscribes to TextChanged; the sender is valid for the call. Defines the
 // `TextChanged` event.
 func (o AutoCompleteBox) OnTextChanged(handler func(AutoCompleteBox)) (Subscription, error) {
-	return subscribe(o.h, 82, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
+	return subscribe(o.h, 84, func(sender Object) { handler(As[AutoCompleteBox](sender)) })
 }
 
 // AutomationPeer: Provides a base class that exposes an element to UI Automation. The members
@@ -3384,7 +3384,7 @@ func (o Spinner) SetValidSpinDirection(value string) error { return setString(o.
 // OnSpin subscribes to Spin; the sender is valid for the call. Defines the `Spin` routed
 // event.
 func (o Spinner) OnSpin(handler func(Spinner)) (Subscription, error) {
-	return subscribe(o.h, 76, func(sender Object) { handler(As[Spinner](sender)) })
+	return subscribe(o.h, 78, func(sender Object) { handler(As[Spinner](sender)) })
 }
 
 // ButtonSpinner: Represents a spinner control that includes two buttons.
@@ -3706,7 +3706,7 @@ func (o Page) SetSafeAreaPadding(value string) error { return setString(o.h, 741
 // the sender is valid for the call. Defines the routed event raised when the system back
 // button is pressed.
 func (o Page) OnPageNavigationSystemBackButtonPressed(handler func(Page)) (Subscription, error) {
-	return subscribe(o.h, 39, func(sender Object) { handler(As[Page](sender)) })
+	return subscribe(o.h, 41, func(sender Object) { handler(As[Page](sender)) })
 }
 
 // MultiPage: Abstract base class for pages that host a collection of child pages.
@@ -3738,7 +3738,7 @@ func (o SelectingMultiPage) SelectedPage() Object { return getObject(o.h, 777) }
 // OnSelectionChanged subscribes to SelectionChanged; the sender is valid for the call. Defines
 // the `SelectionChanged` routed event.
 func (o SelectingMultiPage) OnSelectionChanged(handler func(SelectingMultiPage)) (Subscription, error) {
-	return subscribe(o.h, 73, func(sender Object) { handler(As[SelectingMultiPage](sender)) })
+	return subscribe(o.h, 75, func(sender Object) { handler(As[SelectingMultiPage](sender)) })
 }
 
 // CarouselPage: A page that displays its child pages in a horizontally scrollable carousel,
@@ -3788,7 +3788,7 @@ func (o ToggleButton) SetIsThreeState(value bool) error { return setBool(o.h, 46
 // OnIsCheckedChanged subscribes to IsCheckedChanged; the sender is valid for the call. Defines
 // the `IsCheckedChanged` event.
 func (o ToggleButton) OnIsCheckedChanged(handler func(ToggleButton)) (Subscription, error) {
-	return subscribe(o.h, 28, func(sender Object) { handler(As[ToggleButton](sender)) })
+	return subscribe(o.h, 30, func(sender Object) { handler(As[ToggleButton](sender)) })
 }
 
 // CheckBox: A check box control.
@@ -4219,13 +4219,13 @@ func (o CommandBar) OnClosing(handler func(CommandBar)) (Subscription, error) {
 // OnOpened subscribes to Opened; the sender is valid for the call. Defines the `Opened` routed
 // event.
 func (o CommandBar) OnOpened(handler func(CommandBar)) (Subscription, error) {
-	return subscribe(o.h, 37, func(sender Object) { handler(As[CommandBar](sender)) })
+	return subscribe(o.h, 39, func(sender Object) { handler(As[CommandBar](sender)) })
 }
 
 // OnOpening subscribes to Opening; the sender is valid for the call. Defines the `Opening`
 // routed event.
 func (o CommandBar) OnOpening(handler func(CommandBar)) (Subscription, error) {
-	return subscribe(o.h, 38, func(sender Object) { handler(As[CommandBar](sender)) })
+	return subscribe(o.h, 40, func(sender Object) { handler(As[CommandBar](sender)) })
 }
 
 // CommandBarButton: A button for use in a [`CommandBar`](super::CommandBar).
@@ -4732,7 +4732,7 @@ func (o MenuBase) OnClosed(handler func(MenuBase)) (Subscription, error) {
 
 // OnOpened subscribes to Opened; the sender is valid for the call. Defines the `Opened` event.
 func (o MenuBase) OnOpened(handler func(MenuBase)) (Subscription, error) {
-	return subscribe(o.h, 37, func(sender Object) { handler(As[MenuBase](sender)) })
+	return subscribe(o.h, 39, func(sender Object) { handler(As[MenuBase](sender)) })
 }
 
 // ContextMenu: A control context menu.
@@ -5400,7 +5400,7 @@ func (o DrawerPage) OnClosing(handler func(DrawerPage)) (Subscription, error) {
 // OnOpened subscribes to Opened; the sender is valid for the call. Defines the `Opened` routed
 // event.
 func (o DrawerPage) OnOpened(handler func(DrawerPage)) (Subscription, error) {
-	return subscribe(o.h, 37, func(sender Object) { handler(As[DrawerPage](sender)) })
+	return subscribe(o.h, 39, func(sender Object) { handler(As[DrawerPage](sender)) })
 }
 
 // DrawerPageAutomationPeer: An automation peer which represents a [`DrawerPage`].
@@ -6720,6 +6720,18 @@ func (o Image) StretchDirection() StretchDirection { return StretchDirection(get
 // SetStretchDirection writes StretchDirection.
 func (o Image) SetStretchDirection(value StretchDirection) error { return setI64(o.h, 839, int64(value)) }
 
+// OnImageFailed subscribes to ImageFailed; the sender is valid for the call. Defines the
+// `ImageFailed` event.
+func (o Image) OnImageFailed(handler func(Image)) (Subscription, error) {
+	return subscribe(o.h, 28, func(sender Object) { handler(As[Image](sender)) })
+}
+
+// OnImageOpened subscribes to ImageOpened; the sender is valid for the call. Defines the
+// `ImageOpened` event.
+func (o Image) OnImageOpened(handler func(Image)) (Subscription, error) {
+	return subscribe(o.h, 29, func(sender Object) { handler(As[Image](sender)) })
+}
+
 // ImageAutomationPeer: An automation peer which represents an image.
 type ImageAutomationPeer struct{ ControlAutomationPeer }
 
@@ -7146,7 +7158,7 @@ func (o VirtualizingStackPanel) OnHorizontalSnapPointsChanged(handler func(Virtu
 // OnVerticalSnapPointsChanged subscribes to VerticalSnapPointsChanged; the sender is valid for
 // the call. Defines the `VerticalSnapPointsChanged` event.
 func (o VirtualizingStackPanel) OnVerticalSnapPointsChanged(handler func(VirtualizingStackPanel)) (Subscription, error) {
-	return subscribe(o.h, 94, func(sender Object) { handler(As[VirtualizingStackPanel](sender)) })
+	return subscribe(o.h, 96, func(sender Object) { handler(As[VirtualizingStackPanel](sender)) })
 }
 
 // ItemsStackPanel: The virtualizing items panel of a list view (WinUI's `ItemsStackPanel`):
@@ -7727,19 +7739,19 @@ func (o TextBox) OnCuttingToClipboard(handler func(TextBox)) (Subscription, erro
 // Defines the `PastingFromClipboard` event. The event is raised with
 // [`PastingFromClipboardEventArgs`].
 func (o TextBox) OnPastingFromClipboard(handler func(TextBox)) (Subscription, error) {
-	return subscribe(o.h, 44, func(sender Object) { handler(As[TextBox](sender)) })
+	return subscribe(o.h, 46, func(sender Object) { handler(As[TextBox](sender)) })
 }
 
 // OnTextChanged subscribes to TextChanged; the sender is valid for the call. Defines the
 // `TextChanged` event.
 func (o TextBox) OnTextChanged(handler func(TextBox)) (Subscription, error) {
-	return subscribe(o.h, 82, func(sender Object) { handler(As[TextBox](sender)) })
+	return subscribe(o.h, 84, func(sender Object) { handler(As[TextBox](sender)) })
 }
 
 // OnTextChanging subscribes to TextChanging; the sender is valid for the call. Defines the
 // `TextChanging` event.
 func (o TextBox) OnTextChanging(handler func(TextBox)) (Subscription, error) {
-	return subscribe(o.h, 83, func(sender Object) { handler(As[TextBox](sender)) })
+	return subscribe(o.h, 85, func(sender Object) { handler(As[TextBox](sender)) })
 }
 
 // MaskedTextBox: A text box that restricts its input with a mask.
@@ -7920,19 +7932,19 @@ func (o MenuItem) OnClick(handler func(MenuItem)) (Subscription, error) {
 // OnPointerEnteredItem subscribes to PointerEnteredItem; the sender is valid for the call.
 // Defines the `PointerEnteredItem` event.
 func (o MenuItem) OnPointerEnteredItem(handler func(MenuItem)) (Subscription, error) {
-	return subscribe(o.h, 50, func(sender Object) { handler(As[MenuItem](sender)) })
+	return subscribe(o.h, 52, func(sender Object) { handler(As[MenuItem](sender)) })
 }
 
 // OnPointerExitedItem subscribes to PointerExitedItem; the sender is valid for the call.
 // Defines the `PointerExitedItem` event.
 func (o MenuItem) OnPointerExitedItem(handler func(MenuItem)) (Subscription, error) {
-	return subscribe(o.h, 52, func(sender Object) { handler(As[MenuItem](sender)) })
+	return subscribe(o.h, 54, func(sender Object) { handler(As[MenuItem](sender)) })
 }
 
 // OnSubmenuOpened subscribes to SubmenuOpened; the sender is valid for the call. Defines the
 // `SubmenuOpened` event.
 func (o MenuItem) OnSubmenuOpened(handler func(MenuItem)) (Subscription, error) {
-	return subscribe(o.h, 77, func(sender Object) { handler(As[MenuItem](sender)) })
+	return subscribe(o.h, 79, func(sender Object) { handler(As[MenuItem](sender)) })
 }
 
 // MenuItemAutomationPeer: An automation peer which represents a [`MenuItem`].
@@ -8651,7 +8663,7 @@ func (o NotificationCard) SetNotificationType(value NotificationType) error { re
 // OnNotificationClosed subscribes to NotificationClosed; the sender is valid for the call.
 // Defines the `NotificationClosed` event.
 func (o NotificationCard) OnNotificationClosed(handler func(NotificationCard)) (Subscription, error) {
-	return subscribe(o.h, 36, func(sender Object) { handler(As[NotificationCard](sender)) })
+	return subscribe(o.h, 38, func(sender Object) { handler(As[NotificationCard](sender)) })
 }
 
 // NumberBox: A text box for numbers (WinUI's `NumberBox`): a value of type `f64`, NaN when the
@@ -8922,7 +8934,7 @@ func (o NumericUpDown) SetVerticalContentAlignment(value VerticalAlignment) erro
 // OnValueChanged subscribes to ValueChanged; the sender is valid for the call. Defines the
 // `ValueChanged` event.
 func (o NumericUpDown) OnValueChanged(handler func(NumericUpDown)) (Subscription, error) {
-	return subscribe(o.h, 93, func(sender Object) { handler(As[NumericUpDown](sender)) })
+	return subscribe(o.h, 95, func(sender Object) { handler(As[NumericUpDown](sender)) })
 }
 
 // NumericUpDownAutomationPeer: An automation peer which represents a [`NumericUpDown`].
@@ -9499,7 +9511,7 @@ func (o PipsPager) SetWrapMode(value PipsPagerWrapMode) error { return setI64(o.
 // OnSelectedIndexChanged subscribes to SelectedIndexChanged; the sender is valid for the call.
 // Defines the `SelectedIndexChanged` event.
 func (o PipsPager) OnSelectedIndexChanged(handler func(PipsPager)) (Subscription, error) {
-	return subscribe(o.h, 72, func(sender Object) { handler(As[PipsPager](sender)) })
+	return subscribe(o.h, 74, func(sender Object) { handler(As[PipsPager](sender)) })
 }
 
 // PipsPagerAutomationPeer: An automation peer for [`PipsPager`].
@@ -9666,7 +9678,7 @@ func (o PivotPanel) OnHorizontalSnapPointsChanged(handler func(PivotPanel)) (Sub
 // OnVerticalSnapPointsChanged subscribes to VerticalSnapPointsChanged; the sender is valid for
 // the call. Defines the `VerticalSnapPointsChanged` event.
 func (o PivotPanel) OnVerticalSnapPointsChanged(handler func(PivotPanel)) (Subscription, error) {
-	return subscribe(o.h, 94, func(sender Object) { handler(As[PivotPanel](sender)) })
+	return subscribe(o.h, 96, func(sender Object) { handler(As[PivotPanel](sender)) })
 }
 
 // PlatformGeometry: A geometry that wraps a platform implementation.
@@ -10045,7 +10057,7 @@ func (o RangeBase) SetValue(value float64) error { return setF64(o.h, 1034, valu
 // OnValueChanged subscribes to ValueChanged; the sender is valid for the call. Defines the
 // `ValueChanged` event.
 func (o RangeBase) OnValueChanged(handler func(RangeBase)) (Subscription, error) {
-	return subscribe(o.h, 93, func(sender Object) { handler(As[RangeBase](sender)) })
+	return subscribe(o.h, 95, func(sender Object) { handler(As[RangeBase](sender)) })
 }
 
 // ProgressBar: A control used to indicate the progress of an operation.
@@ -10667,7 +10679,7 @@ func (o RefreshContainer) SetVisualizer(value Wrapper) error { return setObject(
 // OnRefreshRequested subscribes to RefreshRequested; the sender is valid for the call. Defines
 // the `RefreshRequested` event.
 func (o RefreshContainer) OnRefreshRequested(handler func(RefreshContainer)) (Subscription, error) {
-	return subscribe(o.h, 64, func(sender Object) { handler(As[RefreshContainer](sender)) })
+	return subscribe(o.h, 66, func(sender Object) { handler(As[RefreshContainer](sender)) })
 }
 
 // RefreshInfoProvider: What a refresh visualizer needs to know about the interaction that
@@ -10700,13 +10712,13 @@ func (o RefreshInfoProvider) SetRefreshVisualizerSize(value string) error { retu
 // OnRefreshCompleted subscribes to RefreshCompleted; the sender is valid for the call. Defines
 // the `RefreshCompleted` event.
 func (o RefreshInfoProvider) OnRefreshCompleted(handler func(RefreshInfoProvider)) (Subscription, error) {
-	return subscribe(o.h, 63, func(sender Object) { handler(As[RefreshInfoProvider](sender)) })
+	return subscribe(o.h, 65, func(sender Object) { handler(As[RefreshInfoProvider](sender)) })
 }
 
 // OnRefreshStarted subscribes to RefreshStarted; the sender is valid for the call. Defines the
 // `RefreshStarted` event.
 func (o RefreshInfoProvider) OnRefreshStarted(handler func(RefreshInfoProvider)) (Subscription, error) {
-	return subscribe(o.h, 65, func(sender Object) { handler(As[RefreshInfoProvider](sender)) })
+	return subscribe(o.h, 67, func(sender Object) { handler(As[RefreshInfoProvider](sender)) })
 }
 
 // RefreshVisualizer: Shows the progress of a pull-to-refresh interaction and of the refresh it
@@ -10731,7 +10743,7 @@ func (o RefreshVisualizer) RefreshVisualizerState() RefreshVisualizerState { ret
 // OnRefreshRequested subscribes to RefreshRequested; the sender is valid for the call. Defines
 // the `RefreshRequested` event.
 func (o RefreshVisualizer) OnRefreshRequested(handler func(RefreshVisualizer)) (Subscription, error) {
-	return subscribe(o.h, 64, func(sender Object) { handler(As[RefreshVisualizer](sender)) })
+	return subscribe(o.h, 66, func(sender Object) { handler(As[RefreshVisualizer](sender)) })
 }
 
 // RelativePanel: A panel that arranges its children relative to each other and to the panel
@@ -11023,7 +11035,7 @@ func (o StackPanel) OnHorizontalSnapPointsChanged(handler func(StackPanel)) (Sub
 // OnVerticalSnapPointsChanged subscribes to VerticalSnapPointsChanged; the sender is valid for
 // the call. Defines the `VerticalSnapPointsChanged` event.
 func (o StackPanel) OnVerticalSnapPointsChanged(handler func(StackPanel)) (Subscription, error) {
-	return subscribe(o.h, 94, func(sender Object) { handler(As[StackPanel](sender)) })
+	return subscribe(o.h, 96, func(sender Object) { handler(As[StackPanel](sender)) })
 }
 
 // ReversibleStackPanel: Implements a panel which lays out its children horizontally or
@@ -11285,44 +11297,44 @@ func (o RichEditBox) OnCuttingToClipboard(handler func(RichEditBox)) (Subscripti
 
 // OnPastingFromClipboard subscribes to PastingFromClipboard; the sender is valid for the call.
 func (o RichEditBox) OnPastingFromClipboard(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 44, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 46, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnSelectionChanged subscribes to SelectionChanged; the sender is valid for the call.
 func (o RichEditBox) OnSelectionChanged(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 73, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 75, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnSelectionChanging subscribes to SelectionChanging; the sender is valid for the call.
 func (o RichEditBox) OnSelectionChanging(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 74, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 76, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnTextChanged subscribes to TextChanged; the sender is valid for the call.
 func (o RichEditBox) OnTextChanged(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 82, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 84, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnTextChanging subscribes to TextChanging; the sender is valid for the call.
 func (o RichEditBox) OnTextChanging(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 83, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 85, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnTextCompositionChanged subscribes to TextCompositionChanged; the sender is valid for the
 // call.
 func (o RichEditBox) OnTextCompositionChanged(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 84, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 86, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnTextCompositionEnded subscribes to TextCompositionEnded; the sender is valid for the call.
 func (o RichEditBox) OnTextCompositionEnded(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 85, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 87, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // OnTextCompositionStarted subscribes to TextCompositionStarted; the sender is valid for the
 // call.
 func (o RichEditBox) OnTextCompositionStarted(handler func(RichEditBox)) (Subscription, error) {
-	return subscribe(o.h, 86, func(sender Object) { handler(As[RichEditBox](sender)) })
+	return subscribe(o.h, 88, func(sender Object) { handler(As[RichEditBox](sender)) })
 }
 
 // RichEditBoxAutomationPeer: Accessibility projection of the rich editor using the framework's
@@ -11495,12 +11507,12 @@ func (o RichTextBlock) OnContextMenuOpening(handler func(RichTextBlock)) (Subscr
 
 // OnIsTextTrimmedChanged subscribes to IsTextTrimmedChanged; the sender is valid for the call.
 func (o RichTextBlock) OnIsTextTrimmedChanged(handler func(RichTextBlock)) (Subscription, error) {
-	return subscribe(o.h, 30, func(sender Object) { handler(As[RichTextBlock](sender)) })
+	return subscribe(o.h, 32, func(sender Object) { handler(As[RichTextBlock](sender)) })
 }
 
 // OnSelectionChanged subscribes to SelectionChanged; the sender is valid for the call.
 func (o RichTextBlock) OnSelectionChanged(handler func(RichTextBlock)) (Subscription, error) {
-	return subscribe(o.h, 73, func(sender Object) { handler(As[RichTextBlock](sender)) })
+	return subscribe(o.h, 75, func(sender Object) { handler(As[RichTextBlock](sender)) })
 }
 
 // RichEditBoxTextPresenter: Renders and scrolls the owner's single rich document using FerroUI
@@ -11962,7 +11974,7 @@ func (o ScrollViewer) SetZoomMode(value ZoomMode) error { return setI64(o.h, 107
 // OnScrollChanged subscribes to ScrollChanged; the sender is valid for the call. Defines the
 // `ScrollChanged` event.
 func (o ScrollViewer) OnScrollChanged(handler func(ScrollViewer)) (Subscription, error) {
-	return subscribe(o.h, 68, func(sender Object) { handler(As[ScrollViewer](sender)) })
+	return subscribe(o.h, 70, func(sender Object) { handler(As[ScrollViewer](sender)) })
 }
 
 // ScrollViewerAutomationPeer: An automation peer which represents a [`ScrollViewer`].
@@ -12361,25 +12373,25 @@ func (o SplitView) SetUseLightDismissOverlayMode(value bool) error { return setB
 // OnPaneClosed subscribes to PaneClosed; the sender is valid for the call. Defines the
 // `PaneClosed` event.
 func (o SplitView) OnPaneClosed(handler func(SplitView)) (Subscription, error) {
-	return subscribe(o.h, 40, func(sender Object) { handler(As[SplitView](sender)) })
+	return subscribe(o.h, 42, func(sender Object) { handler(As[SplitView](sender)) })
 }
 
 // OnPaneClosing subscribes to PaneClosing; the sender is valid for the call. Defines the
 // `PaneClosing` event.
 func (o SplitView) OnPaneClosing(handler func(SplitView)) (Subscription, error) {
-	return subscribe(o.h, 41, func(sender Object) { handler(As[SplitView](sender)) })
+	return subscribe(o.h, 43, func(sender Object) { handler(As[SplitView](sender)) })
 }
 
 // OnPaneOpened subscribes to PaneOpened; the sender is valid for the call. Defines the
 // `PaneOpened` event.
 func (o SplitView) OnPaneOpened(handler func(SplitView)) (Subscription, error) {
-	return subscribe(o.h, 42, func(sender Object) { handler(As[SplitView](sender)) })
+	return subscribe(o.h, 44, func(sender Object) { handler(As[SplitView](sender)) })
 }
 
 // OnPaneOpening subscribes to PaneOpening; the sender is valid for the call. Defines the
 // `PaneOpening` event.
 func (o SplitView) OnPaneOpening(handler func(SplitView)) (Subscription, error) {
-	return subscribe(o.h, 43, func(sender Object) { handler(As[SplitView](sender)) })
+	return subscribe(o.h, 45, func(sender Object) { handler(As[SplitView](sender)) })
 }
 
 // SplitViewTemplateSettings: Provides calculated values for use with the control theme or
@@ -13710,7 +13722,7 @@ func (o ToggleSplitButton) SetIsChecked(value bool) error { return setBool(o.h, 
 // OnIsCheckedChanged subscribes to IsCheckedChanged; the sender is valid for the call. Defines
 // the `IsCheckedChanged` event.
 func (o ToggleSplitButton) OnIsCheckedChanged(handler func(ToggleSplitButton)) (Subscription, error) {
-	return subscribe(o.h, 28, func(sender Object) { handler(As[ToggleSplitButton](sender)) })
+	return subscribe(o.h, 30, func(sender Object) { handler(As[ToggleSplitButton](sender)) })
 }
 
 // ToggleSplitButtonAutomationPeer: An automation peer which represents a
@@ -13841,7 +13853,7 @@ func ToolTipSetVerticalOffset(target Wrapper, value float64) error { return setF
 // `ToolTipClosing` event as handled does not cancel closing the tooltip. Once the tooltip is
 // displayed, closing the tooltip is done only in response to user interaction with the UI.
 func (o ToolTip) OnToolTipClosing(handler func(ToolTip)) (Subscription, error) {
-	return subscribe(o.h, 89, func(sender Object) { handler(As[ToolTip](sender)) })
+	return subscribe(o.h, 91, func(sender Object) { handler(As[ToolTip](sender)) })
 }
 
 // OnToolTipOpening subscribes to ToolTipOpening; the sender is valid for the call. The event
@@ -13855,7 +13867,7 @@ func (o ToolTip) OnToolTipClosing(handler func(ToolTip)) (Subscription, error) {
 // not have the effect of closing the tooltip, and will instead create an undesirable visual
 // artifact in the UI.
 func (o ToolTip) OnToolTipOpening(handler func(ToolTip)) (Subscription, error) {
-	return subscribe(o.h, 90, func(sender Object) { handler(As[ToolTip](sender)) })
+	return subscribe(o.h, 92, func(sender Object) { handler(As[ToolTip](sender)) })
 }
 
 // ToolTipAutomationPeer: An automation peer which represents a [`ToolTip`].
@@ -13990,7 +14002,7 @@ func (o TransitioningContentControl) SetIsTransitionReversed(value bool) error {
 // OnTransitionCompleted subscribes to TransitionCompleted; the sender is valid for the call.
 // Defines the `TransitionCompleted` routed event.
 func (o TransitioningContentControl) OnTransitionCompleted(handler func(TransitioningContentControl)) (Subscription, error) {
-	return subscribe(o.h, 91, func(sender Object) { handler(As[TransitioningContentControl](sender)) })
+	return subscribe(o.h, 93, func(sender Object) { handler(As[TransitioningContentControl](sender)) })
 }
 
 // TranslateTransform: Translates (moves) a visual.
@@ -14425,13 +14437,13 @@ func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 106
 // OnWindowClosed subscribes to WindowClosed; the sender is valid for the call. Routed event
 // that can be used for global tracking of window destruction.
 func (o Window) OnWindowClosed(handler func(Window)) (Subscription, error) {
-	return subscribe(o.h, 95, func(sender Object) { handler(As[Window](sender)) })
+	return subscribe(o.h, 97, func(sender Object) { handler(As[Window](sender)) })
 }
 
 // OnWindowOpened subscribes to WindowOpened; the sender is valid for the call. Routed event
 // that can be used for global tracking of opening windows.
 func (o Window) OnWindowOpened(handler func(Window)) (Subscription, error) {
-	return subscribe(o.h, 96, func(sender Object) { handler(As[Window](sender)) })
+	return subscribe(o.h, 98, func(sender Object) { handler(As[Window](sender)) })
 }
 
 // WindowAutomationPeer: An automation peer which represents a [`Window`].

@@ -46,6 +46,7 @@ pub(crate) fn register() {
     MarkupType::register_table(crate::navigation::MARKUP_TYPES);
     // The enumerations and the event arguments of WinUI's NavigationView, declared next to them.
     MarkupType::register_table(crate::navigation_view_events::MARKUP_TYPES);
+    MarkupType::register_table(crate::image::MARKUP_TYPES);
     // A binding a property holds as its value is a binding: the wrapper is one more handle of
     // the binding type, so that a property of that type is a property of binding type.
     let binding = <dyn ferroui_base::data::BindingBase as ferroui_base::metadata::MarkupTyped>::MARKUP;

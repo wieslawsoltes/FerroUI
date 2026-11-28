@@ -242,6 +242,10 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
         self.log.push(format!("Clear {color}"));
     }
 
+    fn draw_color(&mut self, color: Color, blend: crate::media::imaging::BitmapBlendingMode) {
+        self.log.push(format!("DrawColor {color} {blend:?}"));
+    }
+
     fn draw_bitmap(&mut self, _source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.log.push(format!("DrawBitmap {opacity} {source_rect} {dest_rect}"));
     }

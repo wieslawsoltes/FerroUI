@@ -242,94 +242,94 @@ fn onHolding(message) = AttrOn { attrOnEvent: 26, attrOnMessage: message }
 // HorizontalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
 fn onHorizontalSnapPointsChanged(message) = AttrOn { attrOnEvent: 27, attrOnMessage: message }
 // onKeyDown(message: M) -> Attr<M>: sends the message on every KeyDown (InputElement).
-fn onKeyDown(message) = AttrOn { attrOnEvent: 31, attrOnMessage: message }
+fn onKeyDown(message) = AttrOn { attrOnEvent: 33, attrOnMessage: message }
 // onKeyUp(message: M) -> Attr<M>: sends the message on every KeyUp (InputElement).
-fn onKeyUp(message) = AttrOn { attrOnEvent: 32, attrOnMessage: message }
+fn onKeyUp(message) = AttrOn { attrOnEvent: 34, attrOnMessage: message }
 // onLoaded(message: M) -> Attr<M>: sends the message on every Loaded (Control).
-fn onLoaded(message) = AttrOn { attrOnEvent: 33, attrOnMessage: message }
+fn onLoaded(message) = AttrOn { attrOnEvent: 35, attrOnMessage: message }
 // onLosingFocus(message: M) -> Attr<M>: sends the message on every LosingFocus (InputElement).
-fn onLosingFocus(message) = AttrOn { attrOnEvent: 34, attrOnMessage: message }
+fn onLosingFocus(message) = AttrOn { attrOnEvent: 36, attrOnMessage: message }
 // onLostFocus(message: M) -> Attr<M>: sends the message on every LostFocus (InputElement).
-fn onLostFocus(message) = AttrOn { attrOnEvent: 35, attrOnMessage: message }
+fn onLostFocus(message) = AttrOn { attrOnEvent: 37, attrOnMessage: message }
 // onPinch(message: M) -> Attr<M>: sends the message on every Pinch (InputElement).
-fn onPinch(message) = AttrOn { attrOnEvent: 45, attrOnMessage: message }
+fn onPinch(message) = AttrOn { attrOnEvent: 47, attrOnMessage: message }
 // onPinchEnded(message: M) -> Attr<M>: sends the message on every PinchEnded (InputElement).
-fn onPinchEnded(message) = AttrOn { attrOnEvent: 46, attrOnMessage: message }
+fn onPinchEnded(message) = AttrOn { attrOnEvent: 48, attrOnMessage: message }
 // onPointerCaptureChanging(message: M) -> Attr<M>: sends the message on every
 // PointerCaptureChanging (InputElement).
-fn onPointerCaptureChanging(message) = AttrOn { attrOnEvent: 47, attrOnMessage: message }
+fn onPointerCaptureChanging(message) = AttrOn { attrOnEvent: 49, attrOnMessage: message }
 // onPointerCaptureLost(message: M) -> Attr<M>: sends the message on every PointerCaptureLost
 // (InputElement).
-fn onPointerCaptureLost(message) = AttrOn { attrOnEvent: 48, attrOnMessage: message }
+fn onPointerCaptureLost(message) = AttrOn { attrOnEvent: 50, attrOnMessage: message }
 // onPointerEntered(message: M) -> Attr<M>: sends the message on every PointerEntered
 // (InputElement).
-fn onPointerEntered(message) = AttrOn { attrOnEvent: 49, attrOnMessage: message }
+fn onPointerEntered(message) = AttrOn { attrOnEvent: 51, attrOnMessage: message }
 // onPointerExited(message: M) -> Attr<M>: sends the message on every PointerExited
 // (InputElement).
-fn onPointerExited(message) = AttrOn { attrOnEvent: 51, attrOnMessage: message }
+fn onPointerExited(message) = AttrOn { attrOnEvent: 53, attrOnMessage: message }
 // onPointerMoved(message: M) -> Attr<M>: sends the message on every PointerMoved
 // (InputElement).
-fn onPointerMoved(message) = AttrOn { attrOnEvent: 53, attrOnMessage: message }
+fn onPointerMoved(message) = AttrOn { attrOnEvent: 55, attrOnMessage: message }
 // onPointerPressed(message: M) -> Attr<M>: sends the message on every PointerPressed
 // (InputElement).
-fn onPointerPressed(message) = AttrOn { attrOnEvent: 54, attrOnMessage: message }
+fn onPointerPressed(message) = AttrOn { attrOnEvent: 56, attrOnMessage: message }
 // onPointerReleased(message: M) -> Attr<M>: sends the message on every PointerReleased
 // (InputElement).
-fn onPointerReleased(message) = AttrOn { attrOnEvent: 55, attrOnMessage: message }
+fn onPointerReleased(message) = AttrOn { attrOnEvent: 57, attrOnMessage: message }
 // onPointerTouchPadGestureMagnify(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureMagnify (InputElement).
-fn onPointerTouchPadGestureMagnify(message) = AttrOn { attrOnEvent: 56, attrOnMessage: message }
+fn onPointerTouchPadGestureMagnify(message) = AttrOn { attrOnEvent: 58, attrOnMessage: message }
 // onPointerTouchPadGestureRotate(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureRotate (InputElement).
-fn onPointerTouchPadGestureRotate(message) = AttrOn { attrOnEvent: 57, attrOnMessage: message }
+fn onPointerTouchPadGestureRotate(message) = AttrOn { attrOnEvent: 59, attrOnMessage: message }
 // onPointerTouchPadGestureSwipe(message: M) -> Attr<M>: sends the message on every
 // PointerTouchPadGestureSwipe (InputElement).
-fn onPointerTouchPadGestureSwipe(message) = AttrOn { attrOnEvent: 58, attrOnMessage: message }
+fn onPointerTouchPadGestureSwipe(message) = AttrOn { attrOnEvent: 60, attrOnMessage: message }
 // onPointerWheelChanged(message: M) -> Attr<M>: sends the message on every PointerWheelChanged
 // (InputElement).
-fn onPointerWheelChanged(message) = AttrOn { attrOnEvent: 59, attrOnMessage: message }
+fn onPointerWheelChanged(message) = AttrOn { attrOnEvent: 61, attrOnMessage: message }
 // onPullGesture(message: M) -> Attr<M>: sends the message on every PullGesture (InputElement).
-fn onPullGesture(message) = AttrOn { attrOnEvent: 60, attrOnMessage: message }
+fn onPullGesture(message) = AttrOn { attrOnEvent: 62, attrOnMessage: message }
 // onPullGestureEnded(message: M) -> Attr<M>: sends the message on every PullGestureEnded
 // (InputElement).
-fn onPullGestureEnded(message) = AttrOn { attrOnEvent: 61, attrOnMessage: message }
+fn onPullGestureEnded(message) = AttrOn { attrOnEvent: 63, attrOnMessage: message }
 // onRequestBringIntoView(message: M) -> Attr<M>: sends the message on every
 // RequestBringIntoView (Control).
-fn onRequestBringIntoView(message) = AttrOn { attrOnEvent: 66, attrOnMessage: message }
+fn onRequestBringIntoView(message) = AttrOn { attrOnEvent: 68, attrOnMessage: message }
 // onRightTapped(message: M) -> Attr<M>: sends the message on every RightTapped (InputElement).
-fn onRightTapped(message) = AttrOn { attrOnEvent: 67, attrOnMessage: message }
+fn onRightTapped(message) = AttrOn { attrOnEvent: 69, attrOnMessage: message }
 // onScrollGesture(message: M) -> Attr<M>: sends the message on every ScrollGesture
 // (InputElement).
-fn onScrollGesture(message) = AttrOn { attrOnEvent: 69, attrOnMessage: message }
+fn onScrollGesture(message) = AttrOn { attrOnEvent: 71, attrOnMessage: message }
 // onScrollGestureEnded(message: M) -> Attr<M>: sends the message on every ScrollGestureEnded
 // (InputElement).
-fn onScrollGestureEnded(message) = AttrOn { attrOnEvent: 70, attrOnMessage: message }
+fn onScrollGestureEnded(message) = AttrOn { attrOnEvent: 72, attrOnMessage: message }
 // onScrollGestureInertiaStarting(message: M) -> Attr<M>: sends the message on every
 // ScrollGestureInertiaStarting (InputElement).
-fn onScrollGestureInertiaStarting(message) = AttrOn { attrOnEvent: 71, attrOnMessage: message }
+fn onScrollGestureInertiaStarting(message) = AttrOn { attrOnEvent: 73, attrOnMessage: message }
 // onSizeChanged(message: M) -> Attr<M>: sends the message on every SizeChanged (Control).
-fn onSizeChanged(message) = AttrOn { attrOnEvent: 75, attrOnMessage: message }
+fn onSizeChanged(message) = AttrOn { attrOnEvent: 77, attrOnMessage: message }
 // onSwipeGesture(message: M) -> Attr<M>: sends the message on every SwipeGesture
 // (InputElement).
-fn onSwipeGesture(message) = AttrOn { attrOnEvent: 78, attrOnMessage: message }
+fn onSwipeGesture(message) = AttrOn { attrOnEvent: 80, attrOnMessage: message }
 // onSwipeGestureEnded(message: M) -> Attr<M>: sends the message on every SwipeGestureEnded
 // (InputElement).
-fn onSwipeGestureEnded(message) = AttrOn { attrOnEvent: 79, attrOnMessage: message }
+fn onSwipeGestureEnded(message) = AttrOn { attrOnEvent: 81, attrOnMessage: message }
 // onTapped(message: M) -> Attr<M>: sends the message on every Tapped (InputElement).
-fn onTapped(message) = AttrOn { attrOnEvent: 80, attrOnMessage: message }
+fn onTapped(message) = AttrOn { attrOnEvent: 82, attrOnMessage: message }
 // onTemplateApplied(message: M) -> Attr<M>: sends the message on every TemplateApplied
 // (TemplatedControl).
-fn onTemplateApplied(message) = AttrOn { attrOnEvent: 81, attrOnMessage: message }
+fn onTemplateApplied(message) = AttrOn { attrOnEvent: 83, attrOnMessage: message }
 // onTextInput(message: M) -> Attr<M>: sends the message on every TextInput (InputElement).
-fn onTextInput(message) = AttrOn { attrOnEvent: 87, attrOnMessage: message }
+fn onTextInput(message) = AttrOn { attrOnEvent: 89, attrOnMessage: message }
 // onTextInputMethodClientRequested(message: M) -> Attr<M>: sends the message on every
 // TextInputMethodClientRequested (InputElement).
-fn onTextInputMethodClientRequested(message) = AttrOn { attrOnEvent: 88, attrOnMessage: message }
+fn onTextInputMethodClientRequested(message) = AttrOn { attrOnEvent: 90, attrOnMessage: message }
 // onUnloaded(message: M) -> Attr<M>: sends the message on every Unloaded (Control).
-fn onUnloaded(message) = AttrOn { attrOnEvent: 92, attrOnMessage: message }
+fn onUnloaded(message) = AttrOn { attrOnEvent: 94, attrOnMessage: message }
 // onVerticalSnapPointsChanged(message: M) -> Attr<M>: sends the message on every
 // VerticalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
-fn onVerticalSnapPointsChanged(message) = AttrOn { attrOnEvent: 94, attrOnMessage: message }
+fn onVerticalSnapPointsChanged(message) = AttrOn { attrOnEvent: 96, attrOnMessage: message }
 
 // ---- driving an interface from a script --------------------------------------------------
 
@@ -344,10 +344,10 @@ fn raiseContextCanceledAt(key) = toInt(ferro_raise(object: findKey(key: key), ev
 fn raiseHorizontalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 27))
 // raiseLoadedAt(key: int) -> int: raises Loaded on the control of the element with the key
 // `key`, as the control does.
-fn raiseLoadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 33))
+fn raiseLoadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 35))
 // raiseUnloadedAt(key: int) -> int: raises Unloaded on the control of the element with the key
 // `key`, as the control does.
-fn raiseUnloadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 92))
+fn raiseUnloadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 94))
 // raiseVerticalSnapPointsChangedAt(key: int) -> int: raises VerticalSnapPointsChanged on the
 // control of the element with the key `key`, as the control does.
-fn raiseVerticalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 94))
+fn raiseVerticalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 96))

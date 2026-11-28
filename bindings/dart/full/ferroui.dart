@@ -290,7 +290,7 @@ void runApp(void Function() start) {
 
 const int _abiVersion = 1;
 const int _bufferTooSmall = -14;
-const int _apiFingerprint = -7664809914081695520;
+const int _apiFingerprint = -4387658432560162436;
 const int _selectionFingerprint = 0;
 
 void _registerTypes() {
@@ -1660,98 +1660,98 @@ extension type InputElement._(int handle) implements Interactive {
       _subscribe(handle, 26, (sender) => handler(InputElement._(sender)));
   /// KeyDown: the sender is valid for the call. Defines the `KeyDown` event.
   Subscription onKeyDown(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 31, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 33, (sender) => handler(InputElement._(sender)));
   /// KeyUp: the sender is valid for the call. Defines the `KeyUp` event.
   Subscription onKeyUp(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 32, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 34, (sender) => handler(InputElement._(sender)));
   /// LosingFocus: the sender is valid for the call. Defines the `LosingFocus` event.
   Subscription onLosingFocus(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 34, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 36, (sender) => handler(InputElement._(sender)));
   /// LostFocus: the sender is valid for the call. Defines the `LostFocus` event.
   Subscription onLostFocus(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 35, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 37, (sender) => handler(InputElement._(sender)));
   /// Pinch: the sender is valid for the call. Defines the `Pinch` event.
   Subscription onPinch(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 45, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 47, (sender) => handler(InputElement._(sender)));
   /// PinchEnded: the sender is valid for the call. Defines the `PinchEnded` event.
   Subscription onPinchEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 46, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 48, (sender) => handler(InputElement._(sender)));
   /// PointerCaptureChanging: the sender is valid for the call. Defines the
   /// `PointerCaptureChanging` routed event.
   Subscription onPointerCaptureChanging(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 47, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 49, (sender) => handler(InputElement._(sender)));
   /// PointerCaptureLost: the sender is valid for the call. Defines the `PointerCaptureLost`
   /// routed event.
   Subscription onPointerCaptureLost(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 48, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 50, (sender) => handler(InputElement._(sender)));
   /// PointerEntered: the sender is valid for the call. Defines the `PointerEntered` event.
   Subscription onPointerEntered(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 49, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 51, (sender) => handler(InputElement._(sender)));
   /// PointerExited: the sender is valid for the call. Defines the `PointerExited` event.
   Subscription onPointerExited(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 51, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 53, (sender) => handler(InputElement._(sender)));
   /// PointerMoved: the sender is valid for the call. Defines the `PointerMoved` event.
   Subscription onPointerMoved(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 53, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 55, (sender) => handler(InputElement._(sender)));
   /// PointerPressed: the sender is valid for the call. Defines the `PointerPressed` event.
   Subscription onPointerPressed(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 54, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 56, (sender) => handler(InputElement._(sender)));
   /// PointerReleased: the sender is valid for the call. Defines the `PointerReleased` event.
   Subscription onPointerReleased(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 55, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 57, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureMagnify: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureMagnify` event.
   Subscription onPointerTouchPadGestureMagnify(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 56, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 58, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureRotate: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureRotate` event.
   Subscription onPointerTouchPadGestureRotate(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 57, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 59, (sender) => handler(InputElement._(sender)));
   /// PointerTouchPadGestureSwipe: the sender is valid for the call. Defines the
   /// `PointerTouchPadGestureSwipe` event.
   Subscription onPointerTouchPadGestureSwipe(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 58, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 60, (sender) => handler(InputElement._(sender)));
   /// PointerWheelChanged: the sender is valid for the call. Defines the `PointerWheelChanged`
   /// event.
   Subscription onPointerWheelChanged(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 59, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 61, (sender) => handler(InputElement._(sender)));
   /// PullGesture: the sender is valid for the call. Defines the `PullGesture` event.
   Subscription onPullGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 60, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 62, (sender) => handler(InputElement._(sender)));
   /// PullGestureEnded: the sender is valid for the call. Defines the `PullGestureEnded` event.
   Subscription onPullGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 61, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 63, (sender) => handler(InputElement._(sender)));
   /// RightTapped: the sender is valid for the call. Defines the `RightTapped` event.
   Subscription onRightTapped(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 67, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 69, (sender) => handler(InputElement._(sender)));
   /// ScrollGesture: the sender is valid for the call. Defines the `ScrollGesture` event.
   Subscription onScrollGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 69, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 71, (sender) => handler(InputElement._(sender)));
   /// ScrollGestureEnded: the sender is valid for the call. Defines the `ScrollGestureEnded`
   /// event.
   Subscription onScrollGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 70, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 72, (sender) => handler(InputElement._(sender)));
   /// ScrollGestureInertiaStarting: the sender is valid for the call. Defines the
   /// `ScrollGestureInertiaStarting` event.
   Subscription onScrollGestureInertiaStarting(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 71, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 73, (sender) => handler(InputElement._(sender)));
   /// SwipeGesture: the sender is valid for the call. Defines the `SwipeGesture` event.
   Subscription onSwipeGesture(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 78, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 80, (sender) => handler(InputElement._(sender)));
   /// SwipeGestureEnded: the sender is valid for the call. Defines the `SwipeGestureEnded`
   /// event.
   Subscription onSwipeGestureEnded(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 79, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 81, (sender) => handler(InputElement._(sender)));
   /// Tapped: the sender is valid for the call. Defines the `Tapped` event.
   Subscription onTapped(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 80, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 82, (sender) => handler(InputElement._(sender)));
   /// TextInput: the sender is valid for the call. Defines the `TextInput` event.
   Subscription onTextInput(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 87, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 89, (sender) => handler(InputElement._(sender)));
   /// TextInputMethodClientRequested: the sender is valid for the call. Defines the
   /// `TextInputMethodClientRequested` event.
   Subscription onTextInputMethodClientRequested(void Function(InputElement sender) handler) =>
-      _subscribe(handle, 88, (sender) => handler(InputElement._(sender)));
+      _subscribe(handle, 90, (sender) => handler(InputElement._(sender)));
 }
 
 /// Base class for controls. The control class extends [`InputElement`] and adds the following
@@ -1773,17 +1773,17 @@ extension type Control._(int handle) implements InputElement {
   set tagObject(FerroObject value) => _setObject(handle, 872, value.handle);
   /// Loaded: the sender is valid for the call. Defines the `Loaded` event.
   Subscription onLoaded(void Function(Control sender) handler) =>
-      _subscribe(handle, 33, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 35, (sender) => handler(Control._(sender)));
   /// RequestBringIntoView: the sender is valid for the call. Event raised when an element
   /// wishes to be scrolled into view.
   Subscription onRequestBringIntoView(void Function(Control sender) handler) =>
-      _subscribe(handle, 66, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 68, (sender) => handler(Control._(sender)));
   /// SizeChanged: the sender is valid for the call. Defines the `SizeChanged` event.
   Subscription onSizeChanged(void Function(Control sender) handler) =>
-      _subscribe(handle, 75, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 77, (sender) => handler(Control._(sender)));
   /// Unloaded: the sender is valid for the call. Defines the `Unloaded` event.
   Subscription onUnloaded(void Function(Control sender) handler) =>
-      _subscribe(handle, 92, (sender) => handler(Control._(sender)));
+      _subscribe(handle, 94, (sender) => handler(Control._(sender)));
 }
 
 /// A control that displays a block of text.
@@ -2085,7 +2085,7 @@ extension type TemplatedControl._(int handle) implements Control {
   /// TemplateApplied: the sender is valid for the call. Defines the `TemplateApplied` routed
   /// event.
   Subscription onTemplateApplied(void Function(TemplatedControl sender) handler) =>
-      _subscribe(handle, 81, (sender) => handler(TemplatedControl._(sender)));
+      _subscribe(handle, 83, (sender) => handler(TemplatedControl._(sender)));
 }
 
 /// Displays a collection of items.
@@ -2158,10 +2158,10 @@ extension type SelectingItemsControl._(int handle) implements ItemsControl {
   /// containers when their selection state changes to notify the parent
   /// [`SelectingItemsControl`] that their selection state has changed.
   Subscription onIsSelectedChanged(void Function(SelectingItemsControl sender) handler) =>
-      _subscribe(handle, 29, (sender) => handler(SelectingItemsControl._(sender)));
+      _subscribe(handle, 31, (sender) => handler(SelectingItemsControl._(sender)));
   /// SelectionChanged: the sender is valid for the call. Defines the `SelectionChanged` event.
   Subscription onSelectionChanged(void Function(SelectingItemsControl sender) handler) =>
-      _subscribe(handle, 73, (sender) => handler(SelectingItemsControl._(sender)));
+      _subscribe(handle, 75, (sender) => handler(SelectingItemsControl._(sender)));
 }
 
 extension type AlwaysSelectedTestSelectorDisablingFirstContainers._(int handle) implements SelectingItemsControl {
@@ -2379,13 +2379,13 @@ extension type AutoCompleteBox._(int handle) implements TemplatedControl {
   /// FerroUI addition after WinUI's `AutoSuggestBox.QuerySubmitted`, raised when Enter submits
   /// the text of the box.
   Subscription onQuerySubmitted(void Function(AutoCompleteBox sender) handler) =>
-      _subscribe(handle, 62, (sender) => handler(AutoCompleteBox._(sender)));
+      _subscribe(handle, 64, (sender) => handler(AutoCompleteBox._(sender)));
   /// SelectionChanged: the sender is valid for the call. Defines the `SelectionChanged` event.
   Subscription onSelectionChanged(void Function(AutoCompleteBox sender) handler) =>
-      _subscribe(handle, 73, (sender) => handler(AutoCompleteBox._(sender)));
+      _subscribe(handle, 75, (sender) => handler(AutoCompleteBox._(sender)));
   /// TextChanged: the sender is valid for the call. Defines the `TextChanged` event.
   Subscription onTextChanged(void Function(AutoCompleteBox sender) handler) =>
-      _subscribe(handle, 82, (sender) => handler(AutoCompleteBox._(sender)));
+      _subscribe(handle, 84, (sender) => handler(AutoCompleteBox._(sender)));
 }
 
 /// Provides a base class that exposes an element to UI Automation. The members named `*_core`
@@ -2789,7 +2789,7 @@ extension type Spinner._(int handle) implements ContentControl {
   set validSpinDirection(String value) => _setString(handle, 1032, value);
   /// Spin: the sender is valid for the call. Defines the `Spin` routed event.
   Subscription onSpin(void Function(Spinner sender) handler) =>
-      _subscribe(handle, 76, (sender) => handler(Spinner._(sender)));
+      _subscribe(handle, 78, (sender) => handler(Spinner._(sender)));
 }
 
 /// Represents a spinner control that includes two buttons.
@@ -3011,7 +3011,7 @@ extension type Page._(int handle) implements TemplatedControl {
   /// PageNavigationSystemBackButtonPressed: the sender is valid for the call. Defines the
   /// routed event raised when the system back button is pressed.
   Subscription onPageNavigationSystemBackButtonPressed(void Function(Page sender) handler) =>
-      _subscribe(handle, 39, (sender) => handler(Page._(sender)));
+      _subscribe(handle, 41, (sender) => handler(Page._(sender)));
 }
 
 /// Abstract base class for pages that host a collection of child pages.
@@ -3039,7 +3039,7 @@ extension type SelectingMultiPage._(int handle) implements MultiPage {
   /// SelectionChanged: the sender is valid for the call. Defines the `SelectionChanged` routed
   /// event.
   Subscription onSelectionChanged(void Function(SelectingMultiPage sender) handler) =>
-      _subscribe(handle, 73, (sender) => handler(SelectingMultiPage._(sender)));
+      _subscribe(handle, 75, (sender) => handler(SelectingMultiPage._(sender)));
 }
 
 /// A page that displays its child pages in a horizontally scrollable carousel, with optional
@@ -3076,7 +3076,7 @@ extension type ToggleButton._(int handle) implements Button {
   set isThreeState(bool value) => _setBool(handle, 464, value);
   /// IsCheckedChanged: the sender is valid for the call. Defines the `IsCheckedChanged` event.
   Subscription onIsCheckedChanged(void Function(ToggleButton sender) handler) =>
-      _subscribe(handle, 28, (sender) => handler(ToggleButton._(sender)));
+      _subscribe(handle, 30, (sender) => handler(ToggleButton._(sender)));
 }
 
 /// A check box control.
@@ -3390,10 +3390,10 @@ extension type CommandBar._(int handle) implements TemplatedControl {
       _subscribe(handle, 6, (sender) => handler(CommandBar._(sender)));
   /// Opened: the sender is valid for the call. Defines the `Opened` routed event.
   Subscription onOpened(void Function(CommandBar sender) handler) =>
-      _subscribe(handle, 37, (sender) => handler(CommandBar._(sender)));
+      _subscribe(handle, 39, (sender) => handler(CommandBar._(sender)));
   /// Opening: the sender is valid for the call. Defines the `Opening` routed event.
   Subscription onOpening(void Function(CommandBar sender) handler) =>
-      _subscribe(handle, 38, (sender) => handler(CommandBar._(sender)));
+      _subscribe(handle, 40, (sender) => handler(CommandBar._(sender)));
 }
 
 /// A button for use in a [`CommandBar`](super::CommandBar).
@@ -3729,7 +3729,7 @@ extension type MenuBase._(int handle) implements SelectingItemsControl {
       _subscribe(handle, 5, (sender) => handler(MenuBase._(sender)));
   /// Opened: the sender is valid for the call. Defines the `Opened` event.
   Subscription onOpened(void Function(MenuBase sender) handler) =>
-      _subscribe(handle, 37, (sender) => handler(MenuBase._(sender)));
+      _subscribe(handle, 39, (sender) => handler(MenuBase._(sender)));
 }
 
 /// A control context menu.
@@ -4184,7 +4184,7 @@ extension type DrawerPage._(int handle) implements Page {
       _subscribe(handle, 6, (sender) => handler(DrawerPage._(sender)));
   /// Opened: the sender is valid for the call. Defines the `Opened` routed event.
   Subscription onOpened(void Function(DrawerPage sender) handler) =>
-      _subscribe(handle, 37, (sender) => handler(DrawerPage._(sender)));
+      _subscribe(handle, 39, (sender) => handler(DrawerPage._(sender)));
 }
 
 /// An automation peer which represents a [`DrawerPage`].
@@ -5138,6 +5138,12 @@ extension type Image._(int handle) implements Control {
   /// StretchDirection. Defines the `StretchDirection` property.
   StretchDirection get stretchDirection => StretchDirection(_getI64(handle, 839));
   set stretchDirection(StretchDirection value) => _setI64(handle, 839, value.value);
+  /// ImageFailed: the sender is valid for the call. Defines the `ImageFailed` event.
+  Subscription onImageFailed(void Function(Image sender) handler) =>
+      _subscribe(handle, 28, (sender) => handler(Image._(sender)));
+  /// ImageOpened: the sender is valid for the call. Defines the `ImageOpened` event.
+  Subscription onImageOpened(void Function(Image sender) handler) =>
+      _subscribe(handle, 29, (sender) => handler(Image._(sender)));
 }
 
 /// An automation peer which represents an image.
@@ -5478,7 +5484,7 @@ extension type VirtualizingStackPanel._(int handle) implements VirtualizingPanel
   /// VerticalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `VerticalSnapPointsChanged` event.
   Subscription onVerticalSnapPointsChanged(void Function(VirtualizingStackPanel sender) handler) =>
-      _subscribe(handle, 94, (sender) => handler(VirtualizingStackPanel._(sender)));
+      _subscribe(handle, 96, (sender) => handler(VirtualizingStackPanel._(sender)));
 }
 
 /// The virtualizing items panel of a list view (WinUI's `ItemsStackPanel`): FerroUI's
@@ -5893,13 +5899,13 @@ extension type TextBox._(int handle) implements TemplatedControl {
   /// PastingFromClipboard: the sender is valid for the call. Defines the `PastingFromClipboard`
   /// event. The event is raised with [`PastingFromClipboardEventArgs`].
   Subscription onPastingFromClipboard(void Function(TextBox sender) handler) =>
-      _subscribe(handle, 44, (sender) => handler(TextBox._(sender)));
+      _subscribe(handle, 46, (sender) => handler(TextBox._(sender)));
   /// TextChanged: the sender is valid for the call. Defines the `TextChanged` event.
   Subscription onTextChanged(void Function(TextBox sender) handler) =>
-      _subscribe(handle, 82, (sender) => handler(TextBox._(sender)));
+      _subscribe(handle, 84, (sender) => handler(TextBox._(sender)));
   /// TextChanging: the sender is valid for the call. Defines the `TextChanging` event.
   Subscription onTextChanging(void Function(TextBox sender) handler) =>
-      _subscribe(handle, 83, (sender) => handler(TextBox._(sender)));
+      _subscribe(handle, 85, (sender) => handler(TextBox._(sender)));
 }
 
 /// A text box that restricts its input with a mask.
@@ -6019,14 +6025,14 @@ extension type MenuItem._(int handle) implements HeaderedSelectingItemsControl {
   /// PointerEnteredItem: the sender is valid for the call. Defines the `PointerEnteredItem`
   /// event.
   Subscription onPointerEnteredItem(void Function(MenuItem sender) handler) =>
-      _subscribe(handle, 50, (sender) => handler(MenuItem._(sender)));
+      _subscribe(handle, 52, (sender) => handler(MenuItem._(sender)));
   /// PointerExitedItem: the sender is valid for the call. Defines the `PointerExitedItem`
   /// event.
   Subscription onPointerExitedItem(void Function(MenuItem sender) handler) =>
-      _subscribe(handle, 52, (sender) => handler(MenuItem._(sender)));
+      _subscribe(handle, 54, (sender) => handler(MenuItem._(sender)));
   /// SubmenuOpened: the sender is valid for the call. Defines the `SubmenuOpened` event.
   Subscription onSubmenuOpened(void Function(MenuItem sender) handler) =>
-      _subscribe(handle, 77, (sender) => handler(MenuItem._(sender)));
+      _subscribe(handle, 79, (sender) => handler(MenuItem._(sender)));
 }
 
 /// An automation peer which represents a [`MenuItem`].
@@ -6540,7 +6546,7 @@ extension type NotificationCard._(int handle) implements ContentControl {
   /// NotificationClosed: the sender is valid for the call. Defines the `NotificationClosed`
   /// event.
   Subscription onNotificationClosed(void Function(NotificationCard sender) handler) =>
-      _subscribe(handle, 36, (sender) => handler(NotificationCard._(sender)));
+      _subscribe(handle, 38, (sender) => handler(NotificationCard._(sender)));
 }
 
 /// A text box for numbers (WinUI's `NumberBox`): a value of type `f64`, NaN when the box is
@@ -6716,7 +6722,7 @@ extension type NumericUpDown._(int handle) implements TemplatedControl {
   set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1037, value.value);
   /// ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.
   Subscription onValueChanged(void Function(NumericUpDown sender) handler) =>
-      _subscribe(handle, 93, (sender) => handler(NumericUpDown._(sender)));
+      _subscribe(handle, 95, (sender) => handler(NumericUpDown._(sender)));
 }
 
 /// An automation peer which represents a [`NumericUpDown`].
@@ -7128,7 +7134,7 @@ extension type PipsPager._(int handle) implements TemplatedControl {
   /// SelectedIndexChanged: the sender is valid for the call. Defines the `SelectedIndexChanged`
   /// event.
   Subscription onSelectedIndexChanged(void Function(PipsPager sender) handler) =>
-      _subscribe(handle, 72, (sender) => handler(PipsPager._(sender)));
+      _subscribe(handle, 74, (sender) => handler(PipsPager._(sender)));
 }
 
 /// An automation peer for [`PipsPager`].
@@ -7264,7 +7270,7 @@ extension type PivotPanel._(int handle) implements Panel {
   /// VerticalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `VerticalSnapPointsChanged` event.
   Subscription onVerticalSnapPointsChanged(void Function(PivotPanel sender) handler) =>
-      _subscribe(handle, 94, (sender) => handler(PivotPanel._(sender)));
+      _subscribe(handle, 96, (sender) => handler(PivotPanel._(sender)));
 }
 
 /// A geometry that wraps a platform implementation.
@@ -7540,7 +7546,7 @@ extension type RangeBase._(int handle) implements TemplatedControl {
   set valueValue(double value) => _setF64(handle, 1034, value);
   /// ValueChanged: the sender is valid for the call. Defines the `ValueChanged` event.
   Subscription onValueChanged(void Function(RangeBase sender) handler) =>
-      _subscribe(handle, 93, (sender) => handler(RangeBase._(sender)));
+      _subscribe(handle, 95, (sender) => handler(RangeBase._(sender)));
 }
 
 /// A control used to indicate the progress of an operation.
@@ -8001,7 +8007,7 @@ extension type RefreshContainer._(int handle) implements ContentControl {
   set visualizer(FerroObject value) => _setObject(handle, 1051, value.handle);
   /// RefreshRequested: the sender is valid for the call. Defines the `RefreshRequested` event.
   Subscription onRefreshRequested(void Function(RefreshContainer sender) handler) =>
-      _subscribe(handle, 64, (sender) => handler(RefreshContainer._(sender)));
+      _subscribe(handle, 66, (sender) => handler(RefreshContainer._(sender)));
 }
 
 /// What a refresh visualizer needs to know about the interaction that drives it: whether the
@@ -8025,10 +8031,10 @@ extension type RefreshInfoProvider._(int handle) implements Interactive {
   set refreshVisualizerSize(String value) => _setString(handle, 699, value);
   /// RefreshCompleted: the sender is valid for the call. Defines the `RefreshCompleted` event.
   Subscription onRefreshCompleted(void Function(RefreshInfoProvider sender) handler) =>
-      _subscribe(handle, 63, (sender) => handler(RefreshInfoProvider._(sender)));
+      _subscribe(handle, 65, (sender) => handler(RefreshInfoProvider._(sender)));
   /// RefreshStarted: the sender is valid for the call. Defines the `RefreshStarted` event.
   Subscription onRefreshStarted(void Function(RefreshInfoProvider sender) handler) =>
-      _subscribe(handle, 65, (sender) => handler(RefreshInfoProvider._(sender)));
+      _subscribe(handle, 67, (sender) => handler(RefreshInfoProvider._(sender)));
 }
 
 /// Shows the progress of a pull-to-refresh interaction and of the refresh it starts.
@@ -8043,7 +8049,7 @@ extension type RefreshVisualizer._(int handle) implements ContentControl {
   RefreshVisualizerState get refreshVisualizerState => RefreshVisualizerState(_getI64(handle, 700));
   /// RefreshRequested: the sender is valid for the call. Defines the `RefreshRequested` event.
   Subscription onRefreshRequested(void Function(RefreshVisualizer sender) handler) =>
-      _subscribe(handle, 64, (sender) => handler(RefreshVisualizer._(sender)));
+      _subscribe(handle, 66, (sender) => handler(RefreshVisualizer._(sender)));
 }
 
 /// A panel that arranges its children relative to each other and to the panel itself.
@@ -8256,7 +8262,7 @@ extension type StackPanel._(int handle) implements Panel {
   /// VerticalSnapPointsChanged: the sender is valid for the call. Defines the
   /// `VerticalSnapPointsChanged` event.
   Subscription onVerticalSnapPointsChanged(void Function(StackPanel sender) handler) =>
-      _subscribe(handle, 94, (sender) => handler(StackPanel._(sender)));
+      _subscribe(handle, 96, (sender) => handler(StackPanel._(sender)));
 }
 
 /// Implements a panel which lays out its children horizontally or vertically and can reverse
@@ -8420,28 +8426,28 @@ extension type RichEditBox._(int handle) implements TemplatedControl {
       _subscribe(handle, 13, (sender) => handler(RichEditBox._(sender)));
   /// PastingFromClipboard: the sender is valid for the call.
   Subscription onPastingFromClipboard(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 44, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 46, (sender) => handler(RichEditBox._(sender)));
   /// SelectionChanged: the sender is valid for the call.
   Subscription onSelectionChanged(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 73, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 75, (sender) => handler(RichEditBox._(sender)));
   /// SelectionChanging: the sender is valid for the call.
   Subscription onSelectionChanging(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 74, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 76, (sender) => handler(RichEditBox._(sender)));
   /// TextChanged: the sender is valid for the call.
   Subscription onTextChanged(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 82, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 84, (sender) => handler(RichEditBox._(sender)));
   /// TextChanging: the sender is valid for the call.
   Subscription onTextChanging(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 83, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 85, (sender) => handler(RichEditBox._(sender)));
   /// TextCompositionChanged: the sender is valid for the call.
   Subscription onTextCompositionChanged(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 84, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 86, (sender) => handler(RichEditBox._(sender)));
   /// TextCompositionEnded: the sender is valid for the call.
   Subscription onTextCompositionEnded(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 85, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 87, (sender) => handler(RichEditBox._(sender)));
   /// TextCompositionStarted: the sender is valid for the call.
   Subscription onTextCompositionStarted(void Function(RichEditBox sender) handler) =>
-      _subscribe(handle, 86, (sender) => handler(RichEditBox._(sender)));
+      _subscribe(handle, 88, (sender) => handler(RichEditBox._(sender)));
 }
 
 /// Accessibility projection of the rich editor using the framework's existing provider ABI.
@@ -8553,10 +8559,10 @@ extension type RichTextBlock._(int handle) implements Control {
       _subscribe(handle, 10, (sender) => handler(RichTextBlock._(sender)));
   /// IsTextTrimmedChanged: the sender is valid for the call.
   Subscription onIsTextTrimmedChanged(void Function(RichTextBlock sender) handler) =>
-      _subscribe(handle, 30, (sender) => handler(RichTextBlock._(sender)));
+      _subscribe(handle, 32, (sender) => handler(RichTextBlock._(sender)));
   /// SelectionChanged: the sender is valid for the call.
   Subscription onSelectionChanged(void Function(RichTextBlock sender) handler) =>
-      _subscribe(handle, 73, (sender) => handler(RichTextBlock._(sender)));
+      _subscribe(handle, 75, (sender) => handler(RichTextBlock._(sender)));
 }
 
 /// Renders and scrolls the owner's single rich document using FerroUI text layout. The
@@ -8867,7 +8873,7 @@ extension type ScrollViewer._(int handle) implements ContentControl {
   set zoomMode(ZoomMode value) => _setI64(handle, 1079, value.value);
   /// ScrollChanged: the sender is valid for the call. Defines the `ScrollChanged` event.
   Subscription onScrollChanged(void Function(ScrollViewer sender) handler) =>
-      _subscribe(handle, 68, (sender) => handler(ScrollViewer._(sender)));
+      _subscribe(handle, 70, (sender) => handler(ScrollViewer._(sender)));
 }
 
 /// An automation peer which represents a [`ScrollViewer`].
@@ -9145,16 +9151,16 @@ extension type SplitView._(int handle) implements ContentControl {
   set useLightDismissOverlayMode(bool value) => _setBool(handle, 1029, value);
   /// PaneClosed: the sender is valid for the call. Defines the `PaneClosed` event.
   Subscription onPaneClosed(void Function(SplitView sender) handler) =>
-      _subscribe(handle, 40, (sender) => handler(SplitView._(sender)));
+      _subscribe(handle, 42, (sender) => handler(SplitView._(sender)));
   /// PaneClosing: the sender is valid for the call. Defines the `PaneClosing` event.
   Subscription onPaneClosing(void Function(SplitView sender) handler) =>
-      _subscribe(handle, 41, (sender) => handler(SplitView._(sender)));
+      _subscribe(handle, 43, (sender) => handler(SplitView._(sender)));
   /// PaneOpened: the sender is valid for the call. Defines the `PaneOpened` event.
   Subscription onPaneOpened(void Function(SplitView sender) handler) =>
-      _subscribe(handle, 42, (sender) => handler(SplitView._(sender)));
+      _subscribe(handle, 44, (sender) => handler(SplitView._(sender)));
   /// PaneOpening: the sender is valid for the call. Defines the `PaneOpening` event.
   Subscription onPaneOpening(void Function(SplitView sender) handler) =>
-      _subscribe(handle, 43, (sender) => handler(SplitView._(sender)));
+      _subscribe(handle, 45, (sender) => handler(SplitView._(sender)));
 }
 
 /// Provides calculated values for use with the control theme or template of the
@@ -10116,7 +10122,7 @@ extension type ToggleSplitButton._(int handle) implements SplitButton {
   set isChecked(bool value) => _setBool(handle, 397, value);
   /// IsCheckedChanged: the sender is valid for the call. Defines the `IsCheckedChanged` event.
   Subscription onIsCheckedChanged(void Function(ToggleSplitButton sender) handler) =>
-      _subscribe(handle, 28, (sender) => handler(ToggleSplitButton._(sender)));
+      _subscribe(handle, 30, (sender) => handler(ToggleSplitButton._(sender)));
 }
 
 /// An automation peer which represents a [`ToggleSplitButton`].
@@ -10199,7 +10205,7 @@ extension type ToolTip._(int handle) implements ContentControl {
   /// does not cancel closing the tooltip. Once the tooltip is displayed, closing the tooltip is
   /// done only in response to user interaction with the UI.
   Subscription onToolTipClosing(void Function(ToolTip sender) handler) =>
-      _subscribe(handle, 89, (sender) => handler(ToolTip._(sender)));
+      _subscribe(handle, 91, (sender) => handler(ToolTip._(sender)));
   /// ToolTipOpening: the sender is valid for the call. The event raised when a tooltip is going
   /// to be shown on an element. To prevent a tooltip from appearing in the UI, your handler for
   /// `ToolTipOpening` can mark the event data as cancelled. Otherwise, the tooltip is
@@ -10211,7 +10217,7 @@ extension type ToolTip._(int handle) implements ContentControl {
   /// have the effect of closing the tooltip, and will instead create an undesirable visual
   /// artifact in the UI.
   Subscription onToolTipOpening(void Function(ToolTip sender) handler) =>
-      _subscribe(handle, 90, (sender) => handler(ToolTip._(sender)));
+      _subscribe(handle, 92, (sender) => handler(ToolTip._(sender)));
 }
 
 /// An automation peer which represents a [`ToolTip`].
@@ -10315,7 +10321,7 @@ extension type TransitioningContentControl._(int handle) implements ContentContr
   /// TransitionCompleted: the sender is valid for the call. Defines the `TransitionCompleted`
   /// routed event.
   Subscription onTransitionCompleted(void Function(TransitioningContentControl sender) handler) =>
-      _subscribe(handle, 91, (sender) => handler(TransitioningContentControl._(sender)));
+      _subscribe(handle, 93, (sender) => handler(TransitioningContentControl._(sender)));
 }
 
 /// Translates (moves) a visual.
@@ -10639,11 +10645,11 @@ extension type Window._(int handle) implements WindowBase {
   /// WindowClosed: the sender is valid for the call. Routed event that can be used for global
   /// tracking of window destruction.
   Subscription onWindowClosed(void Function(Window sender) handler) =>
-      _subscribe(handle, 95, (sender) => handler(Window._(sender)));
+      _subscribe(handle, 97, (sender) => handler(Window._(sender)));
   /// WindowOpened: the sender is valid for the call. Routed event that can be used for global
   /// tracking of opening windows.
   Subscription onWindowOpened(void Function(Window sender) handler) =>
-      _subscribe(handle, 96, (sender) => handler(Window._(sender)));
+      _subscribe(handle, 98, (sender) => handler(Window._(sender)));
 }
 
 /// An automation peer which represents a [`Window`].

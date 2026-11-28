@@ -396,6 +396,23 @@ impl<'a> DrawingContext<'a> {
         }
     }
 
+    /// Composites color across the current clip. Bounds describe affected layer
+    /// content for damage tracking and do not introduce a geometric clip.
+    /// Isolate destination-dependent modes in a layer.
+    pub fn draw_color(
+        &mut self,
+        color: crate::media::Color,
+        blend: crate::media::imaging::BitmapBlendingMode,
+        bounds: Rect,
+    ) {
+        // Recorded through the native draw-operation path: one function, not a default method
+        // of every drawing context.
+        let operation: std::sync::Arc<dyn ICustomDrawOperation> = std::sync::Arc::new(
+            crate::rendering::scene_graph::color_draw_operation::ColorDrawOperation { color, blend, bounds },
+        );
+        self.core().custom(&operation);
+    }
+
     /// Draws text. `origin` is the upper-left corner of the text.
     pub fn draw_text(&mut self, text: &FormattedText, origin: Point) {
         text.draw(self, origin);

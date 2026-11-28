@@ -174,6 +174,12 @@ impl IDrawingContextImpl for MockDrawingContext {
     fn clear(&mut self, color: Color) {
         self.log.borrow_mut().push(format!("clear {color}"));
     }
+
+    fn draw_color(&mut self, color: Color, blend: super::BitmapBlendingMode) {
+        self.log
+            .borrow_mut()
+            .push(format!("color {color} {blend:?}"));
+    }
     fn draw_bitmap(&mut self, _: &dyn IBitmapImpl, _: f64, _: Rect, _: Rect) {}
     fn draw_bitmap_with_mask(&mut self, _: &dyn IBitmapImpl, _: &dyn IBrush, _: Rect, _: Rect) {}
     fn draw_line(&mut self, _: Option<&dyn IPen>, _: Point, _: Point) {}

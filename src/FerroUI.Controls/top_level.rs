@@ -157,6 +157,7 @@ impl StyledElementImpl for TopLevel {
 
     fn is_theme_variant_root(this: &Self) -> bool {
         this.application_theme_host.borrow().is_none()
+            || this.requested_theme_variant().is_some_and(|variant| variant != ThemeVariant::default())
     }
 }
 
@@ -1440,16 +1441,16 @@ impl TopLevel {
         self.renderer().set_platform_specific_scene_info(scene_info);
     }
 
-    /// Follows the contrast setting of the platform (#560): a top level that is a theme variant
-    /// root resolves its variant again when the colour values of the platform or the high
-    /// contrast variant of the theme change; the frame of a top level in the high contrast
+    /// Follows the contrast setting of the platform (#560): a top level that resolves its own
+    /// theme revisits that choice when the platform colours or the high contrast variant
+    /// of the theme change. The frame of a top level in the high contrast
     /// variant follows the window colour of the system colours (light for "High Contrast
     /// White"), which can change while the variant stays.
     fn subscribe_theme_settings(&self) {
         let weak = self.to_ref().downgrade();
         let on_change: Rc<dyn Fn()> = Rc::new(move || {
             let Some(this) = weak.upgrade() else { return };
-            if this.application_theme_host.borrow().is_none() {
+            if this.is_theme_variant_root() {
                 ThemeVariant::update_actual_theme_variant(&this);
             }
             let variant = this.get_value(Self::actual_theme_variant_property());

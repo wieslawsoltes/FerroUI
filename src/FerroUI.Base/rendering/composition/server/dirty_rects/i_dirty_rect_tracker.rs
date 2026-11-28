@@ -366,6 +366,10 @@ pub(crate) mod tests {
         fn clear(&mut self, _color: Color) {
             self.log.push("clear".to_string());
         }
+
+        fn draw_color(&mut self, _color: Color, _blend: crate::media::imaging::BitmapBlendingMode) {
+            self.log.push("color".to_string());
+        }
         fn draw_bitmap(&mut self, _: &dyn IBitmapImpl, _: f64, _: Rect, _: Rect) {
             self.log.push("bitmap".to_string());
         }

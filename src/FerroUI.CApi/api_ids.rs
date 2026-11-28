@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -7664809914081695520;
+pub(crate) const API_FINGERPRINT: i64 = -4387658432560162436;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 517] = [
@@ -1612,7 +1612,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1079] = [
 ];
 
 /// The routed events, by event ID.
-pub(crate) static EVENT_NAMES: [&str; 96] = [
+pub(crate) static EVENT_NAMES: [&str; 98] = [
     "AccessKey",
     "AccessKeyPressed",
     "BackRequested",
@@ -1640,6 +1640,8 @@ pub(crate) static EVENT_NAMES: [&str; 96] = [
     "GotFocus",
     "Holding",
     "HorizontalSnapPointsChanged",
+    "ImageFailed",
+    "ImageOpened",
     "IsCheckedChanged",
     "IsSelectedChanged",
     "IsTextTrimmedChanged",

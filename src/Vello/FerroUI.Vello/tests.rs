@@ -153,6 +153,48 @@ fn clear_fills_the_whole_target() {
 }
 
 #[test]
+fn solid_color_composition_preserves_destination_alpha_clip_and_transform() {
+    let target = Target::with_size(6, 4);
+    target.draw(|context| {
+        context.clear(Colors::TRANSPARENT);
+        context.push_clip(Rect::new(1., 1., 3., 2.));
+        context.draw_color(Colors::RED, BitmapBlendingMode::Source);
+        context.pop_clip();
+        let transform = Matrix::create_translation(1000., 2000.);
+        context.set_transform(transform);
+        context.draw_color(Color::from_uint32(0x800000ff), BitmapBlendingMode::SourceIn);
+        assert_eq!(context.transform(), transform);
+    });
+    assert_eq!(target.pixel(2, 1), (0, 0, 128, 128));
+    assert_eq!(target.pixel(0, 0), (0, 0, 0, 0));
+}
+
+#[test]
+fn recorded_source_in_layer_preserves_unrelated_background() {
+    let _scope = ferroui_base::FerroLocator::enter_scope();
+    ferroui_base::FerroLocator::current_mutable()
+        .bind::<dyn ferroui_base::platform::IPlatformRenderInterface>()
+        .to_constant(Rc::new(crate::PlatformRenderInterface::default()));
+    use ferroui_base::media::{DrawingContext, ISceneBrushContent, immutable::ImmutableImageBrush};
+    use ferroui_base::rendering::composition::drawing::RenderDataDrawingContext;
+    let mut recorder = RenderDataDrawingContext::new(None);
+    {
+        let mut context = DrawingContext::new(&mut recorder);
+        let bounds = Rect::new(0.,0.,6.,4.);
+        let layer = context.try_push_compositing_layer(BitmapBlendingMode::SourceOver,1.0,bounds).unwrap();
+        let brush: Rc<dyn IBrush> = Rc::new(solid(Color::from_uint32(0x80ff0000)));
+        context.draw_rectangle(Some(&brush),None,Rect::new(1.,1.,3.,2.),0.,0.,&BoxShadows::default());
+        context.draw_color(Colors::BLUE,BitmapBlendingMode::SourceIn,Rect::new(1.,1.,3.,2.));
+        context.pop(layer);
+    }
+    let content=recorder.get_immediate_scene_brush_content(Rc::new(ImmutableImageBrush::from_bitmap(None)),None,true).unwrap();
+    let target=Target::with_size(6,4);
+    target.draw(|context| {context.clear(Color::from_uint32(0xff00ff00));content.render(context,None);});
+    assert_eq!(target.pixel(0,0),(0,255,0,255));
+    assert_eq!(target.pixel(2,1),(0,127,128,255));
+}
+
+#[test]
 fn solid_brush_opacity_scales_alpha() {
     let target = Target::new();
     target.draw(|context| {
