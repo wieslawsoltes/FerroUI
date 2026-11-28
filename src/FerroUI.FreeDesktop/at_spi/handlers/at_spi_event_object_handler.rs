@@ -5,6 +5,7 @@ use crate::at_spi::at_spi_constants::{EVENT_OBJECT_VERSION, IFACE_EVENT_OBJECT};
 use crate::at_spi::at_spi_server::AtSpiServer;
 use crate::at_spi::dbus::descriptions::EVENT_OBJECT;
 use crate::at_spi::dbus::interface::{DBusInterface, InterfaceDescription};
+use std::borrow::Cow;
 use std::collections::HashMap;
 use std::rc::Weak;
 use zbus::Variant;
@@ -45,6 +46,28 @@ impl AtSpiEventObjectHandler {
 
     pub(crate) fn emit_selection_changed_signal(&self) {
         self.emit_signal("SelectionChanged", event_body("", 0, 0, Variant::from(0i32)));
+    }
+
+    pub(crate) fn emit_text_caret_moved_signal(&self, position: i32) {
+        self.emit_signal("TextCaretMoved", event_body("", position, 0, Variant::from(0i32)));
+    }
+
+    pub(crate) fn emit_text_selection_changed_signal(&self) {
+        self.emit_signal("TextSelectionChanged", event_body("", 0, 0, Variant::from(0i32)));
+    }
+
+    pub(crate) fn emit_text_attributes_changed_signal(&self) {
+        self.emit_signal("TextAttributesChanged", event_body("", 0, 0, Variant::from(0i32)));
+    }
+
+    pub(crate) fn emit_text_changed_signal(&self, detail: &str, offset: i32, length: i32, text: &str) {
+        // D-Bus strings cannot carry a NUL. Preserve its UTF-16 width.
+        let text = if text.contains('\0') {
+            Cow::Owned(text.replace('\0', "\u{fffd}"))
+        } else {
+            Cow::Borrowed(text)
+        };
+        self.emit_signal("TextChanged", event_body(detail, offset, length, Variant::from(text.as_ref())));
     }
 
     pub(crate) fn emit_bounds_changed_signal(&self) {

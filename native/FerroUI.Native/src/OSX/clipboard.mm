@@ -3,10 +3,55 @@
 #include "clipboard.h"
 #include "FrnString.h"
 
+// The web custom formats of Chromium and the checks of a pasteboard read that changes while it
+// is read: the `chromium-clipboard-map` feature of ferroui-native (FRN_WEB_CUSTOM_FORMATS).
+// Without it the clipboard is main's.
+#if FRN_WEB_CUSTOM_FORMATS
+#include <limits>
+
+// Chromium stores its web custom format map and numbered slots under these UTIs.
+static NSString* const WebCustomFormatMap = @"org.w3.web-custom-format.map";
+static NSString* const WebCustomFormatSlotPrefix = @"org.w3.web-custom-format.type-";
+static constexpr NSUInteger WebCustomFormatMapLimit = 64 * 1024;
+
+static bool IsWebCustomPasteboardType(NSString* format)
+{
+    if ([format isEqualToString:WebCustomFormatMap])
+        return true;
+    if (![format hasPrefix:WebCustomFormatSlotPrefix])
+        return false;
+
+    auto index = [format substringFromIndex:[WebCustomFormatSlotPrefix length]];
+    auto length = [index length];
+    if (length == 0 || length > 2 || (length == 2 && [index characterAtIndex:0] == '0'))
+        return false;
+    for (NSUInteger i = 0; i < length; ++i)
+    {
+        auto digit = [index characterAtIndex:i];
+        if (digit < '0' || digit > '9')
+            return false;
+    }
+    return true;
+}
+#endif // FRN_WEB_CUSTOM_FORMATS
+
 class Clipboard : public ComSingleObject<IFrnClipboard, &IID_IFrnClipboard>
 {
 private:
     NSPasteboard* _pasteboard;
+
+#if FRN_WEB_CUSTOM_FORMATS
+    NSPasteboardItem* ItemAtChangeCount(int index, int64_t changeCount)
+    {
+        if (index < 0 || changeCount != [_pasteboard changeCount])
+            return nil;
+        auto items = [_pasteboard pasteboardItems];
+        if (static_cast<NSUInteger>(index) >= [items count] || changeCount != [_pasteboard changeCount])
+            return nil;
+        return [items objectAtIndex:index];
+    }
+#endif // FRN_WEB_CUSTOM_FORMATS
+
 public:
     FORWARD_IUNKNOWN()
     
@@ -54,10 +99,16 @@ public:
         if (ret == nullptr)
             return E_POINTER;
         
+#if FRN_WEB_CUSTOM_FORMATS
+        auto item = ItemAtChangeCount(index, changeCount);
+        if (item == nil)
+            return COR_E_OBJECTDISPOSED;
+#else
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
 
         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+#endif
         
         *ret = ConvertPasteboardTypes([item types]);
         return S_OK;
@@ -93,11 +144,21 @@ public:
         if (ret == nullptr)
             return E_POINTER;
         
+#if FRN_WEB_CUSTOM_FORMATS
+        auto item = ItemAtChangeCount(index, changeCount);
+        if (item == nil)
+            return COR_E_OBJECTDISPOSED;
+        
+        auto value = [item stringForType:[NSString stringWithUTF8String:format]];
+        if (changeCount != [_pasteboard changeCount])
+            return COR_E_OBJECTDISPOSED;
+#else
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
         
         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
         auto value = [item stringForType:[NSString stringWithUTF8String:format]];
+#endif
         *ret = value == nil ? nullptr : CreateFrnString(value);
         return S_OK;
     }
@@ -109,10 +170,17 @@ public:
         if (ret == nullptr)
             return E_POINTER;
         
+#if FRN_WEB_CUSTOM_FORMATS
+        auto item = ItemAtChangeCount(index, changeCount);
+        if (item == nil)
+            return COR_E_OBJECTDISPOSED;
+#else
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
         
         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
+#endif
+        
         auto formatStr = [NSString stringWithUTF8String:format];
         
         auto value = [item dataForType: formatStr];
@@ -152,9 +220,23 @@ public:
             }
         }
 
+#if FRN_WEB_CUSTOM_FORMATS
+        if (changeCount != [_pasteboard changeCount])
+            return COR_E_OBJECTDISPOSED;
+
+        auto length = [value length];
+        if (value == nil || length > static_cast<NSUInteger>(std::numeric_limits<int>::max())
+            || ([formatStr isEqualToString:WebCustomFormatMap] && length > WebCustomFormatMapLimit))
+            *ret = nullptr;
+        else if (length == 0)
+            *ret = IsWebCustomPasteboardType(formatStr) ? CreateFrnString(@"") : nullptr;
+        else
+            *ret = CreateByteArray((void*)[value bytes], static_cast<int>(length));
+#else
         *ret = value == nil || [value length] == 0
             ? nullptr
             : CreateByteArray((void*)[value bytes], (int)[value length]);
+#endif
         return S_OK;
     }
 
@@ -236,6 +318,11 @@ extern IFrnClipboard* CreateClipboard(NSPasteboard* pb)
 
 NSString* TryConvertFormatToUti(NSString* format)
 {
+#if FRN_WEB_CUSTOM_FORMATS
+    if (IsWebCustomPasteboardType(format))
+        return format;
+#endif
+
     if (@available(macOS 11.0, *))
     {
         auto type = [UTType typeWithIdentifier:format];
@@ -331,6 +418,10 @@ NSString* TryConvertFormatToUti(NSString* format)
         return GetNSStringAndRelease(value->AsString());
     
     auto length = value->GetByteLength();
+#if FRN_WEB_CUSTOM_FORMATS
+    if (length == 0)
+        return [NSData data];
+#endif
     auto buffer = malloc(length);
     value->CopyBytesTo(buffer);
     return [NSData dataWithBytesNoCopy:buffer length:length];

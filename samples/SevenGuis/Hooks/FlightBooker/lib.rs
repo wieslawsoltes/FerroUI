@@ -3,14 +3,15 @@
 //!
 //! Written as a component that runs again, with its state in hooks; `cargo run -p seven-guis-flight-booker-hooks`.
 
-use ferroui_base::media::{Brush, IBrush};
+use ferroui_base::media::IBrush;
 use ferroui_view::prelude::*;
+use ferroui_view::IntoValue;
 use seven_guis_model::{booking_message, can_book, Date, FlightKind};
 use std::rc::Rc;
 
 /// The background of a date that does not parse.
 fn invalid_background() -> Option<Rc<dyn IBrush>> {
-    Brush::parse("#FFC8C8").ok()
+    rgb(0xFFC8C8).into_value()
 }
 
 /// The flight booker. What follows from the state (the kind, the dates,
