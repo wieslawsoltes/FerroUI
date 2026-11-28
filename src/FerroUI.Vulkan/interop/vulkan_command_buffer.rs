@@ -4,7 +4,17 @@ use ash::vk;
 use std::cell::Cell;
 use std::rc::{Rc, Weak};
 
-/// A command buffer of a pool, recorded and submitted once.
+/// The most semaphores a submission waits for or signals. The present path
+/// waits for one and signals one; the submit copies the handles into arrays
+/// of this length, so it allocates nothing.
+pub(crate) const MAX_SUBMIT_SEMAPHORES: usize = 4;
+
+/// A command buffer of a pool. A buffer of
+/// [`create_command_buffer`](VulkanCommandBufferPool::create_command_buffer)
+/// is recorded and submitted once and freed by the pool; a reusable one
+/// ([`create_reusable_command_buffer`](VulkanCommandBufferPool::create_reusable_command_buffer))
+/// belongs to its creator and is recorded again after
+/// [`prepare_for_recording`](Self::prepare_for_recording).
 pub(crate) struct VulkanCommandBuffer {
     pool: Weak<VulkanCommandBufferPool>,
     pool_handle: vk::CommandPool,
@@ -13,6 +23,11 @@ pub(crate) struct VulkanCommandBuffer {
     fence: VulkanFence,
     has_ended: Cell<bool>,
     has_started: Cell<bool>,
+    /// Kept by its creator and recorded again, not handed to the pool when
+    /// submitted.
+    reusable: bool,
+    /// Submitted, and its fence not yet waited for.
+    pending: Cell<bool>,
     this: Weak<VulkanCommandBuffer>,
 }
 
@@ -21,6 +36,7 @@ impl VulkanCommandBuffer {
         pool: &Rc<VulkanCommandBufferPool>,
         handle: vk::CommandBuffer,
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
+        reusable: bool,
     ) -> Result<Rc<Self>, VulkanError> {
         let fence = VulkanFence::new(context.clone(), vk::FenceCreateFlags::SIGNALED)?;
         Ok(Rc::new_cyclic(|this| Self {
@@ -31,6 +47,8 @@ impl VulkanCommandBuffer {
             fence,
             has_ended: Cell::new(false),
             has_started: Cell::new(false),
+            reusable,
+            pending: Cell::new(false),
             this: this.clone(),
         }))
     }
@@ -42,8 +60,9 @@ impl VulkanCommandBuffer {
     /// Waits until the commands have run, then frees the buffer.
     pub fn dispose(&self) {
         if self.fence.handle() != vk::Fence::null() {
-            // The reference lets a failure of the wait escape; nothing can be
-            // done about it while releasing, and the buffer is freed anyway.
+            // Disposing may wait: the buffer and its fence can only be freed
+            // when the commands have run. A failure of the wait cannot be
+            // handled while releasing, and the buffer is freed anyway.
             let _ = self.fence.wait();
             self.fence.dispose();
         }
@@ -59,6 +78,32 @@ impl VulkanCommandBuffer {
 
     pub fn is_finished(&self) -> bool {
         self.fence.is_signaled()
+    }
+
+    /// Whether the buffer was submitted and its fence not yet waited for.
+    #[allow(dead_code)] // Read by the tests.
+    pub fn is_pending(&self) -> bool {
+        self.pending.get()
+    }
+
+    /// Makes a reusable buffer ready to be recorded again: waits until the
+    /// commands of its last submission have run, then lets
+    /// [`begin_recording`](Self::begin_recording) start a new recording
+    /// (the pool resets a buffer when it begins).
+    ///
+    /// The owner of the buffer reuses it frames after its submission (the
+    /// frames in flight of a display), so the wait is for an older frame,
+    /// never for the frame just submitted; the fence is not waited for at
+    /// all when it was waited for already or the buffer was never submitted.
+    pub fn prepare_for_recording(&self) -> Result<(), VulkanError> {
+        debug_assert!(self.reusable, "only a reusable command buffer is recorded again");
+        if self.pending.get() {
+            self.fence.wait()?;
+            self.pending.set(false);
+        }
+        self.has_started.set(false);
+        self.has_ended.set(false);
+        Ok(())
     }
 
     pub fn begin_recording(&self) -> Result<(), VulkanError> {
@@ -106,25 +151,39 @@ impl VulkanCommandBuffer {
             .reset_fences(self.context.device_handle(), &[fence_handle])
             .throw_on_error("vkResetFences")?;
 
-        let wait_semaphores: Vec<vk::Semaphore> = wait_semaphores.iter().map(|semaphore| semaphore.handle()).collect();
-        let signal_semaphores: Vec<vk::Semaphore> =
-            signal_semaphores.iter().map(|semaphore| semaphore.handle()).collect();
+        let (wait_semaphores, wait_count) = semaphore_handles(wait_semaphores);
+        let (signal_semaphores, signal_count) = semaphore_handles(signal_semaphores);
 
         self.context
             .device_api()
             .queue_submit(
                 self.context.main_queue_handle(),
-                &wait_semaphores,
+                &wait_semaphores[..wait_count],
                 wait_dst_stage_mask,
                 &[self.handle.get()],
-                &signal_semaphores,
+                &signal_semaphores[..signal_count],
                 fence_handle,
             )
             .throw_on_error("vkQueueSubmit")?;
+        // Only the own fence tells when the buffer may be recorded again.
+        self.pending.set(fence.is_none());
 
-        if let (Some(pool), Some(this)) = (self.pool.upgrade(), self.this.upgrade()) {
-            pool.add_submitted_command_buffer(this);
+        if !self.reusable {
+            if let (Some(pool), Some(this)) = (self.pool.upgrade(), self.this.upgrade()) {
+                pool.add_submitted_command_buffer(this);
+            }
         }
         Ok(())
     }
+}
+
+/// The handles of at most [`MAX_SUBMIT_SEMAPHORES`] semaphores in an array,
+/// and their number.
+fn semaphore_handles(semaphores: &[&VulkanSemaphore]) -> ([vk::Semaphore; MAX_SUBMIT_SEMAPHORES], usize) {
+    assert!(semaphores.len() <= MAX_SUBMIT_SEMAPHORES, "at most {MAX_SUBMIT_SEMAPHORES} semaphores a submission");
+    let mut handles = [vk::Semaphore::null(); MAX_SUBMIT_SEMAPHORES];
+    for (handle, semaphore) in handles.iter_mut().zip(semaphores) {
+        *handle = semaphore.handle();
+    }
+    (handles, semaphores.len())
 }

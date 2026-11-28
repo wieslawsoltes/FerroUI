@@ -1,0 +1,17 @@
+{
+  "registrations": [
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "name": "Myriad-Dreamin/tinymist",
+          "repositoryUrl": "https://github.com/Myriad-Dreamin/tinymist",
+          "commitHash": "c2aa453af444a98de34b9bc8533dd937bac87bc9"
+        }
+      },
+      "license": "Apache-2.0",
+      "version": "0.12.18"
+    }
+  ],
+  "version": 1
+}

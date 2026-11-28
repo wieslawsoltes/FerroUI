@@ -51,3 +51,7 @@ What it costs, and why it is a decision:
 ## Recommendation
 
 Leave the behaviour as it is for the first preview (it is upstream's, and the tests pin it), and take fix 1 and 2 as a recorded deviation afterwards, with the reposition per frame: it is the behaviour a user expects, it is what the native control host already does, and the cost on an old Wayland shell is confined to a popup that is open while its target moves.
+
+## Addition: ancestors moved by layout (2026-11-27)
+
+The fix follows render transforms only. A layout pass that moves an ancestor of the target (a scroll of the editor, a reflow above it) leaves the bounds of the target itself unchanged, so neither upstream's `PlacementTargetLayoutUpdated` nor the transform subscriptions position the popup again. The code editor anchors its completion list, insight and search popups to the caret inside a scrolled text area, so these popups opt in: `Popup::set_follows_placement_target_layout(true)` adds the `Bounds` of every element of the chain to the same subscription and the same once-per-frame job. It is off by default, so every other popup, flyout, tool tip and menu keeps the triggers above; a popup that does not opt in pays one flag test per property change of the chain while it is open. Tests: `popup_moving_target_tests.rs` (`a_popup_follows_an_ancestor_moved_by_layout_only_when_it_opts_in`).

@@ -65,7 +65,7 @@ pub fn register_components() {
                 Some(person) => format!("Component in XAML: person {} of 10,000", person.id + 1),
                 None => String::from("Component in XAML: no person"),
             };
-            rsx! { TextBlock { text, foreground: "#0063B1" } }
+            rsx! { TextBlock { text, foreground: rgb(0x0063B1) } }
         })
     });
 }
@@ -85,7 +85,7 @@ pub fn Directory(#[prop(default = 10_000)] count: u32) -> Element {
             rsx! {
                 StackPanel { margin: (0.0, 2.0),
                     TextBlock { text: person.name, font_weight: FontWeight::SemiBold }
-                    TextBlock { text: format!("{} - #{}", person.city, person.id + 1), foreground: "#666666" }
+                    TextBlock { text: format!("{} - #{}", person.city, person.id + 1), foreground: rgb(0x666666) }
                 }
             }
         })
@@ -106,7 +106,7 @@ pub fn Directory(#[prop(default = 10_000)] count: u32) -> Element {
     });
 
     rsx! {
-        Grid { column_definitions: "280,*", row_definitions: "Auto,*", margin: 16.0,
+        Grid { column_definitions: [px(280.0), star(1.0)], row_definitions: [auto(), star(1.0)], margin: 16.0,
             TextBlock { Grid.column_span: 2, margin: (0.0, 0.0, 0.0, 8.0), vertical_alignment: VerticalAlignment::Center,
                 text: format!("{} people; the list realizes only the visible ones", all.len()) }
             ListBox { name: "People", Grid.row: 1, items_source: source, item_template: item_template,
