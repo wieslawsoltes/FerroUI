@@ -1,7 +1,5 @@
 use super::{INavigation, Page};
 use ferroui_base::animation::IPageTransition;
-#[allow(deprecated)]
-use ferroui_base::threading::DispatcherTask;
 use ferroui_system::task::JoinHandle;
 use ferroui_base::{BoxedValue, DefaultConstructible, Ref, Upcast};
 use std::rc::Rc;
@@ -29,39 +27,6 @@ pub trait PageNavigationExtensions {
         transition: Option<Rc<dyn IPageTransition>>,
         parameter: Option<BoxedValue>,
     ) -> JoinHandle<()>;
-
-    /// The deprecated form of [`push_async_of`](Self::push_async_of): a `DispatcherTask`.
-    #[deprecated(since = "0.5.0", note = "use `push_async_of`, which gives a `JoinHandle`")]
-    #[allow(deprecated)]
-    fn push_async_of_task<T: DefaultConstructible + Upcast<Page>>(
-        &self,
-        transition: Option<Rc<dyn IPageTransition>>,
-        parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
-        self.push_async_of::<T>(transition, parameter).into()
-    }
-
-    /// The deprecated form of [`replace_async_of`](Self::replace_async_of): a `DispatcherTask`.
-    #[deprecated(since = "0.5.0", note = "use `replace_async_of`, which gives a `JoinHandle`")]
-    #[allow(deprecated)]
-    fn replace_async_of_task<T: DefaultConstructible + Upcast<Page>>(
-        &self,
-        transition: Option<Rc<dyn IPageTransition>>,
-        parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
-        self.replace_async_of::<T>(transition, parameter).into()
-    }
-
-    /// The deprecated form of [`push_modal_async_of`](Self::push_modal_async_of): a `DispatcherTask`.
-    #[deprecated(since = "0.5.0", note = "use `push_modal_async_of`, which gives a `JoinHandle`")]
-    #[allow(deprecated)]
-    fn push_modal_async_of_task<T: DefaultConstructible + Upcast<Page>>(
-        &self,
-        transition: Option<Rc<dyn IPageTransition>>,
-        parameter: Option<BoxedValue>,
-    ) -> DispatcherTask<()> {
-        self.push_modal_async_of::<T>(transition, parameter).into()
-    }
 }
 
 /// C# `new T()` for a page class: the constructor is reached through the class, so the compiler

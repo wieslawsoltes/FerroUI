@@ -946,39 +946,3 @@ fn a_failed_navigation_is_the_panic_of_its_handle() {
     assert_eq!(1, nav.stack_depth());
     assert!(!nav.is_navigating());
 }
-
-#[test]
-#[allow(deprecated)]
-fn the_deprecated_task_forms_keep_the_contract_of_the_dispatcher_task() {
-    let _scope = test_scope();
-    let nav = NavigationPage::new();
-    let root = page();
-
-    let pushed = nav.push_async_task(&root);
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(pushed.is_completed_successfully());
-
-    // A clone observes the same task; the result of a pop on the root only is `None`.
-    let popped = nav.pop_async_task();
-    let observer = popped.clone();
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(observer.is_completed_successfully());
-    assert!(popped.result().expect("the pop was not canceled").is_none());
-
-    // A failure faults the task and is raised again when it is observed.
-    let failed = nav.push_async_task(&root);
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(failed.is_faulted());
-    assert!(throws(|| drop(failed.result())));
-
-    // The navigation service of a hosted page has the same forms.
-    let navigation = root.navigation().expect("the root is hosted");
-    let second = page();
-    let task = navigation.push_async_task(second.clone().upcast());
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(task.is_completed_successfully());
-    assert_eq!(2, nav.stack_depth());
-    let task = navigation.pop_async_task();
-    Dispatcher::ui_thread().run_jobs(None);
-    assert!(same(&second, &task.result().expect("the pop was not canceled")));
-}

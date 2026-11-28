@@ -214,6 +214,11 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
   - The transform exceptions of the markup compiler (`XamlBindingsTransformException`, `XamlDataContextException`, `XamlSelectorsTransformException`, `XamlStyleTransformException`, `XamlPropertyPathException`) with the constructors of `XamlError` (`bindings_transform`, `data_context`, `selectors_transform`, `style_transform`, `property_path`) and `FerroTransformErrorKind`.
   - The Wayland exceptions deprecated in 0.6.0 (`FerroWaylandPollException`, `FerroWaylandNetworkException`, `FerroWaylandFlushException`, `FerroWaylandReadException`, `FerroWaylandProtocolErrorException`) with the constructors of `FerroWaylandError` (`poll`, `network`, `flush`, `flush_errno`, `read`, `read_errno`, `protocol_error`, `protocol_error_with_code`).
   - The error aliases `BsonException`, `LoggingException`, `OpenGlException`, `VulkanException`, `X11Exception`, `VncException`, `XamlMemberException`, `XamlLoadException`, `FerroWaylandException` and `FerroWaylandExceptionKind` with `BsonError`, `LoggingError`, `OpenGlError`, `VulkanError`, `X11Error`, `VncError`, `XamlMemberError`, `XamlLoadError`, `FerroWaylandError` and `FerroWaylandErrorKind`.
+- **The forms of `ferroui-controls` deprecated since 0.5.0 are removed** (#625). Replace:
+  - the `DispatcherTask` forms of the navigation members (`push_async_task`, `pop_async_task`, `pop_to_root_async_task`, `pop_to_page_async_task`, `replace_async_task`, `push_modal_async_task`, `pop_modal_async_task`, `pop_all_modals_async_task` and their `_with_transition_task` and `_with_parameter_task` forms of `INavigation` and `NavigationPage`; `push_async_of_task`, `replace_async_of_task` and `push_modal_async_of_task` of `PageNavigationExtensions`) with the members without `_task`, which give a `JoinHandle`;
+  - `Window::show_dialog_task` and `show_dialog_typed_task` with `show_dialog` and `show_dialog_typed`;
+  - `PageType::from_type_info(type_)` with `PageType::of::<T>()`, or `PageType::from(type_)` for a runtime type;
+  - the alias `ElementNotEnabledException` with `ElementNotEnabledError`.
 
 ## [0.5.0] - 2026-11-14
 

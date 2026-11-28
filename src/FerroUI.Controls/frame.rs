@@ -358,7 +358,7 @@ impl Frame {
     /// `NavigationFailed` handler handled; the error of a failure no handler handled.
     ///
     /// A `&'static TypeInfo` converts to a [`PageType`] that creates the page by reflection, as
-    /// before 0.5; that form is deprecated (`PageType::from_type_info`) and removed in #625.
+    /// before 0.5.
     pub fn navigate(&self, source_page_type: impl Into<PageType>, parameter: Option<BoxedValue>) -> Result<bool, NavigationError> {
         self.navigate_to_type(source_page_type, parameter, &FrameNavigationOptions::default())
     }

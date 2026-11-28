@@ -7,10 +7,6 @@ pub struct ElementNotEnabledError {
     message: String,
 }
 
-/// The name of [`ElementNotEnabledError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `ElementNotEnabledError`")]
-pub type ElementNotEnabledException = ElementNotEnabledError;
-
 impl ElementNotEnabledError {
     /// Creates the error with the default message.
     pub fn new() -> Self {
