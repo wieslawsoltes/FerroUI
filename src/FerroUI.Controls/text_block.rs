@@ -11,8 +11,8 @@ use ferroui_base::media::text_formatting::{
     TextRunProperties,
 };
 use ferroui_base::media::{
-    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
-    TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
+    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontManager, FontStretch, FontStyle, FontWeight, IBrush,
+    TextAlignment, TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::{MathUtilities, OptionCell, ReadOnlyMemory, ValueSpan};
@@ -515,10 +515,17 @@ impl TextBlockImpl for TextBlock {
 /// The default run properties of text blocks that are kept to be shared, by the last use.
 const SHARED_RUN_PROPERTIES: usize = 8;
 
+/// The kept run properties of the thread, with the glyph typeface generation they were kept in.
+struct KeptRunProperties {
+    generation: u64,
+    kept: Vec<Rc<dyn TextRunProperties>>,
+}
+
 ferroui_base::ferro_thread_local! {
     /// The default run properties made last that hold nothing but values: a typeface, a size and
     /// a foreground brush.
-    static RUN_PROPERTIES: RefCell<Vec<Rc<dyn TextRunProperties>>> = const { RefCell::new(Vec::new()) };
+    static RUN_PROPERTIES: RefCell<KeptRunProperties> =
+        const { RefCell::new(KeptRunProperties { generation: 0, kept: Vec::new() }) };
 }
 
 /// The default run properties of a text block: the ones another text block made for the same
@@ -531,6 +538,11 @@ ferroui_base::ferro_thread_local! {
 /// brush (a brush can change, and the text of each block follows its own), and properties with
 /// decorations or font features (collections) are made for their block alone. The last
 /// [`SHARED_RUN_PROPERTIES`] are kept on the thread; a new one takes the place at the end.
+///
+/// Kept properties found their glyph typeface with the fonts of that time. A change of the
+/// fonts (a collection added, removed or replaced, a web font face loaded or deleted, a font
+/// manager disposed of) advances the glyph typeface generation, and the properties kept before
+/// it are let go: a text block made again for the new fonts finds its typeface again.
 fn shared_run_properties(
     typeface: Typeface,
     font_size: f64,
@@ -545,8 +557,18 @@ fn shared_run_properties(
         _ => false,
     };
     if shareable {
-        let found = RUN_PROPERTIES.try_with(|kept| {
-            let mut kept = kept.borrow_mut();
+        let found = RUN_PROPERTIES.try_with(|shared| {
+            let mut shared = shared.borrow_mut();
+            let generation = FontManager::glyph_typeface_generation();
+            if shared.generation != generation {
+                shared.generation = generation;
+                // Let go after the borrow ends, so that dropping them never finds it held.
+                let stale = std::mem::take(&mut shared.kept);
+                drop(shared);
+                drop(stale);
+                return None;
+            }
+            let kept = &mut shared.kept;
             let index = kept.iter().position(|properties| {
                 properties.font_rendering_em_size() == font_size
                     && same_brush(properties.foreground_brush())
@@ -573,8 +595,9 @@ fn shared_run_properties(
         font_features,
     ));
     if shareable {
-        let _ = RUN_PROPERTIES.try_with(|kept| {
-            let mut kept = kept.borrow_mut();
+        let _ = RUN_PROPERTIES.try_with(|shared| {
+            let mut shared = shared.borrow_mut();
+            let kept = &mut shared.kept;
             if kept.len() == SHARED_RUN_PROPERTIES {
                 kept.pop();
             }
@@ -582,18 +605,6 @@ fn shared_run_properties(
         });
     }
     properties
-}
-
-impl TextBlock {
-    /// Drops the run properties kept to be shared. The kept properties find their glyph
-    /// typeface once, with the font manager of that time; a headless unit test session disposes
-    /// of the font manager of every test with the test, and a later test that found the kept
-    /// properties would shape with a glyph typeface whose font data is gone.
-    #[doc(hidden)]
-    pub fn reset_shared_run_properties_for_unit_tests() {
-        let kept = RUN_PROPERTIES.try_with(|kept| std::mem::take(&mut *kept.borrow_mut()));
-        drop(kept);
-    }
 }
 
 /// The handle through which the inlines of a text block reach it.

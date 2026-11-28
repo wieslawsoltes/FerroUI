@@ -39,7 +39,7 @@ use ferroui_base::media::{FontManager, MediaContext};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{CancellationToken, Canceled, Dispatcher, DispatcherFrame, DispatcherPriority};
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_controls::{AppBuilder, Application, Control, IToolTipService, TextBlock};
+use ferroui_controls::{AppBuilder, Application, Control, IToolTipService};
 #[cfg(feature = "harfbuzz")]
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_system::task::oneshot;
@@ -655,9 +655,6 @@ impl SessionThread {
             // a static of the thread, which the reset dispatcher will not run (as the scope of
             // the unit test application of the controls does).
             Control::reset_loaded_queue_for_unit_tests();
-            // Not in the original either: the run properties text blocks share are kept by the
-            // thread, with the glyph typefaces of the font manager disposed of above.
-            TextBlock::reset_shared_run_properties_for_unit_tests();
 
             // An exception of the inner `finally` replaces the one that was in flight.
             if let Err(ex) = scope {
