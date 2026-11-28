@@ -63,8 +63,10 @@ impl LayoutHelper {
     /// the padding.
     pub fn measure_child(control: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
         // WinUI lays padding out at its authored size (`layout_border_insets`).
-        if let Some((scale, false)) = Self::parent_layout_rounding(control) {
-            padding = Self::round_layout_thickness(padding, scale);
+        if let Some(scale) = Self::is_parent_layout_rounded(control) {
+            if !Self::parent_uses_winui_rounding(control) {
+                padding = Self::round_layout_thickness(padding, scale);
+            }
         }
 
         match control {
@@ -89,8 +91,10 @@ impl LayoutHelper {
 
     /// Arranges a child inside padding.
     pub fn arrange_child(child: Option<&Layoutable>, available_size: Size, mut padding: Thickness) -> Size {
-        if let Some((scale, false)) = Self::parent_layout_rounding(child) {
-            padding = Self::round_layout_thickness(padding, scale);
+        if let Some(scale) = Self::is_parent_layout_rounded(child) {
+            if !Self::parent_uses_winui_rounding(child) {
+                padding = Self::round_layout_thickness(padding, scale);
+            }
         }
         Self::arrange_child_internal(child, available_size, padding)
     }
@@ -102,28 +106,44 @@ impl LayoutHelper {
         available_size
     }
 
-    // The two below run for every child that is measured and arranged with a border or padding:
-    // inlined, as the check of the rounding of the parent they replaced was.
-    #[inline(always)]
+    /// The insets of a child inside padding and a border: as before the WinUI option existed,
+    /// except that WinUI lays padding out at its authored size and rounds the painted border on
+    /// each side.
+    #[inline]
     fn layout_border_insets(child: Option<&Layoutable>, padding: Thickness, border: Thickness) -> Thickness {
-        let Some((scale, winui)) = Self::parent_layout_rounding(child) else {
+        let Some(scale) = Self::is_parent_layout_rounded(child) else {
             return padding + border;
         };
-        // WinUI rounds the painted border on each side. Padding participates
-        // in layout at its original size.
-        let padding = if winui { padding } else { Self::round_layout_thickness(padding, scale) };
+        let padding = if Self::parent_uses_winui_rounding(child) { padding } else { Self::round_layout_thickness(padding, scale) };
         padding + Self::round_layout_thickness(border, scale)
     }
 
-    /// Returns the layout scale and WinUI mode of the child's layout-rounded parent.
-    #[inline]
-    fn parent_layout_rounding(child: Option<&Layoutable>) -> Option<(f64, bool)> {
+    /// Returns the layout scale of the child's parent if the parent uses
+    /// layout rounding.
+    fn is_parent_layout_rounded(child: Option<&Layoutable>) -> Option<f64> {
         let parent = child?.visual_parent()?;
         let parent = parent.downcast_ref::<Layoutable>()?;
         if !parent.use_layout_rounding() {
             return None;
         }
-        Some((Self::get_layout_scale(parent), parent.use_winui_measure_rounding()))
+        Some(Self::get_layout_scale(parent))
+    }
+
+    /// Whether the child's layout-rounded parent uses the WinUI rounding: the load of one flag
+    /// until an element of the process sets the option (`Layoutable::use_winui_measure_rounding`),
+    /// and the read of the parent's option out of line after that.
+    #[inline]
+    fn parent_uses_winui_rounding(child: Option<&Layoutable>) -> bool {
+        Layoutable::winui_measure_rounding_in_use() && Self::parent_uses_winui_rounding_held(child)
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn parent_uses_winui_rounding_held(child: Option<&Layoutable>) -> bool {
+        child
+            .and_then(|child| child.visual_parent())
+            .and_then(|parent| parent.downcast_ref::<Layoutable>().map(Layoutable::use_winui_measure_rounding))
+            .unwrap_or(false)
     }
 
     /// Invalidates measure for the control and all of its visual descendants.

@@ -914,6 +914,12 @@ impl Layoutable {
     // Read for every element and three times for every bordered child in every layout pass:
     // inlined, it is the load of one flag until an element of the process sets the option (the
     // accessor of the property and its count of holders cost more than that, per read).
+    /// Whether an element of the process has had a value of the WinUI rounding option.
+    #[inline]
+    pub(crate) fn winui_measure_rounding_in_use() -> bool {
+        WINUI_MEASURE_ROUNDING_SET.load(std::sync::atomic::Ordering::Relaxed)
+    }
+
     #[inline]
     pub fn use_winui_measure_rounding(&self) -> bool {
         if !WINUI_MEASURE_ROUNDING_SET.load(std::sync::atomic::Ordering::Relaxed) {
