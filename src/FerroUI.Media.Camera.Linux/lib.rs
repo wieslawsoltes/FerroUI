@@ -9,9 +9,8 @@ use ferroui_media_camera::*;
 #[cfg(feature = "controls")]
 pub use ferroui_media_linux::NativeGlTextureImporter;
 use ferroui_media_linux::{
-    admitted_caps, poll_native, LinuxFrameStream, NativeRecording, NativeSession,
+    admitted_caps, poll_native, LinuxFrameSource, LinuxFrameStream, NativeRecording, NativeSession,
 };
-use ferroui_media_opengl::NativeGlFrameProducer;
 use native::PortalAccess;
 use std::{
     cell::{Cell, RefCell},
@@ -34,14 +33,14 @@ pub enum LinuxCameraProfile {
     DirectV4l2 { devices: Vec<PathBuf> },
 }
 pub struct LinuxCameraProvider {
-    pub frames: NativeGlFrameProducer,
+    pub frames: LinuxFrameSource,
     pub profile: LinuxCameraProfile,
     permission: Rc<Cell<CameraPermission>>,
 }
 impl LinuxCameraProvider {
-    pub fn new(frames: NativeGlFrameProducer, profile: LinuxCameraProfile) -> Self {
+    pub fn new(frames: impl Into<LinuxFrameSource>, profile: LinuxCameraProfile) -> Self {
         Self {
-            frames,
+            frames: frames.into(),
             profile,
             permission: Rc::new(Cell::new(CameraPermission::NotDetermined)),
         }
