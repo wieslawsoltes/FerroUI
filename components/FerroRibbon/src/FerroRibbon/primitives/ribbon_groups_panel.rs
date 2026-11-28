@@ -195,6 +195,14 @@ impl RibbonGroupsPanel {
     pub fn extent_width(&self) -> f64 {
         self.extent.get()
     }
+    /// The widths by state that the classic reduction used for `group`.
+    #[cfg(test)]
+    pub(crate) fn cached_classic_widths(&self, group: &RibbonGroup) -> Option<Vec<f64>> {
+        self.classic_cache
+            .borrow()
+            .get(group)
+            .map(|cached| cached.widths.borrow().clone())
+    }
     pub fn has_overflow(&self) -> bool {
         self.has_overflow.get()
     }

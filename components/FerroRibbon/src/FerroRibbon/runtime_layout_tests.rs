@@ -27,6 +27,35 @@ fn wide_ribbon_shows_all_groups_large() {
         );
     });
 }
+/// What the reduction decided from: the width of the panel and, for every group, the widths by
+/// state that the panel cached next to the widths measured again now. Measuring again applies
+/// the states, so this is only called for the message of a failed assertion.
+fn reduction_report(m: &Mounted) -> String {
+    let panel = m.ribbon.selected_tab().unwrap().groups_panel();
+    let mut report = format!(
+        "panel width {} extent {}",
+        panel.bounds().width,
+        panel.extent_width()
+    );
+    let metrics = panel.metrics().unwrap();
+    for group in m.groups() {
+        let cached = panel.cached_classic_widths(&group);
+        let state = group.state();
+        let height = group.desired_size().height;
+        let measured = (0..4)
+            .map(|raw| {
+                group.measure_width(RibbonGroupState::from_raw(raw), metrics.clone(), height)
+            })
+            .collect::<Vec<_>>();
+        report.push_str(&format!(
+            "\n{:?} {state:?} order {} collapse {} cached {cached:?} measured {measured:?}",
+            group.id(),
+            group.reduction_order(),
+            group.can_collapse(),
+        ));
+    }
+    report
+}
 #[test]
 fn narrow_ribbon_reduces_then_collapses_groups() {
     crate::group_tests::run(|| {
@@ -34,8 +63,9 @@ fn narrow_ribbon_reduces_then_collapses_groups() {
         m.resize(620.);
         assert!(
             m.states().iter().any(|s| *s != RibbonGroupState::Large),
-            "{:?}",
-            m.states()
+            "{:?}\n{}",
+            m.states(),
+            reduction_report(&m)
         );
         m.resize(300.);
         assert!(
@@ -44,11 +74,17 @@ fn narrow_ribbon_reduces_then_collapses_groups() {
                 .filter(|s| **s == RibbonGroupState::Collapsed)
                 .count()
                 >= 3,
-            "{:?}",
-            m.states()
+            "{:?}\n{}",
+            m.states(),
+            reduction_report(&m)
         );
         m.resize(1400.);
-        assert!(m.states().iter().all(|s| *s == RibbonGroupState::Large));
+        assert!(
+            m.states().iter().all(|s| *s == RibbonGroupState::Large),
+            "{:?}\n{}",
+            m.states(),
+            reduction_report(&m)
+        );
     });
 }
 #[test]
