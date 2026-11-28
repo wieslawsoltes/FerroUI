@@ -20,7 +20,9 @@
 
 use super::{CompositionVisual, Compositor, ElementComposition};
 use crate::animation::SignedDuration;
-use crate::media::effects::{CustomEffect, EffectExtensions, IImmutableEffect, ImmutableCustomEffect};
+use crate::media::effects::{
+    CustomEffect, EffectExtensions, IImmutableEffect, ImmutableCustomEffect,
+};
 use crate::media::MediaContext;
 use crate::{FerroLocator, LocatorExtensions, Ref, Vector, Vector3D, Visual};
 use std::cell::{Cell, RefCell};
@@ -306,6 +308,10 @@ impl SimulationVisualPatch {
             return false;
         };
 
+        // Claim only fields this patch supplies. Unrelated layout/facade updates
+        // still synchronize normally while claimed values survive control repaints.
+        comp.claim_simulation_property_overrides(self);
+
         // Write transforms straight to the compositor visual (zero layout passes).
         if let Some(center) = self.center_point {
             if comp.center_point() != center {
@@ -359,7 +365,8 @@ impl SimulationVisualPatch {
             SimulationEffectUpdate::Set(effect) => {
                 comp.set_simulation_effect_override(true);
                 let current_comp = comp.effect();
-                if !EffectExtensions::effect_equals(current_comp.as_deref(), Some(effect.as_ref())) {
+                if !EffectExtensions::effect_equals(current_comp.as_deref(), Some(effect.as_ref()))
+                {
                     comp.set_effect(Some(effect.clone()));
                 }
             }
@@ -432,9 +439,24 @@ impl SimulationTarget {
         }
     }
 
-    /// Resets composition-layer overrides (`translation`, `rotation_angle`, `scale`,
-    /// `opacity`, and optionally clears `effect`) back to identity defaults.
+    /// Releases UI-tree property ownership, restoring the previous handoff values
+    /// and current styled/facade values. Pure composition targets reset to identity.
+    /// `clear_effect` also releases an effect override on a UI target.
     pub fn reset_to_identity(&self, clear_effect: bool) {
+        if let Self::Visual(visual) = self {
+            if let Some(comp) = ElementComposition::get_element_visual(visual) {
+                if let Some(saved) = comp.take_simulation_property_overrides() {
+                    saved.apply_to_composition_visual(&comp);
+                }
+                if clear_effect {
+                    SimulationVisualPatch::new()
+                        .without_effect()
+                        .apply_to_visual(visual);
+                }
+                visual.synchronize_composition_properties();
+            }
+            return;
+        }
         let mut patch = SimulationVisualPatch::new()
             .with_translation(0.0, 0.0, 0.0)
             .with_rotation_angle(0.0)
@@ -457,7 +479,11 @@ pub struct CompositionSimulationContext<'a> {
 impl<'a> CompositionSimulationContext<'a> {
     #[inline]
     pub(crate) fn new(compositor: &'a Rc<Compositor>, frame: SimulationFrame) -> Self {
-        Self { compositor, frame, applied_updates: 0 }
+        Self {
+            compositor,
+            frame,
+            applied_updates: 0,
+        }
     }
 
     /// Frame timing metadata (`dt`, `elapsed`, `frame_index`).
@@ -538,9 +564,53 @@ pub trait ICompositionSimulation: 'static {
 struct RegisteredSimulation {
     id: SimulationId,
     mode: SimulationMode,
-    paused: bool,
-    awake: bool,
-    simulation: Box<dyn ICompositionSimulation>,
+    paused: Cell<bool>,
+    awake: Cell<bool>,
+    registered: Cell<bool>,
+    wake_version: Cell<u64>,
+    simulation: RefCell<Option<Box<dyn ICompositionSimulation>>>,
+}
+
+impl RegisteredSimulation {
+    fn wake(&self) {
+        self.awake.set(true);
+        self.wake_version
+            .set(self.wake_version.get().wrapping_add(1));
+    }
+
+    fn detach(&self) {
+        self.registered.set(false);
+        // A simulation may unregister itself while its step is on the stack.
+        // In that case RunningSimulation invokes on_detached after step returns.
+        let simulation = self.simulation.borrow_mut().take();
+        if let Some(mut simulation) = simulation {
+            simulation.on_detached();
+        }
+    }
+}
+
+/// Keeps callback ownership sound on both normal return and unwinding.
+struct RunningSimulation<'a> {
+    entry: &'a RegisteredSimulation,
+    simulation: Option<Box<dyn ICompositionSimulation>>,
+}
+
+impl Drop for RunningSimulation<'_> {
+    fn drop(&mut self) {
+        if self.entry.registered.get() {
+            *self.entry.simulation.borrow_mut() = self.simulation.take();
+        } else if let Some(mut simulation) = self.simulation.take() {
+            simulation.on_detached();
+        }
+    }
+}
+
+struct SteppingGuard<'a>(&'a Cell<bool>);
+
+impl Drop for SteppingGuard<'_> {
+    fn drop(&mut self) {
+        self.0.set(false);
+    }
 }
 
 /// RAII handle returned by [`Compositor::register_simulation`].
@@ -569,12 +639,16 @@ impl CompositionSimulationHandle {
 
     /// Returns `true` if this simulation is still registered on its compositor.
     pub fn is_registered(&self) -> bool {
-        self.compositor.upgrade().is_some_and(|c| c.simulations().contains(self.id))
+        self.compositor
+            .upgrade()
+            .is_some_and(|c| c.simulations().contains(self.id))
     }
 
     /// Returns `true` if this simulation is currently paused.
     pub fn is_paused(&self) -> bool {
-        self.compositor.upgrade().is_some_and(|c| c.simulations().is_paused(self.id))
+        self.compositor
+            .upgrade()
+            .is_some_and(|c| c.simulations().is_paused(self.id))
     }
 
     /// Pauses stepping for this simulation without unregistering it.
@@ -590,7 +664,9 @@ impl CompositionSimulationHandle {
     /// Sets the paused state of this simulation.
     pub fn set_paused(&self, paused: bool) {
         if let Some(compositor) = self.compositor.upgrade() {
-            compositor.simulations().set_paused(&compositor, self.id, paused);
+            compositor
+                .simulations()
+                .set_paused(&compositor, self.id, paused);
         }
     }
 
@@ -629,7 +705,8 @@ impl Drop for CompositionSimulationHandle {
 /// Internal simulation scheduler owned by [`Compositor`].
 pub(crate) struct CompositionSimulationHost {
     next_id: Cell<u64>,
-    entries: RefCell<Vec<RegisteredSimulation>>,
+    entries: RefCell<Vec<Rc<RegisteredSimulation>>>,
+    frame_entries: RefCell<Vec<Rc<RegisteredSimulation>>>,
     frame_scheduled: Cell<bool>,
     stepping: Cell<bool>,
     last_frame_time: Cell<Option<SignedDuration>>,
@@ -640,13 +717,12 @@ impl CompositionSimulationHost {
     /// Maximum frame delta clamped into simulations so debugger breaks or window
     /// drags never destabilize integrators (50 ms = 20 FPS floor).
     const MAX_DT_SECONDS: f64 = 1.0 / 20.0;
-    /// Minimum positive delta passed to simulations.
-    const MIN_DT_SECONDS: f64 = 1.0 / 240.0;
 
     pub(crate) fn new() -> Self {
         Self {
             next_id: Cell::new(1),
             entries: RefCell::new(Vec::new()),
+            frame_entries: RefCell::new(Vec::new()),
             frame_scheduled: Cell::new(false),
             stepping: Cell::new(false),
             last_frame_time: Cell::new(None),
@@ -664,13 +740,17 @@ impl CompositionSimulationHost {
         let mode = simulation.mode();
         simulation.on_attached(compositor);
 
-        self.entries.borrow_mut().push(RegisteredSimulation {
-            id,
-            mode,
-            paused: false,
-            awake: true,
-            simulation,
-        });
+        self.entries
+            .borrow_mut()
+            .push(Rc::new(RegisteredSimulation {
+                id,
+                mode,
+                paused: Cell::new(false),
+                awake: Cell::new(true),
+                registered: Cell::new(true),
+                wake_version: Cell::new(0),
+                simulation: RefCell::new(Some(simulation)),
+            }));
         self.ensure_frame_scheduled(compositor);
 
         CompositionSimulationHandle {
@@ -684,10 +764,13 @@ impl CompositionSimulationHost {
     pub(crate) fn unregister(&self, id: SimulationId) {
         let removed = {
             let mut entries = self.entries.borrow_mut();
-            entries.iter().position(|e| e.id == id).map(|idx| entries.remove(idx))
+            entries
+                .iter()
+                .position(|e| e.id == id)
+                .map(|idx| entries.remove(idx))
         };
-        if let Some(mut entry) = removed {
-            entry.simulation.on_detached();
+        if let Some(entry) = removed {
+            entry.detach();
         }
     }
 
@@ -696,7 +779,11 @@ impl CompositionSimulationHost {
     }
 
     pub(crate) fn is_paused(&self, id: SimulationId) -> bool {
-        self.entries.borrow().iter().find(|e| e.id == id).is_some_and(|e| e.paused)
+        self.entries
+            .borrow()
+            .iter()
+            .find(|e| e.id == id)
+            .is_some_and(|e| e.paused.get())
     }
 
     pub(crate) fn count(&self) -> usize {
@@ -704,112 +791,120 @@ impl CompositionSimulationHost {
     }
 
     pub(crate) fn active_modes(&self) -> Vec<SimulationMode> {
-        self.entries.borrow().iter().filter(|e| !e.paused).map(|e| e.mode).collect()
+        self.entries
+            .borrow()
+            .iter()
+            .filter(|e| !e.paused.get())
+            .map(|e| e.mode)
+            .collect()
     }
 
     pub(crate) fn set_paused(&self, compositor: &Rc<Compositor>, id: SimulationId, paused: bool) {
-        let mut wake_needed = false;
-        if let Some(entry) = self.entries.borrow_mut().iter_mut().find(|e| e.id == id) {
-            entry.paused = paused;
+        let was_idle = !self.has_awake_simulations();
+        let entry = self.entries.borrow().iter().find(|e| e.id == id).cloned();
+        if let Some(entry) = entry {
+            entry.paused.set(paused);
             if !paused {
-                entry.awake = true;
-                wake_needed = true;
+                entry.wake();
+                if was_idle {
+                    self.last_frame_time.set(None);
+                }
+                self.ensure_frame_scheduled(compositor);
             }
-        }
-        if wake_needed {
-            self.last_frame_time.set(None);
-            self.ensure_frame_scheduled(compositor);
         }
     }
 
     pub(crate) fn wake_one(&self, compositor: &Rc<Compositor>, id: SimulationId) {
-        let mut found = false;
-        if let Some(entry) = self.entries.borrow_mut().iter_mut().find(|e| e.id == id) {
-            entry.awake = true;
-            found = !entry.paused;
-        }
-        if found {
-            self.last_frame_time.set(None);
-            self.ensure_frame_scheduled(compositor);
+        let was_idle = !self.has_awake_simulations();
+        let entry = self.entries.borrow().iter().find(|e| e.id == id).cloned();
+        if let Some(entry) = entry {
+            entry.wake();
+            if !entry.paused.get() {
+                if was_idle {
+                    self.last_frame_time.set(None);
+                }
+                self.ensure_frame_scheduled(compositor);
+            }
         }
     }
 
     pub(crate) fn wake_all(&self, compositor: &Rc<Compositor>) {
-        let mut any_active = false;
-        for entry in self.entries.borrow_mut().iter_mut() {
-            entry.awake = true;
-            if !entry.paused {
-                any_active = true;
-            }
+        let was_idle = !self.has_awake_simulations();
+        for entry in self.entries.borrow().iter() {
+            entry.wake();
         }
-        if any_active {
+        if was_idle {
             self.last_frame_time.set(None);
-            self.ensure_frame_scheduled(compositor);
         }
+        self.ensure_frame_scheduled(compositor);
     }
 
     pub(crate) fn has_awake_simulations(&self) -> bool {
-        self.entries.borrow().iter().any(|e| !e.paused && e.awake)
+        self.entries
+            .borrow()
+            .iter()
+            .any(|e| !e.paused.get() && e.awake.get())
     }
 
     /// Manually steps all non-paused awake simulations by `dt_seconds`.
-    ///
-    /// Useful for deterministic headless testing, offline rendering, or custom
-    /// frame loops.
-    pub(crate) fn step_all(&self, compositor: &Rc<Compositor>, dt_seconds: f64, elapsed: Duration) -> SimulationStepResult {
-        if self.stepping.get() {
-            return SimulationStepResult::Active;
+    /// Invalid or non-positive deltas do not advance simulation time.
+    pub(crate) fn step_all(
+        &self,
+        compositor: &Rc<Compositor>,
+        dt_seconds: f64,
+        elapsed: Duration,
+    ) -> SimulationStepResult {
+        if self.stepping.get() || !dt_seconds.is_finite() || dt_seconds <= 0.0 {
+            return if self.has_awake_simulations() {
+                SimulationStepResult::Active
+            } else {
+                SimulationStepResult::Idle
+            };
         }
         self.stepping.set(true);
-
-        let dt = if dt_seconds.is_finite() && dt_seconds > 0.0 {
-            dt_seconds.clamp(Self::MIN_DT_SECONDS, Self::MAX_DT_SECONDS)
-        } else {
-            1.0 / 60.0
-        };
-
+        let _stepping = SteppingGuard(&self.stepping);
+        // Preserve high-refresh-rate and deterministic substeps below 1/240 s.
+        let dt = dt_seconds.min(Self::MAX_DT_SECONDS);
         let frame_index = self.frame_index.get().wrapping_add(1);
         self.frame_index.set(frame_index);
-        let frame = SimulationFrame { dt, elapsed, frame_index };
+        let frame = SimulationFrame {
+            dt,
+            elapsed,
+            frame_index,
+        };
 
-        // Swap entries out while stepping so a simulation's callbacks can safely
-        // register, wake, or unregister simulations without RefCell borrow conflicts.
-        let mut active_entries = std::mem::take(&mut *self.entries.borrow_mut());
-        let mut any_active = false;
+        // Snapshot registrations, not simulations. Handles remain live during callbacks:
+        // unregister/pause/wake immediately affect entries still awaiting their step.
+        // Reuse the snapshot allocation after the first frame.
+        let mut frame_entries = std::mem::take(&mut *self.frame_entries.borrow_mut());
+        frame_entries.extend(self.entries.borrow().iter().cloned());
         let mut total_updates = 0usize;
-
-        for entry in &mut active_entries {
-            if entry.paused || !entry.awake {
+        for entry in &frame_entries {
+            if !entry.registered.get() || entry.paused.get() || !entry.awake.get() {
                 continue;
             }
+            let simulation = entry.simulation.borrow_mut().take();
+            let mut running = RunningSimulation { entry, simulation };
+            let wake_version = entry.wake_version.get();
             let mut ctx = CompositionSimulationContext::new(compositor, frame);
-            let result = entry.simulation.step(&mut ctx);
+            let result = running
+                .simulation
+                .as_mut()
+                .expect("registered simulation")
+                .step(&mut ctx);
             total_updates += ctx.applied_updates();
-            match result {
-                SimulationStepResult::Active => {
-                    entry.awake = true;
-                    any_active = true;
-                }
-                SimulationStepResult::Idle => {
-                    entry.awake = false;
-                }
-            }
+            // A wake issued from inside step must survive an Idle return value.
+            entry.awake.set(
+                result == SimulationStepResult::Active || entry.wake_version.get() != wake_version,
+            );
         }
-
-        // Merge back any simulations that were added re-entrantly during `step`.
-        {
-            let mut newly_added = self.entries.borrow_mut();
-            active_entries.append(&mut newly_added);
-            *newly_added = active_entries;
-        }
-
-        self.stepping.set(false);
+        frame_entries.clear();
+        *self.frame_entries.borrow_mut() = frame_entries;
 
         if total_updates > 0 {
             compositor.ensure_commit_requested();
         }
-
-        if any_active {
+        if self.has_awake_simulations() {
             SimulationStepResult::Active
         } else {
             SimulationStepResult::Idle
@@ -844,7 +939,11 @@ impl CompositionSimulationHost {
                 Some(prev) => {
                     let delta_ticks = now.ticks().saturating_sub(prev.ticks());
                     let secs = delta_ticks as f64 / SignedDuration::TICKS_PER_SECOND as f64;
-                    if secs > 0.0 && secs.is_finite() { secs } else { 1.0 / 60.0 }
+                    if secs > 0.0 && secs.is_finite() {
+                        secs
+                    } else {
+                        1.0 / 60.0
+                    }
                 }
                 None => 1.0 / 60.0,
             };
@@ -857,6 +956,14 @@ impl CompositionSimulationHost {
                 host.last_frame_time.set(None);
             }
         });
+    }
+}
+
+impl Drop for CompositionSimulationHost {
+    fn drop(&mut self) {
+        for entry in self.entries.get_mut().drain(..) {
+            entry.detach();
+        }
     }
 }
 
@@ -1025,7 +1132,8 @@ mod tests {
                 .with_rotation_angle(n as f32 * 0.1)
                 .with_scale_2d(1.0 + n as f64 * 0.05, 1.0);
             if self.apply_blur {
-                let blur: Arc<dyn IImmutableEffect> = Arc::new(ImmutableBlurEffect::new(n as f64 * 2.0));
+                let blur: Arc<dyn IImmutableEffect> =
+                    Arc::new(ImmutableBlurEffect::new(n as f64 * 2.0));
                 patch = patch.with_effect(blur);
             }
             ctx.apply(&self.target, &patch);
@@ -1054,16 +1162,31 @@ mod tests {
         });
 
         assert_eq!(compositor.simulation_count(), 1);
-        assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Custom("TestMode")]);
+        assert_eq!(
+            compositor.active_simulation_modes(),
+            vec![SimulationMode::Custom("TestMode")]
+        );
         assert!(handle.is_registered());
 
-        assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
-        assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
-        assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Idle);
+        assert_eq!(
+            compositor.step_simulations(1.0 / 60.0),
+            SimulationStepResult::Active
+        );
+        assert_eq!(
+            compositor.step_simulations(1.0 / 60.0),
+            SimulationStepResult::Active
+        );
+        assert_eq!(
+            compositor.step_simulations(1.0 / 60.0),
+            SimulationStepResult::Idle
+        );
         assert_eq!(steps.get(), 3);
 
         // Idle simulation does not step again until woken.
-        assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Idle);
+        assert_eq!(
+            compositor.step_simulations(1.0 / 60.0),
+            SimulationStepResult::Idle
+        );
         assert_eq!(steps.get(), 3);
 
         assert!((visual.translation().x - 36.0).abs() < 1e-6);
@@ -1073,7 +1196,10 @@ mod tests {
 
         // Waking resumes stepping immediately.
         handle.wake();
-        assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Idle);
+        assert_eq!(
+            compositor.step_simulations(1.0 / 60.0),
+            SimulationStepResult::Idle
+        );
         assert_eq!(steps.get(), 4);
 
         // Dropping the handle unregisters cleanly.
@@ -1109,7 +1235,10 @@ mod tests {
         assert!(modes.contains(&SimulationMode::Harmonic));
         assert!(modes.contains(&SimulationMode::Physics));
 
-        assert_eq!(compositor.step_simulations(0.016), SimulationStepResult::Active);
+        assert_eq!(
+            compositor.step_simulations(0.016),
+            SimulationStepResult::Active
+        );
         assert!(v1.translation().x.abs() > 0.0 || v1.translation().y.abs() > 0.0);
         assert!((v1.center_point().x - 50.0).abs() < 1e-6);
         assert_eq!(steps.get(), 1);
@@ -1117,7 +1246,10 @@ mod tests {
         // Pausing one mode leaves the other mode running.
         physics_handle.pause();
         assert!(physics_handle.is_paused());
-        assert_eq!(compositor.step_simulations(0.016), SimulationStepResult::Active);
+        assert_eq!(
+            compositor.step_simulations(0.016),
+            SimulationStepResult::Active
+        );
         assert_eq!(steps.get(), 1);
 
         drop(harmonic_handle);
@@ -1136,13 +1268,150 @@ mod tests {
         assert!(!visual.has_simulation_effect_override());
         visual.set_simulation_effect_override(true);
         let blur: Arc<dyn IImmutableEffect> = Arc::new(ImmutableBlurEffect::new(6.0));
-        SimulationVisualPatch::new().with_effect(blur).apply_to_composition_visual(&visual);
+        SimulationVisualPatch::new()
+            .with_effect(blur)
+            .apply_to_composition_visual(&visual);
         assert!(visual.has_simulation_effect_override());
         assert!(visual.effect().is_some());
 
         visual.set_simulation_effect_override(false);
-        SimulationVisualPatch::new().without_effect().apply_to_composition_visual(&visual);
+        SimulationVisualPatch::new()
+            .without_effect()
+            .apply_to_composition_visual(&visual);
         assert!(!visual.has_simulation_effect_override());
         assert!(visual.effect().is_none());
+    }
+    struct CallbackSimulation {
+        action: Box<dyn FnMut(&Rc<Compositor>, f64) -> SimulationStepResult>,
+        detached: Rc<Cell<usize>>,
+    }
+
+    impl ICompositionSimulation for CallbackSimulation {
+        fn mode(&self) -> SimulationMode {
+            SimulationMode::Custom("callback")
+        }
+        fn name(&self) -> &str {
+            "callback"
+        }
+        fn step(&mut self, ctx: &mut CompositionSimulationContext<'_>) -> SimulationStepResult {
+            (self.action)(ctx.compositor(), ctx.frame().dt)
+        }
+        fn on_detached(&mut self) {
+            self.detached.set(self.detached.get() + 1);
+        }
+    }
+
+    #[test]
+    fn reentrant_unregister_detaches_self_once_without_resurrection() {
+        let test = TestCompositor::new();
+        let handle = Rc::new(RefCell::new(None::<CompositionSimulationHandle>));
+        let detached = Rc::new(Cell::new(0));
+        let inside = handle.clone();
+        *handle.borrow_mut() = Some(test.compositor.register_simulation(CallbackSimulation {
+            action: Box::new(move |compositor, _| {
+                assert_eq!(compositor.simulation_count(), 1);
+                let mut handle = inside.borrow_mut().take().unwrap();
+                assert!(handle.is_registered());
+                handle.unregister();
+                assert!(!handle.is_registered());
+                SimulationStepResult::Active
+            }),
+            detached: detached.clone(),
+        }));
+        assert_eq!(
+            test.compositor.step_simulations(0.016),
+            SimulationStepResult::Idle
+        );
+        assert_eq!(test.compositor.simulation_count(), 0);
+        assert_eq!(detached.get(), 1);
+        test.compositor.step_simulations(0.016);
+        assert_eq!(detached.get(), 1);
+    }
+
+    #[test]
+    fn reentrant_pause_prevents_a_later_simulation_from_stepping() {
+        let test = TestCompositor::new();
+        let other = Rc::new(RefCell::new(None::<CompositionSimulationHandle>));
+        let other_inside = other.clone();
+        let first = test.compositor.register_simulation(CallbackSimulation {
+            action: Box::new(move |_, _| {
+                let other = other_inside.borrow();
+                let handle = other.as_ref().unwrap();
+                handle.pause();
+                assert!(handle.is_paused());
+                SimulationStepResult::Idle
+            }),
+            detached: Rc::new(Cell::new(0)),
+        });
+        let steps = Rc::new(Cell::new(0));
+        let steps_inside = steps.clone();
+        *other.borrow_mut() = Some(test.compositor.register_simulation(CallbackSimulation {
+            action: Box::new(move |_, _| {
+                steps_inside.set(steps_inside.get() + 1);
+                SimulationStepResult::Idle
+            }),
+            detached: Rc::new(Cell::new(0)),
+        }));
+        assert_eq!(
+            test.compositor.step_simulations(0.016),
+            SimulationStepResult::Idle
+        );
+        assert_eq!(steps.get(), 0);
+        other.borrow().as_ref().unwrap().resume();
+        test.compositor.step_simulations(0.016);
+        assert_eq!(steps.get(), 1);
+        drop(first);
+    }
+
+    #[test]
+    fn reentrant_wake_survives_idle_result() {
+        let test = TestCompositor::new();
+        let handle = Rc::new(RefCell::new(None::<CompositionSimulationHandle>));
+        let inside = handle.clone();
+        let steps = Rc::new(Cell::new(0));
+        let steps_inside = steps.clone();
+        *handle.borrow_mut() = Some(test.compositor.register_simulation(CallbackSimulation {
+            action: Box::new(move |_, _| {
+                let step = steps_inside.get() + 1;
+                steps_inside.set(step);
+                if step == 1 {
+                    inside.borrow().as_ref().unwrap().wake();
+                }
+                SimulationStepResult::Idle
+            }),
+            detached: Rc::new(Cell::new(0)),
+        }));
+        assert_eq!(
+            test.compositor.step_simulations(0.016),
+            SimulationStepResult::Active
+        );
+        assert_eq!(
+            test.compositor.step_simulations(0.016),
+            SimulationStepResult::Idle
+        );
+        assert_eq!(steps.get(), 2);
+        handle.borrow_mut().take();
+    }
+
+    #[test]
+    fn tiny_steps_are_preserved_and_invalid_steps_do_not_advance() {
+        let test = TestCompositor::new();
+        let elapsed = Rc::new(Cell::new(0.0));
+        let inside = elapsed.clone();
+        let _handle = test.compositor.register_simulation(CallbackSimulation {
+            action: Box::new(move |_, dt| {
+                inside.set(inside.get() + dt);
+                SimulationStepResult::Active
+            }),
+            detached: Rc::new(Cell::new(0)),
+        });
+        for dt in [0.0, -1.0, f64::NAN, f64::INFINITY] {
+            test.compositor.step_simulations(dt);
+        }
+        assert_eq!(elapsed.get(), 0.0);
+        for _ in 0..10 {
+            test.compositor.step_simulations(0.001);
+        }
+        assert!((elapsed.get() - 0.01).abs() < 1e-12);
     }
 }

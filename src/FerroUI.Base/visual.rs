@@ -831,7 +831,9 @@ impl VisualImpl for Visual {
         // an unchanged API-side value. Only forward actual framework changes to the handoff
         // visual, so an unrelated repaint does not replace an application's animation.
         let offset = this.composition_offset(true);
-        if comp.offset() != offset { comp.set_offset(offset); }
+        if !comp.has_simulation_override(CompositionVisual::SIMULATION_OFFSET) && comp.offset() != offset {
+            comp.set_offset(offset);
+        }
         let size = crate::Vector::new(bounds.width, bounds.height);
         if comp.size() != size { comp.set_size(size); }
         let visible = (this.is_visible() || this.is_shown_by_composition())
@@ -842,7 +844,9 @@ impl VisualImpl for Visual {
         // that is present is read as before, since it can change without the store changing.
         let inputs = this.composition_styled_inputs();
         let opacity = inputs.opacity;
-        if comp.opacity() != opacity { comp.set_opacity(opacity); }
+        if !comp.has_simulation_override(CompositionVisual::SIMULATION_OPACITY) && comp.opacity() != opacity {
+            comp.set_opacity(opacity);
+        }
         if comp.clip_to_bounds() != inputs.clip_to_bounds { comp.set_clip_to_bounds(inputs.clip_to_bounds); }
         comp.set_clip(if inputs.has_clip { this.clip().and_then(|clip| clip.platform_impl()) } else { None });
 
@@ -905,8 +909,10 @@ impl VisualImpl for Visual {
 
         if comp.transform_matrix() != render_transform { comp.set_transform_matrix(render_transform); }
 
-        if let Some(translation) = this.composition_translation() {
-            if comp.translation() != translation { comp.set_translation(translation); }
+        if !comp.has_simulation_override(CompositionVisual::SIMULATION_TRANSLATION) {
+            if let Some(translation) = this.composition_translation() {
+                if comp.translation() != translation { comp.set_translation(translation); }
+            }
         }
 
         this.synchronize_composition_facades(&comp);
@@ -1769,7 +1775,7 @@ impl Visual {
         );
         if let Some(comp) = self.own_composition_visual() {
             let offset = crate::Vector3D::new(offset.0, offset.1, 0.0);
-            if comp.offset() != offset {
+            if !comp.has_simulation_override(CompositionVisual::SIMULATION_OFFSET) && comp.offset() != offset {
                 comp.set_offset(offset);
             }
         } else if let Some(item) = self.composition_item.get() {

@@ -35,6 +35,7 @@ use super::{
 use crate::media::{BrushExtensions, Geometry, IBrush, IImmutableEffect, IntersectionResult, RenderOptions, TextOptions};
 use crate::numerics::Quaternion;
 use crate::platform::IGeometryImpl;
+use crate::utilities::OptionCell;
 use crate::{Matrix, Point, Ref, Vector, Vector3D};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -73,6 +74,10 @@ pub struct CompositionVisual {
     /// True while a registered [`ICompositionSimulation`](super::ICompositionSimulation)
     /// owns this visual's composition-layer effect so UI repaints do not clobber it.
     simulation_effect_override: Cell<bool>,
+    /// Only the explicitly simulated fields are protected from framework synchronization.
+    simulation_property_overrides: Cell<u8>,
+    /// Allocated only for UI visuals claimed by a simulation, never on ordinary visuals.
+    simulation_property_baselines: OptionCell<Box<super::SimulationVisualPatch>>,
     tag: RefCell<Option<Rc<dyn Any>>>,
     readback: Arc<VisualReadback>,
 }
@@ -157,6 +162,8 @@ impl CompositionVisual {
             opacity_mask: RefCell::new(None),
             custom_hit_test_count_in_sub_tree: Cell::new(0),
             simulation_effect_override: Cell::new(false),
+            simulation_property_overrides: Cell::new(0),
+            simulation_property_baselines: OptionCell::new(),
             tag: RefCell::new(None),
             readback,
         });
@@ -174,6 +181,57 @@ impl CompositionVisual {
     #[inline]
     pub(crate) fn set_simulation_effect_override(&self, active: bool) {
         self.simulation_effect_override.set(active);
+    }
+
+    pub(crate) const SIMULATION_OFFSET: u8 = 1 << 0;
+    pub(crate) const SIMULATION_TRANSLATION: u8 = 1 << 1;
+    pub(crate) const SIMULATION_ROTATION: u8 = 1 << 2;
+    pub(crate) const SIMULATION_SCALE: u8 = 1 << 3;
+    pub(crate) const SIMULATION_CENTER: u8 = 1 << 4;
+    pub(crate) const SIMULATION_OPACITY: u8 = 1 << 5;
+
+    #[inline]
+    pub(crate) fn has_simulation_override(&self, property: u8) -> bool {
+        self.simulation_property_overrides.get() & property != 0
+    }
+
+    /// Claims only supplied UI visual properties. Capture each handoff value on its first
+    /// write, so adding another property later does not restore an obsolete baseline.
+    pub(crate) fn claim_simulation_property_overrides(&self, patch: &super::SimulationVisualPatch) {
+        let requested = (u8::from(patch.offset.is_some()) * Self::SIMULATION_OFFSET)
+            | (u8::from(patch.translation.is_some()) * Self::SIMULATION_TRANSLATION)
+            | (u8::from(patch.rotation_angle.is_some()) * Self::SIMULATION_ROTATION)
+            | (u8::from(patch.scale.is_some()) * Self::SIMULATION_SCALE)
+            | (u8::from(patch.center_point.is_some()) * Self::SIMULATION_CENTER)
+            | (u8::from(patch.opacity.is_some()) * Self::SIMULATION_OPACITY);
+        let existing = self.simulation_property_overrides.get();
+        if requested & !existing == 0 { return; }
+        // Property getters cannot invoke callbacks, so take/modify/set needs no borrow flag.
+        let mut saved = self.simulation_property_baselines.take()
+            .unwrap_or_else(|| Box::new(super::SimulationVisualPatch::new()));
+        macro_rules! capture {
+            ($field:ident, $getter:ident) => {
+                if patch.$field.is_some() && saved.$field.is_none() {
+                    saved.$field = Some(self.$getter());
+                }
+            };
+        }
+        capture!(offset, offset);
+        capture!(translation, translation);
+        capture!(rotation_angle, rotation_angle);
+        capture!(scale, scale);
+        capture!(center_point, center_point);
+        capture!(opacity, opacity);
+        self.simulation_property_baselines.set(Some(saved));
+        self.simulation_property_overrides.set(existing | requested);
+    }
+
+    /// Releases UI simulation ownership, returning only the fields that were claimed.
+    /// The caller restores these handoff values and then synchronizes current layout/facades.
+    /// Effect ownership is independent and is released by `SimulationEffectUpdate::Clear`.
+    pub(crate) fn take_simulation_property_overrides(&self) -> Option<Box<super::SimulationVisualPatch>> {
+        self.simulation_property_overrides.set(0);
+        self.simulation_property_baselines.take()
     }
 
     fn initialize_defaults(&self) {
@@ -599,5 +657,120 @@ impl ICompositorSerializable for CompositionVisual {
     fn serialize_changes(&self, c: &Compositor, writer: &mut BatchStreamWriter<'_>) {
         self.object.begin_serialize_changes(c);
         self.serialize_changes_core(writer);
+    }
+}
+
+#[cfg(test)]
+mod simulation_ownership_tests {
+    use super::CompositionVisual;
+    use crate::numerics::Vector3;
+    use crate::rendering::composition::test_compositor::TestCompositor;
+    use crate::rendering::composition::{SimulationTarget, SimulationVisualPatch};
+    use crate::{Rect, Vector3D, Visual};
+
+    #[test]
+    fn simulation_owned_properties_survive_repaint_and_restore_current_facades() {
+        let services = TestCompositor::new();
+        let visual = Visual::new();
+        visual.set_bounds(Rect::new(10.0, 20.0, 100.0, 50.0));
+        visual.set_opacity(0.7);
+        visual.set_translation(Vector3D::new(1.0, 2.0, 0.0));
+        visual.set_rotation(30.0);
+        visual.set_scale(Vector3::new(1.1, 1.2, 1.0));
+        visual.set_center_point(Vector3::new(3.0, 4.0, 0.0));
+        let comp = visual.attach_to_compositor(&services.compositor);
+        visual.synchronize_composition_properties();
+        let patch = SimulationVisualPatch::new()
+            .with_offset(50.0, 60.0, 0.0)
+            .with_translation(11.0, 12.0, 0.0)
+            .with_rotation_angle(1.2)
+            .with_scale(1.8, 1.9, 1.0)
+            .with_center_point(7.0, 8.0, 0.0)
+            .with_opacity(0.3);
+        assert!(patch.apply_to_visual(&visual));
+
+        // Hover/focus invalidation and concurrent layout/style changes must not clobber
+        // an active simulation's claimed fields, but their new base values remain stored.
+        visual.set_bounds(Rect::new(70.0, 80.0, 120.0, 60.0));
+        visual.set_opacity(0.9);
+        visual.set_translation(Vector3D::new(21.0, 22.0, 0.0));
+        visual.set_rotation(60.0);
+        visual.set_scale(Vector3::new(2.0, 3.0, 1.0));
+        visual.set_center_point(Vector3::new(13.0, 14.0, 0.0));
+        visual.synchronize_composition_properties();
+        assert_eq!(comp.offset(), Vector3D::new(50.0, 60.0, 0.0));
+        assert_eq!(comp.translation(), Vector3D::new(11.0, 12.0, 0.0));
+        assert_eq!(comp.rotation_angle(), 1.2);
+        assert_eq!(comp.scale(), Vector3D::new(1.8, 1.9, 1.0));
+        assert_eq!(comp.center_point(), Vector3D::new(7.0, 8.0, 0.0));
+        assert_eq!(comp.opacity(), 0.3);
+        assert_eq!(comp.size(), crate::Vector::new(120.0, 60.0));
+
+        SimulationTarget::visual(visual.clone()).reset_to_identity(false);
+        assert_eq!(comp.offset(), Vector3D::new(70.0, 80.0, 0.0));
+        assert_eq!(comp.translation(), Vector3D::new(21.0, 22.0, 0.0));
+        assert!((comp.rotation_angle() - 60_f32.to_radians()).abs() < 1e-6);
+        assert_eq!(comp.scale(), Vector3D::new(2.0, 3.0, 1.0));
+        assert_eq!(comp.center_point(), Vector3D::new(13.0, 14.0, 0.0));
+        assert_eq!(comp.opacity(), 0.9);
+        assert_eq!(comp.simulation_property_overrides.get(), 0);
+    }
+
+    #[test]
+    fn partial_simulation_leaves_other_properties_live_and_restores_handoff_values() {
+        let services = TestCompositor::new();
+        let visual = Visual::new();
+        visual.set_bounds(Rect::new(10.0, 20.0, 100.0, 50.0));
+        let comp = visual.attach_to_compositor(&services.compositor);
+        visual.synchronize_composition_properties();
+        // These properties have never been claimed by a UI facade.
+        comp.set_translation(Vector3D::new(3.0, 4.0, 0.0));
+        comp.set_scale(Vector3D::new(2.0, 2.0, 1.0));
+        SimulationVisualPatch::new()
+            .with_translation_2d(40.0, 50.0)
+            .apply_to_visual(&visual);
+        visual.set_bounds(Rect::new(30.0, 40.0, 100.0, 50.0));
+        visual.set_opacity(0.6);
+        visual.synchronize_composition_properties();
+        assert_eq!(comp.offset(), Vector3D::new(30.0, 40.0, 0.0));
+        assert_eq!(comp.opacity(), 0.6);
+        assert_eq!(comp.scale(), Vector3D::new(2.0, 2.0, 1.0));
+        assert!(comp.has_simulation_override(CompositionVisual::SIMULATION_TRANSLATION));
+        assert!(!comp.has_simulation_override(CompositionVisual::SIMULATION_OPACITY));
+
+        // Claiming another field later captures its value at that time, not the start of
+        // the unrelated translation simulation. Repeated updates do not overwrite it.
+        comp.set_scale(Vector3D::new(4.0, 4.0, 1.0));
+        SimulationVisualPatch::new()
+            .with_scale_2d(1.2, 1.2)
+            .apply_to_visual(&visual);
+        SimulationVisualPatch::new()
+            .with_scale_2d(1.5, 1.5)
+            .apply_to_visual(&visual);
+        SimulationTarget::visual(visual.clone()).reset_to_identity(false);
+        assert_eq!(comp.translation(), Vector3D::new(3.0, 4.0, 0.0));
+        assert_eq!(comp.scale(), Vector3D::new(4.0, 4.0, 1.0));
+        assert_eq!(comp.opacity(), 0.6);
+        assert!(!comp.simulation_property_baselines.is_some());
+        // A second reset has no owned properties to clear.
+        SimulationTarget::visual(visual).reset_to_identity(false);
+        assert_eq!(comp.scale(), Vector3D::new(4.0, 4.0, 1.0));
+    }
+
+    #[test]
+    fn pure_composition_target_keeps_existing_identity_reset_semantics() {
+        let services = TestCompositor::new();
+        let comp = services.compositor.create_container_visual();
+        SimulationVisualPatch::new()
+            .with_translation_2d(30.0, 40.0)
+            .with_scale_2d(1.3, 1.4)
+            .with_opacity(0.5)
+            .apply_to_composition_visual(&comp);
+        assert_eq!(comp.simulation_property_overrides.get(), 0);
+        assert!(!comp.simulation_property_baselines.is_some());
+        SimulationTarget::composition(comp.clone()).reset_to_identity(false);
+        assert_eq!(comp.translation(), Vector3D::default());
+        assert_eq!(comp.scale(), Vector3D::new(1.0, 1.0, 1.0));
+        assert_eq!(comp.opacity(), 1.0);
     }
 }
