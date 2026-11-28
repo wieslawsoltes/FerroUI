@@ -11,11 +11,11 @@ use crate::media::text_formatting::testing::{
     TextTestScope, ASCENDER, DESCENDER, DESIGN_EM_HEIGHT, LINE_GAP,
 };
 use crate::media::text_formatting::{
-    GenericTextParagraphProperties, ITextSource, InterWordJustification, ShapedTextRun, TextBounds, TextCharacters,
+    GenericTextParagraphProperties, GenericTextRunProperties, ITextSource, InterWordJustification, ShapedTextRun, TextBounds, TextCharacters,
     TextEndOfParagraph, TextLine, TextLineImpl, TextMetrics, TextParagraphProperties, TextRun, TextRunProperties,
 };
 use crate::media::{
-    CharacterHit, FlowDirection, TextAlignment, TextCollapsingCreateInfo, TextPathSegmentTrimming, TextTrimming,
+    BaselineAlignment, CharacterHit, FlowDirection, TextAlignment, TextCollapsingCreateInfo, TextPathSegmentTrimming, TextTrimming,
     TextWrapping, Typeface,
 };
 use crate::{Point, Rect};
@@ -1258,6 +1258,27 @@ fn should_distribute_extra_space_when_line_height_is_larger_than_natural() {
 }
 
 #[test]
+fn minimum_line_height_preserves_natural_metrics_and_centers_added_space() {
+    let _scope = TextTestScope::new();
+    let properties = default_properties();
+    let text_source = SingleBufferTextSource::new("F", properties.clone());
+    let format = |minimum| {
+        let props: Rc<dyn TextParagraphProperties> = Rc::new(GenericTextParagraphProperties::from_properties(
+            &GenericTextParagraphProperties::new(properties.clone()).with_minimum_line_height(minimum),
+        ));
+        format_line(&text_source, 0, f64::INFINITY, &props, None).unwrap()
+    };
+    let natural = format(0.0);
+    let smaller = format(natural.height() / 2.0);
+    let padded = format(natural.height() + 40.0);
+    assert_eq!(smaller.height(), natural.height());
+    assert_eq!(smaller.baseline(), natural.baseline());
+    assert_eq!(padded.height(), natural.height() + 40.0);
+    assert_eq!(padded.baseline(), natural.baseline() + 20.0);
+    assert_eq!(padded.width_including_trailing_whitespace(), natural.width_including_trailing_whitespace());
+}
+
+#[test]
 fn backspace_should_treat_crlf_as_a_unit() {
     let _scope = TextTestScope::new();
 
@@ -1529,4 +1550,105 @@ fn runs_with_different_font_features_are_shaped_apart() {
     assert_eq!(shape_calls(Some("kern=0"), Some("kern=0")), 1);
     assert_eq!(shape_calls(Some("kern=0"), None), 2);
     assert_eq!(shape_calls(Some("kern=0"), Some("liga=0")), 2);
+}
+
+/// Formats `runs` with a minimum line height of `minimum` (0: none).
+fn format_with_minimum(runs: Vec<Rc<dyn TextRun>>, properties: &Rc<dyn TextRunProperties>, minimum: f64) -> Rc<dyn TextLine> {
+    let source = ListTextSource::new(runs);
+    let props: Rc<dyn TextParagraphProperties> = Rc::new(GenericTextParagraphProperties::from_properties(
+        &GenericTextParagraphProperties::new(properties.clone()).with_minimum_line_height(minimum),
+    ));
+    format_line(&source, 0, f64::INFINITY, &props, None).unwrap()
+}
+
+fn aligned_properties(alignment: BaselineAlignment) -> Rc<dyn TextRunProperties> {
+    Rc::new(GenericTextRunProperties::with_all(Typeface::default_typeface(), EM, None, None, None, alignment, None, None))
+}
+
+const ALIGNMENTS: [BaselineAlignment; 8] = [
+    BaselineAlignment::Baseline,
+    BaselineAlignment::Top,
+    BaselineAlignment::TextTop,
+    BaselineAlignment::Center,
+    BaselineAlignment::Bottom,
+    BaselineAlignment::TextBottom,
+    BaselineAlignment::Subscript,
+    BaselineAlignment::Superscript,
+];
+
+/// A minimum above the natural height adds the same space above and below the
+/// runs: every baseline alignment keeps its place within the box of the runs,
+/// which moves down by half the added height. A minimum at or below the
+/// natural height changes nothing (the offsets of main, no padding).
+#[test]
+fn minimum_line_height_moves_every_baseline_alignment_with_the_box_of_the_runs() {
+    let _scope = TextTestScope::new();
+    for alignment in ALIGNMENTS {
+        let properties = aligned_properties(alignment);
+        let text: Rc<dyn TextRun> = Rc::new(TextCharacters::new(crate::utilities::ReadOnlyMemory::from_str("F"), default_properties()));
+        let object = Rc::new(CustomDrawableRun::with_size(crate::Size::new(10.0, 6.0), 5.0, properties.clone()));
+        let runs = vec![text, object.clone() as Rc<dyn TextRun>];
+        let natural = format_with_minimum(runs.clone(), &properties, 0.0);
+        let below = format_with_minimum(runs.clone(), &properties, natural.height() - 1.0);
+        let padded = format_with_minimum(runs, &properties, natural.height() + 40.0);
+
+        assert_eq!(natural.vertical_padding(), 0.0);
+        assert_eq!(below.vertical_padding(), 0.0);
+        assert_eq!(below.height(), natural.height());
+        assert_eq!(below.baseline(), natural.baseline());
+        assert_eq!(
+            TextLineImpl::get_baseline_offset(&*below, &*object),
+            TextLineImpl::get_baseline_offset(&*natural, &*object),
+            "{alignment:?}"
+        );
+
+        assert_eq!(padded.vertical_padding(), 20.0);
+        assert_eq!(padded.height(), natural.height() + 40.0);
+        assert_eq!(padded.extent(), natural.extent(), "{alignment:?}");
+        let offset = TextLineImpl::get_baseline_offset(&*natural, &*object);
+        let padded_offset = TextLineImpl::get_baseline_offset(&*padded, &*object);
+        assert!((padded_offset - (offset + 20.0)).abs() < 1e-9, "{alignment:?}: {padded_offset} for {offset}");
+    }
+}
+
+/// With the default (full) line bounds the ink of a padded line moves down with
+/// its baseline; its size does not change.
+#[test]
+fn minimum_line_height_moves_the_ink_of_a_full_line_box_with_its_baseline() {
+    let _scope = TextTestScope::new();
+    let properties = default_properties();
+    let runs = || vec![Rc::new(TextCharacters::new(crate::utilities::ReadOnlyMemory::from_str("Fg"), properties.clone())) as Rc<dyn TextRun>];
+    let natural = format_with_minimum(runs(), &properties, 0.0);
+    let padded = format_with_minimum(runs(), &properties, natural.height() + 40.0);
+    let ink = |line: &Rc<dyn TextLine>| line.as_any().downcast_ref::<TextLineImpl>().unwrap().ink_bounds();
+    let (natural_ink, padded_ink) = (ink(&natural), ink(&padded));
+    assert!((padded_ink.y - (natural_ink.y + 20.0)).abs() < 1e-9, "{padded_ink:?} for {natural_ink:?}");
+    assert_eq!(padded_ink.size(), natural_ink.size());
+    assert_eq!(padded.baseline(), natural.baseline() + 20.0);
+}
+
+/// Hit testing along a padded line is that of the natural line: the same
+/// character for every distance and the same horizontal text bounds.
+#[test]
+fn minimum_line_height_does_not_change_hit_testing_along_the_line() {
+    let _scope = TextTestScope::new();
+    let properties = default_properties();
+    let runs = || vec![Rc::new(TextCharacters::new(crate::utilities::ReadOnlyMemory::from_str("0123456789"), properties.clone())) as Rc<dyn TextRun>];
+    let natural = format_with_minimum(runs(), &properties, 0.0);
+    let padded = format_with_minimum(runs(), &properties, natural.height() + 40.0);
+    for step in 0..=26 {
+        let distance = f64::from(step) * 2.5 - 1.0;
+        assert_eq!(
+            padded.get_character_hit_from_distance(distance),
+            natural.get_character_hit_from_distance(distance),
+            "at {distance}"
+        );
+    }
+    for (first, length) in [(0, 1), (2, 3), (0, 10)] {
+        let horizontal = |line: &Rc<dyn TextLine>| {
+            line.get_text_bounds(first, length).iter().map(|bounds| (bounds.rectangle().x, bounds.rectangle().width)).collect::<Vec<_>>()
+        };
+        assert_eq!(horizontal(&padded), horizontal(&natural));
+        assert_eq!(padded.get_distance_from_character_hit(CharacterHit::new(first)), natural.get_distance_from_character_hit(CharacterHit::new(first)));
+    }
 }

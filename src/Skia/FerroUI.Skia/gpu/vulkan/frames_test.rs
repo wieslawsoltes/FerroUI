@@ -24,7 +24,7 @@ use skia_safe::Color;
 use std::any::Any;
 use std::ffi::{c_void, CStr, CString};
 use std::rc::Rc;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 fn skip(reason: &str) {
     if std::env::var("FERROUI_VULKAN_TEST_REQUIRE").is_ok_and(|value| value == "1") {
@@ -57,7 +57,10 @@ impl IPlatformRenderSurface for TestSurface {
     }
 }
 
-struct HeadlessSurface;
+/// A headless surface whose size the test changes.
+struct HeadlessSurface {
+    size: Arc<Mutex<PixelSize>>,
+}
 
 impl IPlatformRenderSurface for HeadlessSurface {
     fn as_any(&self) -> &dyn Any {
@@ -71,7 +74,7 @@ impl IVulkanKhrSurfacePlatformSurface for HeadlessSurface {
     }
 
     fn size(&self) -> PixelSize {
-        PixelSize::new(200, 120)
+        *self.size.lock().unwrap()
     }
 
     fn create_surface(&self, context: &dyn IVulkanPlatformGraphicsContext) -> u64 {
@@ -97,7 +100,9 @@ fn create_headless_surface(instance: &Arc<dyn IVulkanInstance>) -> u64 {
     vk::Handle::as_raw(surface)
 }
 
-struct HeadlessSurfaceFactory;
+struct HeadlessSurfaceFactory {
+    size: Arc<Mutex<PixelSize>>,
+}
 
 impl IVulkanKhrSurfacePlatformSurfaceFactory for HeadlessSurfaceFactory {
     fn can_render_to_surface(
@@ -113,7 +118,7 @@ impl IVulkanKhrSurfacePlatformSurfaceFactory for HeadlessSurfaceFactory {
         _context: &dyn IVulkanPlatformGraphicsContext,
         _surface: &Arc<dyn IPlatformRenderSurface>,
     ) -> Rc<dyn IVulkanKhrSurfacePlatformSurface> {
-        Rc::new(HeadlessSurface)
+        Rc::new(HeadlessSurface { size: self.size.clone() })
     }
 }
 
@@ -140,7 +145,8 @@ fn skia_draws_a_frame_into_the_image_of_a_vulkan_session_and_presents_it() {
         device_check_surface_factory: Some(Arc::new(|instance: &Arc<dyn IVulkanInstance>| Ok(create_headless_surface(instance)))),
         ..Default::default()
     };
-    platform_options.set_khr_surface_factory(Arc::new(HeadlessSurfaceFactory));
+    let size = Arc::new(Mutex::new(PixelSize::new(200, 120)));
+    platform_options.set_khr_surface_factory(Arc::new(HeadlessSurfaceFactory { size: size.clone() }));
     let Some(graphics) = VulkanPlatformGraphics::try_create(&VulkanOptions::default(), platform_options) else {
         return skip("the Vulkan implementation has no device that presents to a headless surface");
     };
@@ -175,6 +181,46 @@ fn skia_draws_a_frame_into_the_image_of_a_vulkan_session_and_presents_it() {
         }
         drop(surface);
         session.dispose();
+    }
+
+    // A partial redraw: the frame draws one corner only, and the rest of the image keeps the last frame's pixels
+    // (the window's surface and image are kept from frame to frame).
+    let last = Color::from_argb(255, 0, 128, 255);
+    let corner = Color::from_argb(255, 255, 255, 0);
+    for _ in 0..3 {
+        let session = target.begin_rendering_session(&scene_info, &skia_safe::SurfaceProps::default());
+        let mut surface = session.sk_surface();
+        let paint = skia_safe::Paint::new(skia_safe::Color4f::from(corner), None);
+        surface.canvas().draw_rect(skia_safe::Rect::from_xywh(0.0, 0.0, 20.0, 20.0), &paint);
+        let gr_context = session.gr_context();
+        let image = gr_context.snapshot_to_raster(&mut surface).expect("the image of the frame");
+        let pixels = image.peek_pixels().expect("a raster image");
+        assert_eq!(pixels.get_color((5, 5)), corner, "the redrawn corner");
+        for point in [(100, 60), (199, 119)] {
+            assert_eq!(pixels.get_color(point), last, "the kept pixel at {point:?}");
+        }
+        drop(surface);
+        session.dispose();
+    }
+
+    // The surface is resized and back: each size gets its image, drawn and read back correctly.
+    for (width, height) in [(160, 90), (200, 120)] {
+        *size.lock().unwrap() = PixelSize::new(width, height);
+        let scene_info = RenderTargetSceneInfo::new(PixelSize::new(width, height), 2.0, Default::default());
+        for color in [Color::GREEN, Color::MAGENTA] {
+            let session = target.begin_rendering_session(&scene_info, &skia_safe::SurfaceProps::default());
+            let mut surface = session.sk_surface();
+            assert_eq!((surface.width(), surface.height()), (width, height));
+            surface.canvas().clear(color);
+            let gr_context = session.gr_context();
+            let image = gr_context.snapshot_to_raster(&mut surface).expect("the image of the frame");
+            let pixels = image.peek_pixels().expect("a raster image");
+            for point in [(0, 0), (width / 2, height / 2), (width - 1, height - 1)] {
+                assert_eq!(pixels.get_color(point), color, "the pixel at {point:?} at {width}x{height}");
+            }
+            drop(surface);
+            session.dispose();
+        }
     }
 
     // An offscreen surface of the Ganesh context of the GPU draws and reads back as well.

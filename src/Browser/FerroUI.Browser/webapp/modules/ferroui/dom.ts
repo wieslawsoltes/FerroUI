@@ -303,6 +303,10 @@ export class FerroDOM {
         return globalThis.navigator?.language ?? null;
     }
 
+    public static getNavigatorPlatform(globalThis: Window): string | null {
+        return globalThis.navigator?.platform ?? null;
+    }
+
     // Whether the user lets animations play (not in the original): asked for each animation,
     // so that a change of the preference applies to the next one.
     public static getAnimationsEnabled(globalThis: Window): boolean {

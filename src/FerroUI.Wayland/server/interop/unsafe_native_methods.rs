@@ -9,6 +9,7 @@
 use std::ffi::CStr;
 use std::io;
 use std::os::fd::{AsRawFd, BorrowedFd, FromRawFd, OwnedFd, RawFd};
+use std::time::Instant;
 
 /// The result of [`poll_two`]: which of the two descriptors can be read.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
@@ -75,6 +76,29 @@ pub fn poll_two(first: BorrowedFd<'_>, second: BorrowedFd<'_>) -> io::Result<Pol
             return Err(error);
         }
         return Ok(PollResult { first: fds[0].revents != 0, second: fds[1].revents != 0 });
+    }
+}
+
+/// Waits for a pipe read (including EOF) until the given deadline.
+pub(crate) fn wait_readable(fd: BorrowedFd<'_>, deadline: Instant) -> io::Result<()> {
+    let mut poll_fd = libc::pollfd { fd: fd.as_raw_fd(), events: libc::POLLIN, revents: 0 };
+    loop {
+        let remaining = deadline.saturating_duration_since(Instant::now());
+        if remaining.is_zero() {
+            return Err(io::ErrorKind::TimedOut.into());
+        }
+        let milliseconds = remaining.as_millis().clamp(1, i32::MAX as u128) as i32;
+        // SAFETY: poll_fd is one initialized entry and fd stays open during the call.
+        match unsafe { libc::poll(&mut poll_fd, 1, milliseconds) } {
+            1 => return Ok(()),
+            0 => continue,
+            _ => {
+                let error = io::Error::last_os_error();
+                if error.kind() != io::ErrorKind::Interrupted {
+                    return Err(error);
+                }
+            }
+        }
     }
 }
 
