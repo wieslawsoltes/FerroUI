@@ -62,6 +62,13 @@ pub struct Button {
 
 ferro_class! {
     Button: ContentControl, virtuals ButtonImpl: ContentControlImpl {
+        /// Whether Button manages command subscriptions and effective enablement.
+        ///
+        /// Return false only when the derived control owns those responsibilities,
+        /// including binding errors and lifecycle cleanup. Keep the result constant
+        /// for the lifetime of the control. Command execution, input, hot keys,
+        /// automation and flyouts still use the native Button implementation.
+        fn uses_default_command_enablement(this) -> bool;
         /// Invokes the `Click` event.
         fn on_click(this);
         /// Opens the button's flyout.
@@ -90,7 +97,7 @@ impl FerroObjectImpl for Button {
 
         let property = change.property();
 
-        if property == Self::command_property().as_property() {
+        if property == Self::command_property().as_property() && this.uses_default_command_enablement() {
             let (old_value, new_value) = change.get_old_and_new_value::<Option<Rc<dyn ICommand>>>();
             if this.is_subscribed_to_command.get() {
                 if old_value.is_some() {
@@ -102,7 +109,7 @@ impl FerroObjectImpl for Button {
                 }
             }
             this.can_execute_changed(new_value.as_ref(), this.command_parameter().as_ref());
-        } else if property == Self::command_parameter_property().as_property() {
+        } else if property == Self::command_parameter_property().as_property() && this.uses_default_command_enablement() {
             let new_value = change.get_new_value::<Option<BoxedValue>>();
             this.can_execute_changed(this.command().as_ref(), new_value.as_ref());
         } else if property == Self::is_cancel_property().as_property() {
@@ -166,6 +173,7 @@ impl FerroObjectImpl for Button {
         Self::parent_update_data_validation(this, property, state, error);
 
         if property == Self::command_property().as_property()
+            && this.uses_default_command_enablement()
             && state == BindingValueType::BINDING_ERROR
             && this.command_can_execute.get()
         {
@@ -185,13 +193,15 @@ impl StyledElementImpl for Button {
 
         Self::parent_on_attached_to_logical_tree(this, e);
 
-        let (command, parameter) = (this.command(), this.command_parameter());
-        if let Some(command) = &command {
-            this.subscribe_can_execute_changed(command);
-            this.can_execute_changed(Some(command), parameter.as_ref());
-        }
+        if this.uses_default_command_enablement() {
+            let (command, parameter) = (this.command(), this.command_parameter());
+            if let Some(command) = &command {
+                this.subscribe_can_execute_changed(command);
+                this.can_execute_changed(Some(command), parameter.as_ref());
+            }
 
-        this.is_subscribed_to_command.set(true);
+            this.is_subscribed_to_command.set(true);
+        }
     }
 
     fn on_detached_from_logical_tree(this: &Self, e: &LogicalTreeAttachmentEventArgs) {
@@ -246,7 +256,8 @@ impl VisualImpl for Button {
 
 impl InputElementImpl for Button {
     fn is_enabled_core(this: &Self) -> bool {
-        Self::parent_is_enabled_core(this) && this.command_can_execute.get()
+        Self::parent_is_enabled_core(this)
+            && (!this.uses_default_command_enablement() || this.command_can_execute.get())
     }
 
     fn on_access_key(this: &Self, e: &dyn IRoutedEventArgs) {
@@ -365,6 +376,10 @@ impl TemplatedControlImpl for Button {
 }
 
 impl ButtonImpl for Button {
+    fn uses_default_command_enablement(_this: &Self) -> bool {
+        true
+    }
+
     fn on_click(this: &Self) {
         if this.is_effectively_enabled() {
             if this.is_flyout_open.get() {

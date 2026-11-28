@@ -1288,6 +1288,7 @@ pub struct StyledPropertyOptions<T> {
     enable_data_validation: bool,
     assign_binding: bool,
     notifying: Option<NotifyingCallback>,
+    binding_writeback_uses_change_value: Option<bool>,
 }
 
 impl<T: StyledValue> StyledPropertyOptions<T> {
@@ -1302,6 +1303,7 @@ impl<T: StyledValue> StyledPropertyOptions<T> {
             enable_data_validation: false,
             assign_binding: false,
             notifying: None,
+            binding_writeback_uses_change_value: None,
         }
     }
 
@@ -1341,6 +1343,14 @@ impl<T: StyledValue> StyledPropertyOptions<T> {
         self
     }
 
+    /// Overrides immediate PropertyChanged binding writeback: a notification
+    /// snapshot (`true`) or the current effective target value (`false`).
+    /// Without an override the existing binding implementation policy is kept.
+    pub fn binding_writeback_uses_change_value(mut self, value: bool) -> Self {
+        self.binding_writeback_uses_change_value = Some(value);
+        self
+    }
+
     /// Whether a binding given for the property in markup is assigned to the
     /// property instead of bound to it; see [`FerroProperty::assign_binding`].
     pub fn assign_binding(mut self, assign_binding: bool) -> Self {
@@ -1364,6 +1374,9 @@ impl<T: StyledValue> StyledPropertyOptions<T> {
             // the algorithm here would root it for every options value type,
             // including properties that never supplied a coercer.
             metadata = metadata.with_registered_coercion(coerce);
+        }
+        if let Some(value) = self.binding_writeback_uses_change_value {
+            metadata = metadata.with_binding_writeback_uses_change_value(value);
         }
         (metadata, self.inherits, self.validate, self.notifying)
     }

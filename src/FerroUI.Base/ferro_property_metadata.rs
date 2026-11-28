@@ -1,7 +1,7 @@
 use crate::data::BindingMode;
-use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, UncommonFields};
+use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, ExplicitFns, UncommonFields};
 use crate::{FerroObject, StyledValue, TypeInfo};
-use std::any::Any;
+use std::any::{Any, TypeId};
 use std::cell::{OnceCell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
@@ -12,11 +12,71 @@ pub struct FerroPropertyMetadata {
     default_binding_mode: BindingMode,
     enable_data_validation: Option<bool>,
     is_read_only: bool,
+    binding_writeback_uses_change_value: Option<bool>,
+    /// Whether the store coerces an unchanged input again when it reevaluates the property
+    /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); `None` inherits it, by default
+    /// it does. Kept here, untyped, so that the typed metadata of every value type is what it is
+    /// without it.
+    /// One byte: the metadata is copied by the code of every value type; the typed operations of
+    /// explicit coercion (`Some(false)`) are found by their value type (`EXPLICIT_TABLES`).
+    reevaluation: Option<bool>,
+}
+
+/// The tables of the typed operations of explicit coercion (`ExplicitFns`), by the type of the
+/// table, of the value types whose coercion is explicit somewhere (`with_coerce_on_reevaluation`).
+static EXPLICIT_TABLES: std::sync::Mutex<Vec<(TypeId, usize)>> = std::sync::Mutex::new(Vec::new());
+
+/// Registers `table`, the table of the typed operations of explicit coercion of one value type.
+pub(crate) fn register_explicit_table<T: 'static>(table: &'static ExplicitFns<T>) {
+    let id = TypeId::of::<ExplicitFns<T>>();
+    let mut tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
+    if !tables.iter().any(|(known, _)| *known == id) {
+        tables.push((id, table as *const ExplicitFns<T> as usize));
+    }
+}
+
+/// The resets of explicit coercion (`reset_coercion`), by the type of the effective value.
+type ExplicitReset = fn(&dyn EffectiveValueDyn, &FerroObject);
+static EXPLICIT_RESETS: std::sync::Mutex<Vec<(TypeId, ExplicitReset)>> = std::sync::Mutex::new(Vec::new());
+
+fn register_explicit_reset(id: TypeId, reset: ExplicitReset) {
+    let mut resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    if !resets.iter().any(|(known, _)| *known == id) {
+        resets.push((id, reset));
+    }
+}
+
+/// The reset of explicit coercion of an effective value of the type `id`, if its coercion is
+/// explicit somewhere.
+pub(crate) fn explicit_reset(id: TypeId) -> Option<ExplicitReset> {
+    let resets = EXPLICIT_RESETS.lock().unwrap_or_else(|e| e.into_inner());
+    resets.iter().find(|(known, _)| *known == id).map(|(_, reset)| *reset)
+}
+
+/// The address of the registered table of the type `id` (one function for every value type).
+#[inline(never)]
+fn explicit_table_address(id: TypeId) -> Option<usize> {
+    let tables = EXPLICIT_TABLES.lock().unwrap_or_else(|e| e.into_inner());
+    tables.iter().find(|(known, _)| *known == id).map(|(_, address)| *address)
+}
+
+/// The table of the typed operations of explicit coercion of `T`, if registered.
+fn explicit_table<T: 'static>() -> Option<&'static ExplicitFns<T>> {
+    let address = explicit_table_address(TypeId::of::<ExplicitFns<T>>())?;
+    // SAFETY: the address of the constant table `ExplicitFns::<T>::get`, registered with the
+    // type of the table checked above; valid for the whole program.
+    Some(unsafe { &*(address as *const ExplicitFns<T>) })
 }
 
 impl FerroPropertyMetadata {
     pub fn new(default_binding_mode: BindingMode, enable_data_validation: Option<bool>) -> Self {
-        Self { default_binding_mode, enable_data_validation, is_read_only: false }
+        Self {
+            default_binding_mode,
+            enable_data_validation,
+            is_read_only: false,
+            binding_writeback_uses_change_value: None,
+            reevaluation: None,
+        }
     }
 
     /// The default binding mode for the property.
@@ -37,6 +97,16 @@ impl FerroPropertyMetadata {
         self.enable_data_validation
     }
 
+    /// Selects the value used by immediate PropertyChanged binding writeback.
+    /// `Some(true)` uses the triggering notification's snapshot, even when a
+    /// reentrant handler has changed the target again. `Some(false)` rereads
+    /// the effective target value. `None` retains the binding implementation's
+    /// existing policy (typed notifications, untyped effective target values).
+    /// Delayed, explicit and lost-focus updates always read the target.
+    pub fn binding_writeback_uses_change_value(&self) -> Option<bool> {
+        self.binding_writeback_uses_change_value
+    }
+
     /// Whether the metadata has been frozen.
     pub fn is_read_only(&self) -> bool {
         self.is_read_only
@@ -50,6 +120,12 @@ impl FerroPropertyMetadata {
         }
         if self.enable_data_validation.is_none() {
             self.enable_data_validation = base.enable_data_validation;
+        }
+        if self.reevaluation.is_none() {
+            self.reevaluation = base.reevaluation;
+        }
+        if self.binding_writeback_uses_change_value.is_none() {
+            self.binding_writeback_uses_change_value = base.binding_writeback_uses_change_value;
         }
     }
 
@@ -361,8 +437,29 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
         self
     }
 
+    /// Whether frame reevaluation recalculates coercion for an unchanged input
+    /// (`with_coerce_on_reevaluation`).
+    pub fn coerce_on_reevaluation(&self) -> bool {
+        self.base.reevaluation != Some(false)
+    }
+
+    /// The typed operations of explicit coercion, for a property whose coercion is explicit.
+    pub(crate) fn explicit_coercion(&self) -> Option<&'static crate::property_store::ExplicitFns<T>> {
+        match self.base.reevaluation {
+            Some(false) => explicit_table::<T>(),
+            _ => None,
+        }
+    }
+
     pub fn with_enable_data_validation(mut self, enable: bool) -> Self {
         self.base.enable_data_validation = Some(enable);
+        self
+    }
+
+    /// Selects immediate binding writeback from the change snapshot (`true`)
+    /// or from the target's current effective value (`false`).
+    pub fn with_binding_writeback_uses_change_value(mut self, value: bool) -> Self {
+        self.base.binding_writeback_uses_change_value = Some(value);
         self
     }
 
@@ -389,6 +486,25 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
 }
 
 impl<T: StyledValue> StyledPropertyMetadata<T> {
+    /// Whether frame reevaluation recalculates coercion for an unchanged input.
+    /// Defaults to true. A control returning false must explicitly coerce when
+    /// its external dependencies change. Explicit writes, changed bindings and
+    /// changed winning frame entries still coerce. Removing a winning frame
+    /// restores the default without automatically coercing that fallback.
+    /// Clearing an input also resets its coercion output without a callback.
+    /// `FerroObject::reset_coercion` applies to a property whose coercion is explicit.
+    pub fn with_coerce_on_reevaluation(mut self, value: bool) -> Self {
+        if !value {
+            // The tables of the value type and of its storage type, which the store reads.
+            register_explicit_table(crate::property_store::ExplicitFns::<T>::get());
+            register_explicit_table(crate::property_store::ExplicitFns::<T::Storage>::get());
+            // The store holds the values of the storage type.
+            register_explicit_reset(TypeId::of::<EffectiveValue<T::Storage>>(), EffectiveValue::<T::Storage>::reset_erased);
+        }
+        self.base.reevaluation = Some(value);
+        self
+    }
+
     /// The metadata as the property store reads it, of the storage type of `T`: this metadata
     /// itself for a type that is its own storage type, else a copy with the default value
     /// converted and the coercion callback wrapped once, made the first time it is asked for.
@@ -470,6 +586,13 @@ impl<T: Clone + 'static> DirectPropertyMetadata<T> {
         self
     }
 
+    /// Selects immediate binding writeback from the change snapshot (`true`)
+    /// or from the target's current effective value (`false`).
+    pub fn with_binding_writeback_uses_change_value(mut self, value: bool) -> Self {
+        self.base.binding_writeback_uses_change_value = Some(value);
+        self
+    }
+
     /// The value to use when the property is set to the unset value.
     #[inline]
     pub fn unset_value(&self) -> &T {
@@ -536,6 +659,8 @@ impl<T: Clone + 'static> PropertyMetadata for StyledPropertyMetadata<T> {
         let mut copy = StyledPropertyMetadata::new(this.default_value.clone())
             .with_default_binding_mode(this.default_binding_mode())
             .with_enable_data_validation(this.enable_data_validation().unwrap_or(false));
+        copy.base.binding_writeback_uses_change_value = this.base.binding_writeback_uses_change_value;
+        copy.base.reevaluation = this.base.reevaluation;
         copy.freeze();
         Rc::new(copy)
     }

@@ -14,6 +14,8 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 mod attached_property_tests;
+mod coercion_reevaluation_tests;
+mod styling_update_tests;
 mod binding_default_value_converter_tests;
 mod binding_expression_tests_attached_property;
 mod binding_expression_tests_data_validation;
@@ -31,6 +33,8 @@ mod binding_expression_tests_task;
 mod binding_model_tests;
 mod binding_null_conditional_tests;
 mod binding_operations_tests;
+mod local_binding_clear_tests;
+mod local_binding_initialization_tests;
 mod binding_plugin_tests;
 mod binding_setter_tests;
 mod reference_semantics_tests;
@@ -48,6 +52,7 @@ mod ferro_object_tests_coercion;
 mod ferro_object_tests_data_validation;
 mod ferro_object_tests_direct;
 mod ferro_object_tests_get_observable;
+mod ferro_object_tests_local_values;
 mod ferro_object_tests_get_value;
 mod ferro_object_tests_inheritance;
 mod ferro_object_tests_inherited_hearing;
@@ -355,3 +360,5 @@ pub(crate) fn old_string(e: &crate::FerroPropertyChangedEventArgs<'_>) -> Option
 pub(crate) fn new_string(e: &crate::FerroPropertyChangedEventArgs<'_>) -> String {
     e.get_new_value::<String>()
 }
+
+mod binding_writeback_policy_tests;

@@ -29,7 +29,9 @@ fn block_of<T>() -> usize {
 #[cfg(target_pointer_width = "64")]
 fn the_common_elements_fit_their_blocks() {
     // A build with fields of its own in the layers (hot reload, tagged weak references) is not the
-    // one that ships: its sizes are not held.
+    // one that ships: its sizes are not held. The size of the object in the build that ships is held
+    // by `instance_data_adds_nothing_to_an_object` of `ferroui-base`, so a field added to every
+    // object fails there instead of turning this test off.
     if size_of::<ferroui_base::FerroObject>() > 248 {
         return;
     }

@@ -33,6 +33,7 @@
 pub mod collections;
 pub mod component_model;
 pub mod events;
+pub mod invariant_numbers;
 pub mod ferro_thread_local;
 mod i_disposable;
 mod subscription;

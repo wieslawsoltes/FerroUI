@@ -369,6 +369,18 @@ trait BindingHost: BindingExpressionBase {
     fn write_target_change(&self, change: &crate::FerroPropertyChangedEventArgs<'_>);
 }
 
+impl BindingTarget {
+    /// Whether a target change writes the value of the notification rather than rereading the
+    /// target. Out of the typed write, which is compiled for every value type.
+    #[inline(never)]
+    fn writeback_uses_change_value(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) -> bool {
+        e.property()
+            .get_metadata_for(e.sender())
+            .binding_writeback_uses_change_value()
+            .unwrap_or(!self.casts_value.get())
+    }
+}
+
 struct BindingController {
     target: BindingTarget,
     mode: BindingMode,
@@ -547,8 +559,8 @@ impl<TValue: PropertyValue> TypedValueSlot<TValue> {
         let (Some(property), Some(target)) = (target_state.property.get(), target_state.owner()) else {
             return None;
         };
-        // Only reached when the source changes in one-way-to-source mode, or
-        // when the target changes and its type differs from the source type.
+        // Source updates in one-way-to-source mode, target casts, or a property
+        // explicitly requesting effective-value writeback all reread the target.
         let value = target.get_value_untyped(property);
         if target_state.casts_value.get() {
             ValueTypes::try_cast(&value, ValueType::of::<TValue>())?.downcast_ref::<TValue>().cloned()
@@ -734,8 +746,14 @@ impl<TSource: PartialEq + 'static, TValue: PropertyValue> BindingHost for TypedB
     }
 
     fn write_target_change(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) {
-        let value = if self.controller.target.casts_value.get() {
+        let casts = self.controller.target.casts_value.get();
+        let value = if !self.controller.target.writeback_uses_change_value(e) {
             TypedValueSlot::<TValue>::try_get_target_value(&self.controller.target)
+        } else if casts {
+            e.to_owned_args()
+                .new_value()
+                .and_then(|v| ValueTypes::try_cast(&v, ValueType::of::<TValue>()))
+                .and_then(|v| v.downcast_ref::<TValue>().cloned())
         } else {
             e.new_value().downcast_ref::<TValue>().cloned()
         };

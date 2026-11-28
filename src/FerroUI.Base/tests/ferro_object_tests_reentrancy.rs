@@ -540,12 +540,11 @@ fn coercion_callback_can_read_the_object() {
     target.set_value(Class1::limit_property(), 200);
     target.coerce_value(Class1::coerced_property());
     assert_eq!(70, target.get_value(Class1::coerced_property()));
-    // As upstream: when both the value and the base value change in a
-    // coercion pass with an animation in effect, the base value is assigned
-    // the coerced animated value (70) rather than the coerced base value
-    // (150). This looks like an upstream defect; it is replicated, and this
-    // assertion pins it so that a deliberate fix has to touch it.
-    assert_eq!(Some(70), target.get_base_value(Class1::coerced_property()));
+    // The isolated local-value correction deliberately fixes the inherited
+    // storage defect: the base slot keeps the coerced base input (150), not
+    // the animated input (70). The original assertion pinned that defect;
+    // the new coercion/animation regressions also verify restoration and raw input.
+    assert_eq!(Some(150), target.get_base_value(Class1::coerced_property()));
 }
 
 #[test]

@@ -405,3 +405,55 @@ mod borrowed_values {
         assert_eq!(object.with_value(Class1::foo_property(), String::len), 5);
     }
 }
+
+#[test]
+fn instance_data_preserves_slots_identity_and_reentrant_old_value_drops() {
+    use std::{cell::Cell, rc::Rc};
+    struct Slot {
+        owner: crate::WeakRef<FerroObject>,
+        drops: Rc<Cell<usize>>,
+    }
+    impl Drop for Slot {
+        fn drop(&mut self) {
+            let owner = self.owner.upgrade().unwrap();
+            assert_eq!(*owner.instance_data::<usize>().unwrap(), 27);
+            owner.set_instance_data(Some(Rc::new(31_i32)));
+            self.drops.set(self.drops.get() + 1);
+        }
+    }
+    let owner = FerroObject::new();
+    let drops = Rc::new(Cell::new(0));
+    owner.set_instance_data(Some(Rc::new(27_usize)));
+    owner.set_instance_data(Some(Rc::new(Slot {
+        owner: owner.to_weak(),
+        drops: drops.clone(),
+    })));
+    owner.set_instance_data::<Slot>(None);
+    assert_eq!(drops.get(), 1);
+    assert_eq!(*owner.instance_data::<i32>().unwrap(), 31);
+    assert!(owner.instance_data::<Slot>().is_none());
+    owner.set_instance_data::<usize>(None);
+    owner.set_instance_data::<i32>(None);
+    assert_eq!(drops.get(), 1);
+}
+
+/// The object-owned data slots live in the rare part of the value store, not in every object: an
+/// object is as large as before the slots existed. The size is that of a build without the
+/// development features, which add fields to the layers.
+#[test]
+#[cfg(all(target_pointer_width = "64", not(feature = "hot-reload"), not(feature = "tagged-weak-references")))]
+fn instance_data_adds_nothing_to_an_object() {
+    assert_eq!(std::mem::size_of::<FerroObject>(), FERRO_OBJECT_SIZE, "size_of::<FerroObject>()");
+    let owner = FerroObject::new();
+    // Asking for, or removing, a slot of an object that never held one allocates nothing.
+    assert!(owner.instance_data::<u8>().is_none());
+    assert!(owner.set_instance_data::<u8>(None).is_none());
+    assert!(!owner.values_have_rare_part());
+    owner.set_instance_data(Some(Rc::new(3_u8)));
+    assert_eq!(*owner.instance_data::<u8>().unwrap(), 3);
+    assert!(owner.values_have_rare_part());
+}
+
+/// The bytes of a `FerroObject` on a 64-bit target, as on main before the slots.
+#[cfg(all(target_pointer_width = "64", not(feature = "hot-reload"), not(feature = "tagged-weak-references")))]
+const FERRO_OBJECT_SIZE: usize = 248;

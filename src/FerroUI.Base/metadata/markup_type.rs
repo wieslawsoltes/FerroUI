@@ -32,7 +32,7 @@ use crate::{BoxedValue, TypeInfo};
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::fmt;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::sync::{OnceLock, RwLock};
 
 /// Names a Rust type lazily. Type identities cannot be computed in constant

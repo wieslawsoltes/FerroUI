@@ -54,6 +54,7 @@ impl BoxedLocalValueBindingObserver {
         if kind == BindingValueType::DO_NOTHING {
             return;
         }
+        if self.state.is_stopped() { return; }
         let Some(owner) = self.state.owner.upgrade() else { return };
         let (value, error) = value.into_value_and_error();
         let value = match value {
@@ -74,8 +75,7 @@ impl BoxedLocalValueBindingObserver {
 
 impl IDisposable for BoxedLocalValueBindingObserver {
     fn dispose(&self) {
-        self.state.detach();
-        self.completed();
+        self.state.stop(self.property, self, ClearValidation::BeforeRemoval);
     }
 }
 

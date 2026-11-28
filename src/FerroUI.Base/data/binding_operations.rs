@@ -35,4 +35,15 @@ impl BindingOperations {
     ) -> Option<Rc<dyn BindingExpressionBase>> {
         target.get_expression(property)
     }
+
+    /// Retrieves only the local-priority expression, even if an animation
+    /// currently supplies the effective value. Observable bindings do not have
+    /// an expression; use `FerroObject::has_local_value_binding` to detect them.
+    /// This does not start, evaluate or dispose a binding.
+    pub fn get_local_binding_expression_base(
+        target: &FerroObject,
+        property: &'static FerroProperty,
+    ) -> Option<Rc<dyn BindingExpressionBase>> {
+        target.get_local_expression(property)
+    }
 }

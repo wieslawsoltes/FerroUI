@@ -32,10 +32,46 @@ pub(crate) trait EffectiveValueDyn: Any {
 /// The write of a value of a property with a coercion callback (`EffectiveValue::set_and_raise_coerced`).
 type CoercedSet<T> = fn(&EffectiveValue<T>, &FerroObject, T, BindingPriority, bool, bool);
 
+/// What the next coerced write of a value does instead of coercing its input (`EffectiveValueState::
+/// pending_coercion`): set by the untyped store right before the write, and taken by the write, so that
+/// the typed code of every value type stays what it is without these cases.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum EntryCoercion {
+    /// Coerce the input: every write but the ones below.
+    Recompute,
+    /// Explicit coercion: an unchanged winning entry reuses its coerced output.
+    ReuseUnchanged { base: bool },
+    /// Explicit coercion: a clear deferred by a styling pass writes its input uncoerced.
+    Raw,
+    /// The value under an animation that ended: the uncoerced base value is the input again.
+    RestoreBase,
+}
+
+/// The typed operations of explicit coercion (`StyledPropertyMetadata::with_coerce_on_reevaluation`).
+/// The table of a value type is made by that builder alone, so a value type whose coercion is not
+/// explicit carries none of them (docs/binary-size.md, section 4.17).
+pub(crate) struct ExplicitFns<T> {
+    /// The output of a write whose coercion is reused or skipped, `None` to coerce it.
+    output: fn(&EffectiveValue<T>, &T, BindingPriority, EntryCoercion) -> Option<T>,
+}
+
+impl<T: StyledValue> ExplicitFns<T> {
+    const FNS: Self = Self {
+        output: EffectiveValue::<T>::explicit_output,
+    };
+
+    /// The table of `T`, a constant.
+    pub(crate) fn get() -> &'static Self {
+        &Self::FNS
+    }
+}
+
 pub(crate) struct UncommonFields<T> {
     coerce: CoerceValueCallback<T>,
     uncoerced_value: RefCell<T>,
     uncoerced_base_value: RefCell<T>,
+    coerced_value_valid: Cell<bool>,
+    coerced_base_valid: Cell<bool>,
     /// The write of a value with the callback. Its address is taken here alone, where a coercion callback
     /// was registered, and not by the write of every value type.
     set: CoercedSet<T>,
@@ -52,6 +88,8 @@ impl<T: Clone + 'static> UncommonFields<T> {
             coerce: coerce.clone(),
             uncoerced_value: RefCell::new(value.clone()),
             uncoerced_base_value: RefCell::new(value.clone()),
+            coerced_value_valid: Cell::new(false),
+            coerced_base_valid: Cell::new(false),
             set: EffectiveValue::<T>::set_and_raise_coerced,
             operations,
         }
@@ -68,13 +106,17 @@ pub(crate) struct EffectiveValueState {
     base_value_entry: OptionCell<Rc<dyn IValueEntry>>,
     is_overriden_current_value: Cell<bool>,
     is_coerced_default_value: Cell<bool>,
+    explicit_coercion: bool,
+    reuse_unmodified_coercion: Cell<bool>,
+    reset_coercion_on_reevaluation: Cell<bool>,
+    pending_coercion: Cell<EntryCoercion>,
     /// The base value is the value (`EffectiveValue::base_value`): what a value without an animation over it
     /// has, and it is then kept once.
     base_is_value: Cell<bool>,
 }
 
 impl EffectiveValueState {
-    fn new(property: &'static FerroProperty) -> Self {
+    fn new(property: &'static FerroProperty, explicit_coercion: bool) -> Self {
         Self {
             property,
             priority: Cell::new(BindingPriority::Unset),
@@ -83,6 +125,10 @@ impl EffectiveValueState {
             base_value_entry: OptionCell::new(),
             is_overriden_current_value: Cell::new(false),
             is_coerced_default_value: Cell::new(false),
+            explicit_coercion,
+            reuse_unmodified_coercion: Cell::new(false),
+            reset_coercion_on_reevaluation: Cell::new(false),
+            pending_coercion: Cell::new(EntryCoercion::Recompute),
             base_is_value: Cell::new(false),
         }
     }
@@ -128,13 +174,76 @@ impl EffectiveValueState {
         }
     }
 
-    fn begin_reevaluation(&self, clear_local_value: bool) {
+    fn begin_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
+        // Only a property that opted out of coercion on reevaluation keeps this state: every other
+        // value pays one test of a field here, as before the option existed.
+        if self.explicit_coercion {
+            self.begin_explicit_coercion_reevaluation(clear_local_value, force_coerce);
+        }
         let overridden = self.is_overriden_current_value.get();
         if clear_local_value || (self.priority.get() != BindingPriority::LocalValue && !overridden) {
             self.priority.set(BindingPriority::Unset);
         }
         if clear_local_value || (self.base_priority.get() != BindingPriority::LocalValue && !overridden) {
             self.base_priority.set(BindingPriority::Unset);
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn begin_explicit_coercion_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
+        self.reuse_unmodified_coercion.set(!force_coerce);
+        // A clear deferred by a styling pass stays requested until the pass reevaluates.
+        self.reset_coercion_on_reevaluation
+            .set(clear_local_value || self.reset_coercion_on_reevaluation.get());
+        if clear_local_value {
+            self.is_coerced_default_value.set(false);
+        }
+    }
+
+    /// Whether a coerced write watches its local input for a watcher of suppressed local writes.
+    #[inline(never)]
+    fn watches_local_input(
+        owner: &FerroObject,
+        priority: BindingPriority,
+        is_overridden_current_value: bool,
+        is_coerced_default_value: bool,
+    ) -> bool {
+        priority == BindingPriority::LocalValue
+            && !is_overridden_current_value
+            && !is_coerced_default_value
+            && owner.has_suppressed_local_value_handlers()
+    }
+
+    /// The end of a reevaluation of a property that opted out of coercion on reevaluation.
+    #[cold]
+    #[inline(never)]
+    fn end_explicit_coercion_reevaluation(&self) {
+        self.reuse_unmodified_coercion.set(false);
+        self.reset_coercion_on_reevaluation.set(false);
+    }
+
+    /// Stores `entry` and says how its value is coerced, for a property that opted out of
+    /// coercion on reevaluation: an unchanged winning entry reuses its coerced output.
+    #[cold]
+    #[inline(never)]
+    fn update_explicit_coercion_entry(
+        &self,
+        owner: &FerroObject,
+        entry: &Rc<dyn IValueEntry>,
+        priority: BindingPriority,
+    ) -> EntryCoercion {
+        let base = priority > BindingPriority::Animation && self.priority.get() <= BindingPriority::Animation;
+        let slot = if base { &self.base_value_entry } else { &self.value_entry };
+        let can_reuse = owner.values().is_evaluating() && self.reuse_unmodified_coercion.get()
+            && slot.with(|previous| previous.is_some_and(|previous| entry_ptr_eq(previous, entry)));
+        self.update_value_entry(Some(entry), priority);
+        if self.reset_coercion_on_reevaluation.get() && owner.values().is_evaluating() {
+            EntryCoercion::Raw
+        } else if can_reuse && slot.with(|current| current.is_some_and(|current| entry_ptr_eq(current, entry))) {
+            EntryCoercion::ReuseUnchanged { base }
+        } else {
+            EntryCoercion::Recompute
         }
     }
 
@@ -220,8 +329,44 @@ impl dyn EffectiveValueDyn {
         self.state().is_overriden_current_value.set(value);
     }
 
-    pub(crate) fn begin_reevaluation(&self, clear_local_value: bool) {
-        self.state().begin_reevaluation(clear_local_value);
+    pub(crate) fn begin_reevaluation(&self, clear_local_value: bool, force_coerce: bool) {
+        self.state().begin_reevaluation(clear_local_value, force_coerce);
+    }
+
+    /// The end of a reevaluation: the default is coerced again where nothing is left, except for
+    /// a local value hidden by an animation that just ended, which is still the input of the
+    /// property (restored by `remove_animation`), and for explicit coercion.
+    pub(crate) fn finish_reevaluation(&self, owner: &FerroObject) {
+        let state = self.state();
+        if state.explicit_coercion {
+            state.end_explicit_coercion_reevaluation();
+        } else if state.base_priority.get() == BindingPriority::Unset {
+            self.end_reevaluation(owner);
+        }
+    }
+
+    /// Removes an animation that ended: the base value is the value again; a coerced value takes
+    /// its uncoerced base value as the input.
+    pub(crate) fn remove_animation(&self, owner: &FerroObject) {
+        let state = self.state();
+        state.pending_coercion.set(EntryCoercion::RestoreBase);
+        self.remove_animation_and_raise(owner);
+        state.pending_coercion.set(EntryCoercion::Recompute);
+    }
+
+    /// The uncoerced inputs become the values again, for a property whose coercion is explicit
+    /// (`StyledPropertyMetadata::with_coerce_on_reevaluation`); nothing for any other property.
+    pub(crate) fn reset_coercion(&self, owner: &FerroObject) {
+        if self.state().explicit_coercion {
+            // Found by the type of the value: registered with the explicit coercion of its type.
+            if let Some(reset) = crate::ferro_property_metadata::explicit_reset(Any::type_id(self)) {
+                reset(self, owner);
+            }
+        }
+    }
+
+    pub(crate) fn clears_coercion_on_clear(&self) -> bool {
+        self.state().explicit_coercion
     }
 
     pub(crate) fn can_remove(&self) -> bool {
@@ -238,8 +383,15 @@ impl dyn EffectiveValueDyn {
     pub(crate) fn set_and_raise(&self, owner: &FerroObject, entry: &Rc<dyn IValueEntry>, priority: BindingPriority) {
         debug_assert!(priority != BindingPriority::LocalValue);
         let state = self.state();
-        state.update_value_entry(Some(entry), priority);
-        self.apply_entry(owner, &**entry, priority);
+        if state.explicit_coercion {
+            let coercion = state.update_explicit_coercion_entry(owner, entry, priority);
+            state.pending_coercion.set(coercion);
+            self.apply_entry(owner, &**entry, priority);
+            state.pending_coercion.set(EntryCoercion::Recompute);
+        } else {
+            state.update_value_entry(Some(entry), priority);
+            self.apply_entry(owner, &**entry, priority);
+        }
         if priority > BindingPriority::LocalValue {
             if let Some((kind, error)) = entry.get_data_validation_state() {
                 owner.on_update_data_validation(state.property, kind, error);
@@ -341,6 +493,109 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         self.base_value.set(None);
     }
 
+    /// The uncoerced inputs become the default, which a coerced default is written from; the
+    /// previous inputs, dropped by the caller after the write.
+    #[cold]
+    #[inline(never)]
+    fn replace_inputs_with_default(&self) -> (T, T) {
+        let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+        let default = self.metadata.default_value().clone();
+        (uncommon.uncoerced_value.replace(default.clone()), uncommon.uncoerced_base_value.replace(default))
+    }
+
+    /// The input and the output of a coerced write that the untyped store asked something else of
+    /// (`EntryCoercion`): the uncoerced base value after an animation, or the output that explicit
+    /// coercion reuses or skips.
+    #[cold]
+    #[inline(never)]
+    fn pending_input(&self, value: T, priority: BindingPriority, pending: EntryCoercion) -> (T, Option<T>) {
+        if pending == EntryCoercion::RestoreBase {
+            let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+            return (uncommon.uncoerced_base_value.borrow().clone(), None);
+        }
+        let output = match self.metadata.explicit_coercion() {
+            Some(explicit) => (explicit.output)(self, &value, priority, pending),
+            None => None,
+        };
+        (value, output)
+    }
+
+    /// Whether a local write requests another input than the local input (a watcher of
+    /// suppressed local writes is told of it).
+    #[cold]
+    #[inline(never)]
+    fn local_input_changed(&self, requested: &T) -> bool {
+        if self.state.base_priority.get() != BindingPriority::LocalValue {
+            return true;
+        }
+        let uncommon = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+        // Compared in place: a comparison does not write the input it reads.
+        !(uncommon.operations.equals)(&uncommon.uncoerced_base_value.borrow(), requested)
+    }
+
+    /// The output of a write of explicit coercion whose coercion is reused or skipped, `None` to
+    /// coerce the input (`ExplicitFns::output`).
+    fn explicit_output(&self, value: &T, priority: BindingPriority, coercion: EntryCoercion) -> Option<T> {
+        let uncommon = self.uncommon.as_ref()?;
+        match coercion {
+            EntryCoercion::Raw => Some(value.clone()),
+            EntryCoercion::ReuseUnchanged { base } => {
+                let (valid, raw, effective_priority) = if base {
+                    (&uncommon.coerced_base_valid, &uncommon.uncoerced_base_value, self.state.base_priority.get())
+                } else {
+                    (&uncommon.coerced_value_valid, &uncommon.uncoerced_value, self.state.priority.get())
+                };
+                let raw = raw.borrow().clone();
+                if valid.get()
+                    && (effective_priority == BindingPriority::Unset || effective_priority == priority)
+                    && (uncommon.operations.equals)(&raw, value)
+                {
+                    if base { self.base_value() } else { Some(self.value()) }
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
+    }
+
+    /// `reset_coerced` of an untyped value of this type (`explicit_reset`).
+    pub(crate) fn reset_erased(value: &dyn EffectiveValueDyn, owner: &FerroObject) {
+        if let Some(value) = (value as &dyn Any).downcast_ref::<Self>() {
+            value.reset_coerced(owner);
+        }
+    }
+
+    /// The uncoerced inputs become the value and the base value again (`reset_coercion`).
+    fn reset_coerced(&self, owner: &FerroObject) {
+        let Some(uncommon) = &self.uncommon else { return };
+        let operations = &uncommon.operations;
+        let old = self.value();
+        let raw = uncommon.uncoerced_value.borrow().clone();
+        let raw_base = uncommon.uncoerced_base_value.borrow().clone();
+        let changed = !(operations.equals)(&old, &raw);
+        let old_base = self.base_value();
+        let base_changed = old_base.as_ref().is_some_and(|value| !(operations.equals)(value, &raw_base));
+        owner.values().advance_value_generation();
+        self.set_value_alone(raw);
+        if old_base.is_some() {
+            if self.state.priority.get() == self.state.base_priority.get() {
+                self.set_base_to_value();
+            } else {
+                self.set_base_value(raw_base);
+            }
+        }
+        self.state.is_coerced_default_value.set(false);
+        uncommon.coerced_value_valid.set(true);
+        uncommon.coerced_base_valid.set(old_base.is_some());
+        if changed {
+            (operations.notify_value_changed)(self, owner, old);
+        }
+        if base_changed {
+            (operations.notify_base_value_changed)(self, owner);
+        }
+    }
+
     // Preserve the two owned-value frames and their argument evaluation:
     // clone the uncoerced value, then the base, then read priorities in the
     // original call. Clone, equality, coercion and Drop can reenter the store.
@@ -375,10 +630,21 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         is_overridden_current_value: bool,
         is_coerced_default_value: bool,
     ) {
-        let operations = &self.uncommon.as_ref().expect("a coerced write has the uncommon fields").operations;
+        let uncommon_fields = self.uncommon.as_ref().expect("a coerced write has the uncommon fields");
+        let operations = &uncommon_fields.operations;
+        // What the untyped store asked of this write instead of a coercion of its input.
+        let (value, output) = match self.state.pending_coercion.replace(EntryCoercion::Recompute) {
+            EntryCoercion::Recompute => (value, None),
+            pending => self.pending_input(value, priority, pending),
+        };
+        // The coerced default: its inputs are the default while it is written; the previous ones
+        // are dropped after it.
+        let previous_inputs = is_coerced_default_value.then(|| self.replace_inputs_with_default());
         let old_value = self.value();
         let mut value_changed = false;
         let mut base_value_changed = false;
+        let watch_local =
+            EffectiveValueState::watches_local_input(owner, priority, is_overridden_current_value, is_coerced_default_value);
 
         self.state.is_overriden_current_value.set(is_overridden_current_value);
         self.state.is_coerced_default_value.set(is_coerced_default_value);
@@ -388,7 +654,15 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         // coercion `v` is the value itself and not a copy of it.
         let (v, uncoerced) = match &self.uncommon {
             Some(uncommon) if !is_coerced_default_value => {
-                ((uncommon.coerce)(owner, value.clone()), Some((uncommon, value)))
+                if output.is_none() {
+                    if priority <= self.state.priority.get() {
+                        uncommon.coerced_value_valid.set(false);
+                    }
+                    if priority <= self.state.base_priority.get() && priority >= BindingPriority::LocalValue {
+                        uncommon.coerced_base_valid.set(false);
+                    }
+                }
+                (output.unwrap_or_else(|| (uncommon.coerce)(owner, value.clone())), Some((uncommon, value)))
             }
             _ => (value, None),
         };
@@ -396,6 +670,9 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         let sets_base = |state: &EffectiveValueState| {
             priority <= state.base_priority.get() && priority >= BindingPriority::LocalValue
         };
+        let local_changed = watch_local
+            && sets_base(&self.state)
+            && uncoerced.as_ref().is_some_and(|(_, requested)| self.local_input_changed(requested));
 
         if priority <= self.state.priority.get() {
             value_changed = !(operations.equals)(&*self.value.borrow(), &v);
@@ -420,16 +697,19 @@ impl<T: Clone + 'static> EffectiveValue<T> {
                 self.state.priority.set(priority);
                 if let Some((uncommon, value)) = &uncoerced {
                     uncommon.uncoerced_value.replace(value.clone());
+                    uncommon.coerced_value_valid.set(true);
                 }
                 self.state.base_priority.set(priority);
                 if let Some((uncommon, value)) = uncoerced {
                     uncommon.uncoerced_base_value.replace(value);
+                    uncommon.coerced_base_valid.set(true);
                 }
             } else {
                 self.set_value_alone(v);
                 self.state.priority.set(priority);
                 if let Some((uncommon, value)) = uncoerced {
                     uncommon.uncoerced_value.replace(value);
+                    uncommon.coerced_value_valid.set(true);
                 }
             }
         } else if sets_base(&self.state) {
@@ -438,6 +718,7 @@ impl<T: Clone + 'static> EffectiveValue<T> {
             self.state.base_priority.set(priority);
             if let Some((uncommon, value)) = uncoerced {
                 uncommon.uncoerced_base_value.replace(value);
+                uncommon.coerced_base_valid.set(true);
             }
         }
 
@@ -446,6 +727,10 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         } else if base_value_changed {
             (operations.notify_base_value_changed)(self, owner);
         }
+        if local_changed && !value_changed {
+            owner.notify_suppressed_local_value_changed(self.state.property);
+        }
+        drop(previous_inputs);
     }
 
     fn set_and_raise_core_with_base(
@@ -467,9 +752,14 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         let mut bv = base_value.clone();
 
         if let Some(uncommon) = &self.uncommon {
+            uncommon.coerced_value_valid.set(false);
+            uncommon.coerced_base_valid.set(false);
             v = (uncommon.coerce)(owner, value.clone());
+            // The base value is coerced from its own input. At one priority it is the value.
             if priority != base_priority {
                 bv = (uncommon.coerce)(owner, base_value.clone());
+            } else {
+                bv = v.clone();
             }
         }
 
@@ -483,20 +773,24 @@ impl<T: Clone + 'static> EffectiveValue<T> {
         }
 
         if !self.with_base_value(|base| base.is_some_and(|base| (operations.equals)(base, &bv))) {
-            // The base value becomes `v`: the value itself where the value has just become it.
-            if value_changed {
+            // A base value under an animation keeps its own value and its own input.
+            if priority == base_priority {
                 self.set_base_to_value();
             } else {
-                self.set_base_value(v);
+                self.set_base_value(bv);
             }
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
-                uncommon.uncoerced_value.replace(base_value);
+                uncommon.uncoerced_base_value.replace(base_value);
             }
         }
 
         self.state.priority.set(priority);
         self.state.base_priority.set(base_priority);
+        if let Some(uncommon) = &self.uncommon {
+            uncommon.coerced_value_valid.set(true);
+            uncommon.coerced_base_valid.set(true);
+        }
 
         if value_changed {
             (operations.notify_value_changed)(self, owner, old_value);
@@ -602,9 +896,10 @@ impl<T: StyledValue> EffectiveValue<T> {
                 },
             ))
         });
+        let explicit_coercion = uncommon.is_some() && !metadata.coerce_on_reevaluation();
         Self {
             metadata,
-            state: EffectiveValueState::new(property),
+            state: EffectiveValueState::new(property, explicit_coercion),
             value: RefCell::new(value),
             base_value: OptionCell::new(),
             uncommon,
@@ -621,6 +916,16 @@ impl<T: StyledValue> EffectiveValue<T> {
 
     pub fn set_coerced_default_value_and_raise(&self, owner: &FerroObject, value: T) {
         self.set_and_raise_core(owner, value, self.state.priority.get(), false, true);
+    }
+
+    pub fn try_get_local_value(&self) -> Option<T> {
+        if self.state.base_priority.get() != BindingPriority::LocalValue {
+            return None;
+        }
+        match &self.uncommon {
+            Some(uncommon) => Some(uncommon.uncoerced_base_value.borrow().clone()),
+            None => self.base_value(),
+        }
     }
 
     /// The base value, if there is one.
@@ -806,6 +1111,7 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
     }
 
     fn end_reevaluation(&self, owner: &FerroObject) {
+        // (The base priority and explicit coercion are tested by `finish_reevaluation`, untyped.)
         if self.state.priority.get() == BindingPriority::Unset {
             // Keep the priority short circuit before even reading metadata.
             if let Some(coercion) = self.metadata.coercion() {
@@ -826,6 +1132,7 @@ impl<T: StyledValue> EffectiveValueDyn for EffectiveValue<T> {
         debug_assert!(self.state.priority.get() != BindingPriority::Animation);
         debug_assert!(self.state.base_priority.get() != BindingPriority::Unset);
         self.state.update_value_entry(None, BindingPriority::Animation);
+        // A coerced value takes its uncoerced base value instead (`EntryCoercion::RestoreBase`).
         let base = self.base_value().expect("base value is set");
         self.set_and_raise_core(owner, base, self.state.base_priority.get(), false, false);
     }

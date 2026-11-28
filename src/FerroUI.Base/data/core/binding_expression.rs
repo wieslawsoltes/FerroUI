@@ -82,6 +82,18 @@ fn is_unset(value: &Option<BoxedValue>) -> bool {
     value.as_ref().is_some_and(|v| v.is::<UnsetValueType>())
 }
 
+struct SnapshotDirectionGuard<'a>(&'a Cell<bool>, bool);
+impl<'a> SnapshotDirectionGuard<'a> {
+    fn new(value: &'a Cell<bool>) -> Self {
+        Self(value, value.replace(true))
+    }
+}
+impl Drop for SnapshotDirectionGuard<'_> {
+    fn drop(&mut self) {
+        self.0.set(self.1);
+    }
+}
+
 /// A binding expression which accepts and produces (possibly boxed) untyped
 /// values: a source, a path of expression nodes read from it, and the
 /// conversion of the result to the target.
@@ -103,6 +115,13 @@ pub struct BindingExpression {
     ignores_own_target_changes: Cell<bool>,
     /// Set while the expression publishes a value to its target, when it ignores its own changes.
     publishing: Cell<bool>,
+    writing_change_value_to_source: Cell<bool>,
+    publishing_change_value_target: Cell<bool>,
+    /// Whether the target property writes the value of its change notification back to the
+    /// source (`binding_writeback_uses_change_value` of its metadata): resolved once when the
+    /// expression starts, for a two-way or one-way-to-source binding without a delay that writes
+    /// on property changes, so publishing a value reads no metadata.
+    change_value_writeback: Cell<bool>,
 }
 
 impl BindingExpression {
@@ -174,6 +193,9 @@ impl BindingExpression {
             lost_focus_token: RefCell::new(None),
             ignores_own_target_changes: Cell::new(false),
             publishing: Cell::new(false),
+            writing_change_value_to_source: Cell::new(false),
+            publishing_change_value_target: Cell::new(false),
+            change_value_writeback: Cell::new(false),
         });
 
         let mut leaf_accessor = None;
@@ -482,16 +504,28 @@ impl BindingExpression {
             value = self.convert_fallback(fallback_value, "FallbackValue");
         }
 
-        let guard = self.ignores_own_target_changes.get() && !self.publishing.replace(true);
-        self.base.publish_value(Publish::Value(value), error, force_update);
-        if guard {
-            self.publishing.set(false);
+        let _publishing = self.ignores_own_target_changes.get().then(|| SnapshotDirectionGuard::new(&self.publishing));
+        if self.uses_change_value_writeback() {
+            // A snapshot writeback must not echo a synchronous source
+            // notification into the target: that can undo a nested correction.
+            if self.writing_change_value_to_source.get() {
+                self.base.cache_value(Publish::Value(value), error);
+                return;
+            }
+            let _guard = SnapshotDirectionGuard::new(&self.publishing_change_value_target);
+            self.base.publish_value(Publish::Value(value), error, force_update);
+        } else {
+            self.base.publish_value(Publish::Value(value), error, force_update);
         }
     }
 
     fn write_target_value_to_source(&self) {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         if self.base.is_reload_paused() { return; }
+
+        if self.writing_change_value_to_source.get() || self.publishing_change_value_target.get() {
+            return;
+        }
 
         debug_assert!(matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource));
         self.stop_delay_timer();
@@ -601,13 +635,21 @@ impl BindingExpression {
         true
     }
 
-    fn on_target_property_changed(&self) {
+    fn on_target_property_changed(&self, e: &crate::FerroPropertyChangedEventArgs<'_>) {
         debug_assert!(matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource));
         if self.publishing.get() {
             return;
         }
         let delay = self.delay();
         let Some(uncommon) = self.uncommon.as_ref().filter(|_| !delay.is_zero()) else {
+            if self.change_value_writeback.get() {
+                if self.writing_change_value_to_source.get() || self.publishing_change_value_target.get() {
+                    return;
+                }
+                let _guard = SnapshotDirectionGuard::new(&self.writing_change_value_to_source);
+                self.write_value_to_source(e.to_owned_args().new_value());
+                return;
+            }
             // The value is read from the target object instead of the change
             // notification because it may have changed again in between.
             self.write_target_value_to_source();
@@ -638,6 +680,29 @@ impl BindingExpression {
             }
         };
         timer.start();
+    }
+
+    fn uses_change_value_writeback(&self) -> bool {
+        self.change_value_writeback.get()
+    }
+
+    /// Reads, once per start, whether the target property writes back the value of its change
+    /// notification ([`change_value_writeback`](Self::change_value_writeback)). A one-way binding
+    /// never writes back, so it reads nothing.
+    fn resolve_change_value_writeback(&self) {
+        let writes_back = matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource)
+            && self.delay().is_zero()
+            && self.update_source_trigger() == UpdateSourceTrigger::PropertyChanged
+            && self.base.target_property().zip(self.base.try_get_target()).is_some_and(|(property, target)| {
+                property.get_metadata_for(&target).binding_writeback_uses_change_value() == Some(true)
+            });
+        self.change_value_writeback.set(writes_back);
+    }
+
+    /// Whether the expression resolved that its target writes back change values (for the tests).
+    #[cfg(test)]
+    pub(crate) fn writes_back_change_values(&self) -> bool {
+        self.change_value_writeback.get()
     }
 }
 
@@ -749,6 +814,7 @@ impl UntypedBindingExpression for BindingExpression {
     }
 
     fn start_core(&self) {
+        self.resolve_change_value_writeback();
         let source = self.source.as_ref().and_then(WeakValue::upgrade);
         let Some(source) = source else {
             self.on_node_error(-1, "Binding Source is null.");
@@ -768,7 +834,7 @@ impl UntypedBindingExpression for BindingExpression {
                     let subscription = target.property_changed(move |e| {
                         if e.property().id() == id {
                             if let Some(this) = weak.upgrade() {
-                                this.on_target_property_changed();
+                                this.on_target_property_changed(e);
                             }
                         }
                     });

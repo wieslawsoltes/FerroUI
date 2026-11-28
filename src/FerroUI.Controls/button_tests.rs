@@ -19,6 +19,194 @@ use ferroui_base::{ferro_model, BoxedValue, Point, Ref};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
+/// A reusable control that owns its command-enabled policy. The native Button
+/// must retain input and invocation without installing a second policy.
+#[repr(C)]
+struct OwnerEnabledButton {
+    base: Button,
+}
+ferroui_base::ferro_class!(OwnerEnabledButton: Button);
+ferroui_base::ferro_impl_classes!(OwnerEnabledButton:
+    ferroui_base::FerroObjectImpl, ferroui_base::StyledElementImpl,
+    ferroui_base::VisualImpl, ferroui_base::layout::LayoutableImpl,
+    ferroui_base::interactivity::InteractiveImpl, ferroui_base::input::InputElementImpl,
+    crate::ControlImpl, crate::primitives::TemplatedControlImpl, crate::ContentControlImpl
+);
+impl OwnerEnabledButton {
+    fn new() -> Ref<Self> {
+        ferroui_base::instantiate(Self {
+            base: Button::construct(),
+        })
+    }
+}
+impl crate::ButtonImpl for OwnerEnabledButton {
+    fn uses_default_command_enablement(_this: &Self) -> bool {
+        false
+    }
+}
+
+#[repr(C)]
+struct OwnerEnabledGrandchild {
+    base: OwnerEnabledButton,
+}
+ferroui_base::ferro_class!(OwnerEnabledGrandchild: OwnerEnabledButton);
+ferroui_base::ferro_impl_classes!(OwnerEnabledGrandchild:
+    ferroui_base::FerroObjectImpl, ferroui_base::StyledElementImpl,
+    ferroui_base::VisualImpl, ferroui_base::layout::LayoutableImpl,
+    ferroui_base::interactivity::InteractiveImpl, ferroui_base::input::InputElementImpl,
+    crate::ControlImpl, crate::primitives::TemplatedControlImpl,
+    crate::ContentControlImpl, crate::ButtonImpl
+);
+
+#[test]
+fn owner_enabled_policy_is_inherited_by_a_further_derived_control() {
+    let _scope = test_scope();
+    let target = ferroui_base::instantiate(OwnerEnabledGrandchild {
+        base: OwnerEnabledButton {
+            base: Button::construct(),
+        },
+    });
+    let command = TestCommand::new(false);
+    let base = target.upcast_ref::<Button>();
+    base.set_command(command.as_command());
+    let _root = TestRoot::with_child(base);
+    assert_eq!(command.subscription_count(), 0);
+    assert!(base.is_effectively_enabled());
+}
+
+#[test]
+fn default_button_queries_once_per_update_and_keeps_its_native_subscription() {
+    let _scope = test_scope();
+    let queries = Rc::new(Cell::new(0));
+    let count = queries.clone();
+    let command = TestCommand::with_can_execute(move |_| {
+        count.set(count.get() + 1);
+        false
+    });
+    let target = Button::new();
+    target.set_command(command.as_command());
+    assert_eq!(queries.get(), 0);
+    assert_eq!(command.subscription_count(), 0);
+    let root = TestRoot::with_child(&target);
+    assert_eq!(queries.get(), 1);
+    assert_eq!(command.subscription_count(), 1);
+    assert!(!target.is_effectively_enabled());
+    target.set_command_parameter(Some(Rc::new(42_i32)));
+    assert_eq!(queries.get(), 2);
+    command.raise_can_execute_changed();
+    assert_eq!(queries.get(), 3);
+    root.set_child(None);
+    assert_eq!(command.subscription_count(), 0);
+    command.raise_can_execute_changed();
+    assert_eq!(queries.get(), 3);
+    root.set_child(&target);
+    assert_eq!(command.subscription_count(), 1);
+    assert_eq!(queries.get(), 4);
+    target.set_command(None);
+    assert_eq!(command.subscription_count(), 0);
+    assert!(target.is_effectively_enabled());
+}
+
+#[test]
+fn owner_enabled_button_has_no_native_command_queries_or_subscriptions() {
+    let _scope = test_scope();
+    let queries = Rc::new(Cell::new(0));
+    let count = queries.clone();
+    let first = TestCommand::with_can_execute(move |_| {
+        count.set(count.get() + 1);
+        false
+    });
+    let second = TestCommand::new(false);
+    let target = OwnerEnabledButton::new();
+    target.set_command(first.as_command());
+    assert_eq!(first.subscription_count(), 0);
+    assert_eq!(queries.get(), 0);
+    let root = TestRoot::with_child(&target);
+    assert_eq!(first.subscription_count(), 0);
+    assert_eq!(queries.get(), 0);
+    assert!(target.is_effectively_enabled());
+    target.set_command_parameter(Some(Rc::new(42_i32)));
+    first.raise_can_execute_changed();
+    assert_eq!(queries.get(), 0);
+    target.set_command(second.as_command());
+    assert_eq!(first.subscription_count(), 0);
+    assert_eq!(second.subscription_count(), 0);
+    root.set_child(None);
+    root.set_child(&target);
+    assert_eq!(second.subscription_count(), 0);
+    assert_eq!(queries.get(), 0);
+    target.set_command(None);
+    assert!(target.is_effectively_enabled());
+}
+
+#[test]
+fn owner_enabled_button_owns_command_binding_error_enablement() {
+    let _scope = test_scope();
+    let target = OwnerEnabledButton::new();
+    target.bind_binding(
+        Button::command_property(),
+        &ReflectionBinding::new("MissingCommand"),
+    );
+    target.set_data_context(Some(Model::new_model(EmptyViewModel)));
+    let _root = TestRoot::with_child(&target);
+    Dispatcher::ui_thread().run_jobs(Some(DispatcherPriority::LOADED));
+    assert!(target.command().is_none());
+    assert!(target.is_enabled());
+    assert!(target.is_effectively_enabled());
+}
+
+#[test]
+fn owner_enabled_button_preserves_property_and_ancestor_disabling() {
+    let _scope = test_scope();
+    let target = OwnerEnabledButton::new();
+    target.set_command(TestCommand::new(false).as_command());
+    let root = TestRoot::with_child(&target);
+    assert!(target.is_effectively_enabled());
+    target.set_is_enabled(false);
+    assert!(!target.is_effectively_enabled());
+    target.set_is_enabled(true);
+    assert!(target.is_effectively_enabled());
+    root.set_is_enabled(false);
+    assert!(!target.is_effectively_enabled());
+    root.set_is_enabled(true);
+    assert!(target.is_effectively_enabled());
+}
+
+#[test]
+fn owner_enabled_button_keeps_native_keyboard_and_command_invocation() {
+    let _scope = test_scope();
+    let queries = Rc::new(Cell::new(0));
+    let executions = Rc::new(Cell::new(0));
+    let count = queries.clone();
+    let executed = executions.clone();
+    let command = TestCommand::with_can_execute_and_execute(
+        move |parameter| {
+            count.set(count.get() + 1);
+            assert_eq!(parameter.unwrap().downcast_ref::<i32>(), Some(&42));
+            true
+        },
+        move |parameter| {
+            assert_eq!(parameter.unwrap().downcast_ref::<i32>(), Some(&42));
+            executed.set(executed.get() + 1);
+        },
+    );
+    let target = OwnerEnabledButton::new();
+    target.set_command_parameter(Some(Rc::new(42_i32)));
+    target.set_command(command.as_command());
+    let _root = TestRoot::with_child(&target);
+    assert_eq!(queries.get(), 0);
+    let clicks = count_clicks(&target);
+    target.raise_event(&create_key_down_event(Key::Enter, None));
+    assert_eq!(queries.get(), 1);
+    assert_eq!(executions.get(), 1);
+    assert_eq!(clicks.get(), 1);
+    target.set_is_enabled(false);
+    target.raise_event(&create_key_down_event(Key::Enter, None));
+    assert_eq!(queries.get(), 1);
+    assert_eq!(executions.get(), 1);
+    assert_eq!(clicks.get(), 1);
+}
+
 fn counter() -> (Rc<Cell<i32>>, Rc<Cell<i32>>) {
     let raised = Rc::new(Cell::new(0));
     (raised.clone(), raised)

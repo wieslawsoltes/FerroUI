@@ -19,7 +19,7 @@ use crate::{
 };
 use std::any::Any;
 use std::cell::{Cell, OnceCell, RefCell};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 type EffectiveValueRef = Rc<dyn EffectiveValueDyn>;
 
@@ -75,12 +75,23 @@ crate::ferro_thread_local! {
     static REEVALUATION_LISTS: RefCell<Vec<Vec<EffectiveValueRef>>> = const { RefCell::new(Vec::new()) };
 }
 
-/// The local value bindings of a store (`ValueStore::local_bindings`).
+crate::ferro_thread_local! {
+    /// The local binding expressions being started on this thread, innermost last. One stack for
+    /// the thread, not a list in each store: a store holds no state for what lasts only a call.
+    static INITIALIZING_LOCAL_EXPRESSIONS: RefCell<Vec<Weak<dyn BindingExpressionBase>>> =
+        const { RefCell::new(Vec::new()) };
+}
+
+/// The rare part of a store (`ValueStore::local_bindings`), allocated on first use: its local
+/// value bindings and the object-owned data slots of its owner.
 #[derive(Default)]
 struct LocalBindings {
     bindings: RefCell<Vec<(u32, Rc<dyn IDisposable>)>>,
     /// The local value bindings that are binding expressions.
     expressions: RefCell<Vec<(u32, Rc<dyn BindingExpressionBase>)>>,
+    /// The object-owned data of the owner (`FerroObject::instance_data`): few objects hold any,
+    /// so it lives here and not in every object.
+    instance_data: OptionCell<Box<crate::ferro_object::InstanceDataMap>>,
 }
 
 /// Stores the styled property values of a [`FerroObject`] and resolves the
@@ -201,6 +212,16 @@ impl ValueStore {
         self.local_bindings.get_or_init(Default::default)
     }
 
+    /// The object-owned data slots of the owner, when the rare part of the store exists.
+    pub(crate) fn instance_data(&self) -> Option<&OptionCell<Box<crate::ferro_object::InstanceDataMap>>> {
+        self.local_bindings.get().map(|local| &local.instance_data)
+    }
+
+    /// The object-owned data slots of the owner, allocating the rare part of the store.
+    pub(crate) fn instance_data_or_create(&self) -> &OptionCell<Box<crate::ferro_object::InstanceDataMap>> {
+        &self.local_bindings().instance_data
+    }
+
     /// Whether the store keeps the lists of its local value bindings.
     #[cfg(test)]
     pub(crate) fn has_local_bindings(&self) -> bool {
@@ -224,6 +245,12 @@ impl ValueStore {
                 self.reevaluate_effective_values(owner, None);
             }
         }
+    }
+
+    /// Makes the end of the current styling pass reevaluate every value.
+    #[cfg(test)]
+    pub(crate) fn request_reevaluation(&self) {
+        self.reevaluation_pending.set(true);
     }
 
     pub fn add_frame(&self, owner: &FerroObject, frame: Rc<dyn ValueFrame>) {
@@ -342,7 +369,10 @@ impl ValueStore {
             self.dispose_existing_local_value_binding(property);
             let disposable: Rc<dyn IDisposable> = source.clone();
             self.set_local_value_binding(property, disposable);
-            self.local_bindings().expressions.borrow_mut().push((property.id(), source.clone()));
+            let local = self.local_bindings();
+            local.expressions.borrow_mut().push((property.id(), source.clone()));
+            INITIALIZING_LOCAL_EXPRESSIONS.with(|stack| stack.borrow_mut().push(Rc::downgrade(&source)));
+            let _initializing = LocalBindingInitializationGuard;
             source.attach(SinkRef::Store(owner.to_weak()), None, owner, property, BindingPriority::LocalValue);
             source.start(true);
         } else {
@@ -421,6 +451,24 @@ impl ValueStore {
             }
         }
         local()
+    }
+
+    pub fn get_local_expression(&self, property: &'static FerroProperty) -> Option<Rc<dyn BindingExpressionBase>> {
+        self.local_bindings.get()?.expressions
+            .borrow()
+            .iter()
+            .find(|(id, _)| *id == property.id())
+            .map(|(_, expression)| expression.clone())
+    }
+
+    pub fn is_local_binding_expression_initializing(&self, property: &FerroProperty) -> bool {
+        let Some(local) = self.local_bindings.get() else { return false };
+        let current = local.expressions.borrow().iter()
+            .find(|(id, _)| *id == property.id()).map(|(_, expression)| Rc::downgrade(expression));
+        current.is_some_and(|current| {
+            INITIALIZING_LOCAL_EXPRESSIONS
+                .with(|stack| stack.borrow().iter().any(|expression| Weak::ptr_eq(expression, &current)))
+        })
     }
 
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
@@ -552,11 +600,59 @@ impl ValueStore {
         #[cfg(all(debug_assertions, feature = "hot-reload"))]
         self.record_local_write(property);
         if let Some(effective) = self.get_effective_value(property) {
-            if effective.priority() == BindingPriority::LocalValue || effective.is_overriden_current_value() {
+            let overridden = effective.is_overriden_current_value();
+            if effective.priority() == BindingPriority::LocalValue || overridden {
+                effective.set_is_overriden_current_value(false);
+                self.reevaluate_effective_value(owner, property, Some(effective), None, true);
+            } else if effective.clears_coercion_on_clear() {
+                // A local value hidden by an animation is not what this clear removes.
+                if effective.base_priority() == BindingPriority::LocalValue {
+                    self.reset_coercion(owner, property);
+                } else {
+                    self.reevaluate_effective_value(owner, property, Some(effective), None, true);
+                }
+            }
+        }
+    }
+
+    pub fn clear_local_value(&self, owner: &FerroObject, property: &'static FerroProperty) {
+        #[cfg(all(debug_assertions, feature = "hot-reload"))]
+        self.record_local_write(property);
+        if let Some(effective) = self.get_effective_value(property) {
+            if effective.base_priority() == BindingPriority::LocalValue {
                 effective.set_is_overriden_current_value(false);
                 self.reevaluate_effective_value(owner, property, Some(effective), None, true);
             }
         }
+    }
+
+    pub fn clear_local_value_and_binding(&self, owner: &FerroObject, property: &'static FerroProperty) {
+        // Detach before invoking source disposal. Its completion callback must
+        // not clear the input or notify halfway through this operation.
+        if let Some(local) = self.local_bindings.get() {
+            let binding = {
+                let mut bindings = local.bindings.borrow_mut();
+                bindings.iter().position(|(id, _)| *id == property.id())
+                    .map(|index| bindings.remove(index).1)
+            };
+            let expression = {
+                let mut expressions = local.expressions.borrow_mut();
+                expressions.iter().position(|(id, _)| *id == property.id())
+                    .map(|index| expressions.remove(index).1)
+            };
+            // The expression is already detached, so its completion does not clear this state.
+            let had_validation = expression.as_ref().is_some_and(|e| e.is_data_validation_enabled());
+            if let Some(binding) = binding {
+                binding.dispose();
+            }
+            drop(expression);
+            self.clear_local_value(owner, property);
+            if had_validation {
+                owner.on_update_data_validation(property, BindingValueType::UNSET_VALUE, None);
+            }
+            return;
+        }
+        self.clear_local_value(owner, property);
     }
 
     pub fn set_value<T: StyledValue>(
@@ -700,6 +796,16 @@ impl ValueStore {
         }
     }
 
+    pub fn reset_coercion(&self, owner: &FerroObject, property: &'static FerroProperty) {
+        if let Some(value) = self.get_effective_value(property) {
+            value.reset_coercion(owner);
+            if value.can_remove() {
+                self.remove_effective_value(owner, property);
+                value.dispose_and_raise_unset(owner);
+            }
+        }
+    }
+
     #[inline]
     pub fn coerce_default_value<T: StyledValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
         let metadata = property.get_metadata_for(owner);
@@ -738,6 +844,15 @@ impl ValueStore {
     fn get_stored_base_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
         let effective = self.get_effective_value(property)?;
         cast_effective_value::<S>(&*effective).try_get_base_value()
+    }
+
+    pub fn get_local_value<T: StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+        self.get_stored_local_value::<T::Storage>(property).map(T::from_storage)
+    }
+
+    fn get_stored_local_value<S: StyledValue>(&self, property: &FerroProperty) -> Option<S> {
+        let effective = self.get_effective_value(property)?;
+        cast_effective_value::<S>(&*effective).try_get_local_value()
     }
 
     /// Finds the effective value of an inherited property on the nearest
@@ -930,6 +1045,9 @@ impl ValueStore {
         }
     }
 
+    // Inlined into the activation of a style instance, the path of every class or pseudo-class
+    // change (pinned: thin LTO stopped inlining it after unrelated changes of the store).
+    #[inline]
     pub fn on_frame_activation_changed(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) {
         match frame.base().entry_count() {
             0 => {}
@@ -1274,6 +1392,14 @@ impl ValueStore {
             // Don't reevaluate if a styling pass is in effect, reevaluation
             // will be done when it has finished.
             if self.styling.get() > 0 {
+                // The pending pass does not know this was a clear: a property that opted out of
+                // coercion on reevaluation records it on the value now. Every other value is left
+                // to the pass, as before the option existed.
+                if ignore_local_value {
+                    if let Some(current) = current.as_ref().filter(|current| current.clears_coercion_on_clear()) {
+                        record_deferred_clear(&**current, changed_value_entry.is_some());
+                    }
+                }
                 self.reevaluation_pending.set(true);
                 return;
             }
@@ -1283,7 +1409,7 @@ impl ValueStore {
             // Notify the existing effective value that reevaluation is starting.
             crate::perf_count!(SingleValueReevaluations);
             if let Some(current) = &current {
-                current.begin_reevaluation(ignore_local_value);
+                current.begin_reevaluation(ignore_local_value, changed_value_entry.is_some());
             }
 
             // Iterate the frames to get the effective value.
@@ -1338,14 +1464,14 @@ impl ValueStore {
             }
 
             if let Some(current) = &current {
-                current.end_reevaluation(owner);
+                current.finish_reevaluation(owner);
 
                 if current.can_remove() {
                     if current.base_priority() == BindingPriority::Unset {
                         self.remove_effective_value(owner, property);
                         current.dispose_and_raise_unset(owner);
                     } else {
-                        current.remove_animation_and_raise(owner);
+                        current.remove_animation(owner);
                     }
                 }
 
@@ -1378,7 +1504,7 @@ impl ValueStore {
             // no copy of the list is needed for the visit.
             for (_, value) in self.effective_values.borrow().iter() {
                 crate::perf_count!(ReevaluatedEffectiveValues);
-                value.begin_reevaluation(false);
+                value.begin_reevaluation(false, changed_value_entry.is_some());
             }
 
             // Iterate the frames, setting and creating effective values.
@@ -1427,7 +1553,7 @@ impl ValueStore {
             values.extend(self.effective_values.borrow().iter().map(|(_, v)| v.clone()));
             for value in values.iter().rev() {
                 let property = value.property();
-                value.end_reevaluation(owner);
+                value.finish_reevaluation(owner);
                 if value.can_remove() {
                     self.remove_effective_value(owner, property);
                     value.dispose_and_raise_unset(owner);
@@ -1556,6 +1682,14 @@ struct EvaluatingGuard<'a>(&'a Cell<u32>);
 
 /// A store dropped with effective values of inheriting properties no longer holds them
 /// (`FerroProperty::holders`).
+/// Records a clear of a value of a property that opted out of coercion on reevaluation, while a
+/// styling pass defers its reevaluation.
+#[cold]
+#[inline(never)]
+fn record_deferred_clear(current: &dyn EffectiveValueDyn, changed_value_entry: bool) {
+    current.begin_reevaluation(true, changed_value_entry);
+}
+
 impl Drop for ValueStore {
     fn drop(&mut self) {
         for (_, value) in self.effective_values.get_mut().iter() {
@@ -1564,6 +1698,15 @@ impl Drop for ValueStore {
                 property.remove_holder();
             }
         }
+    }
+}
+
+struct LocalBindingInitializationGuard;
+
+impl Drop for LocalBindingInitializationGuard {
+    fn drop(&mut self) {
+        let popped = INITIALIZING_LOCAL_EXPRESSIONS.with(|stack| stack.borrow_mut().pop());
+        debug_assert!(popped.is_some());
     }
 }
 

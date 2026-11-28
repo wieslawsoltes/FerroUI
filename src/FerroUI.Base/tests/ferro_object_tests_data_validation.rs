@@ -314,3 +314,21 @@ macro_rules! data_validation_tests {
 
 data_validation_tests!(direct_property_tests, validated_direct_int_property, non_validated_direct_int_property);
 data_validation_tests!(styled_property_tests, validated_styled_int_property, non_validated_styled_int_property);
+
+#[test]
+fn clearing_a_validated_local_binding_clears_its_validation_state() {
+    let source = ViewModel::new();
+    source.set_int_value(5);
+    let target = Class1::new();
+    let property = Class1::validated_styled_int_property();
+    let binding = ReflectionBinding::new("IntValue");
+    binding.set_source(Some(source.clone()));
+    target.bind_binding(property, &binding);
+    let before = target.notifications().len();
+
+    target.clear_local_value_and_binding(property);
+
+    let notifications = target.notifications();
+    assert!(notifications.len() > before);
+    assert!(notifications.last().is_some_and(|n| n.0 == BindingValueType::UNSET_VALUE));
+}
