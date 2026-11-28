@@ -273,7 +273,7 @@ pub struct DrawingContextImpl {
     color_matrix_stack: Vec<effects::ColorMatrixFrame>,
     /// The pixel operations that are pushed (on the device), innermost
     /// last.
-    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "gpu")), allow(dead_code))]
     pixel_operation_stack: Vec<effects::PixelOperationFrame>,
     /// The clips that are open in the scene of the context.
     open_clips: usize,

@@ -422,3 +422,51 @@ fn the_blur_of_colours_on_the_device_agrees_with_the_cpu_filter() {
         assert!(error <= RENDER_TEST_ALLOWED_ERROR, "drop shadow {deviation}: error {error}");
     }
 }
+
+/// The offset of a drop shadow turns with its content in the compute mode, as in the CPU mode.
+#[cfg(feature = "gpu")]
+#[test]
+fn the_drop_shadow_of_the_compute_mode_follows_a_turn() {
+    use ferroui_base::media::effects::ImmutableDropShadowEffect;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::Colors;
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    if !device.supports_compute() {
+        println!("skipped: no compute");
+        return;
+    }
+    let drawn = |mode: VelloRenderingMode| {
+        let sink = crate::gpu::create_window_scene_sink(&device, &[mode], SIZE, SIZE, wgpu::TextureFormat::Rgba8Unorm);
+        let pixels = Rc::new(RefCell::new(vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4]));
+        let target = pixels.clone();
+        let mut context = DrawingContextImpl::new(
+            CreateInfo {
+                sink,
+                backdrop: None,
+                on_finished: Box::new(move |sink| sink.render_to_pixels(&mut target.borrow_mut())),
+                scale_drawing_to_dpi: false,
+                dpi: Vector::new(96.0, 96.0),
+                rendering_modes: vec![mode],
+            },
+            Vec::new(),
+        );
+        context.set_transform(Matrix::create_rotation(0.6) * Matrix::create_translation(40.0, 16.0));
+        let effects = context.as_drawing_context_impl_with_effects().unwrap();
+        effects.push_effect(None, &ImmutableDropShadowEffect::new(12.0, 0.0, 3.0, Colors::BLACK, 0.8));
+        let brush = ImmutableSolidColorBrush::new(Colors::RED);
+        effects.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(Rect::new(0.0, 0.0, 30.0, 30.0)), &BoxShadows::default());
+        effects.pop_effect();
+        context.dispose();
+        let result = pixels.borrow().clone();
+        result
+    };
+    let error = render_test_error(&drawn(VelloRenderingMode::Gpu), &drawn(VelloRenderingMode::Cpu));
+    println!("turned drop shadow: error {error:.4}");
+    assert!(error <= RENDER_TEST_ALLOWED_ERROR, "error {error}");
+}

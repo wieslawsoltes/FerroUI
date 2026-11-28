@@ -105,7 +105,7 @@ pub fn create_gpu(graphics_context: &Rc<dyn IPlatformGraphicsContext>) -> Option
 
 #[cfg(all(test, feature = "hybrid"))]
 mod layer_tests;
-#[cfg(all(test, feature = "hybrid"))]
+#[cfg(test)]
 mod effect_pass_tests;
 #[cfg(test)]
 mod effect_route_tests;
