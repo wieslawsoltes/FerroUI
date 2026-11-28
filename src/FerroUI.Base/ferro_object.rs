@@ -28,7 +28,7 @@ struct SuppressedLocalValueHandlers(HandlerList<SuppressedLocalValueHandler>);
 
 type SuppressedLocalValueHooks = (fn(&FerroObject) -> bool, fn(&FerroObject, &'static FerroProperty));
 
-thread_local! {
+crate::ferro_thread_local! {
     /// The check and the notification of watchers of suppressed local writes, installed by the
     /// first watcher (`FerroObject::suppressed_local_value_changed`): until then a coerced write
     /// reads no instance data for them.
