@@ -24,9 +24,10 @@
 //! coordinates are those of naga's GLSL back end with its default flags (the
 //! vertex output adjusted to the clip space of OpenGL).
 //!
-//! The browser renderer does not draw these programs yet (step 3 of the
-//! Vello route of docs/porting/gpu-rendering.md): it draws the shader effects
-//! by their CPU references until its sink paints with framebuffer textures.
+//! The WebGL2 route of `ferroui-vello` draws the effects of the library with
+//! these programs ([`library_shader_effects`], step 3 of the Vello route of
+//! docs/porting/gpu-rendering.md). The effects with images, and those of an
+//! application, are drawn by their CPU references there for now.
 
 use ferroui_base::media::effects::{
     CustomEffect, ImmutableCustomEffect, SHADER_WGSL_FRAGMENT_ENTRY, SHADER_WGSL_VERTEX_ENTRY,
@@ -48,6 +49,76 @@ pub struct ShaderEffectGlsl {
     /// The textures of the fragment stage (the content): the binding of the
     /// WGSL module and the name of the sampler in the GLSL.
     pub textures: Vec<(u32, String)>,
+    /// The size in bytes of the block `uniforms`, a multiple of 16.
+    pub uniforms_size: u32,
+    /// The byte offset of each member of the block `uniforms`, in order: the
+    /// uniforms of the convention of `ShaderEffectDescription`.
+    pub uniform_offsets: Vec<u32>,
+}
+
+/// A shader effect of the library with its GLSL ES 3.0.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct LibraryShaderEffect {
+    /// [`CustomEffect::NAME`].
+    pub name: &'static str,
+    /// [`shader_module_hash`] of its WGSL module: what tells it from an
+    /// effect of an application of the same name.
+    pub module_hash: u64,
+    /// The stages and what they bind.
+    pub glsl: ShaderEffectGlsl,
+}
+
+/// The FNV-1a hash of the text of a WGSL module.
+pub fn shader_module_hash(module: &str) -> u64 {
+    module.bytes().fold(0xcbf2_9ce4_8422_2325, |hash, byte| (hash ^ u64::from(byte)).wrapping_mul(0x0100_0000_01b3))
+}
+
+fn library_entry<T: CustomEffect>() -> Result<LibraryShaderEffect, ShaderEffectGlslError> {
+    let description = ImmutableCustomEffect::new(T::default())
+        .shader()
+        .ok_or_else(|| ShaderEffectGlslError::Translation(format!("{} has no shader", T::NAME)))?;
+    let module = description.wgsl_module();
+    Ok(LibraryShaderEffect {
+        name: T::NAME,
+        module_hash: shader_module_hash(&module),
+        glsl: translate_shader_effect_module(&module)?,
+    })
+}
+
+/// The shader effects of the library that sample no image, in GLSL ES 3.0:
+/// what the WebGL2 route of `ferroui-vello` compiles (its build script writes
+/// them into the crate, so the browser module carries no translator).
+pub fn library_shader_effects() -> Result<Vec<LibraryShaderEffect>, ShaderEffectGlslError> {
+    use ferroui_base::media::effects::library::{
+        BurningFlameShaderEffect, GridShaderEffect, PixelateEffect, PointerSpotlightShaderEffect,
+        ReactiveGridShaderEffect, ScanlineShaderEffect, SpotlightShaderEffect, WaterRippleShaderEffect,
+    };
+    Ok(vec![
+        library_entry::<PixelateEffect>()?,
+        library_entry::<ScanlineShaderEffect>()?,
+        library_entry::<GridShaderEffect>()?,
+        library_entry::<SpotlightShaderEffect>()?,
+        library_entry::<PointerSpotlightShaderEffect>()?,
+        library_entry::<ReactiveGridShaderEffect>()?,
+        library_entry::<WaterRippleShaderEffect>()?,
+        library_entry::<BurningFlameShaderEffect>()?,
+    ])
+}
+
+/// The size and the member offsets of the block `uniforms` of `module`.
+fn uniform_layout(module: &naga::Module) -> (u32, Vec<u32>) {
+    let block = module.global_variables.iter().find(|(_, variable)| {
+        variable.name.as_deref() == Some("uniforms") && variable.space == naga::AddressSpace::Uniform
+    });
+    let Some((_, variable)) = block else {
+        return (0, Vec::new());
+    };
+    match &module.types[variable.ty].inner {
+        naga::TypeInner::Struct { members, span } => {
+            ((*span).max(16).div_ceil(16) * 16, members.iter().map(|member| member.offset).collect())
+        }
+        _ => (0, Vec::new()),
+    }
 }
 
 /// Why the WGSL module of a shader effect was not translated or written.
@@ -124,7 +195,8 @@ pub fn translate_shader_effect_module(wgsl_module: &str) -> Result<ShaderEffectG
         .filter_map(|(name, mapping)| Some((binding(mapping.texture)?, name.clone())))
         .collect();
     textures.sort();
-    Ok(ShaderEffectGlsl { vertex, fragment, uniform_blocks, textures })
+    let (uniforms_size, uniform_offsets) = uniform_layout(&module);
+    Ok(ShaderEffectGlsl { vertex, fragment, uniform_blocks, textures, uniforms_size, uniform_offsets })
 }
 
 /// One entry point of `module` in GLSL ES 3.0, with naga's reflection.
@@ -267,6 +339,21 @@ mod tests {
         }
         // A type without a shader has none.
         assert!(shader_effect_glsl::<TintEffect>().is_none());
+    }
+
+    #[test]
+    fn the_library_table_holds_the_effects_without_images_with_their_layout() {
+        let table = library_shader_effects().expect("the library translates");
+        assert_eq!(8, table.len());
+        for effect in &table {
+            assert_ne!(0, effect.module_hash, "{}", effect.name);
+            assert_eq!(0, effect.glsl.uniforms_size % 16, "{}", effect.name);
+            // At least `layer_size` and `layer_scale`, in the order of the block.
+            assert!(effect.glsl.uniform_offsets.len() >= 2, "{}", effect.name);
+            assert!(effect.glsl.uniform_offsets.windows(2).all(|pair| pair[0] < pair[1]), "{}", effect.name);
+            let textures: Vec<u32> = effect.glsl.textures.iter().map(|(binding, _)| *binding).collect();
+            assert_eq!(vec![SHADER_WGSL_CONTENT_BINDING], textures, "{}", effect.name);
+        }
     }
 
     /// The page transitions (#455, E6): the textures of their images follow
