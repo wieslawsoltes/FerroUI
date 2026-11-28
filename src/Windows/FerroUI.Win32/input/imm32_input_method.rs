@@ -793,6 +793,9 @@ impl Imm32InputMethod {
                     return;
                 }
                 let Some(context) = owned.as_ref() else {
+                    // Assistive technology uses the system caret even when
+                    // the window has no input method context.
+                    self.caret_manager.try_create(&*self.system, record.hwnd);
                     return;
                 };
                 himc = context.handle;
@@ -989,11 +992,10 @@ impl Imm32InputMethod {
         self.input_options.apply(self);
     }
 
-    /// The candidate window of a connection client: the cursor rectangle is
-    /// in the coordinates of the client's window (the site that installed
-    /// it), which may not be the window that has the input context (a popup
-    /// that does not take activation).
-    fn move_managed_ime_window(&self, rect: Rect, himc: isize) {
+    /// Moves the system caret and, when available, the IME window. The
+    /// rectangle is in the client site's coordinates, which can differ
+    /// from the active window's when a popup does not take activation.
+    fn move_managed_text_cursor(&self, rect: Rect, himc: Option<isize>) {
         let generation = self.generation.get();
         let context_generation = self.context_generation.get();
         let hwnd = self.hwnd.get();
@@ -1032,6 +1034,9 @@ impl Imm32InputMethod {
         if !is_current() {
             return;
         }
+        let Some(himc) = himc else {
+            return;
+        };
 
         if self.show_composition_window() {
             self.configure_composition_window(x1, y1, himc, y2 - y1);
@@ -1323,13 +1328,12 @@ impl Imm32InputMethod {
             if this.generation.get() != generation {
                 return;
             }
-            let Some(context) = this.acquire_context(this.hwnd.get()) else {
-                return;
-            };
-            if this.generation.get() != generation {
+            let context_generation = this.context_generation.get();
+            let context = this.acquire_context(this.hwnd.get());
+            if this.generation.get() != generation || this.context_generation.get() != context_generation {
                 return;
             }
-            this.move_managed_ime_window(rect, context.handle);
+            this.move_managed_text_cursor(rect, context.as_ref().map(|context| context.handle));
         }));
     }
 

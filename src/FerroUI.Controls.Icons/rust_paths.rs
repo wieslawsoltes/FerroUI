@@ -7,7 +7,9 @@
 ferroui_base::ferro_rust_paths! {
     classes: [
         crate::BitmapIcon,
+        crate::BitmapIconSource,
         crate::ImageIcon,
+        crate::ImageIconSource,
     ],
     types: [
     ],

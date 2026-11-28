@@ -82,12 +82,9 @@ pub trait TextInputMethodEditing {
 /// capture it when the client is installed. It never redirects to a newer
 /// focused element, and retaining it does not retain its owner or client.
 ///
-/// The input method manager creates a connection only for a client that opts
-/// in by implementing [`TextInputMethodEditing`]
-/// ([`TextInputMethodClient::input_method_editing`] returns `Some`); for every
-/// other client [`TextInputMethodClient::input_method_connection`] is `None` and
-/// the platform backends keep their upstream behaviour
-/// (`docs/porting/winui-rich-text.md`, decision D5).
+/// The input method manager connects clients that opt in to atomic composition
+/// or contextual replacement. Platforms query the connection for the editing
+/// capability they use.
 pub struct TextInputMethodConnection {
     owner: WeakRef<InputElement>,
     client: Weak<dyn TextInputMethodClient>,
@@ -262,6 +259,44 @@ impl TextInputMethodConnection {
         Ok(())
     }
 
+    /// Replaces the primary selection and the specified adjacent UTF-16 units
+    /// as one routed edit. Empty text requests deletion.
+    pub fn replace_surrounding_text(
+        self: &Rc<Self>,
+        before: usize,
+        after: usize,
+        text: &str,
+        timestamp: u64,
+    ) -> Result<bool, TextInputMethodError> {
+        let client = self.client()?;
+        if !client.supports_surrounding_text_edits() {
+            return Err(TextInputMethodError::Unsupported);
+        }
+        self.dispatch(
+            text,
+            timestamp,
+            self.state_version(&*client)?,
+            CommitAction::ReplaceSurrounding { before, after },
+        )
+    }
+
+    /// Applies an exact edit whose range is local to the client's surrounding
+    /// text and whose selection is local to the resulting text.
+    pub fn apply_surrounding_text_edit(
+        self: &Rc<Self>,
+        edit: &TextInputMethodEdit,
+        timestamp: u64,
+    ) -> Result<bool, TextInputMethodError> {
+        let client = self.client()?;
+        if !client.supports_surrounding_text_edits() {
+            return Err(TextInputMethodError::Unsupported);
+        }
+        let version = self.state_version(&*client)?;
+        edit.apply_to(&client.surrounding_text())?;
+        self.check_state(&*client, version)?;
+        self.dispatch(&edit.text, timestamp, version, CommitAction::SurroundingEdit(edit.clone()))
+    }
+
     /// Starts a new immutable platform session without deleting the current
     /// selection. Any previous session on this connection is superseded.
     pub fn begin_composition(
@@ -358,6 +393,8 @@ pub struct TextInputMethodCommit {
 enum CommitAction {
     Text,
     Edit(TextInputMethodEdit),
+    ReplaceSurrounding { before: usize, after: usize },
+    SurroundingEdit(TextInputMethodEdit),
     CompleteComposition,
 }
 
@@ -374,6 +411,23 @@ impl TextInputMethodCommit {
     }
     pub fn completes_composition(&self) -> bool {
         matches!(self.action, CommitAction::CompleteComposition)
+    }
+
+    /// UTF-16 units before and after the primary selection to remove with
+    /// this text input event.
+    pub fn surrounding_deletion(&self) -> Option<(usize, usize)> {
+        match self.action {
+            CommitAction::ReplaceSurrounding { before, after } => Some((before, after)),
+            _ => None,
+        }
+    }
+
+    /// An exact edit addressed to the client's surrounding text.
+    pub fn surrounding_edit(&self) -> Option<&TextInputMethodEdit> {
+        match &self.action {
+            CommitAction::SurroundingEdit(edit) => Some(edit),
+            _ => None,
+        }
     }
     pub fn owner(&self) -> Option<Ref<InputElement>> {
         self.connection.owner()

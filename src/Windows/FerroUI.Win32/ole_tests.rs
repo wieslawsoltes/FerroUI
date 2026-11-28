@@ -94,6 +94,83 @@ fn sample_data_transfer() -> Rc<DataTransfer> {
     transfer
 }
 
+#[test]
+fn native_clipboard_publishes_chromium_formats_alongside_ordinary_ole_formats() {
+    let input = DataTransfer::new();
+    let item = DataTransferItem::new();
+    item.set_text(Some("one\ntwo"));
+    let box_selection = DataFormat::create_string_application_format("Box");
+    item.set(&box_selection, Some("1".to_owned()));
+    let opaque = DataFormat::create_bytes_application_format("Bytes");
+    item.set(&opaque, Some(Rc::from([0, 255, 128, 0])));
+    let occupied = DataFormat::create_bytes_platform_format("Web Custom Format0");
+    item.set(&occupied, Some(Rc::from([0x2a])));
+    input.add(item);
+
+    let published = crate::web_clipboard::publish(input.clone(), &input.formats());
+    let (_, object) = DataTransferToOleDataObjectWrapper::new(published);
+    let native = OleDataObjectToDataTransferWrapper::new(&object);
+    assert_eq!(native.try_get_text().as_deref(), Some("one\ntwo"));
+    assert_eq!(native.try_get_value(&box_selection).as_deref(), Some("1"));
+    assert_eq!(native.try_get_value(&occupied).as_deref(), Some([0x2a].as_slice()));
+    let map = native.try_get_value(&DataFormat::create_bytes_platform_format("Web Custom Format Map")).unwrap();
+    let map: serde_json::Value = serde_json::from_slice(&map).unwrap();
+    assert_eq!(map, serde_json::json!({
+        "application/frn-fmt.text.426f78": "Web Custom Format1",
+        "application/frn-fmt.bytes.4279746573": "Web Custom Format2",
+    }));
+    assert_eq!(
+        native.try_get_value(&DataFormat::create_bytes_platform_format("Web Custom Format1")).as_deref(),
+        Some(b"1".as_slice())
+    );
+    assert_eq!(
+        native.try_get_value(&DataFormat::create_bytes_platform_format("Web Custom Format2")).as_deref(),
+        Some([0, 255, 128, 0].as_slice())
+    );
+}
+
+#[test]
+fn browser_clipboard_map_restores_formats_on_the_native_clipboard_only() {
+    let input = DataTransfer::new();
+    let item = DataTransferItem::new();
+    item.set_text(Some("browser text"));
+    let map = br#"{
+        "application/frn-fmt.text.426f78":"Web Custom Format0",
+        "application/frn-fmt.bytes.4279746573":"Web Custom Format1",
+        "application/frn-fmt.text.57686f6c65":"Web Custom Format2",
+        "application/frn-fmt.text.4d697373696e67":"Web Custom Format99",
+        "application/frn-fmt.text.556e73616665":"CF_UNICODETEXT",
+        "application/other":"Web Custom Format3"
+    }"#;
+    item.set(&DataFormat::create_bytes_platform_format("Web Custom Format Map"), Some(Rc::from(map.as_slice())));
+    for (slot, data) in [
+        ("Web Custom Format0", b"1".as_slice()),
+        ("Web Custom Format1", &[0, 255, 128, 0]),
+        ("Web Custom Format2", b"browser".as_slice()),
+        ("Web Custom Format3", b"foreign".as_slice()),
+    ] {
+        item.set(&DataFormat::create_bytes_platform_format(slot), Some(Rc::from(data)));
+    }
+    let box_selection = DataFormat::create_string_application_format("Box");
+    let bytes = DataFormat::create_bytes_application_format("Bytes");
+    let whole_line = DataFormat::create_string_application_format("Whole");
+    item.set(&whole_line, Some("native".to_owned()));
+    input.add(item);
+    let (_, object) = DataTransferToOleDataObjectWrapper::new(input);
+
+    let clipboard = OleDataObjectToDataTransferWrapper::new_clipboard(&object);
+    assert_eq!(clipboard.try_get_text().as_deref(), Some("browser text"));
+    assert_eq!(clipboard.try_get_value(&box_selection).as_deref(), Some("1"));
+    assert_eq!(clipboard.try_get_value(&bytes).as_deref(), Some([0, 255, 128, 0].as_slice()));
+    assert_eq!(clipboard.try_get_value(&whole_line).as_deref(), Some("native"));
+    assert!(!clipboard.contains(&DataFormat::create_string_application_format("Missing")));
+    assert!(!clipboard.contains(&DataFormat::create_string_application_format("Unsafe")));
+    assert_eq!(clipboard.items().len(), 1);
+    let drag_transfer = OleDataObjectToDataTransferWrapper::new(&object);
+    assert!(!drag_transfer.contains(&box_selection));
+    assert_eq!(drag_transfer.try_get_text().as_deref(), Some("browser text"));
+}
+
 fn enumerate(enumerator: &IEnumFORMATETC) -> Vec<u16> {
     let mut ids = Vec::new();
     loop {
@@ -220,6 +297,29 @@ fn a_data_object_is_a_data_transfer_of_its_formats() {
     assert!(transfer_contract.try_get_value(&DataFormat::file()).is_none());
     assert!(transfer_contract.try_get_value(&DataFormat::create_string_application_format("ferroui-win32-tests.absent")).is_none());
 
+    transfer.dispose();
+}
+
+#[test]
+fn external_editor_markers_keep_their_registered_name_and_single_byte_payload() {
+    let names = ["AvalonEditRectangularSelection", "MSDEVLineSelect"];
+    let item = DataTransferItem::create_text(Some("first\r\nsecond"));
+    for name in names {
+        item.set(&DataFormat::create_bytes_platform_format(name), Some(Rc::from([1])));
+    }
+    let source = DataTransfer::new();
+    source.add(item);
+    let (_wrapper, object) = DataTransferToOleDataObjectWrapper::new(source);
+    let transfer = OleDataObjectToDataTransferWrapper::new(&object);
+    let formats = enumerate(&object.enum_format_etc(DATADIR_GET).unwrap().unwrap());
+    assert_eq!(formats.len(), 1 + names.len());
+    assert_eq!(transfer.try_get_text().as_deref(), Some("first\r\nsecond"));
+    for (id, name) in formats[1..].iter().zip(names) {
+        assert_eq!(unmanaged_methods::get_clipboard_format_name(*id).as_deref(), Some(name));
+        let bytes = transfer.try_get_value(&DataFormat::create_bytes_platform_format(name)).unwrap();
+        assert_eq!(bytes.first(), Some(&1));
+        assert!(bytes[1..].iter().all(|&byte| byte == 0));
+    }
     transfer.dispose();
 }
 

@@ -41,6 +41,14 @@ pub trait TextLine: 'static {
     /// Gets the height of a line of text.
     fn height(&self) -> f64;
 
+    /// Gets the space a minimum line height
+    /// ([`TextParagraphProperties::minimum_line_height`](crate::media::text_formatting::TextParagraphProperties::minimum_line_height))
+    /// added above the runs of the line, and as much below them: 0 for a line
+    /// at its natural height, which is every line without the property.
+    fn vertical_padding(&self) -> f64 {
+        0.0
+    }
+
     /// Gets the number of newline characters at the end of a line.
     fn new_line_length(&self) -> i32;
 

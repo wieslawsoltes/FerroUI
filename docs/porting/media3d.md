@@ -366,6 +366,13 @@ single-threaded build now, the threaded build after #601. WebGPU comes when Ferr
 path ([browser-graphite-webgpu.md](browser-graphite-webgpu.md)); the shader is WGSL, so it then
 runs unchanged.
 
+A browser application turns the executor on as every host does, with the feature `media3d` of
+`ferroui-skia`; without it a `Viewport3D` draws nothing (`scenes_not_drawn`). The ControlCatalog site
+(`samples/ControlCatalog.Browser`) names `ferroui-skia` with the feature for the pages of its section
+"3D", and its headless Chrome test checks that the Viewport3D page is drawn by the GL executor on
+WebGL2: scenes counted on the GPU, none by the CPU reference, none left undrawn, and a shaded
+viewport (export `catalogScene3D`, `scripts/browser/tests/control_catalog.test.mjs`).
+
 ### 3.11 Shared-texture materials
 
 Video frames reach every shipped route as GPU textures in the backend's own device or context

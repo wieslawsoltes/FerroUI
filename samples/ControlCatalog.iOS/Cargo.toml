@@ -17,7 +17,9 @@ path = "main.rs"
 
 [features]
 default = ["skia"]
-skia = ["ferroui-ios/skia"]
+# With the 3D scenes of the pages of the section "3D" (`media3d`: on Graphite the Metal executor of
+# `ferroui-metal` draws them on the GPU, docs/porting/media3d.md, section 3.19).
+skia = ["ferroui-ios/skia", "dep:ferroui-skia", "ferroui-skia/media3d"]
 quartz-metal = ["ferroui-ios/quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/metal"]
 quartz-runtime-shaders = ["quartz-metal", "ferroui-ios/quartz-runtime-shaders"]
 
@@ -27,6 +29,8 @@ ferroui-controls = { workspace = true }
 ferroui-ios = { workspace = true, default-features = false }
 ferroui-quartz = { workspace = true, optional = true }
 control-catalog = { path = "../ControlCatalog" }
+# Named only to turn on its 3D scenes (feature `skia`); the backend itself comes with `ferroui-ios/skia`.
+ferroui-skia = { workspace = true, optional = true }
 
 [build-dependencies]
 ferroui-build = { workspace = true }

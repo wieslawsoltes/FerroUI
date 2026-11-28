@@ -17,6 +17,8 @@ mod vulkan_skia_render_target;
 pub use vulkan_skia_external_objects_feature::VulkanSkiaExternalObjectsFeature;
 pub use vulkan_skia_gpu::VulkanSkiaGpu;
 pub use vulkan_skia_render_target::VulkanSkiaRenderTarget;
+#[cfg(test)]
+pub(crate) use vulkan_skia_render_target::WrappedSurfaceKey;
 
 use ferroui_vulkan::VulkanImageInfo;
 use skia_safe::gpu::vk;
