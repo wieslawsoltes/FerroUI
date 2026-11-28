@@ -11,7 +11,7 @@ use ferroui_base::data::model::{CollectionChange, ModelTypes};
 use ferroui_base::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{ferro_markup_type, BoxedValue};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// The accessor factories compiled binding paths use for their property
@@ -71,6 +71,7 @@ pub(crate) struct InpcPropertyAccessor {
     reference: WeakValue,
     property: Rc<dyn IPropertyInfo>,
     token: Cell<Option<u64>>,
+    native_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
 }
 
 impl InpcPropertyAccessor {
@@ -81,6 +82,7 @@ impl InpcPropertyAccessor {
             reference,
             property,
             token: Cell::new(None),
+            native_subscription: RefCell::new(None),
         })
     }
 
@@ -108,10 +110,30 @@ impl InpcPropertyAccessor {
                 }
             }));
             self.token.set(Some(token));
+        } else if let Some(target) = ValueTypes::as_object(&*o) {
+            // Keep this accessor's own write/publication ordering. The Base
+            // accessor intentionally has different conversion and duplicate
+            // notification behavior, so do not replace this class with it.
+            if let Some(property) = ferroui_base::FerroPropertyRegistry::instance()
+                .find_registered_for(&target, self.property.name())
+            {
+                let id = property.id();
+                let weak = self.this.clone();
+                self.native_subscription.replace(Some(target.property_changed(move |e| {
+                    if e.property().id() == id {
+                        if let Some(this) = weak.upgrade() {
+                            this.send_current_value();
+                        }
+                    }
+                })));
+            }
         }
     }
 
     fn unsubscribe_from_changes(&self) {
+        if let Some(subscription) = self.native_subscription.take() {
+            subscription.dispose();
+        }
         let Some(token) = self.token.take() else { return };
         let Some(o) = self.reference.upgrade() else { return };
         if let Some(inpc) = BaseInpcPropertyAccessor::find_notifier(&*o) {
@@ -289,3 +311,7 @@ ferro_markup_type!(static PropertyInfoAccessorFactory {
             },
     ],
 });
+
+#[cfg(test)]
+#[path = "property_info_accessor_factory_native_tests.rs"]
+mod native_notification_tests;

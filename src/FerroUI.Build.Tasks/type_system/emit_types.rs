@@ -1095,6 +1095,17 @@ impl EmitTypes for ModelEmitTypes {
         PRIMITIVES.iter().find(|(primitive, _)| *primitive == text).map(|(_, name)| *name)
     }
 
+    fn value_type_name(&self, key: TypeKey<'_>) -> Option<String> {
+        if let Some(primitive) = self.primitive_type_name(key) {
+            return Some(primitive.to_string());
+        }
+        let text = text_of(key)?;
+        if let Some((_, declared)) = self.set().find_rust_type(text) {
+            return public_path(declared);
+        }
+        self.set().public_type_name(text)
+    }
+
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
         let (Some(from), Some(to)) = (text_of(from), text_of(to)) else { return false };
         if self.stated_assignable(from, to) {

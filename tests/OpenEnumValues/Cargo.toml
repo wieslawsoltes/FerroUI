@@ -1,0 +1,16 @@
+[workspace]
+[package]
+name = "open-enum-values"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+publish = false
+links = "open_enum_values_xaml"
+build = "build.rs"
+[lib]
+path = "lib.rs"
+[dependencies]
+ferroui-base = { path = "../../src/FerroUI.Base", features = ["compiler-metadata"] }
+[build-dependencies]
+ferroui-build = { path = "../../src/FerroUI.Build.Tasks" }
+ferroui-build-scan = { path = "../../src/FerroUI.Build.Scan" }

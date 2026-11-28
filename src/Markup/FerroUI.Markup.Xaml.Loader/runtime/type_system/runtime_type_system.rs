@@ -1170,17 +1170,23 @@ impl RuntimeTypeSystem {
             let add = self.method(
                 type_,
                 format!("add_{}", event.name),
-                false,
+                event.is_static,
                 self.void(),
-                (vec![handler_type], vec![None]),
+                (vec![handler_type.clone()], vec![None]),
                 RuntimeInvoker::Static(event.add),
                 Vec::new(),
             );
+            let remove = event.remove.map(|remove| self.method(
+                type_, format!("remove_{}", event.name), event.is_static, self.void(),
+                (vec![handler_type.clone()], vec![None]), RuntimeInvoker::Static(remove), Vec::new(),
+            ));
             members.methods.push(add.clone());
+            members.methods.extend(remove.iter().cloned());
             members.events.push(Rc::new(RuntimeEvent {
                 name: event.name.to_string(),
                 declaring_type: weak.clone(),
                 add: Some(add),
+                remove,
             }));
         }
         if markup.kind == MarkupTypeKind::Enum {

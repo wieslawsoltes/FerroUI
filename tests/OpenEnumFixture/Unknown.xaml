@@ -1,0 +1,7 @@
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:e="urn:open-enums">
+ <e:EnumBag x:Key="known" Value="1" Optional="{x:Null}" Closed="First" Bits="3" />
+ <e:EnumBag x:Key="unknown" Value="99" Optional="-99" />
+ <e:EnumBag x:Key="limits" Value="-2147483648" Optional="2147483647" />
+ <e:EnumBag x:Key="static" Value="{x:Static e:Choice.Primary}" Optional="{x:Static e:Choice.None}" />
+ <e:EnumBag x:Key="narrowed" Value="2147483648" Optional="-2147483649" />
+</ResourceDictionary>

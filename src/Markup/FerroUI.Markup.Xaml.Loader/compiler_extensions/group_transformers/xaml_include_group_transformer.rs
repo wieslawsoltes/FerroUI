@@ -74,9 +74,22 @@ pub const COMPILED_RESOURCES_TYPE_NAME: &str = "CompiledFerroXaml.!FerroResource
 #[derive(Default)]
 pub struct XamlRuntimeIncludeFallback {
     can_load: std::cell::RefCell<Option<Rc<dyn Fn(&str) -> bool>>>,
+    public_compiled: std::cell::RefCell<Option<Rc<dyn Fn(&str) -> bool>>>,
 }
 
 impl XamlRuntimeIncludeFallback {
+    /// Exact public compiled-document lookup, separate from source-asset fallback.
+    /// A missing public build method must not turn an embedded private source asset
+    /// into permission to bypass its compiled visibility.
+    pub fn set_public_compiled(&self, lookup: Option<Rc<dyn Fn(&str) -> bool>>) {
+        *self.public_compiled.borrow_mut() = lookup;
+    }
+
+    fn applies_public_compiled(context: &AstGroupTransformationContext, uri: &str) -> bool {
+        let lookup = context.configuration().get_extra::<Self>()
+            .ok().and_then(|fallback| fallback.public_compiled.borrow().clone());
+        lookup.is_some_and(|lookup| lookup(uri))
+    }
     /// Installs (or with `None` removes) the predicate: whether the document with the
     /// absolute URI can be loaded at run time.
     pub fn set(&self, can_load: Option<Rc<dyn Fn(&str) -> bool>>) {
@@ -382,6 +395,7 @@ impl IXamlAstGroupTransformer for FerroXamlIncludeTransformer {
         };
 
         let relative_name = format!("Build:{}", &asset_path[assembly_name_separator..]);
+        let declared_build_method = ava_res_type.find_method(|m| m.name() == relative_name);
         let build_method = ava_res_type.find_method(|m| m.name() == relative_name && m.is_public());
         if let Some(build_method) = build_method {
             return Self::from_method(
@@ -407,6 +421,13 @@ impl IXamlAstGroupTransformer for FerroXamlIncludeTransformer {
             );
         }
 
+        // A runtime projection may know the assembly's resource type but not the
+        // generated build methods. Only an exact public compiled registration may
+        // defer this branch; neither source bytes nor a known private method qualify.
+        if declared_build_method.is_none()
+            && XamlRuntimeIncludeFallback::applies_public_compiled(context, &asset_path_uri) {
+            return Ok(node);
+        }
         context.report_transform_error_node(
             &format!(
                 "Unable to resolve XAML resource \"{asset_path_uri}\" in the \"{assembly}\" assembly. Make sure this file exists and is public."

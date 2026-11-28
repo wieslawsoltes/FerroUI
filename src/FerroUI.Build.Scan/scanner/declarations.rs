@@ -88,6 +88,8 @@ pub(crate) struct RawMember {
     pub fallible: bool,
     pub attributes: Vec<RawAttribute>,
     pub callable: Tokens,
+    pub event_remove: Option<RawAccessor>,
+    pub event_handler_nullable: bool,
 }
 
 /// An accessor of a plain property: whether it is declared with `try_`, and the callable.
@@ -466,13 +468,33 @@ pub(crate) fn read_markup_body(tokens: &[TokenTree], line: usize) -> Result<Mark
                 let (list, line) = take_list(&mut cursor, "the events in brackets")?;
                 let mut list = Cursor::new(&list, line);
                 while !list.is_end() {
+                    let is_static = list.eat_ident("static");
                     let fallible = is_try(&mut list);
                     let name = list.take_ident("the name of an event")?;
                     let (arguments, line) = list.take_group(Delimiter::Parenthesis, "the arguments of the handler in parentheses")?;
                     let parameters = split_types(&arguments, line)?.into_iter().map(positional).collect();
-                    list.expect_arrow('=')?;
-                    let callable = list.take_expression("the callable that subscribes")?.to_vec();
-                    body.events.push(RawMember { name, parameters, fallible, callable, ..RawMember::default() });
+                    if list.eat_arrow('=') {
+                        let callable = list.take_expression("the callable that subscribes")?.to_vec();
+                        body.events.push(RawMember { name, parameters, is_static, fallible, callable, ..RawMember::default() });
+                    } else {
+                        if fallible { return Err(ParseError { line, message: "Use try_add/try_remove inside a paired event".into() }); }
+                        let (accessors, line) = list.take_group(Delimiter::Brace, "paired event accessors in braces")?;
+                        let mut accessors = Cursor::new(&accessors, line);
+                        let add_kind = accessors.take_ident("add or try_add")?;
+                        if add_kind != "add" && add_kind != "try_add" { return Err(ParseError { line, message: "Expected add or try_add first".into() }); }
+                        accessors.expect_punct(':')?;
+                        let callable = accessors.take_expression("the event addition callable")?.to_vec();
+                        separator(&mut accessors)?;
+                        let remove_kind = accessors.take_ident("remove or try_remove")?;
+                        if remove_kind != "remove" && remove_kind != "try_remove" { return Err(ParseError { line, message: "Expected remove or try_remove second".into() }); }
+                        accessors.expect_punct(':')?;
+                        let remove = accessors.take_expression("the event removal callable")?.to_vec();
+                        separator(&mut accessors)?;
+                        if !accessors.is_end() { return Err(ParseError { line, message: "Unexpected paired event accessor".into() }); }
+                        body.events.push(RawMember { name, parameters, is_static, fallible: add_kind == "try_add", callable,
+                            event_handler_nullable: true, event_remove: Some(RawAccessor { fallible: remove_kind == "try_remove", callable: remove }),
+                            ..RawMember::default() });
+                    }
                     separator(&mut list)?;
                 }
             }
@@ -612,7 +634,7 @@ fn read_methods(tokens: &[TokenTree], line: usize) -> Result<Vec<RawMember>, Par
                 cursor.take_expression("the callable of the method")?.to_vec()
             }
         };
-        methods.push(RawMember { name, parameters, return_type, is_static, fallible, attributes, callable });
+        methods.push(RawMember { name, parameters, return_type, is_static, fallible, attributes, callable, ..RawMember::default() });
         separator(&mut cursor)?;
     }
     Ok(methods)

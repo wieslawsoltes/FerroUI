@@ -3,14 +3,19 @@
 use std::rc::Rc;
 
 use crate::ast::{
-    IXamlAstNode, XamlAstConstructableObjectNode, XamlAstExtensions, XamlAstNodeExtensions,
-    XamlAstObjectNode,
+    IXamlAstNode, XamlAstClrTypeReference, XamlAstConstructableObjectNode, XamlAstExtensions,
+    XamlAstNodeExtensions, XamlAstObjectNode, XamlAstRuntimeCastNode, XamlMarkupExtensionNode,
 };
 use crate::exceptions::{XamlError, XamlResult};
 use crate::transform::{AstTransformationContext, IXamlAstTransformer, XamlTransformHelpers};
 use crate::type_system::{IXamlConstructor, IXamlType};
 
 pub struct ConstructableObjectTransformer;
+
+/// Backend capability: constructors return values directly, without IL managed
+/// addresses. Generic XamlX hosts retain the original restriction by default.
+/// The host must implement value construction/initialization and boxing semantics.
+pub struct XamlValueTypeConstruction;
 
 fn transform_arguments_and_get_constructor(
     context: &AstTransformationContext,
@@ -45,6 +50,26 @@ fn transform_arguments_and_get_constructor(
             &*parameter_info,
         )? {
             Some(arg) => n.arguments.borrow_mut()[c] = arg,
+            None if argument.cast::<XamlMarkupExtensionNode>().is_some()
+                && argument
+                    .type_()
+                    .get_clr_type()?
+                    .equals(&*context.configuration().well_known_types().object)
+                && !parameter_info.parameter_type().is_value_type() =>
+            {
+                // ProvideValue is statically object. Reference constructor
+                // arguments, like property values, require the actual
+                // declared reference cast after the extension has run.
+                n.arguments.borrow_mut()[c] = XamlAstRuntimeCastNode::new(
+                    &**argument,
+                    argument.clone(),
+                    XamlAstClrTypeReference::new(
+                        &**argument,
+                        parameter_info.parameter_type(),
+                        false,
+                    ),
+                );
+            }
             None => {
                 return Err(XamlError::load_exception(
                     format!(
@@ -54,7 +79,7 @@ fn transform_arguments_and_get_constructor(
                         n.type_.borrow().get_clr_type()?.get_fqn()
                     ),
                     Some(&**argument),
-                ))
+                ));
             }
         }
     }
@@ -70,14 +95,17 @@ impl IXamlAstTransformer for ConstructableObjectTransformer {
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
         if let Some(ni) = node.cast::<XamlAstObjectNode>() {
             let t = ni.type_.borrow().get_clr_type()?;
-            if t.is_value_type() {
+            if t.is_value_type() && context.configuration().get_extra::<XamlValueTypeConstruction>().is_err() {
                 return Err(XamlError::load_exception(
                     "Value types can only be loaded via converters. We don't want to mess with indirect loads and other weird stuff",
                     Some(&*node),
                 ));
             }
 
-            let matching_ctor_is_required = context.has_parent_nodes();
+            // A reference root may be populated into an existing instance. A value
+            // root is constructed, so invalid arguments must never select the
+            // first constructor and silently drop those arguments.
+            let matching_ctor_is_required = context.has_parent_nodes() || t.is_value_type();
             let ctor = transform_arguments_and_get_constructor(context, &ni)?;
             let type_reference = ni.type_.borrow().get_clr_type_reference()?;
             if let Some(ctor) = ctor {

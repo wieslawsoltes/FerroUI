@@ -16,6 +16,10 @@
 
 /// The documents compiled into `compiled_xaml.rs`, by their path below `ferres://Tests/`.
 pub const DOCUMENTS: &[(&str, &str)] = &[
+    // Native regression inputs: public availability must follow the generated loader,
+    // including private documents that still have an internal build function.
+    ("Runtime/Public.xaml", "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:String x:Key='Availability'>Public</x:String></ResourceDictionary>"),
+    ("Runtime/Private.xaml", "<ResourceDictionary xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:ClassModifier='internal'><x:String x:Key='Availability'>Private</x:String></ResourceDictionary>"),
     // ResourceIncludeTests.ResourceInclude_Loads_ResourceDictionary
     (
         "Resource.xaml",

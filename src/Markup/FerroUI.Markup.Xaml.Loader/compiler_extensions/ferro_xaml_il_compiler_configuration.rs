@@ -54,6 +54,9 @@ impl FerroXamlIlCompilerConfiguration {
             diagnostics_handler,
         )?;
         base.add_extra(Rc::new(FerroXamlIlWellKnownTypes::new(&base.type_system)?));
+        // Both FerroUI backends invoke registered Rust constructors directly;
+        // neither requires the managed-address machinery of an IL backend.
+        base.add_extra(Rc::new(xamlx::transform::transformers::XamlValueTypeConstruction));
         Ok(Self {
             base: Rc::new(base),
         })

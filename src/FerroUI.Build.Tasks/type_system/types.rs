@@ -974,6 +974,7 @@ pub struct ModelEvent {
     pub(crate) name: String,
     pub(crate) declaring_type: Weak<ModelType>,
     pub(crate) add: Option<Rc<ModelMethod>>,
+    pub(crate) remove: Option<Rc<ModelMethod>>,
 }
 
 impl IXamlMember for ModelEvent {
@@ -988,6 +989,9 @@ impl IXamlMember for ModelEvent {
 impl IXamlEventInfo for ModelEvent {
     fn add(&self) -> Option<Rc<dyn IXamlMethod>> {
         self.add.clone().map(|method| method as Rc<dyn IXamlMethod>)
+    }
+    fn remove(&self) -> Option<Rc<dyn IXamlMethod>> {
+        self.remove.clone().map(|m| m as Rc<dyn IXamlMethod>)
     }
     fn equals(&self, other: &dyn IXamlEventInfo) -> bool {
         match other.as_any().downcast_ref::<ModelEvent>() {

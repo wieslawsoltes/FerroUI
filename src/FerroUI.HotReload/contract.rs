@@ -362,6 +362,8 @@ mod metadata_tests {
     static CUSTOM: MarkupType = MarkupType {
         explicit_namespace: Some("Reload.Contract.Tests"),
         events: &[MarkupEvent {
+                remove: None, handler_nullable: false, accessor_methods: &[],
+            is_static: false,
             name: "Recomputed",
             arguments: &[],
             add: |_| panic!("contract parsing must not invoke event accessors"),
@@ -395,6 +397,8 @@ mod metadata_tests {
         static LAZY: MarkupType = MarkupType {
             explicit_namespace: Some("Reload.LazyContract.Tests"),
             events: &[MarkupEvent {
+                remove: None, handler_nullable: false, accessor_methods: &[],
+                is_static: false,
                 name: "Recomputed",
                 arguments: &[],
                 add: |_| panic!("contract parsing must not subscribe"),

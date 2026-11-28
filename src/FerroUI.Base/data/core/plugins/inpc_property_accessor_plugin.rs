@@ -1,10 +1,12 @@
-use super::{markup_members, AccessorListener, IPropertyAccessor, IPropertyAccessorPlugin, PropertyAccessorBase, PropertyError};
+use super::{
+    AccessorListener, IPropertyAccessor, IPropertyAccessorPlugin, PropertyAccessorBase, PropertyError, markup_members,
+};
 use crate::data::core::{IPropertyInfo, ValueType, ValueTypes, WeakValue};
 use crate::data::model::{INotifyPropertyChanged, ModelTypes};
 use crate::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use crate::reactive::IDisposable;
 use crate::{AnyValue, BoxedValue};
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 
 /// Views an untyped value as a property change notifier.
@@ -76,6 +78,7 @@ pub struct InpcPropertyAccessor {
     property: Rc<dyn IPropertyInfo>,
     inpc: Option<InpcLookup>,
     token: Cell<Option<u64>>,
+    native_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     event_raised: Cell<bool>,
 }
 
@@ -115,7 +118,10 @@ impl InpcPropertyAccessor {
         // Markup metadata first: a view model that states
         // `notify_property_changed:` needs no other registration.
         let markup = crate::metadata::MarkupType::find_by_handle(value.value_type_id());
-        if let Some(notifier) = markup.and_then(|m| m.notify_property_changed).and_then(|view| view(value)) {
+        if let Some(notifier) = markup
+            .and_then(|m| m.notify_property_changed)
+            .and_then(|view| view(value))
+        {
             return Some(notifier);
         }
         let model = ModelTypes::find(value)?;
@@ -134,6 +140,7 @@ impl InpcPropertyAccessor {
             property,
             inpc,
             token: Cell::new(None),
+            native_subscription: RefCell::new(None),
             event_raised: Cell::new(false),
         })
     }
@@ -155,7 +162,9 @@ impl InpcPropertyAccessor {
         Self::new(
             reference,
             property,
-            Some(Rc::new(|v: &dyn AnyValue| v.downcast_ref::<O>().map(|o| o as &dyn INotifyPropertyChanged))),
+            Some(Rc::new(|v: &dyn AnyValue| {
+                v.downcast_ref::<O>().map(|o| o as &dyn INotifyPropertyChanged)
+            })),
         )
     }
 
@@ -172,6 +181,9 @@ impl InpcPropertyAccessor {
     }
 
     fn remove_handler(&self) {
+        if let Some(subscription) = self.native_subscription.take() {
+            subscription.dispose();
+        }
         if let Some(token) = self.token.take() {
             if let (Some(target), Some(inpc)) = (self.reference.upgrade(), &self.inpc) {
                 if let Some(inpc) = inpc(&*target) {
@@ -213,7 +225,7 @@ impl IPropertyAccessor for InpcPropertyAccessor {
                     "Object of type '{}' cannot be converted to type '{}'.",
                     value.map_or("null", |v| (**v).type_name()),
                     target_type
-                )))
+                )));
             }
         };
         self.event_raised.set(false);
@@ -245,6 +257,30 @@ impl IPropertyAccessor for InpcPropertyAccessor {
                 self.token.set(Some(token));
             }
         }
+        // A statically declared CLR/interface property can wrap a registered
+        // property on the runtime native object. Follow that property's changes
+        // while still reading/writing through the declared accessors: replacing
+        // them with raw property access would bypass overrides and errors.
+        // A real INPC subscription remains authoritative when present.
+        if self.token.get().is_none() {
+            if let Some(target) = self.reference.upgrade().and_then(|v| ValueTypes::as_object(&*v)) {
+                if let Some(property) =
+                    crate::FerroPropertyRegistry::instance().find_registered_for(&target, self.property.name())
+                {
+                    let id = property.id();
+                    let weak = self.this.clone();
+                    let subscription = target.property_changed(move |e| {
+                        if e.property().id() == id {
+                            if let Some(this) = weak.upgrade() {
+                                this.event_raised.set(true);
+                                this.send_current_value();
+                            }
+                        }
+                    });
+                    self.native_subscription.replace(Some(subscription));
+                }
+            }
+        }
         self.send_current_value();
     }
 
@@ -261,75 +297,5 @@ impl Drop for InpcPropertyAccessor {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::data::core::{ClrPropertyInfo, Value};
-    use std::cell::RefCell;
-
-    struct Source {
-        text: RefCell<String>,
-    }
-
-    impl PartialEq for Source {
-        fn eq(&self, other: &Self) -> bool {
-            std::ptr::eq(self, other)
-        }
-    }
-
-    fn text_property() -> Rc<dyn IPropertyInfo> {
-        Rc::new(ClrPropertyInfo::read_write::<Source, Value<String>>(
-            "Text",
-            |s| s.text.borrow().clone(),
-            |s, v| *s.text.borrow_mut() = v,
-        ))
-    }
-
-    fn source() -> (Rc<Source>, BoxedValue) {
-        ValueTypes::register_reference::<Source>();
-        let source = Rc::new(Source { text: RefCell::new("a".to_string()) });
-        let boxed: BoxedValue = source.clone();
-        (source, boxed)
-    }
-
-    #[test]
-    fn set_value_converts_before_it_writes() {
-        let (source, boxed) = source();
-        let accessor = InpcPropertyAccessor::new(WeakValue::new(&boxed), text_property(), None);
-
-        // A value of another type is converted to the type of the property.
-        let number: BoxedValue = Rc::new(5i32);
-        assert_eq!(accessor.set_value(Some(&number), BindingPriority::LocalValue), Ok(true));
-        assert_eq!(*source.text.borrow(), "5");
-
-        // A value that cannot be converted is an error, and nothing is written.
-        let accessor = InpcPropertyAccessor::new(
-            WeakValue::new(&boxed),
-            Rc::new(ClrPropertyInfo::read_write::<Source, Value<i32>>("Length", |s| s.text.borrow().len() as i32, |_, _| {})),
-            None,
-        );
-        let text: BoxedValue = Rc::new("not a number".to_string());
-        let error = accessor.set_value(Some(&text), BindingPriority::LocalValue).unwrap_err();
-        assert!(error.to_string().contains("cannot be converted to type"), "{error}");
-    }
-
-    #[test]
-    fn set_value_on_a_source_that_no_longer_exists_is_an_error() {
-        let (source, boxed) = source();
-        let reference = WeakValue::new(&boxed);
-        let accessor = InpcPropertyAccessor::new(reference, text_property(), None);
-        drop(boxed);
-        drop(source);
-
-        assert!(accessor.value().is_none());
-        let value: BoxedValue = Rc::new("b".to_string());
-        let error = accessor.set_value(Some(&value), BindingPriority::LocalValue).unwrap_err();
-        assert_eq!(error.to_string(), "Non-static method requires a target.");
-        // The conversion comes first: its error wins over the missing target.
-        let read_only = InpcPropertyAccessor::new(
-            WeakValue::Value(Rc::new(1i32)),
-            Rc::new(ClrPropertyInfo::read_only::<Source, Value<String>>("Text", |s| s.text.borrow().clone())),
-            None,
-        );
-        assert_eq!(read_only.set_value(Some(&value), BindingPriority::LocalValue), Ok(false));
-    }
-}
+#[path = "inpc_property_accessor_plugin_tests.rs"]
+mod tests;

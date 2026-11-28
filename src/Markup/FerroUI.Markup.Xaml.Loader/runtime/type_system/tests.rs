@@ -1118,3 +1118,57 @@ fn a_static_property_has_static_accessors_and_no_field() {
     assert!(constant.is_static());
     assert!(!declared.properties().iter().any(|p| p.name() == "Constant"));
 }
+
+pub struct RuntimeStaticEvents;
+ferroui_base::ferro_static_type!(RuntimeStaticEvents);
+ferroui_base::ferro_markup_type!(static RuntimeStaticEvents {
+    namespace: "Runtime.StaticEvents", type_info: RuntimeStaticEvents,
+    events: [
+        static Changed() => |handler: ferroui_base::metadata::MarkupDelegate| { handler.invoke(&[]); },
+        static try Failed() => |_: ferroui_base::metadata::MarkupDelegate| Err::<(), _>("Subscription failed"),
+    ],
+});
+
+#[test]
+fn runtime_static_event_adders_do_not_require_an_instance() {
+    use ferroui_base::metadata::{MarkupType, MarkupTyped, MarkupDelegate, MarkupInvokeError};
+    classes::register();
+    MarkupType::register(RuntimeStaticEvents::MARKUP);
+    let ts = RuntimeTypeSystem::new();
+    let type_ = ts.find_type("Runtime.StaticEvents.RuntimeStaticEvents").unwrap();
+    let calls = Rc::new(std::cell::Cell::new(0));
+    let called = calls.clone();
+    let handler = MarkupDelegate::new(move |_| { called.set(called.get() + 1); None });
+    let add = method(&type_, "add_Changed");
+    assert!(add.is_static());
+    assert_eq!(add.parameters().len(), 1);
+    add.invoke(&[boxed(handler.clone())]).unwrap();
+    assert_eq!(calls.get(), 1);
+    assert!(matches!(method(&type_, "add_Failed").invoke(&[boxed(handler)]), Err(MarkupInvokeError::Failed(_))));
+}
+
+pub struct RuntimePairedEvents;
+ferroui_base::ferro_static_type!(RuntimePairedEvents);
+ferroui_base::ferro_markup_type!(static RuntimePairedEvents {
+    namespace:"Runtime.PairedEvents",type_info:RuntimePairedEvents,
+    events:[
+        static Changed() {add:|_:Option<ferroui_base::metadata::MarkupDelegate>|{},remove:|_:Option<ferroui_base::metadata::MarkupDelegate>|{}},
+        static Failing() {try_add:|_:Option<ferroui_base::metadata::MarkupDelegate>|Err::<(),_>("add-failed"),try_remove:|_:Option<ferroui_base::metadata::MarkupDelegate>|Err::<(),_>("remove-failed")},
+    ],
+});
+#[test]
+fn runtime_paired_events_expose_and_invoke_both_accessors_including_null() {
+    use ferroui_base::metadata::{MarkupType,MarkupTyped,MarkupDelegate,MarkupInvokeError};
+    classes::register();MarkupType::register(RuntimePairedEvents::MARKUP);
+    let ts=RuntimeTypeSystem::new();let type_=ts.find_type("Runtime.PairedEvents.RuntimePairedEvents").unwrap();
+    let event=type_.events().into_iter().find(|e|e.name()=="Changed").unwrap();
+    for (name,method_) in [("add_Changed",event.add().unwrap()),("remove_Changed",event.remove().unwrap())] {
+        assert_eq!(method_.name(),name);assert!(method_.is_static());
+        assert_eq!(type_.methods().iter().filter(|m|m.name()==name).count(),1);
+        assert_eq!(method(&type_,name).invoke(&[None]),Ok(None));
+        assert_eq!(method(&type_,name).invoke(&[boxed(MarkupDelegate::new(|_|None))]),Ok(None));
+    }
+    for (name,message) in [("add_Failing","add-failed"),("remove_Failing","remove-failed")] {
+        assert_eq!(method(&type_,name).invoke(&[None]),Err(MarkupInvokeError::Failed(message.into())));
+    }
+}

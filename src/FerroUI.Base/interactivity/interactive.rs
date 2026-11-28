@@ -274,6 +274,35 @@ impl Interactive {
         route.raise_event(&self.to_ref(), e);
     }
 
+    /// Invokes a snapshot of this object's handlers without visiting ancestors.
+    ///
+    /// This is local notification using the existing event identity and native
+    /// subscriptions, rather than routed input. Every local instance handler is
+    /// invoked in subscription order, regardless of its route filters or the
+    /// current `handled` value. `handled` remains shared and visible to handlers.
+    /// The source is this object and the route is initially `DIRECT`.
+    ///
+    /// Local class/raised observers run before instance handlers; route-finished
+    /// observers run after them. Additions and removals during delivery affect
+    /// the next raise. Nested raises have independent snapshots. A panic stops
+    /// delivery and propagates, releasing the snapshot during unwinding.
+    ///
+    /// This opt-in operation does not change [`raise_event`](Self::raise_event),
+    /// event registration, handler tokens, or the event's routing strategies.
+    /// Panics if the args have no routed event.
+    pub fn raise_event_local(&self, e: &dyn IRoutedEventArgs) {
+        let routed_event = e
+            .routed_event()
+            .expect("Cannot raise an event whose RoutedEvent is null.");
+        let source = self.to_ref();
+        let mut route = EventRoute::new(&routed_event);
+        if routed_event.has_raised_subscriptions() {
+            route.add_class_handler(&source);
+        }
+        self.add_to_event_route(&source, routed_event, &mut route);
+        route.raise_event_local(&source, e);
+    }
+
     /// Builds an event route for a routed event: the handlers the event
     /// would visit if raised on this object, in bubbling order.
     pub fn build_event_route<TEventArgs: ?Sized>(&self, e: &RoutedEvent<TEventArgs>) -> EventRoute {

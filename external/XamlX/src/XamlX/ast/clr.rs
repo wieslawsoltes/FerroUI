@@ -324,6 +324,24 @@ impl XamlDirectCallPropertySetter {
         let parameters: Vec<Rc<dyn IXamlType>> =
             method.parameters_with_this().into_iter().skip(1).collect();
         let target_type = method.this_or_first_parameter()?;
+        Self::with_parameters(method, target_type, parameters)
+    }
+
+    /// Event adders are not attached setters: a static adder takes only its handler.
+    pub fn for_event(method: Rc<dyn IXamlMethod>) -> XamlResult<Rc<Self>> {
+        if method.is_static() {
+            Self::with_parameters(method.clone(), method.declaring_type(), method.parameters())
+        } else {
+            Self::new(method)
+        }
+    }
+
+    /// Whether invocation consumes the property target as a method argument.
+    pub fn consumes_target(&self) -> bool {
+        !self.method.is_static() || self.method.parameters().len() > self.parameters.len()
+    }
+
+    fn with_parameters(method: Rc<dyn IXamlMethod>, target_type: Rc<dyn IXamlType>, parameters: Vec<Rc<dyn IXamlType>>) -> XamlResult<Rc<Self>> {
         let last = parameters.last().ok_or_else(|| {
             XamlError::internal(
                 "ArgumentOutOfRangeException",

@@ -336,17 +336,27 @@ fn direct_setter_method(setter: &Rc<dyn IXamlPropertySetter>) -> Option<&Rc<dyn 
     })
 }
 
+/// The declaration and invocation form of a non-routed event subscription.
+struct SubscribedEvent {
+    declaring: Rc<dyn IXamlType>,
+    name: String,
+    is_static: bool,
+    /// The event declares a remover, which finds a handler by its method and target.
+    paired: bool,
+}
+
 /// The event a direct call property setter subscribes to, when its method is the
 /// subscription of an event of its declaring type (`add_Name`): the declaring type and the
 /// name of the event.
-fn subscribed_event(setter: &Rc<dyn IXamlPropertySetter>) -> Option<(Rc<dyn IXamlType>, String)> {
+fn subscribed_event(setter: &Rc<dyn IXamlPropertySetter>) -> Option<SubscribedEvent> {
     let method = setter.as_any().downcast_ref::<XamlDirectCallPropertySetter>()?.method();
     let declaring = method.declaring_type();
     let event = declaring
         .events()
         .into_iter()
         .find(|event| event.add().is_some_and(|add| node_address(&add) == node_address(method)))?;
-    Some((declaring, event.name()))
+    let paired = event.remove().is_some();
+    Some(SubscribedEvent { declaring, name: event.name(), is_static: method.is_static(), paired })
 }
 
 /// The call `call` of a member; a `fallible` member's error is the load
@@ -1809,6 +1819,17 @@ impl<'a> Emitter<'a> {
         if markup.is_flags() {
             return self.flags_value(node, markup, value);
         }
+        // Open enums opt in explicitly. Never infer a Rust constructor or
+        // reinterpret a closed Rust enum from an integer. Flags keep their
+        // separate composition/validation path above.
+        if let Some(factory) = markup.enum_i32_factory() {
+            let value = i32::try_from(value)
+                .map_err(|_| unsupported(node, format!("{value} is out of the i32 range of {}", type_.full_name())))?;
+            let path = markup.rust_path()
+                .ok_or_else(|| unsupported(node, format!("no public Rust path is recorded for {}", markup.full_name())))?;
+            let id = markup.handle().ok_or_else(|| unsupported(node, "the enumeration has no value type"))?;
+            return Ok(Typed { expr: format!("{}::{factory}({value}_i32)", absolute(path)), kind: Kind::Exact { id, nullable: markup.nullable() } });
+        }
         let members = markup.enum_members();
         if let Some(variant) = members.iter().find(|member| member.value == value).and_then(|member| member.rust_variant) {
             return self.enum_variant(node, markup, variant);
@@ -1953,9 +1974,19 @@ impl<'a> Emitter<'a> {
         for (index, (argument, handle)) in arguments.iter().zip(&runtime.parameter_handles).enumerate() {
             let handle = handle.ok_or_else(|| unsupported(node, format!("argument {index} of the constructor has no Rust type")))?;
             self.position.set((node.line(), node.position()));
-            texts.push(self.coerce(argument, handle.id()).ok_or_else(|| {
-                unsupported(node, format!("argument {index} of the constructor cannot be stated as `{}`", handle.name()))
-            })?);
+            let argument_node = node.cast::<XamlAstNewClrObjectNode>()
+                .and_then(|n| n.arguments.borrow().get(index).cloned())
+                .map(|n| n.as_node());
+            let text = if let Some(cast_node) = argument_node.filter(|n| self.is_cast_result(n)) {
+                // The cast was already evaluated and checked once. Recover the
+                // declared Rust parameter, exactly as an untyped setter does.
+                untyped_argument(&argument.expr, &format!("{}.ctor", declaring.full_name()), index, &cast_node)
+            } else {
+                self.coerce(argument, handle.id()).ok_or_else(|| {
+                    unsupported(node, format!("argument {index} of the constructor cannot be stated as `{}`", handle.name()))
+                })?
+            };
+            texts.push(text);
         }
         let value = self
             .types
@@ -2506,8 +2537,8 @@ impl<'a> Emitter<'a> {
             self.line(statement);
             return Ok(());
         }
-        if let Some((declaring, event)) = subscribed_event(&setter) {
-            return self.event_assignment(node, assignment, &declaring, &event, target);
+        if let Some(event) = subscribed_event(&setter) {
+            return self.event_assignment(node, assignment, &event, target);
         }
         if let Some(class) = setter.as_any().downcast_ref::<ClassValueSetter>() {
             return self.class_value_assignment(node, assignment, class, target);
@@ -3012,7 +3043,7 @@ impl<'a> Emitter<'a> {
     /// of the delegate type (the parameters exactly, or wider ones): `rt::method_delegate`
     /// over the root object of the context, with the typed function of the declared method
     /// called with the instance and the arguments in the types it declares. The delegate
-    /// holds its instance weakly and discards a failure, as the interpreter's does.
+    /// holds its instance weakly and reports a failure to the dispatcher, as the interpreter's does.
     fn method_delegate(&mut self, node: &Rc<dyn IXamlAstNode>, delegate: &Rc<XamlLoadMethodDelegateNode>) -> EmitResult<Typed<'a>> {
         let name = delegate.method.name();
         if !delegate.base.value().as_node().is::<XamlRootObjectNode>() {
@@ -3068,8 +3099,7 @@ impl<'a> Emitter<'a> {
         &mut self,
         node: &Rc<dyn IXamlAstNode>,
         assignment: &Rc<XamlPropertyAssignmentNode>,
-        declaring: &Rc<dyn IXamlType>,
-        event: &str,
+        event: &SubscribedEvent,
         target: &Typed<'a>,
     ) -> EmitResult<()> {
         let property_name = assignment.property.name();
@@ -3078,26 +3108,58 @@ impl<'a> Emitter<'a> {
             return Err(unsupported(node, format!("{property_name}: a subscription with {} values", values.len())));
         };
         let value_node = value_node.as_node();
-        let markup = self.markup_expr(node, declaring)?;
-        let instance = match target.kind {
+        let markup = self.markup_expr(node, &event.declaring)?;
+        let instance = if event.is_static { "None".to_string() } else { match target.kind {
             Kind::Class(_) => format!("rt::to_value({}.clone())", target.expr),
             Kind::Exact { .. } => format!("rt::to_value({})", owned(&target.expr)),
             Kind::Null | Kind::SystemType { .. } => {
                 return Err(unsupported(node, format!("{property_name}: the target of the subscription is not an object")));
             }
-        };
+        }};
         self.marker(node, &property_name);
-        let value = self.value(&value_node)?;
+        // Only a handler of an event with a remover needs the descriptor of its method: the
+        // remover compares it with a delegate of the same method and target. Every other
+        // handler keeps the direct typed call.
+        let value = match value_node.cast::<XamlLoadMethodDelegateNode>().filter(|_| event.paired) {
+            Some(delegate) => self.removable_method_delegate(&value_node, &delegate)?,
+            None => self.value(&value_node)?,
+        };
         let handler = self
             .coerce(&value, self.types.known(Known::Delegate))
             .ok_or_else(|| unsupported(&value_node, format!("{property_name}: the handler is not the delegate of a method")))?;
         self.line(format!(
             "rt::add_event_handler({markup}, {}, {instance}, {handler}, {}, {})?;",
-            rust_string_literal(event),
+            rust_string_literal(&event.name),
             node.line(),
             node.position()
         ));
         Ok(())
+    }
+
+    /// The delegate of a named handler of an event with a remover: it carries the descriptor
+    /// of the declared method, so that the remover finds it, and keeps a failure of the method
+    /// for the invocation that raises the event.
+    fn removable_method_delegate(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        delegate: &Rc<XamlLoadMethodDelegateNode>,
+    ) -> EmitResult<Typed<'a>> {
+        let name = delegate.method.name();
+        if !delegate.base.value().as_node().is::<XamlRootObjectNode>() {
+            return Err(unsupported(node, format!("{name}: a delegate over another object than the root object")));
+        }
+        if delegate.method.is_generic_method() { return Err(unsupported(node, "a generic named handler")); }
+        let returns = self.types.method(&*delegate.method).and_then(|method| method.declared().and_then(|d| d.returns));
+        if returns.is_some_and(|returned| returned == self.types.known(Known::Class) || returned == self.types.known(Known::OptionClass)) {
+            return Err(unsupported(node, format!("{name}: a method that returns a type")));
+        }
+        let declaring = delegate.method.declaring_type();
+        let ordinal = declaring.methods().into_iter().filter(|m| m.name() == name)
+            .position(|m| m.equals(&*delegate.method)).ok_or_else(|| unsupported(node, "the named handler's declared overload is absent"))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        self.uses_context = true;
+        let expr = format!("rt::declared_method_handler(&context, {markup}, {}, {ordinal}, ({}, {}))?", rust_string_literal(&name), node.line(), node.position());
+        Ok(self.exact(Known::Delegate, expr))
     }
 
     /// `Type.Member`, as the loader names a member in an argument error.
@@ -4033,7 +4095,15 @@ impl<'a> Emitter<'a> {
                 }
             }
             XamlIlBindingPathElementNode::ClrIndexer(e) => self.path_indexer(node, e)?,
-            XamlIlBindingPathElementNode::ClrMethod(_) => return Err(unsupported(node, "a binding path with a method")),
+            XamlIlBindingPathElementNode::ClrMethod(e) => {
+                if e.method.is_generic_method() { return Err(unsupported(node, "a generic method binding")); }
+                let declaring = e.method.declaring_type();
+                let name = e.method.name();
+                let ordinal = declaring.methods().into_iter().filter(|m| m.name() == name)
+                    .position(|m| m.equals(&*e.method)).ok_or_else(|| unsupported(node, "the method binding's declared overload is absent"))?;
+                let markup = self.markup_expr(node, &declaring)?;
+                format!("rt::path_method(&builder, {markup}, {}, {ordinal}, {}, ({}, {}))?", rust_string_literal(&name), e.accepts_null, node.line(), node.position())
+            },
             XamlIlBindingPathElementNode::ClrMethodAsCommand(e) => self.path_command(node, e)?,
             XamlIlBindingPathElementNode::XBindFunction(e) => self.path_function(node, e)?,
             XamlIlBindingPathElementNode::XBindEventHandler(e) => self.path_event_handler(node, e)?,
@@ -4757,6 +4827,20 @@ impl<'a> Emitter<'a> {
         let collection = Typed { expr: local, kind: self.kind_of(collection_type) };
         let mut arguments = vec![collection];
         arguments.extend(self.assignment_values(node, assignment)?);
+        // The adder receives the same checked object-to-reference conversion as
+        // a declared setter. An extension's result is known only when loaded;
+        // preserve the interpreter's type failure and the value's source position.
+        let values = assignment.values.borrow().clone();
+        if let (Some(last), Some(value_node), Some(parameter), Some(Some(handle))) = (
+            arguments.last_mut(),
+            values.last(),
+            add.parameters.last(),
+            add.parameter_handles.last(),
+        ) {
+            if let Some(checked) = self.checked_cast(&value_node.as_node(), last, parameter, *handle, &add)? {
+                *last = checked;
+            }
+        }
         let call = self.declared_call(node, &add, &arguments)?;
         self.line(format!("{call};"));
         Ok(())

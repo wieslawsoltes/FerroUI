@@ -45,3 +45,6 @@ pub use value_type::{ValueType, ValueTypeRegistration, ValueTypes};
 #[doc(hidden)]
 pub use value_type::{__NoValueTypeRegistration, __ValueTypeProbe, __ValueTypeRegistrationOf};
 pub use weak_value::WeakValue;
+
+#[cfg(test)]
+mod untyped_value_tests;

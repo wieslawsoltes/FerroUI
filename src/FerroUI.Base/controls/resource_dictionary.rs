@@ -669,6 +669,13 @@ impl IResourceNode for ResourceDictionaryHandle {
     }
 }
 
+/// The dictionary that `object`, the object of a resource provider, is
+/// (`IResourceProvider::resource_dictionary`): one function for every provider.
+#[inline(never)]
+pub(crate) fn dictionary_of_object(object: Option<&FerroObject>) -> Option<Rc<dyn IResourceDictionary>> {
+    object.and_then(|object| object.to_ref().cast::<ResourceDictionary>()).map(Into::into)
+}
+
 impl IResourceProvider for ResourceDictionaryHandle {
     fn as_any(&self) -> Option<&dyn std::any::Any> {
         Some(self)

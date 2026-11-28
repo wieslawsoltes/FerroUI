@@ -53,6 +53,24 @@ fn test_host() -> (Rc<TestHost>, ResourceHostRef) {
 // --- ResourceDictionary ------------------------------------------------------
 
 #[test]
+fn dictionary_provider_exposes_same_mutable_dictionary_and_non_dictionary_does_not() {
+    let target = ResourceDictionary::new();
+    let provider: Rc<dyn IResourceProvider> = target.clone().into();
+    let dictionary = provider.resource_dictionary().unwrap();
+    let again = provider.resource_dictionary().unwrap();
+    let expected: Rc<dyn IResourceDictionary> = target.clone().into();
+    assert!(*dictionary == *expected);
+    assert!(*dictionary == *again);
+    dictionary.set(key("entry"), Some(Rc::new("first".to_string())));
+    assert_eq!(string(target.try_get_value(&key("entry"))).as_deref(), Some("first"));
+    target.set("entry", Some(Rc::new("second".to_string())));
+    assert_eq!(string(dictionary.try_get_value(&key("entry"))).as_deref(), Some("second"));
+    let style: Ref<crate::styling::StyleBase> = Style::new().upcast();
+    let style: Rc<dyn IResourceProvider> = style.into();
+    assert!(style.resource_dictionary().is_none());
+}
+
+#[test]
 fn can_add_null_value() {
     let target = ResourceDictionary::new();
     target.add("null", None);

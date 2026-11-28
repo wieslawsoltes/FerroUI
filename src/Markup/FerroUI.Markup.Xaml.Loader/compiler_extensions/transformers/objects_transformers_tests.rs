@@ -1348,3 +1348,82 @@ fn source_info_is_attached_to_created_objects() {
         assert_eq!(wrappers.len(), 1);
     }
 }
+
+#[test]
+fn nonstyled_x_name_registers_native_objects_without_a_name_assignment() {
+    let fw = create_objects_test_framework();
+    let root = transform(&fw, &format!("<Grid {XMLNS} x:Name='root'><Grid.ColumnDefinitions><ColumnDefinition x:Name='column' Width='8'/></Grid.ColumnDefinitions></Grid>"));
+    no_errors(&fw);
+    let registrations = collect::<FerroNameScopeRegistrationXamlIlNode>(&root);
+    let names: Vec<_> = registrations.iter().map(|r| text_of(&r.name())).collect();
+    assert_eq!(names, ["root", "column"]);
+    let assignments = collect::<XamlPropertyAssignmentNode>(&root);
+    assert_eq!(
+        assignments
+            .iter()
+            .filter(|p| p.property.name() == "Name")
+            .count(),
+        1,
+        "only the StyledElement Name property is assigned"
+    );
+    assert!(registrations[1]
+        .target_type
+        .as_ref()
+        .unwrap()
+        .is("FerroUI.Controls", "ColumnDefinition"));
+}
+#[test]
+fn nonstyled_regular_name_property_remains_an_error() {
+    let fw = create_objects_test_framework();
+    let _ = transform_objects(&fw, &format!("<ColumnDefinition {XMLNS} Name='ordinary'/>"));
+    assert!(
+        !error_titles(&fw).is_empty(),
+        "regular Name syntax must not be converted to a directive"
+    );
+}
+#[test]
+fn nonstyled_names_in_deferred_templates_keep_separate_scope_metadata() {
+    let fw = create_objects_test_framework();
+    let root=transform_until(&fw,"AddNameScopeRegistration",&format!("<ContentControl {XMLNS} x:Name='outer'><ContentControl.ContentTemplate><DataTemplate><Grid x:Name='inner'><Grid.ColumnDefinitions><ColumnDefinition x:Name='column' Width='8'/></Grid.ColumnDefinitions></Grid></DataTemplate></ContentControl.ContentTemplate></ContentControl>"));
+    no_errors(&fw);
+    let registrations = collect::<FerroNameScopeRegistrationXamlIlNode>(&root);
+    assert_eq!(
+        registrations
+            .iter()
+            .map(|r| text_of(&r.name()))
+            .collect::<Vec<_>>(),
+        ["outer", "inner", "column"]
+    );
+    let mut visitor = crate::compiler_extensions::visitors::NameScopeRegistrationVisitor::new(0, 0);
+    xamlx::ast::visit_node(&root, &mut visitor).unwrap();
+    assert_eq!(visitor.len(), 1);
+    assert!(visitor.contains_key("outer"));
+}
+#[test]
+fn nonstyled_x_name_does_not_bypass_an_existing_name_member_or_name_non_native_values() {
+    let fw = create_objects_test_framework();
+    fw.fake_type("FerroUI.Controls.ColumnDefinition")
+        .add_property("Name", fw.t("System.String"));
+    let root = transform(
+        &fw,
+        &format!("<ColumnDefinition {XMLNS} x:Name='ordinary'/>"),
+    );
+    no_errors(&fw);
+    assert_eq!(
+        collect::<XamlPropertyAssignmentNode>(&root)
+            .iter()
+            .filter(|p| p.property.name() == "Name")
+            .count(),
+        1,
+        "preserve the existing member setter path"
+    );
+    let fw = create_objects_test_framework();
+    let _ = transform_objects(
+        &fw,
+        &format!("<x:String {XMLNS} x:Name='notNative'>text</x:String>"),
+    );
+    assert!(
+        !error_titles(&fw).is_empty(),
+        "do not register a value which cannot be cast to native FerroObject"
+    );
+}

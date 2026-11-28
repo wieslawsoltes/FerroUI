@@ -401,6 +401,13 @@ impl EmitTypes for RuntimeEmitTypes {
         table.iter().find(|(known, _)| *known == id).map(|(_, name)| *name)
     }
 
+    fn value_type_name(&self, key: TypeKey<'_>) -> Option<String> {
+        if let Some(primitive) = self.primitive_type_name(key) {
+            return Some(primitive.to_string());
+        }
+        rust_path_of_type(id_of(key)?).map(|path| format!("::{}", path.trim_start_matches("::")))
+    }
+
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool {
         match (id_of(from), id_of(to)) {
             (Some(from), Some(to)) => ValueTypes::is_assignable(ValueType::new(from, ""), ValueType::new(to, "")),

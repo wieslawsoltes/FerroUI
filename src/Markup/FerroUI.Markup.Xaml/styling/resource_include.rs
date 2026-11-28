@@ -18,7 +18,7 @@ use std::rc::{Rc, Weak};
 /// The document is loaded the first time the resources are asked for.
 pub struct ResourceInclude {
     this: Weak<ResourceInclude>,
-    service_provider: Option<Rc<dyn IServiceProvider>>,
+    service_provider: RefCell<Option<Rc<dyn IServiceProvider>>>,
     base_uri: Option<url::Url>,
     loaded: RefCell<Option<Rc<dyn IResourceDictionary>>>,
     is_loading: Cell<bool>,
@@ -46,7 +46,7 @@ impl ResourceInclude {
     fn create(service_provider: Option<Rc<dyn IServiceProvider>>, base_uri: Option<url::Url>) -> Rc<Self> {
         Rc::new_cyclic(|this| Self {
             this: this.clone(),
-            service_provider,
+            service_provider: RefCell::new(service_provider),
             base_uri,
             loaded: RefCell::new(None),
             is_loading: Cell::new(false),
@@ -61,8 +61,8 @@ impl ResourceInclude {
     /// no error channel: inside an error scope of a load
     /// ([`with_xaml_errors`](crate::xaml_error_scope::with_xaml_errors)), a
     /// document that cannot be loaded is the error of the scope, and the
-    /// include acts as if it were empty (#567); outside, it panics as
-    /// [`loaded`](Self::loaded) does.
+    /// include acts as if it were empty (#567). Outside a load scope it
+    /// reports the error to the dispatcher.
     fn loaded_or_reported(&self) -> Option<Rc<dyn IResourceDictionary>> {
         crate::throw_or(self.try_loaded().map(Some), || None)
     }
@@ -84,8 +84,10 @@ impl ResourceInclude {
         let Some(source) = self.source() else {
             return Err(XamlLoadError::with_message("ResourceInclude.Source must be set."));
         };
+        // Loading can reenter, so release the borrow before calling the loader.
+        let provider = self.service_provider.borrow().clone();
         let load = ||
-            FerroXamlLoader::load_with_service_provider(self.service_provider.as_ref(), &source, self.base_uri.as_ref());
+            FerroXamlLoader::load_with_service_provider(provider.as_ref(), &source, self.base_uri.as_ref());
         #[cfg(feature = "source-overlays")]
         let loaded = if let Some(snapshot) = &self.source_snapshot { snapshot.run(load) } else { load() }?;
         #[cfg(not(feature = "source-overlays"))]
@@ -97,6 +99,11 @@ impl ResourceInclude {
             )));
         };
         *self.loaded.borrow_mut() = Some(loaded.clone());
+        // A successful include never loads again (even if Source changes). Its
+        // declaration context is no longer needed and may own this include's
+        // root. Retain it on errors so a later retry sees the same services.
+        let old_provider = self.service_provider.borrow_mut().take();
+        drop(old_provider);
 
         Ok(loaded)
     }
@@ -149,6 +156,15 @@ impl IResourceNode for ResourceInclude {
 impl IResourceProvider for ResourceInclude {
     fn as_any(&self) -> Option<&dyn std::any::Any> {
         Some(self)
+    }
+
+    fn resource_dictionary(&self) -> Option<Rc<dyn IResourceDictionary>> {
+        // Match resource lookup's reentrancy guard while constructing a document.
+        if self.is_loading.get() {
+            None
+        } else {
+            self.loaded_or_reported()
+        }
     }
 
     #[cfg(all(debug_assertions, feature = "hot-reload"))]

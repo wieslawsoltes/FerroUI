@@ -58,6 +58,7 @@ fn pipeline_has_the_upstream_order() {
             "XBindDirectivesTransformer",
             "MarkupExtensionTransformer",
             "TextNodeMerger",
+            "FerroXamlIlRegisterNamedObjectTransformer",
             "FerroXamlIlResolveClassesPropertiesTransformer",
             "FerroXamlIlTransformRoutedEvent",
             "FerroXamlIlTransformInstanceAttachedProperties",
@@ -884,6 +885,29 @@ fn include_of_another_assembly_uses_its_compiled_resources_type() {
             "Unable to resolve XAML resource \"ferres://other.library/Themes/Light.xaml\" in the \"other.library\" assembly. Make sure this file exists and is public. Line 1, position 295.".to_string(),
         ]
     );
+}
+
+#[test]
+fn runtime_compiled_fallback_requires_exact_public_availability_and_respects_private_methods() {
+    use super::group_transformers::XamlRuntimeIncludeFallback;
+    for (known_private, public_compiled) in [(false,false),(false,true),(true,true)] {
+        let fw=create_objects_test_framework();
+        let compiler=compiler(&fw);
+        let other=fw.type_system.define_assembly("compiled.fallback");
+        let (namespace,name)=COMPILED_RESOURCES_TYPE_NAME.split_once('.').unwrap();
+        let resources=other.define_class(namespace,name);
+        if known_private {
+            let method=resources.add_method("Build:/Private.xaml",fw.t("FerroUI.Controls.ResourceDictionary"),vec![fw.t("System.IServiceProvider")],true);
+            method.is_public.set(false);
+        }
+        let fallback=fw.configuration.get_or_create_extra::<XamlRuntimeIncludeFallback>();
+        // The old source-asset predicate alone is not public compiled metadata.
+        fallback.set(Some(Rc::new(|_|true)));
+        fallback.set_public_compiled(Some(Rc::new(move |_|public_compiled)));
+        let a=resource(&fw,&compiler,"A",&dictionary("<ResourceDictionary.MergedDictionaries><ResourceInclude Source='ferres://compiled.fallback/Private.xaml'/></ResourceDictionary.MergedDictionaries>"),true,None);
+        compiler.transform_group(&[a]).unwrap();
+        assert_eq!(errors(&fw).is_empty(),public_compiled&&!known_private,"{:?}",errors(&fw));
+    }
 }
 
 #[test]

@@ -1,4 +1,4 @@
-use crate::test_support::TestRoot;
+use crate::test_support::{test_scope, TestRoot};
 use crate::{Border, Control, ControlImpl, Panel, StackPanel};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -290,6 +290,7 @@ fn spacing_not_added_for_invisible_children() {
 
 #[test]
 fn spacing_not_added_for_children_hidden_by_style_applied_during_measure() {
+    let _scope = test_scope();
     for orientation in [Orientation::Horizontal, Orientation::Vertical] {
         let target = StackPanel::new();
         target.set_spacing(40.0);

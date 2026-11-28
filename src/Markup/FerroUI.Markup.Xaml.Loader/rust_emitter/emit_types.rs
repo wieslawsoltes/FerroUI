@@ -423,6 +423,11 @@ pub trait EmitTypes {
     /// The Rust name of a primitive type the type system defines itself (`i32`,
     /// `::std::string::String`).
     fn primitive_type_name(&self, key: TypeKey<'_>) -> Option<&'static str>;
+    /// The public Rust spelling of a value handle, including its primitive spelling.
+    /// This must not use the diagnostic name of a runtime handle: it may name private modules.
+    fn value_type_name(&self, key: TypeKey<'_>) -> Option<String> {
+        self.primitive_type_name(key).map(str::to_string)
+    }
     /// A value of the Rust type `from` is a value of `to` through the casts the crates
     /// register (a contract a class implements, a registered cast).
     fn is_assignable(&self, from: TypeKey<'_>, to: TypeKey<'_>) -> bool;

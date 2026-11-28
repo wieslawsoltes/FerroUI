@@ -973,3 +973,71 @@ fn visitors_replace_children_in_place_and_track_parents() {
         other => panic!("Expected an invalid cast, got {:?}", other.map(|_| ())),
     }
 }
+
+// Focused host-independent constructor resource regression: ProvideValue is
+// statically object; the actual interface cast must occur at runtime.
+#[test]
+fn constructor_object_markup_extension_to_reference_parameter_is_runtime_cast() {
+    let host = TestHost::new();
+    let node = host.transform(&format!("<ContentControl xmlns='test' {X}><EnumerableCtorClass><x:Arguments><TestExtension/></x:Arguments></EnumerableCtorClass></ContentControl>")).expect("transform");
+    assert!(
+        host.errors().is_empty(),
+        "{:?}",
+        host.errors().iter().map(|e| &e.title).collect::<Vec<_>>()
+    );
+    let content = assigned(&node.root().expect("root"), "Content");
+    assert!(
+        content.contains("(Cast clr!!System.Collections.IEnumerable (MarkupExt ProvideValue"),
+        "{content}"
+    );
+}
+#[test]
+fn constructor_object_markup_extension_does_not_implicitly_unbox_value_parameter() {
+    let host = TestHost::new();
+    host.transform(&format!("<ContentControl xmlns='test' {X}><CtorClass><x:Arguments><TestExtension/><x:String>abc</x:String></x:Arguments></CtorClass></ContentControl>")).expect("non-fatal");
+    assert!(host.errors().iter().any(|e|e.title.contains("Unable to convert System.Runtime:System.Object to System.Runtime:System.Int32 for constructor")), "{:?}", host.errors().iter().map(|e| &e.title).collect::<Vec<_>>());
+}
+
+#[test]
+fn value_constructor_capability_is_opt_in_and_preserves_converted_arguments() {
+    let markup = format!(
+        "<ValueCtorStruct xmlns='test' {X}><x:Arguments><x:Int32>5</x:Int32><x:String>abc</x:String></x:Arguments></ValueCtorStruct>"
+    );
+    let generic = TestHost::new();
+    generic.transform(&markup).expect("non-fatal");
+    assert!(generic.errors().iter().any(|e| {
+        e.title
+            .contains("Value types can only be loaded via converters")
+    }));
+    let host = TestHost::new();
+    host.configuration.add_extra(Rc::new(
+        crate::transform::transformers::XamlValueTypeConstruction,
+    ));
+    let document = host.transform(&markup).expect("transform");
+    assert!(
+        host.errors().is_empty(),
+        "{:?}",
+        host.errors().iter().map(|e| &e.title).collect::<Vec<_>>()
+    );
+    let text = dump(&document.root().unwrap());
+    assert!(
+        text.contains("Constructable clr!!XamlParserTests.ValueCtorStruct"),
+        "{text}"
+    );
+    assert!(text.contains("5i32") && text.contains("abc"), "{text}");
+}
+#[test]
+fn value_root_constructor_requires_matching_arity_even_when_population_is_possible_for_classes() {
+    let host = TestHost::new();
+    host.configuration.add_extra(Rc::new(
+        crate::transform::transformers::XamlValueTypeConstruction,
+    ));
+    host.transform(&format!("<ValueCtorStruct xmlns='test' {X}><x:Arguments><x:Int32>5</x:Int32></x:Arguments></ValueCtorStruct>")).expect("non-fatal");
+    assert!(
+        host.errors()
+            .iter()
+            .any(|e| e.title.contains("Unable to find public constructor")),
+        "{:?}",
+        host.errors().iter().map(|e| &e.title).collect::<Vec<_>>()
+    );
+}

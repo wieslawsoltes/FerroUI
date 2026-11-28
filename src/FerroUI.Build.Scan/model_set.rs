@@ -136,6 +136,29 @@ impl ModelSet {
         None
     }
 
+    /// The public spelling of a canonical value handle. Paths of crates in the set
+    /// must be exported; external paths retain the spelling explicitly stated by the
+    /// metadata (and are checked when the independent generated consumer compiles).
+    pub fn public_type_name(&self, text: &str) -> Option<String> {
+        let missing = std::cell::Cell::new(false);
+        let result = self.map_paths(text, &|path| {
+            let mut candidates: Vec<_> = self.exports.iter().filter_map(|(public, declared)| {
+                let suffix = path.strip_prefix(declared)?;
+                (suffix.is_empty() || suffix.starts_with("::")).then_some((declared.len(), public, suffix))
+            }).collect();
+            candidates.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.len().cmp(&b.1.len())).then_with(|| a.1.cmp(b.1)));
+            if let Some((_, public, suffix)) = candidates.first() {
+                return format!("{public}{suffix}");
+            }
+            if self.models.iter().any(|model| path.starts_with(&format!("::{}::", model.crate_name))) {
+                // A type of an audited crate without an export cannot be named downstream.
+                missing.set(true);
+            }
+            path.to_string()
+        });
+        (!missing.get()).then_some(result)
+    }
+
     /// The normalised type text `text` with every absolute path made canonical
     /// ([`canonical_path`](Self::canonical_path)): the text the model of the declaring
     /// crate has for the same type.
@@ -387,6 +410,16 @@ mod tests {
         ];
         controls.types = vec![path];
         ModelSet::new(vec![base, other, controls])
+    }
+
+    #[test]
+    fn value_handle_names_use_public_exports_and_reject_private_owned_paths() {
+        let set = set();
+        assert_eq!(set.public_type_name("::base::shapes::shape::Shape"), Some("::base::Shape".into()));
+        assert_eq!(set.public_type_name("Option<::base::media::pen::Pen>"), Some("Option<::base::Pen>".into()));
+        assert_eq!(set.public_type_name("::base::private::Value"), None);
+        assert_eq!(set.public_type_name("::core_models::values::Size"), Some("::core_models::values::Size".into()));
+        assert_eq!(set.public_type_name("Option<::base::private::Value>"), None);
     }
 
     /// Not from upstream: a path is canonical by the longest exported prefix, through the

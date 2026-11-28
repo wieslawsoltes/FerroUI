@@ -1068,11 +1068,24 @@ impl ModelTypeSystem {
                     .and_then(|action| action.make_generic_type(&arguments).ok())
                     .unwrap_or_else(|| self.get("System.Delegate")),
             };
+            let mut add_source = source_of(event);
+            // Paired accessors have no generated typed function. Invoke the exact
+            // nullable accessor descriptor, for both local and downstream callers.
+            if event.event_remove.is_some() {
+                if let MemberSource::Declared { call, .. } = &mut add_source { *call = Some(crate::model::CallForm::Invoker); }
+            }
             let add = self
-                .method(type_, format!("add_{}", event.name), false, self.void(), vec![handler_type], Vec::new(), source_of(event))
+                .method(type_, format!("add_{}", event.name), event.is_static, self.void(), vec![handler_type.clone()], Vec::new(), add_source)
                 .with_rust(MemberRust { parameters: vec![None], ..MemberRust::default() });
+            let remove = event.event_remove.as_ref().map(|accessor| {
+                let mut source = accessor_source(accessor);
+                if let MemberSource::Declared { call, .. } = &mut source { *call = Some(crate::model::CallForm::Invoker); }
+                self.method(type_, format!("remove_{}", event.name), event.is_static, self.void(), vec![handler_type.clone()], Vec::new(), source)
+                    .with_rust(MemberRust { parameters: vec![None], ..MemberRust::default() })
+            });
             members.methods.push(add.clone());
-            members.events.push(Rc::new(ModelEvent { name: event.name.clone(), declaring_type: weak.clone(), add: Some(add) }));
+            members.methods.extend(remove.iter().cloned());
+            members.events.push(Rc::new(ModelEvent { name: event.name.clone(), declaring_type: weak.clone(), add: Some(add), remove }));
         }
         if declared.kind == TypeKind::Enum {
             let wide = declared.enum_members.iter().any(|member| member.value.is_some_and(|value| i32::try_from(value).is_err()));

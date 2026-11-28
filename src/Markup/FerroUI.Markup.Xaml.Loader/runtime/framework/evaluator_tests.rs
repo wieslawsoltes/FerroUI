@@ -1217,3 +1217,48 @@ fn property_field_nodes_load_the_field() {
     let value = ok(h.value(node));
     assert_eq!(from_markup_value::<&'static ferroui_base::FerroProperty>(&value).map(|p| p.name()), Some("Opacity"));
 }
+
+#[test]
+fn metadata_value_constructors_load_root_and_resource_values_without_controls() {
+    use ferroui_base::{Thickness, controls::ResourceDictionary, data::core::ValueTypes};
+    ferroui_markup_xaml::register_types();
+    let ns =
+        "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+    for (body, expected) in [
+        ("", Thickness::default()),
+        (
+            "<x:Arguments><x:Double>2.5</x:Double></x:Arguments>",
+            Thickness::uniform(2.5),
+        ),
+        (
+            "<x:Arguments><x:Double>1.25</x:Double><x:Double>2.5</x:Double><x:Double>3.75</x:Double><x:Double>4</x:Double></x:Arguments>",
+            Thickness::new(1.25, 2.5, 3.75, 4.),
+        ),
+    ] {
+        let xaml = format!("<Thickness {ns}>{body}</Thickness>");
+        let value = crate::FerroRuntimeXamlLoader::parse(&xaml, None).unwrap();
+        assert_eq!(*value.downcast_ref::<Thickness>().unwrap(), expected);
+        let xaml = format!(
+            "<ResourceDictionary {ns}><Thickness x:Key='value'>{body}</Thickness></ResourceDictionary>"
+        );
+        let value = crate::FerroRuntimeXamlLoader::parse(&xaml, None).unwrap();
+        let d = ValueTypes::as_object(&*value)
+            .unwrap()
+            .cast::<ResourceDictionary>()
+            .unwrap();
+        assert_eq!(
+            *d.try_get_resource(&"value".into(), None)
+                .flatten()
+                .unwrap()
+                .downcast_ref::<Thickness>()
+                .unwrap(),
+            expected
+        );
+    }
+}
+#[test]
+fn metadata_value_constructor_invalid_root_arity_is_not_default_construction() {
+    ferroui_markup_xaml::register_types();
+    let xaml = "<Thickness xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'><x:Arguments><x:Double>1</x:Double><x:Double>2</x:Double><x:Double>3</x:Double></x:Arguments></Thickness>";
+    assert!(crate::FerroRuntimeXamlLoader::parse(xaml, None).is_err());
+}

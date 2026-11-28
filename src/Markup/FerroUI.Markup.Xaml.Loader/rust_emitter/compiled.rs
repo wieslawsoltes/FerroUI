@@ -383,7 +383,15 @@ pub(super) fn file_of(assembly_name: &str, root_uri: &str, compiled: Vec<Compile
     source.push_str("    service_provider: ::core::option::Option<&::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>>,\n");
     source.push_str("    uri: &str,\n");
     source.push_str(") -> ::core::result::Result<::core::option::Option<::ferroui_base::BoxedValue>, ::ferroui_markup_xaml::XamlLoadError> {\n");
-    source.push_str("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::uri_equals(uri, ROOT_URI, document)) else {\n");
+    // A request may spell the URI of a document with characters a URI escapes escaped: those
+    // documents take the comparison that unescapes, which no other application links.
+    let compare = match exported.iter().any(|(name, ..)| {
+        uri_needs_unescaping(&format!("{root_uri}{name}"))
+    }) {
+        true => "uri_equals_escaped",
+        false => "uri_equals",
+    };
+    source.push_str(&format!("    let ::core::option::Option::Some((_, build)) = ::core::iter::Iterator::find(&mut DOCUMENTS.iter(), |(document, _)| rt::{compare}(uri, ROOT_URI, document)) else {{\n"));
     source.push_str("        return ::core::result::Result::Ok(::core::option::Option::None);\n");
     source.push_str("    };\n");
     source.push_str("    let provider = ::ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers::create_root_service_provider_v3(\n");
@@ -1036,6 +1044,8 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         crate_name: own_crate.to_string(),
         documents: exported,
         theme_units,
+        loadable_documents: constructor.iter().map(|_| 0).chain(loadable.iter().copied())
+            .filter_map(|index| documents[index].2.clone()).collect(),
     })
 }
 
@@ -1071,6 +1081,7 @@ pub struct ClassFile {
     documents: Vec<DocumentModel>,
     /// The unit graph of the theme of the class (#568), when its markup is partitioned into units.
     theme_units: Option<ThemeUnitsModel>,
+    loadable_documents: Vec<String>,
 }
 
 impl ClassFile {
@@ -1079,6 +1090,11 @@ impl ClassFile {
         self.theme_units.as_ref()
     }
 
+    /// Exact public URI entries of this class file's loader, including the class
+    /// only when it has a callable constructor. Reading this list never constructs it.
+    pub fn loadable_documents(&self) -> &[String] {
+        &self.loadable_documents
+    }
     /// The `.xamlmeta` of the file (docs/porting/xaml.md, 9.7.3): its compiled documents,
     /// for crates that include them. `dependencies` are the `.xamlmeta` files of the
     /// crates the documents include documents of, relative to the file the metadata is
@@ -1124,7 +1140,11 @@ fn loader_table(
     // The class has an entry when it has a constructor the table can call.
     for index in constructor.iter().map(|_| 0).chain(loadable.iter().copied()) {
         let uri = documents[index].2.clone().unwrap_or_default();
-        source.push_str(&format!("    if rt::uri_equals(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
+        let compare = match uri_needs_unescaping(&uri) {
+            true => "uri_equals_escaped",
+            false => "uri_equals",
+        };
+        source.push_str(&format!("    if rt::{compare}(uri, {}, \"\") {{\n", rust_string_literal(&uri)));
         let value = match (index, constructor) {
             (0, Some(Constructor::Parameterless(function))) => format!("::{class_path}::{function}()"),
             (0, Some(Constructor::ServiceProvider(function))) => {
@@ -1228,4 +1248,11 @@ mod tests {
         let names: Vec<&str> = group.iter().map(|(name, _, _)| name.as_str()).collect();
         assert_eq!(names, ["Theme.xaml", "A&B.xaml", "Keyed.xaml"]);
     }
+}
+
+/// Whether the URI of a document may be requested escaped: it has a character that a URI escapes, or
+/// an escape (as `rt::uri_needs_unescaping`, which the emitter does not link). Such a document is
+/// compared with a request by `rt::uri_equals_escaped`, any other by `rt::uri_equals`.
+fn uri_needs_unescaping(uri: &str) -> bool {
+    uri.chars().any(|c| !c.is_ascii() || c.is_ascii_control() || " %\"<>`{}#?^|\\".contains(c))
 }

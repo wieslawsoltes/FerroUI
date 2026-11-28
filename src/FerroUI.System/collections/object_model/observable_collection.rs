@@ -182,7 +182,16 @@ impl<T: Clone + PartialEq + 'static> ObservableCollection<T> {
     /// Removes every item (`ClearItems`): a reset.
     pub fn clear(&self) {
         self.check_reentrancy();
-        self.inner.items.borrow_mut().clear();
+        // The values are dropped without a borrow of the collection: a destructor may use it.
+        // The capacity is kept unless a destructor added values meanwhile.
+        let mut removed = std::mem::take(&mut *self.inner.items.borrow_mut());
+        removed.clear();
+        {
+            let mut items = self.inner.items.borrow_mut();
+            if items.is_empty() && items.capacity() < removed.capacity() {
+                std::mem::swap(&mut *items, &mut removed);
+            }
+        }
         self.on_count_property_changed();
         self.on_indexer_property_changed();
         self.on_collection_reset();
@@ -207,7 +216,7 @@ impl<T: Clone + PartialEq + 'static> ObservableCollection<T> {
     /// Panics on a change made by a handler of a notification while more than one handler listens
     /// (`CheckReentrancy`, `InvalidOperationException`).
     pub fn check_reentrancy(&self) {
-        if self.inner.block_reentrancy_count.get() > 0 && self.inner.collection_changed.len() + usize::from(self.inner.untyped_collection_changed.has_handlers()) > 1 {
+        if self.inner.block_reentrancy_count.get() > 0 && self.inner.collection_changed.len() + self.inner.untyped_collection_changed.handler_count() > 1 {
             panic!("Cannot change ObservableCollection during a CollectionChanged event.");
         }
     }
@@ -250,16 +259,27 @@ impl<T: Clone + PartialEq + 'static> ObservableCollection<T> {
         }
         let _unblock = Unblock(&self.inner.block_reentrancy_count);
         let args = NotifyCollectionChangedEventArgs { action, new_items, old_items, new_starting_index, old_starting_index };
-        for (_, handler) in self.inner.collection_changed.snapshot().iter() {
-            handler(&args);
-        }
-        self.inner.untyped_collection_changed.raise(&CollectionChange {
+        // Take BOTH snapshots before invoking any handler. Adding/removing a
+        // handler through the other view affects the next notification only.
+        let typed = self.inner.collection_changed.snapshot();
+        let untyped = self.inner.untyped_collection_changed.snapshot();
+        let change = CollectionChange {
             action,
             new_starting_index,
             new_count: new_items.len(),
             old_starting_index,
             old_count: old_items.len(),
-        });
+        };
+        let (mut t, mut u) = (0, 0);
+        while t < typed.len() || u < untyped.len() {
+            if u == untyped.len() || (t < typed.len() && typed[t].0 < untyped[u].0) {
+                typed[t].1(&args);
+                t += 1;
+            } else {
+                untyped[u].1(&change);
+                u += 1;
+            }
+        }
     }
 }
 

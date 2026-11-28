@@ -122,6 +122,21 @@ impl EventRoute {
         }
     }
 
+    /// Delivers the local snapshot assembled by `Interactive::raise_event_local`.
+    pub(crate) fn raise_event_local(&self, source: &Ref<Interactive>, e: &dyn IRoutedEventArgs) {
+        e.set_source(source);
+        e.set_route(RoutingStrategies::DIRECT);
+        if let Some(route) = &self.route {
+            self.event.invoke_raised(source, e);
+            for entry in route {
+                if let Some(handler) = &entry.handler {
+                    handler(source, e);
+                }
+            }
+        }
+        self.event.invoke_route_finished(e);
+    }
+
     fn raise_event_impl(&self, e: &dyn IRoutedEventArgs) {
         let Some(route) = &self.route else { return };
 

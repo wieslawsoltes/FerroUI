@@ -63,6 +63,7 @@ fn compiled_reentrant(_sp: Option<&Rc<dyn IServiceProvider>>, _uri: &str) -> Res
     // While it is loading, an include answers no resource lookups.
     let include = REENTRANT.with(|include| include.borrow().clone()).unwrap();
     assert!(include.try_get_resource(&key("any"), None).is_none());
+    assert!(include.as_resource_provider().resource_dictionary().is_none());
     Ok(Some(boxed(ResourceDictionary::new())))
 }
 
@@ -506,6 +507,28 @@ fn a_registration_can_be_replaced_and_removed() {
 }
 
 #[test]
+fn public_compiled_document_queries_do_not_load_and_follow_registration_lifetime() {
+    let scope = TestAssetLoader::new().install();
+    const PUBLIC: &[&str] = &["ferres://includes.query/Folder/Caf\u{e9}.xaml"];
+    let before = LOADS.with(Cell::get);
+    FerroXamlLoader::register_compiled_xaml_with_documents("includes.query", compiled_resources, PUBLIC);
+    assert!(FerroXamlLoader::has_public_compiled_document(&uri_ref(PUBLIC[0]), None));
+    assert!(FerroXamlLoader::has_public_compiled_document(&uri_ref("ferres://includes.query/folder/Caf\u{c9}.xaml"), None));
+    assert!(FerroXamlLoader::has_public_compiled_document(&uri_ref("Caf\u{e9}.xaml"), Some(&url("ferres://includes.query/Folder/Root.xaml"))));
+    assert!(!FerroXamlLoader::has_public_compiled_document(&uri_ref("Missing.xaml"), None));
+    assert!(!FerroXamlLoader::has_public_compiled_document(&uri_ref("ferres://includes.query/Private.xaml"), None));
+    assert_eq!(LOADS.with(Cell::get), before);
+    // A legacy replacement cannot leave the previous advertised documents behind.
+    FerroXamlLoader::register_compiled_xaml("includes.query", compiled_resources);
+    assert!(!FerroXamlLoader::has_public_compiled_document(&uri_ref(PUBLIC[0]), None));
+    FerroXamlLoader::register_compiled_xaml_with_documents("includes.query", compiled_resources, PUBLIC);
+    assert!(FerroXamlLoader::unregister_compiled_xaml("includes.query"));
+    assert!(!FerroXamlLoader::has_public_compiled_document(&uri_ref(PUBLIC[0]), None));
+    assert_eq!(LOADS.with(Cell::get), before);
+    scope.dispose();
+}
+
+#[test]
 fn subscribing_to_owner_changed_through_metadata_reports_a_failing_load() {
     use ferroui_base::metadata::{MarkupDelegate, MarkupEvent, MarkupInvokeError};
 
@@ -805,4 +828,69 @@ fn development_include_sources_resolve_without_loading_missing_assets() {
     assert_eq!(style.development_source().as_deref(), Some("ferres://discovery/Styles.xaml"));
     // No asset loader or runtime loader is installed: metadata discovery must
     // never construct a dictionary/style or resolve an asset.
+}
+
+#[test]
+fn successful_resource_include_releases_context_but_failed_load_retains_it_for_retry() {
+    let scope = TestAssetLoader::new().install();
+    FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
+    let sp = TestServiceProvider::new().with_base_uri("ferres://includes.resources/Views/Main.xaml").sp();
+    let weak = Rc::downgrade(&sp);
+    let include = ResourceInclude::with_service_provider(sp);
+    assert!(weak.upgrade().is_some());
+    assert!(include.try_loaded().is_err()); // Missing Source must remain retryable.
+    assert!(weak.upgrade().is_some());
+    include.set_source(Some(uri_ref("../Shared.xaml")));
+    let first = include.try_loaded().unwrap();
+    assert!(SEEN_PROVIDER.with(Cell::get));
+    assert!(weak.upgrade().is_none(), "successful include retains its declaration context");
+    include.set_source(Some(uri_ref("../Other.xaml")));
+    assert!(Rc::ptr_eq(&first, &include.try_loaded().unwrap()));
+    assert_eq!(text(include.try_get_resource(&key("source"), None)), "Shared.xaml");
+    scope.dispose();
+}
+
+#[test]
+fn erased_resource_include_exposes_actual_dictionary_lazily_and_caches_identity() {
+    let scope = TestAssetLoader::new().install();
+    FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
+    LOADS.with(|loads| loads.set(0));
+    let include = ResourceInclude::new(None);
+    include.set_source(Some(uri_ref("ferres://includes.resources/Shared.xaml")));
+    let provider = include.as_resource_provider();
+    assert_eq!(LOADS.with(Cell::get), 0);
+    let dictionary = provider.resource_dictionary().unwrap();
+    assert_eq!(LOADS.with(Cell::get), 1);
+    assert!(Rc::ptr_eq(&dictionary, &include.try_loaded().unwrap()));
+    assert!(Rc::ptr_eq(&dictionary, &provider.resource_dictionary().unwrap()));
+    include.set_source(Some(uri_ref("ferres://includes.resources/Other.xaml")));
+    assert!(Rc::ptr_eq(&dictionary, &provider.resource_dictionary().unwrap()));
+    assert_eq!(LOADS.with(Cell::get), 1);
+    dictionary.set(key("shared"), Some(boxed("live".to_string())));
+    assert_eq!(text(provider.try_get_resource(&key("shared"), None)), "live");
+    scope.dispose();
+}
+
+#[test]
+fn erased_resource_include_propagates_load_errors_and_remains_retryable() {
+    use crate::xaml_error_scope::with_xaml_errors;
+    let scope = TestAssetLoader::new().install();
+    FerroXamlLoader::register_compiled_xaml("includes.resources", compiled_resources);
+    FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
+    let include = ResourceInclude::new(None);
+    let provider = include.as_resource_provider();
+    let load_error = || {
+        with_xaml_errors(|| {
+            assert!(provider.resource_dictionary().is_none());
+            Ok(())
+        })
+        .unwrap_err()
+    };
+    assert_eq!(load_error().message(), "ResourceInclude.Source must be set.");
+    include.set_source(Some(uri_ref("ferres://includes.styles/NotAStyle.xaml")));
+    assert!(load_error().message().contains("IResourceDictionary"));
+    include.set_source(Some(uri_ref("ferres://includes.resources/Recovered.xaml")));
+    let dictionary = provider.resource_dictionary().unwrap();
+    assert_eq!(text(dictionary.try_get_value(&key("source"))), "Recovered.xaml");
+    scope.dispose();
 }
