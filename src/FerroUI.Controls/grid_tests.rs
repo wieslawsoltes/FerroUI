@@ -253,6 +253,51 @@ fn child_bounds(grid: &Grid, index: usize) -> Rect {
     grid.children().get(index).bounds()
 }
 
+#[test]
+fn padding_insets_child_measure_and_arrange_without_definitions() {
+    let grid = Grid::new();
+    let child = TestControl::new(Size::new(30.0, 20.0));
+    grid.children().add(child.clone());
+    grid.set_padding(Thickness::new(3.0, 4.0, 5.0, 6.0));
+
+    let available = Size::new(100.0, 80.0);
+    grid.measure(available);
+    grid.arrange(Rect::from_size(available));
+
+    assert_eq!(grid.desired_size(), Size::new(38.0, 30.0));
+    assert_eq!(child.previous_measure(), Some(Size::new(92.0, 70.0)));
+    assert_eq!(child.bounds(), Rect::new(3.0, 4.0, 92.0, 70.0));
+
+    grid.set_padding(Thickness::new(7.0, 4.0, 5.0, 6.0));
+    assert!(!grid.is_measure_valid());
+    grid.measure(available);
+    assert_eq!(grid.desired_size(), Size::new(42.0, 30.0));
+    assert_eq!(child.previous_measure(), Some(Size::new(88.0, 70.0)));
+}
+
+#[test]
+fn star_columns_share_the_padded_grid_area() {
+    let grid = Grid::new();
+    grid.set_padding(Thickness::new(3.0, 4.0, 5.0, 6.0));
+    grid.set_column_spacing(4.0);
+    grid.column_definitions().add(column(pixels(20.0), None));
+    grid.column_definitions().add(column(star(1.0), None));
+    let first = TestControl::new(Size::new(10.0, 20.0));
+    let second = TestControl::new(Size::new(10.0, 20.0));
+    grid.children().add(cell(first.clone(), 0, 0));
+    grid.children().add(cell(second.clone(), 0, 1));
+
+    let available = Size::new(100.0, 80.0);
+    grid.measure(available);
+    grid.arrange(Rect::from_size(available));
+
+    assert_eq!(grid.desired_size(), Size::new(42.0, 30.0));
+    assert_eq!(first.previous_measure(), Some(Size::new(20.0, 70.0)));
+    assert_eq!(second.previous_measure(), Some(Size::new(68.0, 70.0)));
+    assert_eq!(first.bounds(), Rect::new(3.0, 4.0, 20.0, 70.0));
+    assert_eq!(second.bounds(), Rect::new(27.0, 4.0, 68.0, 70.0));
+}
+
 /// Asserts the actual width of all the columns of a shared size group.
 fn assert_group_width(grid: &Grid, shared_size_group: Option<&str>, expected: f64) {
     for cd in grid.column_definitions().snapshot().iter() {

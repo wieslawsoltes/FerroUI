@@ -224,8 +224,8 @@ protected:
     Self& self() noexcept { return static_cast<Self&>(*this); }
 };
 
-inline constexpr std::int64_t api_fingerprint = -4387658432560162436;
-inline constexpr std::int64_t selection_fingerprint = 5031981251879184649;
+inline constexpr std::int64_t api_fingerprint = -2903654145985797389;
+inline constexpr std::int64_t selection_fingerprint = 1698379762983661930;
 
 /// Defines how a background is drawn relative to its border.
 enum class BackgroundSizing : std::int64_t {
@@ -456,13 +456,13 @@ public:
     Self& render_transform_origin(std::string_view value_) { detail::set_string(this->handle(), 720, value_); return this->self(); }
     Self& render_transform_origin(const char* value_) { return render_transform_origin(std::string_view(value_)); }
     /// Visual.FlowDirection (attached). Defines the `FlowDirection` attached property.
-    static FlowDirection get_flow_direction(const Object& target) { return static_cast<FlowDirection>(detail::get_i64(target.handle(), 1047)); }
-    static void set_flow_direction(const Object& target, FlowDirection value_) { detail::check(ferro_set_i64(target.handle(), 1047, static_cast<std::int64_t>(value_))); }
+    static FlowDirection get_flow_direction(const Object& target) { return static_cast<FlowDirection>(detail::get_i64(target.handle(), 1048)); }
+    static void set_flow_direction(const Object& target, FlowDirection value_) { detail::check(ferro_set_i64(target.handle(), 1048, static_cast<std::int64_t>(value_))); }
     /// VisualParent. Defines the `VisualParent` property.
-    Object visual_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1048, &result)); return Object(detail::Adopt{}, result); }
+    Object visual_parent() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1049, &result)); return Object(detail::Adopt{}, result); }
     /// ZIndex. Defines the `ZIndex` property.
-    std::int64_t z_index() const { return detail::get_i64(this->handle(), 1077); }
-    Self& z_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 1077, value_)); return this->self(); }
+    std::int64_t z_index() const { return detail::get_i64(this->handle(), 1078); }
+    Self& z_index(std::int64_t value_) { detail::check(ferro_set_i64(this->handle(), 1078, value_)); return this->self(); }
 };
 
 class Visual final : public VisualApi<Visual> {
@@ -504,12 +504,17 @@ public:
     /// UseLayoutRounding. Defines the `UseLayoutRounding` property.
     bool use_layout_rounding() const { return detail::get_bool(this->handle(), 1028); }
     Self& use_layout_rounding(bool value_) { detail::check(ferro_set_bool(this->handle(), 1028, value_)); return this->self(); }
+    /// UseWinUiMeasureRounding. Defines the inherited `UseWinUiMeasureRounding` property. When
+    /// layout rounding is enabled, this uses WinUI's physical-pixel rounding for layout sizes,
+    /// offsets and border insets.
+    bool use_win_ui_measure_rounding() const { return detail::get_bool(this->handle(), 1032); }
+    Self& use_win_ui_measure_rounding(bool value_) { detail::check(ferro_set_bool(this->handle(), 1032, value_)); return this->self(); }
     /// VerticalAlignment. Defines the `VerticalAlignment` property.
-    VerticalAlignment vertical_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1036)); }
-    Self& vertical_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1036, static_cast<std::int64_t>(value_))); return this->self(); }
+    VerticalAlignment vertical_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1037)); }
+    Self& vertical_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1037, static_cast<std::int64_t>(value_))); return this->self(); }
     /// Width. Defines the `Width` property.
-    double width() const { return detail::get_f64(this->handle(), 1054); }
-    Self& width(double value_) { detail::check(ferro_set_f64(this->handle(), 1054, value_)); return this->self(); }
+    double width() const { return detail::get_f64(this->handle(), 1055); }
+    Self& width(double value_) { detail::check(ferro_set_f64(this->handle(), 1055, value_)); return this->self(); }
 };
 
 class Layoutable final : public LayoutableApi<Layoutable> {
@@ -921,8 +926,8 @@ public:
     HorizontalAlignment horizontal_content_alignment() const { return static_cast<HorizontalAlignment>(detail::get_i64(this->handle(), 352)); }
     Self& horizontal_content_alignment(HorizontalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 352, static_cast<std::int64_t>(value_))); return this->self(); }
     /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-    VerticalAlignment vertical_content_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1037)); }
-    Self& vertical_content_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1037, static_cast<std::int64_t>(value_))); return this->self(); }
+    VerticalAlignment vertical_content_alignment() const { return static_cast<VerticalAlignment>(detail::get_i64(this->handle(), 1038)); }
+    Self& vertical_content_alignment(VerticalAlignment value_) { detail::check(ferro_set_i64(this->handle(), 1038, static_cast<std::int64_t>(value_))); return this->self(); }
 };
 
 class ContentControl final : public ContentControlApi<ContentControl> {
@@ -1230,19 +1235,19 @@ public:
     Self& title(std::string_view value_) { detail::set_string(this->handle(), 944, value_); return this->self(); }
     Self& title(const char* value_) { return title(std::string_view(value_)); }
     /// WindowDecorationMargin. Defines the `WindowDecorationMargin` property.
-    std::string window_decoration_margin() const { return detail::get_string(this->handle(), 1057); }
+    std::string window_decoration_margin() const { return detail::get_string(this->handle(), 1058); }
     /// WindowDecorations. Defines the `WindowDecorations` property.
-    WindowDecorations window_decorations() const { return static_cast<WindowDecorations>(detail::get_i64(this->handle(), 1059)); }
-    Self& window_decorations(WindowDecorations value_) { detail::check(ferro_set_i64(this->handle(), 1059, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowDecorations window_decorations() const { return static_cast<WindowDecorations>(detail::get_i64(this->handle(), 1060)); }
+    Self& window_decorations(WindowDecorations value_) { detail::check(ferro_set_i64(this->handle(), 1060, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowDecorationsTheme. Defines the `WindowDecorationsTheme` property.
-    Object window_decorations_theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1060, &result)); return Object(detail::Adopt{}, result); }
-    Self& window_decorations_theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 1060, value_.handle())); return this->self(); }
+    Object window_decorations_theme() const { FerroHandle result = 0; detail::check(ferro_get_handle(this->handle(), 1061, &result)); return Object(detail::Adopt{}, result); }
+    Self& window_decorations_theme(const Object& value_) { detail::check(ferro_set_handle(this->handle(), 1061, value_.handle())); return this->self(); }
     /// WindowStartupLocation. Defines the `WindowStartupLocation` property.
-    WindowStartupLocation window_startup_location() const { return static_cast<WindowStartupLocation>(detail::get_i64(this->handle(), 1063)); }
-    Self& window_startup_location(WindowStartupLocation value_) { detail::check(ferro_set_i64(this->handle(), 1063, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowStartupLocation window_startup_location() const { return static_cast<WindowStartupLocation>(detail::get_i64(this->handle(), 1064)); }
+    Self& window_startup_location(WindowStartupLocation value_) { detail::check(ferro_set_i64(this->handle(), 1064, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowState. Represents the currently effective window state (normal, minimized, maximized).
-    WindowState window_state() const { return static_cast<WindowState>(detail::get_i64(this->handle(), 1064)); }
-    Self& window_state(WindowState value_) { detail::check(ferro_set_i64(this->handle(), 1064, static_cast<std::int64_t>(value_))); return this->self(); }
+    WindowState window_state() const { return static_cast<WindowState>(detail::get_i64(this->handle(), 1065)); }
+    Self& window_state(WindowState value_) { detail::check(ferro_set_i64(this->handle(), 1065, static_cast<std::int64_t>(value_))); return this->self(); }
     /// WindowClosed: the handler takes the object, and may return `true` for handled. Routed event
     /// that can be used for global tracking of window destruction.
     template <class Handler>

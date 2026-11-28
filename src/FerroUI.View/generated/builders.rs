@@ -4806,6 +4806,13 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GradientStop>> GradientStopProp
 
 /// The properties and routed events of [`Grid`](ferroui_controls::Grid).
 pub trait GridProps: ElementBuilder {
+    /// Sets [`Grid::padding_property`](ferroui_controls::Grid::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
+    fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
+        self.prop(<ferroui_controls::Grid>::padding_property(), value)
+    }
+
     /// Sets [`Grid::show_grid_lines_property`](ferroui_controls::Grid::show_grid_lines_property).
     fn show_grid_lines<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::show_grid_lines_property(), value)
@@ -5563,6 +5570,11 @@ pub trait LayoutableProps: ElementBuilder {
     /// Sets [`Layoutable::use_layout_rounding_property`](ferroui_base::layout::Layoutable::use_layout_rounding_property).
     fn use_layout_rounding<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_base::layout::Layoutable>::use_layout_rounding_property(), value)
+    }
+
+    /// Sets [`Layoutable::use_winui_measure_rounding_property`](ferroui_base::layout::Layoutable::use_winui_measure_rounding_property).
+    fn use_winui_measure_rounding<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_base::layout::Layoutable>::use_winui_measure_rounding_property(), value)
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::layout::Layoutable>> LayoutableProps for El<T> {}

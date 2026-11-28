@@ -2,8 +2,8 @@
 
 package ferroui
 
-const apiFingerprint int64 = -4387658432560162436
-const selectionFingerprint int64 = 5031981251879184649
+const apiFingerprint int64 = -2903654145985797389
+const selectionFingerprint int64 = 1698379762983661930
 
 // BackgroundSizing: Defines how a background is drawn relative to its border.
 type BackgroundSizing int64
@@ -296,18 +296,18 @@ func (o Visual) SetRenderTransformOrigin(value string) error { return setString(
 
 // VisualFlowDirection reads the attached property Visual.FlowDirection. Defines the
 // `FlowDirection` attached property.
-func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1047)) }
+func VisualFlowDirection(target Wrapper) FlowDirection { return FlowDirection(getI64(target.Handle(), 1048)) }
 // VisualSetFlowDirection writes the attached property Visual.FlowDirection.
-func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1047, int64(value)) }
+func VisualSetFlowDirection(target Wrapper, value FlowDirection) error { return setI64(target.Handle(), 1048, int64(value)) }
 
 // VisualParent reads VisualParent. Defines the `VisualParent` property.
 // VisualParent is the object the property holds, with one reference counted: release it.
-func (o Visual) VisualParent() Object { return getObject(o.h, 1048) }
+func (o Visual) VisualParent() Object { return getObject(o.h, 1049) }
 
 // ZIndex reads ZIndex. Defines the `ZIndex` property.
-func (o Visual) ZIndex() int64 { return getI64(o.h, 1077) }
+func (o Visual) ZIndex() int64 { return getI64(o.h, 1078) }
 // SetZIndex writes ZIndex.
-func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1077, value) }
+func (o Visual) SetZIndex(value int64) error { return setI64(o.h, 1078, value) }
 
 // Layoutable: Implements layout-related functionality for a control.
 type Layoutable struct{ Visual }
@@ -361,15 +361,22 @@ func (o Layoutable) UseLayoutRounding() bool { return getBool(o.h, 1028) }
 // SetUseLayoutRounding writes UseLayoutRounding.
 func (o Layoutable) SetUseLayoutRounding(value bool) error { return setBool(o.h, 1028, value) }
 
+// UseWinUiMeasureRounding reads UseWinUiMeasureRounding. Defines the inherited
+// `UseWinUiMeasureRounding` property. When layout rounding is enabled, this uses WinUI's
+// physical-pixel rounding for layout sizes, offsets and border insets.
+func (o Layoutable) UseWinUiMeasureRounding() bool { return getBool(o.h, 1032) }
+// SetUseWinUiMeasureRounding writes UseWinUiMeasureRounding.
+func (o Layoutable) SetUseWinUiMeasureRounding(value bool) error { return setBool(o.h, 1032, value) }
+
 // VerticalAlignment reads VerticalAlignment. Defines the `VerticalAlignment` property.
-func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1036)) }
+func (o Layoutable) VerticalAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
 // SetVerticalAlignment writes VerticalAlignment.
-func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1036, int64(value)) }
+func (o Layoutable) SetVerticalAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
 
 // Width reads Width. Defines the `Width` property.
-func (o Layoutable) Width() float64 { return getF64(o.h, 1054) }
+func (o Layoutable) Width() float64 { return getF64(o.h, 1055) }
 // SetWidth writes Width.
-func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1054, value) }
+func (o Layoutable) SetWidth(value float64) error { return setF64(o.h, 1055, value) }
 
 // Interactive: Base class for objects that raise routed events.
 type Interactive struct{ Layoutable }
@@ -811,9 +818,9 @@ func (o ContentControl) SetHorizontalContentAlignment(value HorizontalAlignment)
 
 // VerticalContentAlignment reads VerticalContentAlignment. Defines the
 // `VerticalContentAlignment` property.
-func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1037)) }
+func (o ContentControl) VerticalContentAlignment() VerticalAlignment { return VerticalAlignment(getI64(o.h, 1038)) }
 // SetVerticalContentAlignment writes VerticalContentAlignment.
-func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1037, int64(value)) }
+func (o ContentControl) SetVerticalContentAlignment(value VerticalAlignment) error { return setI64(o.h, 1038, int64(value)) }
 
 // Button: A standard button control.
 type Button struct{ ContentControl }
@@ -1185,31 +1192,31 @@ func (o Window) SetTitle(value string) error { return setString(o.h, 944, value)
 
 // WindowDecorationMargin reads WindowDecorationMargin. Defines the `WindowDecorationMargin`
 // property.
-func (o Window) WindowDecorationMargin() string { return getString(o.h, 1057) }
+func (o Window) WindowDecorationMargin() string { return getString(o.h, 1058) }
 
 // WindowDecorations reads WindowDecorations. Defines the `WindowDecorations` property.
-func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1059)) }
+func (o Window) WindowDecorations() WindowDecorations { return WindowDecorations(getI64(o.h, 1060)) }
 // SetWindowDecorations writes WindowDecorations.
-func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1059, int64(value)) }
+func (o Window) SetWindowDecorations(value WindowDecorations) error { return setI64(o.h, 1060, int64(value)) }
 
 // WindowDecorationsTheme reads WindowDecorationsTheme. Defines the `WindowDecorationsTheme`
 // property.
 // WindowDecorationsTheme is the object the property holds, with one reference counted: release it.
-func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1060) }
+func (o Window) WindowDecorationsTheme() Object { return getObject(o.h, 1061) }
 // SetWindowDecorationsTheme writes WindowDecorationsTheme to an object; nil is null.
-func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1060, value) }
+func (o Window) SetWindowDecorationsTheme(value Wrapper) error { return setObject(o.h, 1061, value) }
 
 // WindowStartupLocation reads WindowStartupLocation. Defines the `WindowStartupLocation`
 // property.
-func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1063)) }
+func (o Window) WindowStartupLocation() WindowStartupLocation { return WindowStartupLocation(getI64(o.h, 1064)) }
 // SetWindowStartupLocation writes WindowStartupLocation.
-func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1063, int64(value)) }
+func (o Window) SetWindowStartupLocation(value WindowStartupLocation) error { return setI64(o.h, 1064, int64(value)) }
 
 // WindowState reads WindowState. Represents the currently effective window state (normal,
 // minimized, maximized).
-func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1064)) }
+func (o Window) WindowState() WindowState { return WindowState(getI64(o.h, 1065)) }
 // SetWindowState writes WindowState.
-func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1064, int64(value)) }
+func (o Window) SetWindowState(value WindowState) error { return setI64(o.h, 1065, int64(value)) }
 
 // OnWindowClosed subscribes to WindowClosed; the sender is valid for the call. Routed event
 // that can be used for global tracking of window destruction.

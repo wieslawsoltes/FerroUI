@@ -24,8 +24,28 @@ impl FontFamilyLineMetrics {
         font_rendering_em_size: f64,
         text_line_bounds: TextLineBounds,
     ) -> Self {
-        let typeface = Typeface::new(font_family.clone()).glyph_typeface();
+        let typeface = Self::line_typeface(Typeface::new(font_family.clone()).glyph_typeface(), font_family, font_rendering_em_size);
         Self::from_font_metrics(typeface.metrics(), font_rendering_em_size, text_line_bounds)
+    }
+
+    /// The face whose metrics bound the line: the regular face of the family, or, for a family
+    /// that asks for automatic optical sizing (`FontFamily::with_automatic_optical_sizing`), its
+    /// instance at the optical size of the text. The line height of every other family, the
+    /// variable system fonts included, stays that of the regular face.
+    pub(crate) fn line_typeface(
+        regular: std::rc::Rc<crate::media::GlyphTypeface>,
+        font_family: &FontFamily,
+        font_rendering_em_size: f64,
+    ) -> std::rc::Rc<crate::media::GlyphTypeface> {
+        if !font_family.automatic_optical_sizing() {
+            return regular;
+        }
+        crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
+            regular,
+            font_family,
+            font_family,
+            font_rendering_em_size,
+        )
     }
 
     pub(crate) fn from_font_metrics(

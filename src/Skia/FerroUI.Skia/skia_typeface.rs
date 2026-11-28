@@ -6,10 +6,18 @@ use ferroui_base::media::{
     FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
-use skia_safe::{Font, Typeface};
+use skia_safe::font_arguments::{VariationPosition, variation_position::Coordinate};
+use skia_safe::{Font, FontArguments, FourByteTag, Typeface};
 use std::any::Any;
 use std::io::{Cursor, Read};
 use std::rc::Rc;
+use std::sync::OnceLock;
+
+/// The index of a typeface in its font collection, from the data it keeps; 0 without data. The
+/// bytes of the font are never copied for it.
+fn collection_index(typeface: &Typeface) -> u32 {
+    typeface.to_existing_font_data().map_or(0, |(_, index)| index)
+}
 
 /// A platform typeface over a Skia typeface.
 pub struct SkiaTypeface {
@@ -18,6 +26,7 @@ pub struct SkiaTypeface {
     weight: FontWeight,
     style: FontStyle,
     stretch: FontStretch,
+    collection_index: OnceLock<u32>,
     /// The glyph bounds its glyph runs measured, by size (`glyph_bounds_cache`).
     glyph_bounds: GlyphBoundsCache,
 }
@@ -34,6 +43,7 @@ impl SkiaTypeface {
             stretch: FontStretch::from_i32(*font_style.width()).unwrap_or(FontStretch::Normal),
             sk_typeface: typeface,
             font_simulations,
+            collection_index: OnceLock::new(),
             glyph_bounds: GlyphBoundsCache::default(),
         })
     }
@@ -140,10 +150,6 @@ impl IPlatformTypeface for SkiaTypeface {
     /// design position): the axes of `settings` take their values, the others the values of this
     /// typeface. The optical size of a text is chosen with it (#859).
     fn with_variation_settings(&self, settings: &FontVariationSettings) -> Option<Rc<dyn IPlatformTypeface>> {
-        use skia_safe::font_arguments::variation_position::Coordinate;
-        use skia_safe::font_arguments::VariationPosition;
-        use skia_safe::{FontArguments, FourByteTag};
-
         let mut coordinates: Vec<Coordinate> = self.sk_typeface.variation_design_position().unwrap_or_default();
         for variation in settings.variations() {
             let axis = FourByteTag::new(variation.tag.value());
@@ -153,8 +159,14 @@ impl IPlatformTypeface for SkiaTypeface {
                 None => coordinates.push(Coordinate { axis, value }),
             }
         }
-        let position = VariationPosition { coordinates: &coordinates };
-        let arguments = FontArguments::new().set_variation_design_position(position);
+        // A variable face can come from a nonzero index in a font collection. The index is read
+        // from the data the typeface keeps; a system typeface (Core Text, DirectWrite, a file of
+        // fontconfig) keeps none and is addressed by its own handle, so it is 0 and the font file
+        // is never read for it.
+        let index = *self.collection_index.get_or_init(|| collection_index(&self.sk_typeface));
+        let mut arguments = FontArguments::new();
+        arguments.set_collection_index(index as usize);
+        let arguments = arguments.set_variation_design_position(VariationPosition { coordinates: &coordinates });
         let typeface = self.sk_typeface.clone_with_arguments(&arguments)?;
         let typeface: Rc<dyn IPlatformTypeface> = SkiaTypeface::new(typeface, self.font_simulations);
         Some(typeface)
@@ -168,5 +180,26 @@ impl IPlatformTypeface for SkiaTypeface {
 
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+#[cfg(test)]
+mod collection_index_tests {
+    use super::*;
+
+    /// A typeface made from data reads its index from that data; a variation of it keeps the
+    /// face. Nothing reads the bytes of a font to find its index.
+    #[test]
+    fn the_collection_index_comes_from_the_kept_data() {
+        let bytes = include_bytes!("test_assets/assets/AdobeBlank2VF.ttf");
+        let typeface = skia_safe::FontMgr::new()
+            .new_from_data(skia_safe::Data::new_copy(bytes), None)
+            .expect("a typeface from the bytes of a variable font");
+        assert_eq!(collection_index(&typeface), 0);
+        let platform = SkiaTypeface::new(typeface, FontSimulations::None);
+        let varied = platform
+            .with_variation_settings(&FontVariationSettings::default())
+            .expect("a variation of the typeface");
+        assert_eq!(varied.family_name(), platform.family_name());
     }
 }

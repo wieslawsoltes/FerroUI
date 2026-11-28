@@ -290,8 +290,8 @@ void runApp(void Function() start) {
 
 const int _abiVersion = 1;
 const int _bufferTooSmall = -14;
-const int _apiFingerprint = -4387658432560162436;
-const int _selectionFingerprint = 5031981251879184649;
+const int _apiFingerprint = -2903654145985797389;
+const int _selectionFingerprint = 1698379762983661930;
 
 void _registerTypes() {
   for (final entry in const ['ferro_type_button', 'ferro_type_stack_panel', 'ferro_type_text_block', 'ferro_type_window']) {
@@ -506,13 +506,13 @@ extension type Visual._(int handle) implements StyledElement {
   String get renderTransformOrigin => _getString(handle, 720);
   set renderTransformOrigin(String value) => _setString(handle, 720, value);
   /// Visual.FlowDirection (attached). Defines the `FlowDirection` attached property.
-  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1047));
-  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1047, value.value);
+  static FlowDirection getFlowDirection(FerroObject target) => FlowDirection(_getI64(target.handle, 1048));
+  static void setFlowDirection(FerroObject target, FlowDirection value) => _setI64(target.handle, 1048, value.value);
   /// VisualParent. Defines the `VisualParent` property.
-  FerroObject get visualParent => FerroObject(_getObject(handle, 1048));
+  FerroObject get visualParent => FerroObject(_getObject(handle, 1049));
   /// ZIndex. Defines the `ZIndex` property.
-  int get zIndex => _getI64(handle, 1077);
-  set zIndex(int value) => _setI64(handle, 1077, value);
+  int get zIndex => _getI64(handle, 1078);
+  set zIndex(int value) => _setI64(handle, 1078, value);
 }
 
 /// Implements layout-related functionality for a control.
@@ -546,12 +546,17 @@ extension type Layoutable._(int handle) implements Visual {
   /// UseLayoutRounding. Defines the `UseLayoutRounding` property.
   bool get useLayoutRounding => _getBool(handle, 1028);
   set useLayoutRounding(bool value) => _setBool(handle, 1028, value);
+  /// UseWinUiMeasureRounding. Defines the inherited `UseWinUiMeasureRounding` property. When
+  /// layout rounding is enabled, this uses WinUI's physical-pixel rounding for layout sizes,
+  /// offsets and border insets.
+  bool get useWinUiMeasureRounding => _getBool(handle, 1032);
+  set useWinUiMeasureRounding(bool value) => _setBool(handle, 1032, value);
   /// VerticalAlignment. Defines the `VerticalAlignment` property.
-  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1036));
-  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1036, value.value);
+  VerticalAlignment get verticalAlignment => VerticalAlignment(_getI64(handle, 1037));
+  set verticalAlignment(VerticalAlignment value) => _setI64(handle, 1037, value.value);
   /// Width. Defines the `Width` property.
-  double get width => _getF64(handle, 1054);
-  set width(double value) => _setF64(handle, 1054, value);
+  double get width => _getF64(handle, 1055);
+  set width(double value) => _setF64(handle, 1055, value);
 }
 
 /// Base class for objects that raise routed events.
@@ -815,8 +820,8 @@ extension type ContentControl._(int handle) implements TemplatedControl {
   HorizontalAlignment get horizontalContentAlignment => HorizontalAlignment(_getI64(handle, 352));
   set horizontalContentAlignment(HorizontalAlignment value) => _setI64(handle, 352, value.value);
   /// VerticalContentAlignment. Defines the `VerticalContentAlignment` property.
-  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1037));
-  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1037, value.value);
+  VerticalAlignment get verticalContentAlignment => VerticalAlignment(_getI64(handle, 1038));
+  set verticalContentAlignment(VerticalAlignment value) => _setI64(handle, 1038, value.value);
 }
 
 /// A standard button control.
@@ -1051,20 +1056,20 @@ extension type Window._(int handle) implements WindowBase {
   String get title => _getString(handle, 944);
   set title(String value) => _setString(handle, 944, value);
   /// WindowDecorationMargin. Defines the `WindowDecorationMargin` property.
-  String get windowDecorationMargin => _getString(handle, 1057);
+  String get windowDecorationMargin => _getString(handle, 1058);
   /// WindowDecorations. Defines the `WindowDecorations` property.
-  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1059));
-  set windowDecorations(WindowDecorations value) => _setI64(handle, 1059, value.value);
+  WindowDecorations get windowDecorations => WindowDecorations(_getI64(handle, 1060));
+  set windowDecorations(WindowDecorations value) => _setI64(handle, 1060, value.value);
   /// WindowDecorationsTheme. Defines the `WindowDecorationsTheme` property.
-  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1060));
-  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1060, value.handle);
+  FerroObject get windowDecorationsTheme => FerroObject(_getObject(handle, 1061));
+  set windowDecorationsTheme(FerroObject value) => _setObject(handle, 1061, value.handle);
   /// WindowStartupLocation. Defines the `WindowStartupLocation` property.
-  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1063));
-  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1063, value.value);
+  WindowStartupLocation get windowStartupLocation => WindowStartupLocation(_getI64(handle, 1064));
+  set windowStartupLocation(WindowStartupLocation value) => _setI64(handle, 1064, value.value);
   /// WindowState. Represents the currently effective window state (normal, minimized,
   /// maximized).
-  WindowState get windowState => WindowState(_getI64(handle, 1064));
-  set windowState(WindowState value) => _setI64(handle, 1064, value.value);
+  WindowState get windowState => WindowState(_getI64(handle, 1065));
+  set windowState(WindowState value) => _setI64(handle, 1065, value.value);
   /// WindowClosed: the sender is valid for the call. Routed event that can be used for global
   /// tracking of window destruction.
   Subscription onWindowClosed(void Function(Window sender) handler) =>

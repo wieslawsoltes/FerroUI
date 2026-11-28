@@ -78,7 +78,7 @@ pub struct GlyphTypeface {
     /// (`glyph_typeface_optical_size.rs`).
     pub(crate) optical_size_axis: OnceCell<Option<(f64, f64)>>,
     /// The instances of the typeface at the optical sizes of texts, by optical size.
-    pub(crate) optical_sizes: RefCell<Vec<(i32, Rc<GlyphTypeface>)>>,
+    pub(crate) optical_sizes: RefCell<Vec<(f64, Rc<GlyphTypeface>)>>,
 }
 
 impl GlyphTypeface {
@@ -805,6 +805,7 @@ impl GlyphTypeface {
         if let Some(typeface) = self.text_shaper_typeface.borrow_mut().take() {
             typeface.dispose();
         }
+        self.optical_sizes.borrow_mut().clear();
 
         self.platform_typeface.dispose();
     }

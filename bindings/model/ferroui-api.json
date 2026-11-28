@@ -2,7 +2,7 @@
  "format": 1,
  "generated_by": "scripts/generate_api_model.py",
  "abi_version": 1,
- "fingerprint": -4387658432560162436,
+ "fingerprint": -2903654145985797389,
  "naming": "Names are the names of the framework; `words` are their words in lower case, for each backend to apply the casing of its language.",
  "abi": {
   "functions": [
@@ -5646,6 +5646,7 @@
     "Grid.IsSharedSizeScope",
     "Grid.Row",
     "Grid.RowSpan",
+    "Padding",
     "RowSpacing",
     "ShowGridLines"
    ],
@@ -6760,6 +6761,7 @@
     "MinHeight",
     "MinWidth",
     "UseLayoutRounding",
+    "UseWinUiMeasureRounding",
     "VerticalAlignment",
     "Width"
    ],
@@ -32807,6 +32809,18 @@
      "doc": "Defines the `Padding` property."
     },
     {
+     "owner": "Grid",
+     "kind": "styled",
+     "value": {
+      "rust": "Thickness",
+      "nullable": false,
+      "kind": "parsed"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the inset between the grid bounds and its cells."
+    },
+    {
      "owner": "RichTextBlock",
      "kind": "styled",
      "value": {
@@ -44464,6 +44478,31 @@
   },
   {
    "id": 1032,
+   "name": "UseWinUiMeasureRounding",
+   "words": [
+    "use",
+    "win",
+    "ui",
+    "measure",
+    "rounding"
+   ],
+   "declarations": [
+    {
+     "owner": "Layoutable",
+     "kind": "styled",
+     "value": {
+      "rust": "bool",
+      "nullable": false,
+      "kind": "bool"
+     },
+     "default": "false",
+     "read_only": false,
+     "doc": "Defines the inherited `UseWinUiMeasureRounding` property. When layout rounding is enabled, this uses WinUI's physical-pixel rounding for layout sizes, offsets and border insets."
+    }
+   ]
+  },
+  {
+   "id": 1033,
    "name": "ValidSpinDirection",
    "words": [
     "valid",
@@ -44486,7 +44525,7 @@
    ]
   },
   {
-   "id": 1033,
+   "id": 1034,
    "name": "ValidationMode",
    "words": [
     "validation",
@@ -44509,7 +44548,7 @@
    ]
   },
   {
-   "id": 1034,
+   "id": 1035,
    "name": "Value",
    "words": [
     "value"
@@ -44674,7 +44713,7 @@
    ]
   },
   {
-   "id": 1035,
+   "id": 1036,
    "name": "ValueMemberBinding",
    "words": [
     "value",
@@ -44697,7 +44736,7 @@
    ]
   },
   {
-   "id": 1036,
+   "id": 1037,
    "name": "VerticalAlignment",
    "words": [
     "vertical",
@@ -44720,7 +44759,7 @@
    ]
   },
   {
-   "id": 1037,
+   "id": 1038,
    "name": "VerticalContentAlignment",
    "words": [
     "vertical",
@@ -44874,7 +44913,7 @@
    ]
   },
   {
-   "id": 1038,
+   "id": 1039,
    "name": "VerticalOffset",
    "words": [
     "vertical",
@@ -44920,7 +44959,7 @@
    ]
   },
   {
-   "id": 1039,
+   "id": 1040,
    "name": "VerticalOrientationPadding",
    "words": [
     "vertical",
@@ -44943,7 +44982,7 @@
    ]
   },
   {
-   "id": 1040,
+   "id": 1041,
    "name": "VerticalSpacing",
    "words": [
     "vertical",
@@ -44965,7 +45004,7 @@
    ]
   },
   {
-   "id": 1041,
+   "id": 1042,
    "name": "Viewbox",
    "words": [
     "viewbox"
@@ -44986,7 +45025,7 @@
    ]
   },
   {
-   "id": 1042,
+   "id": 1043,
    "name": "Viewport",
    "words": [
     "viewport"
@@ -45031,7 +45070,7 @@
    ]
   },
   {
-   "id": 1043,
+   "id": 1044,
    "name": "ViewportFraction",
    "words": [
     "viewport",
@@ -45053,7 +45092,7 @@
    ]
   },
   {
-   "id": 1044,
+   "id": 1045,
    "name": "ViewportSize",
    "words": [
     "viewport",
@@ -45087,7 +45126,7 @@
    ]
   },
   {
-   "id": 1045,
+   "id": 1046,
    "name": "Visibility",
    "words": [
     "visibility"
@@ -45109,7 +45148,7 @@
    ]
   },
   {
-   "id": 1046,
+   "id": 1047,
    "name": "Visual",
    "words": [
     "visual"
@@ -45131,7 +45170,7 @@
    ]
   },
   {
-   "id": 1047,
+   "id": 1048,
    "name": "Visual.FlowDirection",
    "words": [
     "visual",
@@ -45155,7 +45194,7 @@
    ]
   },
   {
-   "id": 1048,
+   "id": 1049,
    "name": "VisualParent",
    "words": [
     "visual",
@@ -45178,7 +45217,7 @@
    ]
   },
   {
-   "id": 1049,
+   "id": 1050,
    "name": "VisualStateManager.CustomVisualStateManager",
    "words": [
     "visual",
@@ -45206,7 +45245,7 @@
    ]
   },
   {
-   "id": 1050,
+   "id": 1051,
    "name": "VisualStateManager.VisualStateGroups",
    "words": [
     "visual",
@@ -45232,7 +45271,7 @@
    ]
   },
   {
-   "id": 1051,
+   "id": 1052,
    "name": "Visualizer",
    "words": [
     "visualizer"
@@ -45254,7 +45293,7 @@
    ]
   },
   {
-   "id": 1052,
+   "id": 1053,
    "name": "WaylandProperties.AppId",
    "words": [
     "wayland",
@@ -45278,7 +45317,7 @@
    ]
   },
   {
-   "id": 1053,
+   "id": 1054,
    "name": "WeekNumberRule",
    "words": [
     "week",
@@ -45315,7 +45354,7 @@
    ]
   },
   {
-   "id": 1054,
+   "id": 1055,
    "name": "Width",
    "words": [
     "width"
@@ -45360,7 +45399,7 @@
    ]
   },
   {
-   "id": 1055,
+   "id": 1056,
    "name": "Win32Properties.NonClientHitTestResult",
    "words": [
     "win32",
@@ -45388,7 +45427,7 @@
    ]
   },
   {
-   "id": 1056,
+   "id": 1057,
    "name": "Win32Properties.WindowCornerPreference",
    "words": [
     "win32",
@@ -45414,7 +45453,7 @@
    ]
   },
   {
-   "id": 1057,
+   "id": 1058,
    "name": "WindowDecorationMargin",
    "words": [
     "window",
@@ -45437,7 +45476,7 @@
    ]
   },
   {
-   "id": 1058,
+   "id": 1059,
    "name": "WindowDecorationProperties.ElementRole",
    "words": [
     "window",
@@ -45463,7 +45502,7 @@
    ]
   },
   {
-   "id": 1059,
+   "id": 1060,
    "name": "WindowDecorations",
    "words": [
     "window",
@@ -45486,7 +45525,7 @@
    ]
   },
   {
-   "id": 1060,
+   "id": 1061,
    "name": "WindowDecorationsTheme",
    "words": [
     "window",
@@ -45510,7 +45549,7 @@
    ]
   },
   {
-   "id": 1061,
+   "id": 1062,
    "name": "WindowDrawnDecorations.TitleBarDecorations",
    "words": [
     "window",
@@ -45536,7 +45575,7 @@
    ]
   },
   {
-   "id": 1062,
+   "id": 1063,
    "name": "WindowManagerAddShadowHint",
    "words": [
     "window",
@@ -45585,7 +45624,7 @@
    ]
   },
   {
-   "id": 1063,
+   "id": 1064,
    "name": "WindowStartupLocation",
    "words": [
     "window",
@@ -45609,7 +45648,7 @@
    ]
   },
   {
-   "id": 1064,
+   "id": 1065,
    "name": "WindowState",
    "words": [
     "window",
@@ -45632,7 +45671,7 @@
    ]
   },
   {
-   "id": 1065,
+   "id": 1066,
    "name": "Wrap",
    "words": [
     "wrap"
@@ -45654,7 +45693,7 @@
    ]
   },
   {
-   "id": 1066,
+   "id": 1067,
    "name": "WrapMode",
    "words": [
     "wrap",
@@ -45677,7 +45716,7 @@
    ]
   },
   {
-   "id": 1067,
+   "id": 1068,
    "name": "WrapSelection",
    "words": [
     "wrap",
@@ -45699,7 +45738,7 @@
    ]
   },
   {
-   "id": 1068,
+   "id": 1069,
    "name": "X",
    "words": [
     "x"
@@ -45720,7 +45759,7 @@
    ]
   },
   {
-   "id": 1069,
+   "id": 1070,
    "name": "X11Properties.NetWmWindowType",
    "words": [
     "x11",
@@ -45747,7 +45786,7 @@
    ]
   },
   {
-   "id": 1070,
+   "id": 1071,
    "name": "X11Properties.WmClass",
    "words": [
     "x11",
@@ -45771,7 +45810,7 @@
    ]
   },
   {
-   "id": 1071,
+   "id": 1072,
    "name": "XYFocus.NavigationModes",
    "words": [
     "xy",
@@ -45795,7 +45834,7 @@
    ]
   },
   {
-   "id": 1072,
+   "id": 1073,
    "name": "XamlAmbientLight.IsTarget",
    "words": [
     "xaml",
@@ -45820,7 +45859,7 @@
    ]
   },
   {
-   "id": 1073,
+   "id": 1074,
    "name": "XamlBindingHelper.DataTemplateComponent",
    "words": [
     "xaml",
@@ -45846,7 +45885,7 @@
    ]
   },
   {
-   "id": 1074,
+   "id": 1075,
    "name": "Y",
    "words": [
     "y"
@@ -45867,7 +45906,7 @@
    ]
   },
   {
-   "id": 1075,
+   "id": 1076,
    "name": "YearFormat",
    "words": [
     "year",
@@ -45901,7 +45940,7 @@
    ]
   },
   {
-   "id": 1076,
+   "id": 1077,
    "name": "YearVisible",
    "words": [
     "year",
@@ -45935,7 +45974,7 @@
    ]
   },
   {
-   "id": 1077,
+   "id": 1078,
    "name": "ZIndex",
    "words": [
     "z",
@@ -45957,7 +45996,7 @@
    ]
   },
   {
-   "id": 1078,
+   "id": 1079,
    "name": "ZoomFactor",
    "words": [
     "zoom",
@@ -45979,7 +46018,7 @@
    ]
   },
   {
-   "id": 1079,
+   "id": 1080,
    "name": "ZoomMode",
    "words": [
     "zoom",

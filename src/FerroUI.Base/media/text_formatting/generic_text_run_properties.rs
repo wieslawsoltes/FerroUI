@@ -128,7 +128,8 @@ impl TextRunProperties for GenericTextRunProperties {
                 crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
                     self.typeface.glyph_typeface(),
                     self.typeface.font_family(),
-                    self.font_rendering_em_size * self.font_scale,
+                    self.requested_font_family(),
+                    self.effective_font_rendering_em_size(),
                 )
             })
             .clone()

@@ -12,14 +12,16 @@ use crate::media::fonts::{FamilyNameCollection, FontFamilyKey};
 use crate::media::{FontManager, Typeface};
 use crate::utilities::{FormatError, UriRef};
 
+#[derive(Clone)]
 struct FontFamilyInner {
     family_names: FamilyNameCollection,
     key: Option<FontFamilyKey>,
+    automatic_optical_sizing: bool,
 }
 
 /// Represents a family of related fonts.
 ///
-/// A cheap to clone handle; equality compares the family names and the key.
+/// A cheap to clone handle; equality compares the names, key and optical sizing.
 #[derive(Clone)]
 pub struct FontFamily(Rc<FontFamilyInner>);
 
@@ -143,7 +145,8 @@ impl FontFamily {
             Some(CompositeFontFamilyKey::new(source, keys))
         };
 
-        (FontFamily(Rc::new(FontFamilyInner { family_names, key })), uses_base_uri)
+        let inner = FontFamilyInner { family_names, key, automatic_optical_sizing: false };
+        (FontFamily(Rc::new(inner)), uses_base_uri)
     }
 
     /// Represents the default font family.
@@ -172,6 +175,19 @@ impl FontFamily {
     /// Returns the typefaces for the font family.
     pub fn family_typefaces(&self) -> Vec<Typeface> {
         FontManager::current().get_family_typefaces(self)
+    }
+
+    /// Selects the OpenType optical size from the text size when the selected
+    /// face and font backend support the `opsz` axis.
+    pub fn with_automatic_optical_sizing(mut self) -> Self {
+        if !self.0.automatic_optical_sizing {
+            Rc::make_mut(&mut self.0).automatic_optical_sizing = true;
+        }
+        self
+    }
+
+    pub(crate) fn automatic_optical_sizing(&self) -> bool {
+        self.0.automatic_optical_sizing
     }
 
     /// Whether both handles refer to the same instance (C# `ReferenceEquals`). Families made
@@ -285,11 +301,11 @@ impl fmt::Debug for FontFamily {
 
 impl PartialEq for FontFamily {
     fn eq(&self, other: &Self) -> bool {
-        if Rc::ptr_eq(&self.0, &other.0) {
+        if self.ptr_eq(other) {
             return true;
         }
 
-        if self.0.key != other.0.key {
+        if self.0.automatic_optical_sizing != other.0.automatic_optical_sizing || self.0.key != other.0.key {
             return false;
         }
 
@@ -303,6 +319,7 @@ impl Hash for FontFamily {
     fn hash<H: Hasher>(&self, state: &mut H) {
         self.0.family_names.hash(state);
         self.0.key.hash(state);
+        self.0.automatic_optical_sizing.hash(state);
     }
 }
 
