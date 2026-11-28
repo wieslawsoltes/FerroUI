@@ -41,7 +41,10 @@ impl VulkanCommandBufferPool {
         self.handle.get()
     }
 
-    /// Frees every submitted buffer, waiting for its commands.
+    /// Frees every submitted buffer, waiting for its commands. Only for
+    /// disposing and for the tests: a frame frees the finished buffers
+    /// ([`free_finished_command_buffers`](Self::free_finished_command_buffers)),
+    /// so it never waits for the GPU.
     pub fn free_used_command_buffers(&self) {
         loop {
             let next = self.command_buffers.borrow_mut().pop_front();
@@ -79,11 +82,30 @@ impl VulkanCommandBufferPool {
         self.handle.set(vk::CommandPool::null());
     }
 
+    /// A command buffer that is submitted once; the pool frees it when its
+    /// commands have run.
     pub fn create_command_buffer(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
         if self.auto_free {
             self.free_finished_command_buffers();
         }
+        self.allocate_command_buffer(false)
+    }
 
+    /// A command buffer, with its fence, that its creator keeps and records
+    /// again for every use (see
+    /// [`prepare_for_recording`](VulkanCommandBuffer::prepare_for_recording)).
+    /// The pool does not free it; its creator disposes it before the pool.
+    pub fn create_reusable_command_buffer(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
+        self.allocate_command_buffer(true)
+    }
+
+    /// The number of submitted buffers the pool has not freed yet.
+    #[allow(dead_code)] // Read by the tests.
+    pub fn submitted_count(&self) -> usize {
+        self.command_buffers.borrow().len()
+    }
+
+    fn allocate_command_buffer(&self, reusable: bool) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
         let command_buffer_allocate_info = vk::CommandBufferAllocateInfo::default()
             .command_pool(self.handle.get())
             .command_buffer_count(1)
@@ -96,7 +118,7 @@ impl VulkanCommandBufferPool {
             .throw_on_error("vkAllocateCommandBuffers")?[0];
 
         let this = self.this.upgrade().expect("a pool that is called is alive");
-        VulkanCommandBuffer::new(&this, buffer_handle, self.context.clone())
+        VulkanCommandBuffer::new(&this, buffer_handle, self.context.clone(), reusable)
     }
 
     pub fn add_submitted_command_buffer(&self, buffer: Rc<VulkanCommandBuffer>) {
