@@ -4807,6 +4807,8 @@ impl<T: ObjectType + Upcast<ferroui_base::media::GradientStop>> GradientStopProp
 /// The properties and routed events of [`Grid`](ferroui_controls::Grid).
 pub trait GridProps: ElementBuilder {
     /// Sets [`Grid::padding_property`](ferroui_controls::Grid::padding_property).
+    ///
+    /// Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.
     fn padding<M>(self, value: impl IntoProp<ferroui_base::Thickness, M>) -> Self {
         self.prop(<ferroui_controls::Grid>::padding_property(), value)
     }
