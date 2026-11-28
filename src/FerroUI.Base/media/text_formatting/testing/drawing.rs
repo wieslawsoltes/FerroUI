@@ -11,6 +11,7 @@ pub enum DrawCall {
     /// A glyph run with its text and the translation in effect.
     GlyphRun { text: String, origin: Point },
     Rectangle(Rect),
+    RoundedRectangle { rect: Rect, radius: f64 },
     Line(Point, Point),
 }
 
@@ -51,6 +52,16 @@ impl ITextDrawingSink for RecordingDrawingSink {
 
     fn draw_rectangle(&mut self, _brush: Option<&Rc<dyn IBrush>>, _pen: Option<&Rc<dyn IPen>>, rect: Rect) {
         self.calls.borrow_mut().push(DrawCall::Rectangle(rect));
+    }
+
+    fn draw_rounded_rectangle(
+        &mut self,
+        _brush: Option<&Rc<dyn IBrush>>,
+        _pen: Option<&Rc<dyn IPen>>,
+        rect: Rect,
+        radius: f64,
+    ) {
+        self.calls.borrow_mut().push(DrawCall::RoundedRectangle { rect, radius });
     }
 
     fn draw_line(&mut self, _pen: &Rc<dyn IPen>, p1: Point, p2: Point) {

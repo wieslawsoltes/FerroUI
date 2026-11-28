@@ -80,7 +80,7 @@ fn imm32_context_repeated_enable_balances_every_borrow() {
 }
 
 #[test]
-fn imm32_context_creation_failure_creates_no_association_or_caret() {
+fn imm32_context_creation_failure_keeps_the_system_caret_available() {
     let system = FakeSystem::tracking();
     system.context.set(0);
     system.next_created_context.set(0);
@@ -91,8 +91,32 @@ fn imm32_context_creation_failure_creates_no_association_or_caret() {
         system.take_calls()
     );
     assert_eq!(0, input.current_himc.get());
-    drop(input);
-    assert!(system.take_calls().is_empty());
+
+    system.active_window.set(FIRST);
+    input.set_managed_cursor_rect(Rect::new(10.0, 20.0, 1.0, 16.0));
+    system.run_posted();
+    assert_eq!(
+        vec![
+            Call::GetContext(FIRST),
+            Call::CreateCaret(FIRST, 1, 16),
+            Call::SetCaretPos(10, 20),
+            Call::ShowCaret(FIRST),
+        ],
+        system.take_calls()
+    );
+    input.set_managed_cursor_rect(Rect::new(18.0, 36.0, 1.0, 16.0));
+    system.run_posted();
+    assert_eq!(
+        vec![Call::GetContext(FIRST), Call::SetCaretPos(18, 36)],
+        system.take_calls()
+    );
+
+    input.set_client(None);
+    system.run_posted();
+    assert!(input.caret_manager.caret().is_none());
+    let calls = system.take_calls();
+    assert!(calls.contains(&Call::DestroyCaret));
+    assert!(!calls.iter().any(|call| matches!(call, Call::AssociateContext(..))));
     balanced(&system);
 }
 

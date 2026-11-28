@@ -1,8 +1,9 @@
 use crate::browser_input_handler::BrowserInputHandler;
+use crate::browser_text_input_edit::edit_from_dom;
 use crate::browser_text_input_options::BrowserTextInputOptions;
 use crate::interop::{input_helper, JsObject};
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection,
+    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection, TextInputMethodState,
     TextInputOptions, TextSelection,
 };
 use ferroui_base::reactive::IDisposable;
@@ -164,6 +165,7 @@ pub struct BrowserTextInputMethod {
     applying_options: Cell<bool>,
     dom: RefCell<dom::DomState>,
     client_revision: Cell<u64>,
+    legacy_context_revision: Cell<Option<u64>>,
     mirroring_dom: Cell<bool>,
     dom_dirty: Cell<bool>,
 }
@@ -218,6 +220,7 @@ impl BrowserTextInputMethod {
             applying_options: Cell::new(false),
             dom: RefCell::new(dom::DomState::default()),
             client_revision: Cell::new(0),
+            legacy_context_revision: Cell::new(None),
             mirroring_dom: Cell::new(false),
             dom_dirty: Cell::new(false),
         })
@@ -305,9 +308,11 @@ impl BrowserTextInputMethod {
             return;
         }
         if let Some(client) = self.client() {
+            let revision = client.supports_surrounding_text_edits()
+                .then(|| client.input_method_state_revision()).flatten();
             let surrounding_text = client.surrounding_text();
             let selection = client.selection();
-
+            self.legacy_context_revision.set(revision);
             self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
         }
     }
@@ -352,6 +357,57 @@ impl BrowserTextInputMethod {
         // selection (and any filtering performed by the native control).
         self.surrounding_text_changed();
         handled
+    }
+
+    /// Runs the native deletion for a browser edit that has no usable key event.
+    pub fn on_standalone_delete(&self, backward: bool) -> bool {
+        if self.is_composing() || self.uses_connection() || self.focus_is_leaving_view.get()
+            || self.client().is_none()
+        {
+            return false;
+        }
+        let Some(input_handler) = self.input_handler.upgrade() else {
+            return false;
+        };
+        let key = if backward { "Backspace" } else { "Delete" };
+        // A virtual key has a logical meaning but no physical scancode. Use
+        // the normal key route so editor handlers, graphemes and undo apply.
+        input_handler.on_key_down(None, Some(key), 0);
+        // Some browsers have already changed the proxy by the time they notify
+        // us. The native client owns the final value even if it rejected the edit.
+        self.surrounding_text_changed();
+        true
+    }
+
+    /// A browser correction can change a range away from the editor's caret.
+    /// Only the focused owner's current surrounding projection can anchor it.
+    pub(crate) fn on_replacement_text(
+        &self,
+        before: &TextInputMethodState,
+        native_selection: Option<TextSelection>,
+        after: &TextInputMethodState,
+    ) {
+        if self.is_composing() || self.uses_connection() || self.focus_is_leaving_view.get() {
+            return;
+        }
+        let generation = self.generation.get();
+        if let Some(client) = self.client() {
+            if let Some(connection) = client.surrounding_text_edit_connection() {
+                let text = client.surrounding_text().replace(['\r', '\n'], " ");
+                if text == before.text && client.selection() == before.selection
+                    && client.input_method_state_revision() == self.legacy_context_revision.get()
+                    && self.generation.get() == generation
+                {
+                    if let Ok(Some(edit)) = edit_from_dom(before, native_selection, after, "insertReplacementText") {
+                        let _ = connection.apply_surrounding_text_edit(&edit, self.timestamp());
+                    }
+                }
+            }
+        }
+        // Mirror the final model state, including when a correction was rejected.
+        if self.generation.get() == generation && !self.is_composing() {
+            self.surrounding_text_changed();
+        }
     }
 
     /// A native focus change or reset ends the old client's composition even
@@ -413,7 +469,7 @@ impl BrowserTextInputMethod {
         }
         if let Some(data) = data {
             if let Some(input_handler) = self.input_handler.upgrade() {
-                input_handler.raw_text_event(data);
+                input_handler.composition_text_event(data);
             }
         }
     }
@@ -537,7 +593,7 @@ impl BrowserTextInputMethod {
         let old_client = self.client.replace(client);
         drop(old_client);
 
-        if let Some(client) = self.client() {
+        if self.client().is_some() {
             self.show_ime();
             if self.generation.get() != generation {
                 return;
@@ -545,9 +601,7 @@ impl BrowserTextInputMethod {
             if connection.is_some() {
                 self.synchronize_dom();
             } else {
-                let surrounding_text = client.surrounding_text();
-                let selection = client.selection();
-                self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+                self.surrounding_text_changed();
             }
         } else {
             self.hide_ime();
@@ -564,7 +618,8 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         let connection = client
             .as_ref()
             .filter(|_| self.page.has_text_input_element())
-            .and_then(|client| client.input_method_editing().and_then(|_| client.input_method_connection()));
+            .and_then(|client| client.input_method_connection())
+            .filter(|connection| connection.supports_exact_edits());
         if self.generation.get() != generation {
             return;
         }
@@ -594,13 +649,9 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         let old_client = self.client.replace(client);
         drop(old_client);
 
-        if let Some(client) = self.client() {
+        if self.client().is_some() {
             self.show_ime();
-
-            let surrounding_text = client.surrounding_text();
-            let selection = client.selection();
-
-            self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+            self.surrounding_text_changed();
         } else {
             self.hide_ime();
         }
@@ -628,6 +679,7 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
             return;
         }
         self.cancel_composition();
+        self.legacy_context_revision.set(None);
         self.page.clear_input_element();
         self.page.set_surrounding_text("", 0, 0);
     }

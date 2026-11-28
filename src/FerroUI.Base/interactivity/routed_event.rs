@@ -82,6 +82,12 @@ impl RouteFinishedObservable {
         }))
     }
 
+    /// Whether there is any subscriber.
+    #[inline]
+    pub fn has_observers(&self) -> bool {
+        !self.handlers.is_empty()
+    }
+
     #[inline]
     fn notify(&self, e: &dyn IRoutedEventArgs) {
         if self.handlers.is_empty() {
