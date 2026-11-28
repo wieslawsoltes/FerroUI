@@ -26,8 +26,8 @@ use crate::interop::unmanaged_methods::{
     LANG_KO, NI_COMPOSITIONSTR, POINT, RECT,
 };
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection,
-    TextInputOptions,
+    ITextInputMethodImpl, TextInputContentType, TextInputMethodClient, TextInputMethodComposition,
+    TextInputMethodConnection, TextInputOptions,
 };
 use input_options::ImmInputOptions;
 use ferroui_base::input::{Key, PhysicalKey};
@@ -168,6 +168,8 @@ pub(crate) struct Imm32InputMethod {
     // tell the work posted for a connection client, and the native calls it
     // makes, from what happened meanwhile; the reference's own work is never
     // fenced by them.
+    /// The options of the client ask for a secure entry: the input method stays off.
+    secure_entry: Cell<bool>,
     managed_input: Cell<bool>,
     connection: RefCell<Option<Rc<TextInputMethodConnection>>>,
     composition_session: RefCell<Option<TextInputMethodComposition>>,
@@ -198,6 +200,7 @@ impl Imm32InputMethod {
             client: RefCell::new(None),
             is_composing: Cell::new(false),
             composition: RefCell::new(None),
+            secure_entry: Cell::new(false),
             managed_input: Cell::new(false),
             connection: RefCell::new(None),
             composition_session: RefCell::new(None),
@@ -286,6 +289,14 @@ impl Imm32InputMethod {
             return;
         }
 
+        // Deviation (DEVIATIONS.md, Input): upstream leaves the input method on. A secure entry
+        // has none, as a password edit of the system, because an input method can be another
+        // process that sees every key of the composition.
+        if self.secure_entry.get() {
+            self.disable_imm();
+            return;
+        }
+
         let hwnd = self.hwnd.get();
         let mut himc = self.system.imm_get_context(hwnd);
 
@@ -309,6 +320,27 @@ impl Imm32InputMethod {
         // with a new one): the caret is the window's, which may be another
         // window of the thread, or the same one after a new client (#430).
         self.caret_manager.try_create(&*self.system, hwnd);
+    }
+
+    /// Turns the input method on or off for the current client, after the current message.
+    fn post_imm_state(&self) {
+        let this = self.this.clone();
+        self.system.post(Box::new(move || {
+            let Some(this) = this.upgrade() else {
+                return;
+            };
+            if this.is_active() {
+                this.enable_imm();
+            } else {
+                // A renderer process have moved its input focus to a password input
+                // when there is an ongoing composition, e.g. a user has clicked a
+                // mouse button and selected a password input while composing a text.
+                // For this case, we have to complete the ongoing composition and
+                // clean up the resources attached to this object BEFORE DISABLING THE IME.
+
+                this.disable_imm();
+            }
+        }));
     }
 
     pub fn disable_imm(&self) {
@@ -642,24 +674,7 @@ impl ITextInputMethodImpl for Imm32InputMethod {
         }
 
         *self.client.borrow_mut() = client;
-
-        let this = self.this.clone();
-        self.system.post(Box::new(move || {
-            let Some(this) = this.upgrade() else {
-                return;
-            };
-            if this.is_active() {
-                this.enable_imm();
-            } else {
-                // A renderer process have moved its input focus to a password input
-                // when there is an ongoing composition, e.g. a user has clicked a
-                // mouse button and selected a password input while composing a text.
-                // For this case, we have to complete the ongoing composition and
-                // clean up the resources attached to this object BEFORE DISABLING THE IME.
-
-                this.disable_imm();
-            }
-        }));
+        self.post_imm_state();
     }
 
     fn set_cursor_rect(&self, rect: Rect) {
@@ -671,6 +686,14 @@ impl ITextInputMethodImpl for Imm32InputMethod {
         // The options are kept for a client of the connection, whose input
         // scopes reach the system; for every other client nothing is set.
         self.input_options.update(Some(options.clone()));
+        let secure = options.is_sensitive
+            || matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin);
+        if secure != self.secure_entry.replace(secure)
+            && !self.managed_input.get()
+            && self.connection.borrow().is_none()
+        {
+            self.post_imm_state();
+        }
         // A connection that was replaced (a reset of the client) is followed
         // by the client with its new one, which applies them.
         if self.connection.borrow().as_ref().is_some_and(|connection| !connection.is_current()) {
@@ -2331,8 +2354,7 @@ pub(crate) mod tests {
 
         // Options are not given to the system (`SetOptions` is a no-op).
         input_method.set_options(&TextInputOptions {
-            content_type: ferroui_base::input::text_input::TextInputContentType::Password,
-            is_sensitive: true,
+            content_type: ferroui_base::input::text_input::TextInputContentType::Email,
             ..Default::default()
         });
         system.run_posted();
@@ -2381,6 +2403,31 @@ pub(crate) mod tests {
             system.take_calls()
         );
         assert!(!input_method.has_managed_connection());
+    }
+
+    #[test]
+    fn a_secure_entry_keeps_the_input_method_off_until_it_ends() {
+        let Setup { system, input_method, .. } = setup(HKL_JA);
+        let associated = |calls: &[Call]| {
+            calls.iter().any(|call| matches!(call, Call::AssociateContext(HWND, himc) if *himc != 0))
+        };
+
+        input_method.set_options(&TextInputOptions {
+            content_type: ferroui_base::input::text_input::TextInputContentType::Password,
+            is_sensitive: true,
+            ..Default::default()
+        });
+        system.run_posted();
+        assert!(system.take_calls().contains(&Call::AssociateContext(HWND, 0)));
+
+        // A new keyboard layout or window turns the input method on again otherwise.
+        input_method.enable_imm();
+        system.run_posted();
+        assert!(!associated(&system.take_calls()));
+
+        input_method.set_options(&TextInputOptions::default());
+        system.run_posted();
+        assert!(associated(&system.take_calls()));
     }
 
     #[test]
