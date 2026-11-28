@@ -1,7 +1,7 @@
 use crate::frn_string::to_c_string;
 use crate::helpers::{to_frn_rect, ComResultExt};
 use crate::interop::*;
-use crate::native_text_input_options::{NativeTextContentType, NativeTextInputOptions};
+use crate::native_text_input_options::{is_secure_entry, NativeTextContentType, NativeTextInputOptions};
 use ferroui_base::input::text_input::{ITextInputMethodImpl, TextInputMethodClient, TextInputOptions, TextSelection};
 use ferroui_base::reactive::Subscription;
 use ferroui_base::Rect;
@@ -114,17 +114,23 @@ impl FerroNativeTextInputMethod {
 
     /// Sends the content hint of a client of the exact-edit connection to the view
     /// (`IFrnTextInputMethodOptions`). Any other client keeps upstream's no-op
-    /// `SetOptions` (decision D5): the hint is cleared when such a client follows a
-    /// connection client, and nothing is ever sent otherwise.
+    /// `SetOptions` (decision D5) unless it is a secure entry: the hint is cleared when
+    /// such a client follows a connection client, and nothing else is ever sent.
     fn apply_options(&self) {
         let connection = self
             .client()
             .and_then(|client| client.input_method_connection())
             .filter(|connection| connection.is_current());
-        let requested = connection.as_ref().map_or(NativeTextContentType::None, |connection| {
-            NativeTextContentType::from_options(&self.options.borrow(), connection.effective_input_scope())
-        });
-        self.content_hint.set_active(connection.is_some());
+        // Deviation (DEVIATIONS.md, Input): a masked field of any client is a secure entry.
+        let secure = connection.is_none() && self.client().is_some() && is_secure_entry(&self.options.borrow());
+        let requested = if secure {
+            NativeTextContentType::Secure
+        } else {
+            connection.as_ref().map_or(NativeTextContentType::None, |connection| {
+                NativeTextContentType::from_options(&self.options.borrow(), connection.effective_input_scope())
+            })
+        };
+        self.content_hint.set_active(connection.is_some() || secure);
         self.content_hint.set_requested(requested);
         self.send_content_hint();
     }
@@ -141,6 +147,7 @@ impl FerroNativeTextInputMethod {
                 NativeTextContentType::EmailAddress => FrnTextInputContentType::FrnTextInputContentEmailAddress,
                 NativeTextContentType::Name => FrnTextInputContentType::FrnTextInputContentName,
                 NativeTextContentType::TelephoneNumber => FrnTextInputContentType::FrnTextInputContentTelephoneNumber,
+                NativeTextContentType::Secure => FrnTextInputContentType::FrnTextInputContentSecure,
             };
             native_options.set_content_type(content);
         });

@@ -541,6 +541,27 @@ fn dbus_a_listener_that_was_registered_before_the_start_is_heard() {
 }
 
 #[test]
+fn dbus_a_text_box_that_becomes_masked_tells_clients_and_has_no_text() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let fixture = Fixture::new(&["object:"]);
+    let ui = ui();
+    fixture.add_window(&ui.window);
+    fixture.connections.settle();
+    let window = fixture.children(ROOT_PATH)[0].clone();
+    let entry = fixture.find(&window, "entry").unwrap();
+    fixture.received();
+
+    ui.text_box.set_password_char('*');
+    let signals = fixture.received();
+    assert!(
+        signals.iter().any(|signal| signal.starts_with(&format!("{entry} PropertyChange accessible-value"))),
+        "{signals:?}"
+    );
+    assert!(!signals.iter().any(|signal| signal.contains("Hello world")), "{signals:?}");
+    fixture.server.dispose();
+}
+
+#[test]
 fn dbus_children_that_arrive_after_a_client_asked_are_found() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let fixture = Fixture::new(&[]);
