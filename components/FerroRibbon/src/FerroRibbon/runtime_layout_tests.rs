@@ -27,121 +27,28 @@ fn wide_ribbon_shows_all_groups_large() {
         );
     });
 }
-/// What the reduction decided from: the width of the panel and, for every group, the widths by
-/// state that the panel cached next to the widths measured again now. Measuring again applies
-/// the states, so this is only called for the message of a failed assertion.
-fn reduction_report(m: &Mounted) -> String {
-    let panel = m.ribbon.selected_tab().unwrap().groups_panel();
-    let mut report = format!(
-        "panel width {} extent {}",
-        panel.bounds().width,
-        panel.extent_width()
-    );
-    let top_level = ferroui_controls::TopLevel::get_top_level(Some(&m.ribbon));
-    report.push_str(&format!(
-        " render scaling {:?} winui rounding {} ribbon font {}",
-        top_level.as_ref().map(|t| t.render_scaling()),
-        m.ribbon.use_winui_measure_rounding(),
-        m.ribbon.font_size()
-    ));
-    let metrics = panel.metrics().unwrap();
-    for group in m.groups() {
-        let cached = panel.cached_classic_widths(&group);
-        let state = group.state();
-        let height = group.desired_size().height;
-        let measured = (0..4)
-            .map(|raw| {
-                group.measure_width(RibbonGroupState::from_raw(raw), metrics.clone(), height)
-            })
-            .collect::<Vec<_>>();
-        report.push_str(&format!(
-            "\n{:?} {state:?} order {} collapse {} cached {cached:?} measured {measured:?}",
-            group.id(),
-            group.reduction_order(),
-            group.can_collapse(),
-        ));
-    }
-    for group in m.groups() {
-        let Some(button) = group.collapsed_button() else {
-            continue;
-        };
-        report.push_str(&format!(
-            "\n{:?} collapsed button font {} theme {}",
-            group.id(),
-            button.font_size(),
-            button.theme().is_some()
-        ));
-        for text in button
-            .get_visual_descendants()
-            .filter_map(|v| v.cast::<ferroui_controls::TextBlock>())
-        {
-            report.push_str(&format!(
-                " | {:?} size {} family {} visible {} width {}",
-                text.text(),
-                text.font_size(),
-                text.font_family(),
-                text.is_visible(),
-                text.desired_size().width
-            ));
-        }
-    }
-    report
-}
-/// Writes the inputs of the reduction that the panel cached, without measuring again, to the
-/// standard error of the process: the case runs on the session thread, whose captured output is
-/// not the output of this test. Temporary, to compare a passing run with a failing one.
-fn trace_reduction(m: &Mounted, step: &str) {
-    use std::io::Write;
-    let panel = m.ribbon.selected_tab().unwrap().groups_panel();
-    let mut line = format!(
-        "ribbon-trace {step}: container {} panel {} extent {}",
-        m.ribbon.bounds().width,
-        panel.bounds().width,
-        panel.extent_width()
-    );
-    for group in m.groups() {
-        line.push_str(&format!(
-            " | {:?} {:?} {:?}",
-            group.id(),
-            group.state(),
-            panel.cached_classic_widths(&group)
-        ));
-    }
-    line.push('\n');
-    let _ = std::io::stderr().write_all(line.as_bytes());
-}
 #[test]
 fn narrow_ribbon_reduces_then_collapses_groups() {
     crate::group_tests::run(|| {
         let m = Mounted::new(1400.);
-        trace_reduction(&m, "1400");
         m.resize(620.);
-        trace_reduction(&m, "620");
         assert!(
             m.states().iter().any(|s| *s != RibbonGroupState::Large),
-            "{:?}\n{}",
-            m.states(),
-            reduction_report(&m)
+            "{:?}",
+            m.states()
         );
         m.resize(300.);
-        trace_reduction(&m, "300");
         assert!(
             m.states()
                 .iter()
                 .filter(|s| **s == RibbonGroupState::Collapsed)
                 .count()
                 >= 3,
-            "{:?}\n{}",
-            m.states(),
-            reduction_report(&m)
+            "{:?}",
+            m.states()
         );
         m.resize(1400.);
-        assert!(
-            m.states().iter().all(|s| *s == RibbonGroupState::Large),
-            "{:?}\n{}",
-            m.states(),
-            reduction_report(&m)
-        );
+        assert!(m.states().iter().all(|s| *s == RibbonGroupState::Large));
     });
 }
 #[test]

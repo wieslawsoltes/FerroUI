@@ -844,6 +844,7 @@ impl Ribbon {
             .is_some_and(|handle| handle.handle_descriptor() == Some("XID"));
         let mut previous = self.keyboard.overlays.take();
         let mut overlays: Vec<Rc<BadgeOverlay>> = Vec::new();
+        let mut placements = Vec::new();
         for entry in scope.entries().iter() {
             let target = entry.target.expect("null scope target");
             if target.get_visual_root().is_none()
@@ -932,16 +933,30 @@ impl Ribbon {
                 || self
                     .quick_access_tool_bar()
                     .is_some_and(|qat| qat.items().contains(&Some(target.clone())));
-            let point = badge_position(bounds, size, owner.bounds().size(), large);
+            let window_size = owner.bounds().size();
+            let point = badge_position(bounds, size, window_size, large);
             Canvas::set_left(&badge, point.x);
             Canvas::set_top(&badge, point.y);
             overlay.canvas.children().add(badge.clone());
+            placements.push((badge.clone(), size, bounds, window_size, large));
             self.keyboard.badges.add(Some(badge));
         }
         drop(previous);
         self.keyboard.overlays.replace(overlays.clone());
         for overlay in overlays {
             overlay.popup.set_is_open(true);
+        }
+        // The measure off the tree has the theme of a badge, not what it inherits there (the font
+        // of the window). With the overlays open the badges are in their tree: one whose size
+        // changed is placed again by the same rule.
+        for (badge, measured, bounds, window_size, large) in placements {
+            badge.measure(Size::new(f64::INFINITY, f64::INFINITY));
+            let size = badge.desired_size();
+            if size != measured {
+                let point = badge_position(bounds, size, window_size, large);
+                Canvas::set_left(&badge, point.x);
+                Canvas::set_top(&badge, point.y);
+            }
         }
         self.update_key_tip_badge_visibility();
     }
