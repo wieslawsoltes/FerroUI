@@ -35,7 +35,7 @@ pub fn video(
     #[cfg(windows)]
     {
         Ok(Rc::new(ferroui_media_video_windows::WindowsVideoProvider {
-            frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+            frames: ferroui_media_windows::WindowsFrameProducer::from_interop(interop, budget)?,
         }))
     }
     #[cfg(target_os = "linux")]
@@ -70,7 +70,7 @@ pub fn camera(
         }
         Ok(Rc::new(
             ferroui_media_camera_windows::WindowsCameraProvider::new(
-                ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+                ferroui_media_windows::WindowsFrameProducer::from_interop(interop, budget)?,
             ),
         ))
     }

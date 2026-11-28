@@ -157,6 +157,9 @@ pub struct VelloSurfaceGpu {
     /// The import of DMA-BUF frames, on a device made with it (#575).
     #[cfg(target_os = "linux")]
     external_objects: Option<Rc<crate::gpu::dma_buf_external_objects::VelloDmaBufExternalObjectsFeature>>,
+    /// The import of frames shared by an NT handle, when it is turned on (#575).
+    #[cfg(windows)]
+    external_objects: Option<Rc<crate::gpu::d3d12_external_objects::VelloD3d12ExternalObjectsFeature>>,
 }
 
 impl VelloSurfaceGpu {
@@ -246,6 +249,10 @@ impl VelloSurfaceGpu {
             .then(|| crate::gpu::dma_buf_external_objects::VelloDmaBufExternalObjectsFeature::new(device.clone()))
             .flatten()
             .map(Rc::new);
+        // The import of shared frames is off by default, and the device is made the same way (#575).
+        #[cfg(windows)]
+        let external_objects =
+            crate::gpu::d3d12_external_objects::VelloD3d12ExternalObjectsFeature::new(device.clone()).map(Rc::new);
         // Layers and bitmaps of the GPU modes are drawn on this device too.
         device.prefer();
 
@@ -257,7 +264,6 @@ impl VelloSurfaceGpu {
             retired: RefCell::new(Vec::new()),
             #[cfg(target_os = "linux")]
             x_connection,
-            #[cfg(target_os = "linux")]
             external_objects,
         }))
     }
@@ -313,8 +319,7 @@ impl IVelloGpu for VelloSurfaceGpu {
         &self.device
     }
 
-    /// The import of DMA-BUF frames, on a device made with it (#575).
-    #[cfg(target_os = "linux")]
+    /// The import of the frames of producers, on a device that has it (#575).
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn std::any::Any>> {
         use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
         if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
