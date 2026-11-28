@@ -8266,7 +8266,12 @@ the machine).
   rest of part (b) and part (c)). Text blocks with the same typeface, size and foreground share
   their default run properties. No line of the gate is worse; `trees::Text.create_and_measure`
   -5.56 %, `change_and_lay_out` -1.83 %. What the descriptions kept is memory, which this gate does
-  not count; it is to be counted with the heap of the wall.
+  not count; it is to be counted with the heap of the wall. The shared properties are kept with
+  the glyph typeface generation of the thread and let go when it changes (a web font face loaded
+  or deleted, a font collection added, removed or replaced, a font manager disposed of), as the
+  text layout cache does: they found their glyph typeface once, and a text block made again for
+  new fonts would otherwise find the typeface of the old ones (#1205). Test:
+  `shared_run_properties_are_let_go_when_the_fonts_change`.
 - **A selectable text block keeps the shaped runs of its text between layouts** (#649, the first
   fix of step 4): `text::SelectableTextBlockWidths.measure_at_the_other_width` -72.4 %; the rest of
   `text::` and `trees::Text` within its tolerance (the largest rise +1.5 %).
