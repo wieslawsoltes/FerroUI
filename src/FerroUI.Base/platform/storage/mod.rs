@@ -36,7 +36,7 @@ pub use i_launcher::{ILauncher, NoopLauncher};
 pub use i_storage_bookmark_item::{
     IStorageBookmarkFile, IStorageBookmarkFolder, IStorageBookmarkItem, IStorageItemWithFileSystemInfo,
 };
-pub use i_storage_file::IStorageFile;
+pub use i_storage_file::{IStorageFile, StorageWriteCallback};
 pub use i_storage_folder::IStorageFolder;
 pub use i_storage_item::IStorageItem;
 pub use i_storage_provider::IStorageProvider;

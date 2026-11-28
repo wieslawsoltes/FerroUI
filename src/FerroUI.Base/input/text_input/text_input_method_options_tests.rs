@@ -380,3 +380,33 @@ fn connection_clients_are_not_bound_to_a_detached_owner() {
     assert!(tree.im.client.borrow().is_some());
     assert!(tree.client.input_method_connection().unwrap().is_current());
 }
+
+/// The two connection accessors are split by capability: a client with neither
+/// capability gets neither connection (as on main), a composition client gets the
+/// input method connection only (as on main), and a client of surrounding-text edits
+/// only gets the surrounding-text connection only, so a backend that reads
+/// `input_method_connection()` sees no change for it.
+#[test]
+fn the_connection_accessors_follow_the_capabilities_of_the_client() {
+    let legacy = ime_tree();
+    legacy.focus(Some(&legacy.editor));
+    assert!(legacy.im.client.borrow().is_some());
+    assert!(legacy.client.input_method_connection().is_none());
+    assert!(legacy.client.surrounding_text_edit_connection().is_none());
+
+    let editing = ime_tree_with_connection();
+    editing.focus(Some(&editing.editor));
+    assert!(editing.client.input_method_connection().unwrap().is_current());
+    assert!(editing.client.surrounding_text_edit_connection().is_none());
+
+    let surrounding = ime_tree_with(TestTextClient::surrounding_edits_only);
+    surrounding.focus(Some(&surrounding.editor));
+    assert!(surrounding.im.client.borrow().is_some());
+    assert!(surrounding.client.input_method_connection().is_none());
+    let connection = surrounding.client.surrounding_text_edit_connection().unwrap();
+    assert!(connection.is_current());
+    assert_eq!(connection.owner(), Some(surrounding.editor.clone().upcast()));
+
+    surrounding.focus(Some(&surrounding.button));
+    assert!(!connection.is_current());
+}

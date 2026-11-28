@@ -14,6 +14,11 @@ pub trait TextParagraphProperties: 'static {
 
     /// Paragraph's line height.
     fn line_height(&self) -> f64;
+    /// A minimum line box height. Extra space is distributed above and below
+    /// the formatted line, preserving taller text and inline objects.
+    fn minimum_line_height(&self) -> f64 {
+        0.0
+    }
 
     /// Paragraph's line spacing.
     fn line_spacing(&self) -> f64 {

@@ -15,7 +15,12 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     metadata: &[],
 };
 
-const TYPES: &[&TypeInfo] = &[<crate::BitmapIcon as StaticType>::TYPE, <crate::ImageIcon as StaticType>::TYPE];
+const TYPES: &[&TypeInfo] = &[
+    <crate::BitmapIcon as StaticType>::TYPE,
+    <crate::BitmapIconSource as StaticType>::TYPE,
+    <crate::ImageIcon as StaticType>::TYPE,
+    <crate::ImageIconSource as StaticType>::TYPE,
+];
 
 /// Registers the types of this crate for markup.
 pub fn register_types() {

@@ -35,7 +35,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SPLASH_PROBE, open, run, assert, sleep, near, differing, colours, splashFrames } from "../harness.mjs";
+import { SPLASH_PROBE, open, run, assert, sleep, near, differing, colours, splashFrames, headlessClipboardKey } from "../harness.mjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..", "..");
 const site = process.argv[2] ?? path.join(process.env.CARGO_TARGET_DIR ?? path.join(root, "target"), "browser", "themed_view");
@@ -476,7 +476,7 @@ check("text is copied from a text box to the clipboard and pasted into it", asyn
     await withClipboard(page);
     await page.click(...TEXT_BOX);
     await page.press("a", ["ctrl"]);
-    await page.press("c", ["ctrl"]);
+    await page.press("c", ["ctrl"], headlessClipboardKey);
     assert((await page.lastKey()).prevented, "ctrl+c kept the copy of the browser");
     await page.waitFor(`navigator.clipboard.readText().then((text) => text === "Text box")`, 10000);
 
@@ -485,12 +485,12 @@ check("text is copied from a text box to the clipboard and pasted into it", asyn
     // would make it a double click that selects a word).
     await page.click(TEXT_BOX[0] + 160, TEXT_BOX[1]);
     assert((await page.state()).caret === "8", `the click did not put the caret at the end: ${JSON.stringify(await page.state())}`);
-    await page.press("v", ["ctrl"]);
+    await page.press("v", ["ctrl"], headlessClipboardKey);
     await page.waitFor(`themedView.themedViewState().includes("text=Text box pasted;")`, 10000);
 
     // Cut: the selection leaves the text box for the clipboard.
     await page.press("a", ["ctrl"]);
-    await page.press("x", ["ctrl"]);
+    await page.press("x", ["ctrl"], headlessClipboardKey);
     await page.waitFor(`themedView.themedViewState().includes("text=;")`, 10000);
     await page.waitFor(`navigator.clipboard.readText().then((text) => text === "Text box pasted")`, 10000);
 });
@@ -530,15 +530,14 @@ check("without the asynchronous clipboard API a paste goes through the paste eve
         Object.defineProperty(navigator.clipboard, "readText", { value: undefined }), true)`);
     await page.click(...TEXT_BOX);
     await page.press("End");
-    await page.press("v", ["ctrl"], { commands: ["paste"] });
+    await page.press("v", ["ctrl"], { ...headlessClipboardKey, commands: ["paste"] });
     const key = await page.lastKey();
     assert(!key.prevented, "the key of the paste was prevented, so the browser could not paste");
     await page.waitFor(`themedView.themedViewState().includes("text=Text boxfallback;")`, 10000);
 
-    // Without a paste event the read ends when the key is released.
+    // A programmatic read has no browser paste gesture to supply data.
     await page.evaluate("themedView.themedViewReadClipboard()");
-    await page.press("Shift");
-    await page.waitForService("clipboard", `Some("error:Other")`);
+    await page.waitForService("clipboard", `Some("error:AccessDenied")`);
 });
 
 check("text dropped on a drop target is delivered with its effect", async (page) => {
