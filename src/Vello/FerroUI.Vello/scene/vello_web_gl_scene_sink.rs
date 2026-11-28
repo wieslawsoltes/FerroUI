@@ -1,7 +1,7 @@
 use crate::scene::vello_cpu_scene_sink::{prepare, ALIASING_THRESHOLD, CURVE_TOLERANCE};
 use crate::scene::{IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint};
 use crate::vello_options::VelloRenderingMode;
-use crate::web_gl::{log_render_failure, VelloWebGlGpu};
+use crate::web_gl::{log_render_failure, VelloWebGlGpu, VelloWebGlTexture};
 use glifo::{FontEmbolden, Glyph};
 use kurbo::{Affine, BezPath, Diagonal2, Rect, Shape, Stroke, StrokeOpts};
 use peniko::{BlendMode, Fill, ImageBrush, ImageData, ImageSampler};
@@ -25,13 +25,16 @@ pub struct VelloWebGlSceneSink {
     scene: Scene,
     /// The images of the scene by the identity of their pixels.
     images: HashMap<u64, ImageData>,
+    /// The textures of the context the scene paints with: held until the scene is rendered, so
+    /// the pool does not hand them out again before.
+    textures: Vec<Rc<VelloWebGlTexture>>,
 }
 
 impl VelloWebGlSceneSink {
     /// Creates the scene of a frame of the canvas of `gpu`, of the size the
     /// drawing buffer of the canvas has for that frame.
     pub fn new(gpu: Rc<VelloWebGlGpu>, width: u16, height: u16) -> Self {
-        Self { gpu, scene: Scene::new(width, height), images: HashMap::new() }
+        Self { gpu, scene: Scene::new(width, height), images: HashMap::new(), textures: Vec::new() }
     }
 
     fn set_anti_alias(&mut self, anti_alias: bool) {
@@ -116,6 +119,7 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
     fn reset(&mut self) {
         self.scene.reset();
         self.images.clear();
+        self.textures.clear();
     }
 
     fn fill_glyph_outline(
@@ -281,6 +285,66 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
     }
 
     fn render_to_canvas(&mut self) -> Result<(), String> {
-        self.gpu.render(&self.scene, &self.images)
+        let rendered = self.gpu.render(&self.scene, &self.images, &self.textures);
+        // The textures of the frame are the pool's again; what no frame uses is let go.
+        self.textures.clear();
+        self.gpu.trim_textures();
+        rendered
+    }
+
+    fn web_gl_gpu(&self) -> Option<Rc<VelloWebGlGpu>> {
+        Some(self.gpu.clone())
+    }
+
+    fn fill_with_web_gl_texture(
+        &mut self,
+        path: &BezPath,
+        transform: Affine,
+        texture: &Rc<VelloWebGlTexture>,
+        size: (u32, u32),
+        texture_transform: Affine,
+    ) {
+        let (path, path_transform) = prepare(path, transform);
+        let limit = u32::from(u16::MAX);
+        let paint_type = PaintType::Image(ImageBrush {
+            image: ImageSource::ExternalTexture {
+                id: texture.id,
+                source_region: RectU16 {
+                    x0: 0,
+                    y0: 0,
+                    x1: size.0.min(texture.width).min(limit) as u16,
+                    y1: size.1.min(texture.height).min(limit) as u16,
+                },
+                may_have_transparency: true,
+            },
+            sampler: ImageSampler {
+                x_extend: peniko::Extend::Pad,
+                y_extend: peniko::Extend::Pad,
+                quality: peniko::ImageQuality::Low,
+                alpha: 1.0,
+            },
+        });
+        // As `fill` places a paint: by the transform of the path times the one of the paint.
+        let relative_paint_transform = match path_transform == transform {
+            true => texture_transform,
+            false => transform * texture_transform,
+        };
+
+        self.set_anti_alias(false);
+        self.scene.set_fill_rule(Fill::NonZero);
+        self.scene.set_blend_mode(BlendMode::default());
+        self.scene.set_transform(path_transform);
+        self.scene.set_paint(paint_type);
+        self.scene.set_paint_transform(relative_paint_transform);
+        self.scene.fill_path(&path);
+        if !self.textures.iter().any(|held| Rc::ptr_eq(held, texture)) {
+            self.textures.push(texture.clone());
+        }
+    }
+
+    fn render_to_web_gl_texture(&mut self, area: (u32, u32, u32, u32)) -> Result<Rc<VelloWebGlTexture>, String> {
+        let rendered = self.gpu.render_to_texture(&self.scene, &self.images, &self.textures, area);
+        self.textures.clear();
+        rendered
     }
 }
