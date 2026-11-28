@@ -17,7 +17,7 @@ path = "program.rs"
 editor-demo = { path = "../EditorDemo", default-features = false, features = ["full-textmate-catalog"] }
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
-ferroui-browser.workspace = true
+ferroui-browser = { workspace = true, features = ["skia"] }
 ferroui-edit.workspace = true
 ferroui-fonts-inter.workspace = true
 ferroui-themes-fluent.workspace = true
