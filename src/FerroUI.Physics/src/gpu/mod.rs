@@ -55,12 +55,20 @@ impl GpuPhysicsContext {
             ..wgpu::DeviceDescriptor::default()
         };
         let (device, queue) = block_on(adapter.request_device(&descriptor)).ok()?;
-        Some(Self { device, queue, info })
+        Some(Self {
+            device,
+            queue,
+            info,
+        })
     }
 
     /// Creates a context from an existing application-owned `wgpu::Device` and `wgpu::Queue`.
     pub fn from_existing(device: wgpu::Device, queue: wgpu::Queue, info: GpuDeviceInfo) -> Self {
-        Self { device, queue, info }
+        Self {
+            device,
+            queue,
+            info,
+        }
     }
 }
 
@@ -121,38 +129,45 @@ impl GpuParticleSolver {
 
     pub fn with_context(ctx: GpuPhysicsContext, initial_capacity: usize) -> Self {
         let cap = initial_capacity.max(256);
-        let shader = ctx.device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("ferroui-physics particle compute shader"),
-            source: wgpu::ShaderSource::Wgsl(PARTICLE_PHYSICS_WGSL.into()),
-        });
+        let shader = ctx
+            .device
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("ferroui-physics particle compute shader"),
+                source: wgpu::ShaderSource::Wgsl(PARTICLE_PHYSICS_WGSL.into()),
+            });
 
-        let bind_group_layout = ctx.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("ferroui-physics particle bgl"),
-            entries: &[
-                bgl_entry(0, wgpu::BufferBindingType::Uniform),
-                bgl_entry(1, wgpu::BufferBindingType::Storage { read_only: false }),
-                bgl_entry(2, wgpu::BufferBindingType::Storage { read_only: false }),
-                bgl_entry(3, wgpu::BufferBindingType::Storage { read_only: false }),
-                bgl_entry(4, wgpu::BufferBindingType::Storage { read_only: false }),
-                bgl_entry(5, wgpu::BufferBindingType::Storage { read_only: true }),
-            ],
-        });
+        let bind_group_layout =
+            ctx.device
+                .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                    label: Some("ferroui-physics particle bgl"),
+                    entries: &[
+                        bgl_entry(0, wgpu::BufferBindingType::Uniform),
+                        bgl_entry(1, wgpu::BufferBindingType::Storage { read_only: false }),
+                        bgl_entry(2, wgpu::BufferBindingType::Storage { read_only: false }),
+                        bgl_entry(3, wgpu::BufferBindingType::Storage { read_only: false }),
+                        bgl_entry(4, wgpu::BufferBindingType::Storage { read_only: false }),
+                        bgl_entry(5, wgpu::BufferBindingType::Storage { read_only: true }),
+                    ],
+                });
 
-        let pipeline_layout = ctx.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("ferroui-physics particle pipeline layout"),
-            bind_group_layouts: &[Some(&bind_group_layout)],
-            immediate_size: 0,
-        });
+        let pipeline_layout = ctx
+            .device
+            .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("ferroui-physics particle pipeline layout"),
+                bind_group_layouts: &[Some(&bind_group_layout)],
+                immediate_size: 0,
+            });
 
         let make_pipeline = |entry: &str| {
-            ctx.device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-                label: Some(entry),
-                layout: Some(&pipeline_layout),
-                module: &shader,
-                entry_point: Some(entry),
-                compilation_options: wgpu::PipelineCompilationOptions::default(),
-                cache: None,
-            })
+            ctx.device
+                .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                    label: Some(entry),
+                    layout: Some(&pipeline_layout),
+                    module: &shader,
+                    entry_point: Some(entry),
+                    compilation_options: wgpu::PipelineCompilationOptions::default(),
+                    cache: None,
+                })
         };
 
         let clear_pipeline = make_pipeline("clear_grid");
@@ -281,7 +296,9 @@ impl GpuParticleSolver {
         }
         self.ping_a_is_input = true;
         if !particles.is_empty() {
-            self.ctx.queue.write_buffer(&self.particles_a, 0, slice_as_bytes(particles));
+            self.ctx
+                .queue
+                .write_buffer(&self.particles_a, 0, slice_as_bytes(particles));
         }
     }
 
@@ -295,7 +312,10 @@ impl GpuParticleSolver {
         out_particles: &mut Vec<GpuParticle>,
     ) -> ParticleStepStats {
         let start = Instant::now();
-        if self.count == 0 || dt <= 0.0 {
+        if dt <= 0.0 || !dt.is_finite() {
+            return self.last_stats;
+        }
+        if self.count == 0 {
             out_particles.clear();
             return ParticleStepStats {
                 step_us: 0,
@@ -310,7 +330,11 @@ impl GpuParticleSolver {
         let damp = config.damping.powf(1.0 / substeps as f32);
         let obs_count = obstacles.len().min(MAX_GPU_OBSTACLES);
         if obs_count > 0 {
-            self.ctx.queue.write_buffer(&self.obstacle_buffer, 0, slice_as_bytes(&obstacles[..obs_count]));
+            self.ctx.queue.write_buffer(
+                &self.obstacle_buffer,
+                0,
+                slice_as_bytes(&obstacles[..obs_count]),
+            );
         }
 
         let cell_size = (config.particle_radius * 2.1).max(0.05);
@@ -332,17 +356,26 @@ impl GpuParticleSolver {
             grid_mask: GPU_GRID_BUCKETS - 1,
             cell_size_inv: 1.0 / cell_size,
         };
-        self.ctx.queue.write_buffer(&self.uniform_buffer, 0, struct_as_bytes(&uniforms));
+        self.ctx
+            .queue
+            .write_buffer(&self.uniform_buffer, 0, struct_as_bytes(&uniforms));
 
         let grid_groups = (GPU_GRID_BUCKETS + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
         let particle_groups = (self.count as u32 + WORKGROUP_SIZE - 1) / WORKGROUP_SIZE;
 
-        let mut encoder = self.ctx.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("ferroui-physics particle step encoder"),
-        });
+        let mut encoder = self
+            .ctx
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("ferroui-physics particle step encoder"),
+            });
 
         for _ in 0..substeps {
-            let bg = if self.ping_a_is_input { &self.bind_group_a_to_b } else { &self.bind_group_b_to_a };
+            let bg = if self.ping_a_is_input {
+                &self.bind_group_a_to_b
+            } else {
+                &self.bind_group_b_to_a
+            };
             {
                 let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                     label: Some("physics particle substep"),
@@ -363,7 +396,11 @@ impl GpuParticleSolver {
         }
 
         // Copy latest output buffer to readback staging buffer
-        let latest_buf = if self.ping_a_is_input { &self.particles_a } else { &self.particles_b };
+        let latest_buf = if self.ping_a_is_input {
+            &self.particles_a
+        } else {
+            &self.particles_b
+        };
         let byte_size = (self.count * std::mem::size_of::<GpuParticle>()) as u64;
         encoder.copy_buffer_to_buffer(latest_buf, 0, &self.readback_buffer, 0, byte_size);
 
@@ -407,7 +444,11 @@ fn bgl_entry(binding: u32, ty: wgpu::BufferBindingType) -> wgpu::BindGroupLayout
     wgpu::BindGroupLayoutEntry {
         binding,
         visibility: wgpu::ShaderStages::COMPUTE,
-        ty: wgpu::BindingType::Buffer { ty, has_dynamic_offset: false, min_binding_size: None },
+        ty: wgpu::BindingType::Buffer {
+            ty,
+            has_dynamic_offset: false,
+            min_binding_size: None,
+        },
         count: None,
     }
 }
@@ -423,7 +464,9 @@ fn create_particle_buffers(
         device.create_buffer(&wgpu::BufferDescriptor {
             label: Some(label),
             size: p_bytes,
-            usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+            usage: wgpu::BufferUsages::STORAGE
+                | wgpu::BufferUsages::COPY_DST
+                | wgpu::BufferUsages::COPY_SRC,
             mapped_at_creation: false,
         })
     };
@@ -460,12 +503,30 @@ fn create_bind_group(
         label: Some("ferroui-physics particle bg"),
         layout,
         entries: &[
-            wgpu::BindGroupEntry { binding: 0, resource: uniforms.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 1, resource: in_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 2, resource: out_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 3, resource: cell_head.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 4, resource: next_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 5, resource: obstacles.as_entire_binding() },
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniforms.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: in_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: out_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 3,
+                resource: cell_head.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 4,
+                resource: next_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 5,
+                resource: obstacles.as_entire_binding(),
+            },
         ],
     })
 }
@@ -481,15 +542,24 @@ fn struct_as_bytes<T>(value: &T) -> &[u8] {
 }
 
 fn block_on<F: Future>(future: F) -> F::Output {
-    let mut context = std::task::Context::from_waker(std::task::Waker::noop());
+    struct ThreadWake(std::thread::Thread);
+    impl std::task::Wake for ThreadWake {
+        fn wake(self: Arc<Self>) {
+            self.0.unpark();
+        }
+        fn wake_by_ref(self: &Arc<Self>) {
+            self.0.unpark();
+        }
+    }
+    let waker = std::task::Waker::from(Arc::new(ThreadWake(std::thread::current())));
+    let mut context = std::task::Context::from_waker(&waker);
     let mut future = std::pin::pin!(future);
-    for _ in 0..2_000_000 {
+    loop {
         if let std::task::Poll::Ready(out) = future.as_mut().poll(&mut context) {
             return out;
         }
-        std::thread::yield_now();
+        std::thread::park();
     }
-    panic!("wgpu future did not complete");
 }
 
 /// GPU-compatible rigid body record matching `RIGID_INTEGRATE_WGSL` (48 bytes).
@@ -547,32 +617,40 @@ impl GpuRigidBatchIntegrator {
     }
 
     pub fn with_context(ctx: GpuPhysicsContext) -> Self {
-        let shader = ctx.device.create_shader_module(wgpu::ShaderModuleDescriptor {
-            label: Some("ferroui-physics rigid integrate shader"),
-            source: wgpu::ShaderSource::Wgsl(RIGID_INTEGRATE_WGSL.into()),
-        });
-        let bgl = ctx.device.create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
-            label: Some("ferroui-physics rigid bgl"),
-            entries: &[
-                bgl_entry(0, wgpu::BufferBindingType::Uniform),
-                bgl_entry(1, wgpu::BufferBindingType::Storage { read_only: false }),
-                bgl_entry(2, wgpu::BufferBindingType::Storage { read_only: true }),
-                bgl_entry(3, wgpu::BufferBindingType::Storage { read_only: false }),
-            ],
-        });
-        let layout = ctx.device.create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
-            label: Some("ferroui-physics rigid layout"),
-            bind_group_layouts: &[Some(&bgl)],
-            immediate_size: 0,
-        });
-        let pipeline = ctx.device.create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
-            label: Some("integrate_bodies"),
-            layout: Some(&layout),
-            module: &shader,
-            entry_point: Some("integrate_bodies"),
-            compilation_options: wgpu::PipelineCompilationOptions::default(),
-            cache: None,
-        });
+        let shader = ctx
+            .device
+            .create_shader_module(wgpu::ShaderModuleDescriptor {
+                label: Some("ferroui-physics rigid integrate shader"),
+                source: wgpu::ShaderSource::Wgsl(RIGID_INTEGRATE_WGSL.into()),
+            });
+        let bgl = ctx
+            .device
+            .create_bind_group_layout(&wgpu::BindGroupLayoutDescriptor {
+                label: Some("ferroui-physics rigid bgl"),
+                entries: &[
+                    bgl_entry(0, wgpu::BufferBindingType::Uniform),
+                    bgl_entry(1, wgpu::BufferBindingType::Storage { read_only: false }),
+                    bgl_entry(2, wgpu::BufferBindingType::Storage { read_only: true }),
+                    bgl_entry(3, wgpu::BufferBindingType::Storage { read_only: false }),
+                ],
+            });
+        let layout = ctx
+            .device
+            .create_pipeline_layout(&wgpu::PipelineLayoutDescriptor {
+                label: Some("ferroui-physics rigid layout"),
+                bind_group_layouts: &[Some(&bgl)],
+                immediate_size: 0,
+            });
+        let pipeline = ctx
+            .device
+            .create_compute_pipeline(&wgpu::ComputePipelineDescriptor {
+                label: Some("integrate_bodies"),
+                layout: Some(&layout),
+                module: &shader,
+                entry_point: Some("integrate_bodies"),
+                compilation_options: wgpu::PipelineCompilationOptions::default(),
+                cache: None,
+            });
         let uniform_buffer = ctx.device.create_buffer(&wgpu::BufferDescriptor {
             label: Some("rigid uniforms"),
             size: std::mem::size_of::<RigidUniforms>() as u64,
@@ -607,7 +685,7 @@ impl GpuRigidBatchIntegrator {
         dt: f32,
     ) -> Vec<GpuAabbRecord> {
         let n = bodies.len().min(radii.len());
-        if n == 0 || dt <= 0.0 {
+        if n == 0 || dt <= 0.0 || !dt.is_finite() {
             return Vec::new();
         }
         if n > self.capacity {
@@ -625,14 +703,27 @@ impl GpuRigidBatchIntegrator {
         let body_bytes = (n * std::mem::size_of::<GpuRigidBodyRecord>()) as u64;
         let aabb_bytes = (n * std::mem::size_of::<GpuAabbRecord>()) as u64;
 
-        let uniforms = RigidUniforms { gravity, dt, body_count: n as u32 };
-        self.ctx.queue.write_buffer(&self.uniform_buffer, 0, struct_as_bytes(&uniforms));
-        self.ctx.queue.write_buffer(&self.body_buf, 0, slice_as_bytes(&bodies[..n]));
-        self.ctx.queue.write_buffer(&self.radii_buf, 0, slice_as_bytes(&radii[..n]));
+        let uniforms = RigidUniforms {
+            gravity,
+            dt,
+            body_count: n as u32,
+        };
+        self.ctx
+            .queue
+            .write_buffer(&self.uniform_buffer, 0, struct_as_bytes(&uniforms));
+        self.ctx
+            .queue
+            .write_buffer(&self.body_buf, 0, slice_as_bytes(&bodies[..n]));
+        self.ctx
+            .queue
+            .write_buffer(&self.radii_buf, 0, slice_as_bytes(&radii[..n]));
 
-        let mut encoder = self.ctx.device.create_command_encoder(&wgpu::CommandEncoderDescriptor {
-            label: Some("rigid integrate encoder"),
-        });
+        let mut encoder = self
+            .ctx
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("rigid integrate encoder"),
+            });
         {
             let mut pass = encoder.begin_compute_pass(&wgpu::ComputePassDescriptor {
                 label: Some("rigid integrate pass"),
@@ -651,15 +742,26 @@ impl GpuRigidBatchIntegrator {
         let aabb_done = Arc::new(AtomicBool::new(false));
         let bd = Arc::clone(&body_done);
         let ad = Arc::clone(&aabb_done);
-        self.body_rb.slice(0..body_bytes).map_async(wgpu::MapMode::Read, move |r| bd.store(r.is_ok(), Ordering::SeqCst));
-        self.aabb_rb.slice(0..aabb_bytes).map_async(wgpu::MapMode::Read, move |r| ad.store(r.is_ok(), Ordering::SeqCst));
+        self.body_rb
+            .slice(0..body_bytes)
+            .map_async(wgpu::MapMode::Read, move |r| {
+                bd.store(r.is_ok(), Ordering::SeqCst)
+            });
+        self.aabb_rb
+            .slice(0..aabb_bytes)
+            .map_async(wgpu::MapMode::Read, move |r| {
+                ad.store(r.is_ok(), Ordering::SeqCst)
+            });
         let _ = self.ctx.device.poll(wgpu::PollType::wait_indefinitely());
 
         if body_done.load(Ordering::SeqCst) {
             if let Ok(view) = self.body_rb.slice(0..body_bytes).get_mapped_range() {
                 // SAFETY: GpuRigidBodyRecord is #[repr(C)] POD matching WGSL GpuRigidBody.
                 let dst = unsafe {
-                    std::slice::from_raw_parts_mut(bodies.as_mut_ptr() as *mut u8, body_bytes as usize)
+                    std::slice::from_raw_parts_mut(
+                        bodies.as_mut_ptr() as *mut u8,
+                        body_bytes as usize,
+                    )
                 };
                 dst.copy_from_slice(&view[..dst.len()]);
             }
@@ -671,7 +773,10 @@ impl GpuRigidBatchIntegrator {
             if let Ok(view) = self.aabb_rb.slice(0..aabb_bytes).get_mapped_range() {
                 // SAFETY: GpuAabbRecord is #[repr(C)] POD matching WGSL GpuAabb.
                 let dst = unsafe {
-                    std::slice::from_raw_parts_mut(aabbs.as_mut_ptr() as *mut u8, aabb_bytes as usize)
+                    std::slice::from_raw_parts_mut(
+                        aabbs.as_mut_ptr() as *mut u8,
+                        aabb_bytes as usize,
+                    )
                 };
                 dst.copy_from_slice(&view[..dst.len()]);
             }
@@ -686,7 +791,14 @@ fn create_rigid_buffers(
     bgl: &wgpu::BindGroupLayout,
     uniform_buffer: &wgpu::Buffer,
     capacity: usize,
-) -> (wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::Buffer, wgpu::BindGroup) {
+) -> (
+    wgpu::Buffer,
+    wgpu::Buffer,
+    wgpu::Buffer,
+    wgpu::Buffer,
+    wgpu::Buffer,
+    wgpu::BindGroup,
+) {
     let body_bytes = (capacity * std::mem::size_of::<GpuRigidBodyRecord>()) as u64;
     let radii_bytes = (capacity * std::mem::size_of::<f32>()) as u64;
     let aabb_bytes = (capacity * std::mem::size_of::<GpuAabbRecord>()) as u64;
@@ -694,7 +806,9 @@ fn create_rigid_buffers(
     let body_buf = device.create_buffer(&wgpu::BufferDescriptor {
         label: Some("rigid bodies"),
         size: body_bytes,
-        usage: wgpu::BufferUsages::STORAGE | wgpu::BufferUsages::COPY_DST | wgpu::BufferUsages::COPY_SRC,
+        usage: wgpu::BufferUsages::STORAGE
+            | wgpu::BufferUsages::COPY_DST
+            | wgpu::BufferUsages::COPY_SRC,
         mapped_at_creation: false,
     });
     let radii_buf = device.create_buffer(&wgpu::BufferDescriptor {
@@ -725,10 +839,22 @@ fn create_rigid_buffers(
         label: Some("rigid integrate bg"),
         layout: bgl,
         entries: &[
-            wgpu::BindGroupEntry { binding: 0, resource: uniform_buffer.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 1, resource: body_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 2, resource: radii_buf.as_entire_binding() },
-            wgpu::BindGroupEntry { binding: 3, resource: aabb_buf.as_entire_binding() },
+            wgpu::BindGroupEntry {
+                binding: 0,
+                resource: uniform_buffer.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 1,
+                resource: body_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 2,
+                resource: radii_buf.as_entire_binding(),
+            },
+            wgpu::BindGroupEntry {
+                binding: 3,
+                resource: aabb_buf.as_entire_binding(),
+            },
         ],
     });
     (body_buf, radii_buf, aabb_buf, body_rb, aabb_rb, bind_group)

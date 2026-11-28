@@ -86,6 +86,7 @@ pub struct ParticleSystem {
     pub density: Vec<f32>,
     pub obstacles: Vec<ParticleObstacle>,
     grid: SpatialHashGrid,
+    neighbors: Vec<u32>,
     last_stats: ParticleStepStats,
 }
 
@@ -102,6 +103,7 @@ impl ParticleSystem {
             density: Vec::new(),
             obstacles: Vec::new(),
             grid: SpatialHashGrid::new(cell_size),
+            neighbors: Vec::with_capacity(32),
             last_stats: ParticleStepStats::default(),
         }
     }
@@ -121,6 +123,9 @@ impl ParticleSystem {
         self.vy.clear();
         self.color_hint.clear();
         self.density.clear();
+        self.grid.clear();
+        self.neighbors.clear();
+        self.last_stats = ParticleStepStats::default();
     }
 
     pub fn reserve(&mut self, additional: usize) {
@@ -153,11 +158,16 @@ impl ParticleSystem {
         for i in 0..count {
             let col = i % cols;
             let row = i / cols;
-            let jitter = ((i.wrapping_mul(2654435761) & 0xFF) as f32 / 255.0 - 0.5) * spacing * 0.15;
-            let x = (region.min.x + (col as f32 + 0.5) * spacing + jitter)
-                .clamp(region.min.x + self.config.particle_radius, region.max.x - self.config.particle_radius);
-            let y = (region.min.y + (row as f32 + 0.5) * spacing)
-                .clamp(region.min.y + self.config.particle_radius, region.max.y - self.config.particle_radius);
+            let jitter =
+                ((i.wrapping_mul(2654435761) & 0xFF) as f32 / 255.0 - 0.5) * spacing * 0.15;
+            let x = (region.min.x + (col as f32 + 0.5) * spacing + jitter).clamp(
+                region.min.x + self.config.particle_radius,
+                region.max.x - self.config.particle_radius,
+            );
+            let y = (region.min.y + (row as f32 + 0.5) * spacing).clamp(
+                region.min.y + self.config.particle_radius,
+                region.max.y - self.config.particle_radius,
+            );
             let hue = (i as f32 / count as f32).clamp(0.0, 1.0);
             self.push(Vec2::new(x, y), Vec2::ZERO, hue);
         }
@@ -165,16 +175,23 @@ impl ParticleSystem {
 
     /// Exports particles into the flat GPU-compatible buffer format.
     pub fn to_gpu_particles(&self) -> Vec<GpuParticle> {
-        (0..self.len())
-            .map(|i| GpuParticle {
-                pos: [self.px[i], self.py[i]],
-                vel: [self.vx[i], self.vy[i]],
-                color_hint: self.color_hint[i],
-                density: self.density[i],
-                _pad0: 0.0,
-                _pad1: 0.0,
-            })
-            .collect()
+        let mut particles = Vec::with_capacity(self.len());
+        self.write_gpu_particles(&mut particles);
+        particles
+    }
+
+    /// Writes the flat GPU-compatible particle format while reusing the caller's
+    /// allocation. Suitable for a persistent CPU-render or GPU-upload staging buffer.
+    pub fn write_gpu_particles(&self, destination: &mut Vec<GpuParticle>) {
+        destination.clear();
+        destination.extend((0..self.len()).map(|i| GpuParticle {
+            pos: [self.px[i], self.py[i]],
+            vel: [self.vx[i], self.vy[i]],
+            color_hint: self.color_hint[i],
+            density: self.density[i],
+            _pad0: 0.0,
+            _pad1: 0.0,
+        }));
     }
 
     /// Imports particles back from a flat GPU buffer.
@@ -199,7 +216,7 @@ impl ParticleSystem {
     pub fn step_cpu(&mut self, dt: f32) -> ParticleStepStats {
         let start = Instant::now();
         let n = self.len();
-        if n == 0 || dt <= 0.0 {
+        if n == 0 || dt <= 0.0 || !dt.is_finite() {
             self.last_stats = ParticleStepStats {
                 step_us: 0,
                 particle_count: n,
@@ -226,7 +243,9 @@ impl ParticleSystem {
 
         // Re-create spatial hash if cell size drifted significantly
         let desired_cell = (min_dist * 1.1).max(0.05);
-        if (self.grid.cell_size() - desired_cell).abs() > desired_cell * 0.25 {
+        if self.grid.cell_size() < min_dist
+            || (self.grid.cell_size() - desired_cell).abs() > desired_cell * 0.25
+        {
             self.grid = SpatialHashGrid::new(desired_cell);
         }
 
@@ -266,7 +285,7 @@ impl ParticleSystem {
             }
 
             // 4. Neighbor collision & viscosity pass
-            let mut neighbors: Vec<u32> = Vec::with_capacity(24);
+            let neighbors = &mut self.neighbors;
             for i in 0..n {
                 neighbors.clear();
                 self.grid.query_neighbors(self.px[i], self.py[i], |j| {
@@ -280,16 +299,20 @@ impl ParticleSystem {
                 let mut vxi = self.vx[i];
                 let mut vyi = self.vy[i];
 
-                for &ju in &neighbors {
+                for &ju in neighbors.iter() {
                     let j = ju as usize;
                     let dx = self.px[j] - xi;
                     let dy = self.py[j] - yi;
                     let d2 = dx * dx + dy * dy;
-                    if d2 > 1e-10 && d2 < min_dist_sq {
+                    if d2 < min_dist_sq {
                         let d = d2.sqrt();
-                        let inv_d = 1.0 / d;
-                        let nx = dx * inv_d;
-                        let ny = dy * inv_d;
+                        // A deterministic axis separates coincident particles
+                        // without NaNs or leaving an immovable dense clump.
+                        let (nx, ny) = if d > 1e-5 {
+                            (dx / d, dy / d)
+                        } else {
+                            (1.0, 0.0)
+                        };
                         let overlap = (min_dist - d) * 0.5 * stiff;
 
                         // Positional push apart

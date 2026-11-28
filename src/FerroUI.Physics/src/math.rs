@@ -43,25 +43,37 @@ impl Vec2 {
     /// Cross product of scalar `s` (along Z) and 2D vector `self`: `(-s * y, s * x)`.
     #[inline]
     pub fn cross_scalar_left(s: f32, v: Self) -> Self {
-        Self { x: -s * v.y, y: s * v.x }
+        Self {
+            x: -s * v.y,
+            y: s * v.x,
+        }
     }
 
     /// Cross product of 2D vector `self` and scalar `s` (along Z): `(s * y, -s * x)`.
     #[inline]
     pub fn cross_scalar_right(self, s: f32) -> Self {
-        Self { x: s * self.y, y: -s * self.x }
+        Self {
+            x: s * self.y,
+            y: -s * self.x,
+        }
     }
 
     /// Perpendicular vector rotated +90 degrees CCW (`(-y, x)`).
     #[inline]
     pub fn perp(self) -> Self {
-        Self { x: -self.y, y: self.x }
+        Self {
+            x: -self.y,
+            y: self.x,
+        }
     }
 
     /// Perpendicular vector rotated -90 degrees CW (`(y, -x)`).
     #[inline]
     pub fn perp_cw(self) -> Self {
-        Self { x: self.y, y: -self.x }
+        Self {
+            x: self.y,
+            y: -self.x,
+        }
     }
 
     #[inline]
@@ -106,22 +118,34 @@ impl Vec2 {
 
     #[inline]
     pub fn abs(self) -> Self {
-        Self { x: self.x.abs(), y: self.y.abs() }
+        Self {
+            x: self.x.abs(),
+            y: self.y.abs(),
+        }
     }
 
     #[inline]
     pub fn min(self, other: Self) -> Self {
-        Self { x: self.x.min(other.x), y: self.y.min(other.y) }
+        Self {
+            x: self.x.min(other.x),
+            y: self.y.min(other.y),
+        }
     }
 
     #[inline]
     pub fn max(self, other: Self) -> Self {
-        Self { x: self.x.max(other.x), y: self.y.max(other.y) }
+        Self {
+            x: self.x.max(other.x),
+            y: self.y.max(other.y),
+        }
     }
 
     #[inline]
     pub fn clamp(self, min: Self, max: Self) -> Self {
-        Self { x: self.x.clamp(min.x, max.x), y: self.y.clamp(min.y, max.y) }
+        Self {
+            x: self.x.clamp(min.x, max.x),
+            y: self.y.clamp(min.y, max.y),
+        }
     }
 
     #[inline]
@@ -144,7 +168,10 @@ impl Add for Vec2 {
     type Output = Self;
     #[inline]
     fn add(self, rhs: Self) -> Self {
-        Self { x: self.x + rhs.x, y: self.y + rhs.y }
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+        }
     }
 }
 
@@ -160,7 +187,10 @@ impl Sub for Vec2 {
     type Output = Self;
     #[inline]
     fn sub(self, rhs: Self) -> Self {
-        Self { x: self.x - rhs.x, y: self.y - rhs.y }
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+        }
     }
 }
 
@@ -176,7 +206,10 @@ impl Mul<f32> for Vec2 {
     type Output = Self;
     #[inline]
     fn mul(self, rhs: f32) -> Self {
-        Self { x: self.x * rhs, y: self.y * rhs }
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+        }
     }
 }
 
@@ -184,7 +217,10 @@ impl Mul<Vec2> for f32 {
     type Output = Vec2;
     #[inline]
     fn mul(self, rhs: Vec2) -> Vec2 {
-        Vec2 { x: self * rhs.x, y: self * rhs.y }
+        Vec2 {
+            x: self * rhs.x,
+            y: self * rhs.y,
+        }
     }
 }
 
@@ -201,7 +237,10 @@ impl Div<f32> for Vec2 {
     #[inline]
     fn div(self, rhs: f32) -> Self {
         let inv = 1.0 / rhs;
-        Self { x: self.x * inv, y: self.y * inv }
+        Self {
+            x: self.x * inv,
+            y: self.y * inv,
+        }
     }
 }
 
@@ -218,7 +257,10 @@ impl Neg for Vec2 {
     type Output = Self;
     #[inline]
     fn neg(self) -> Self {
-        Self { x: -self.x, y: -self.y }
+        Self {
+            x: -self.x,
+            y: -self.y,
+        }
     }
 }
 
@@ -246,8 +288,16 @@ pub struct Vec3 {
 }
 
 impl Vec3 {
-    pub const ZERO: Self = Self { x: 0.0, y: 0.0, z: 0.0 };
-    pub const ONE: Self = Self { x: 1.0, y: 1.0, z: 1.0 };
+    pub const ZERO: Self = Self {
+        x: 0.0,
+        y: 0.0,
+        z: 0.0,
+    };
+    pub const ONE: Self = Self {
+        x: 1.0,
+        y: 1.0,
+        z: 1.0,
+    };
 
     #[inline]
     pub const fn new(x: f32, y: f32, z: f32) -> Self {
@@ -298,7 +348,11 @@ impl Add for Vec3 {
     type Output = Self;
     #[inline]
     fn add(self, rhs: Self) -> Self {
-        Self { x: self.x + rhs.x, y: self.y + rhs.y, z: self.z + rhs.z }
+        Self {
+            x: self.x + rhs.x,
+            y: self.y + rhs.y,
+            z: self.z + rhs.z,
+        }
     }
 }
 
@@ -315,7 +369,11 @@ impl Sub for Vec3 {
     type Output = Self;
     #[inline]
     fn sub(self, rhs: Self) -> Self {
-        Self { x: self.x - rhs.x, y: self.y - rhs.y, z: self.z - rhs.z }
+        Self {
+            x: self.x - rhs.x,
+            y: self.y - rhs.y,
+            z: self.z - rhs.z,
+        }
     }
 }
 
@@ -323,7 +381,11 @@ impl Mul<f32> for Vec3 {
     type Output = Self;
     #[inline]
     fn mul(self, rhs: f32) -> Self {
-        Self { x: self.x * rhs, y: self.y * rhs, z: self.z * rhs }
+        Self {
+            x: self.x * rhs,
+            y: self.y * rhs,
+            z: self.z * rhs,
+        }
     }
 }
 
@@ -331,7 +393,11 @@ impl Neg for Vec3 {
     type Output = Self;
     #[inline]
     fn neg(self) -> Self {
-        Self { x: -self.x, y: -self.y, z: -self.z }
+        Self {
+            x: -self.x,
+            y: -self.y,
+            z: -self.z,
+        }
     }
 }
 
@@ -367,13 +433,19 @@ impl Rot2 {
     /// Rotates a vector by this rotation.
     #[inline]
     pub fn rotate(self, v: Vec2) -> Vec2 {
-        Vec2::new(self.cos * v.x - self.sin * v.y, self.sin * v.x + self.cos * v.y)
+        Vec2::new(
+            self.cos * v.x - self.sin * v.y,
+            self.sin * v.x + self.cos * v.y,
+        )
     }
 
     /// Rotates a vector by the inverse of this rotation.
     #[inline]
     pub fn inv_rotate(self, v: Vec2) -> Vec2 {
-        Vec2::new(self.cos * v.x + self.sin * v.y, -self.sin * v.x + self.cos * v.y)
+        Vec2::new(
+            self.cos * v.x + self.sin * v.y,
+            -self.sin * v.x + self.cos * v.y,
+        )
     }
 
     #[inline]
@@ -386,7 +458,10 @@ impl Rot2 {
 
     #[inline]
     pub fn inverse(self) -> Self {
-        Self { cos: self.cos, sin: -self.sin }
+        Self {
+            cos: self.cos,
+            sin: -self.sin,
+        }
     }
 
     #[inline]
@@ -403,7 +478,10 @@ impl Rot2 {
     pub fn normalized(self) -> Self {
         let inv = (self.cos * self.cos + self.sin * self.sin).sqrt();
         if inv > 1e-6 {
-            Self { cos: self.cos / inv, sin: self.sin / inv }
+            Self {
+                cos: self.cos / inv,
+                sin: self.sin / inv,
+            }
         } else {
             Self::IDENTITY
         }
@@ -429,16 +507,25 @@ pub struct Transform2D {
 }
 
 impl Transform2D {
-    pub const IDENTITY: Self = Self { position: Vec2::ZERO, rotation: Rot2::IDENTITY };
+    pub const IDENTITY: Self = Self {
+        position: Vec2::ZERO,
+        rotation: Rot2::IDENTITY,
+    };
 
     #[inline]
     pub fn new(position: Vec2, angle_radians: f32) -> Self {
-        Self { position, rotation: Rot2::from_radians(angle_radians) }
+        Self {
+            position,
+            rotation: Rot2::from_radians(angle_radians),
+        }
     }
 
     #[inline]
     pub fn from_position(position: Vec2) -> Self {
-        Self { position, rotation: Rot2::IDENTITY }
+        Self {
+            position,
+            rotation: Rot2::IDENTITY,
+        }
     }
 
     #[inline]
@@ -494,7 +581,10 @@ impl Mat2 {
 
     #[inline]
     pub fn mul_vec(self, v: Vec2) -> Vec2 {
-        Vec2::new(self.col0.x * v.x + self.col1.x * v.y, self.col0.y * v.x + self.col1.y * v.y)
+        Vec2::new(
+            self.col0.x * v.x + self.col1.x * v.y,
+            self.col0.y * v.x + self.col1.y * v.y,
+        )
     }
 
     /// Solves `A * x = b` for 2x2 matrix `A`; returns zero vector if singular.
@@ -523,7 +613,10 @@ pub struct Aabb2 {
 
 impl Default for Aabb2 {
     fn default() -> Self {
-        Self { min: Vec2::ZERO, max: Vec2::ZERO }
+        Self {
+            min: Vec2::ZERO,
+            max: Vec2::ZERO,
+        }
     }
 }
 
@@ -535,7 +628,10 @@ impl Aabb2 {
 
     #[inline]
     pub fn from_center_half_extents(center: Vec2, half: Vec2) -> Self {
-        Self { min: center - half, max: center + half }
+        Self {
+            min: center - half,
+            max: center + half,
+        }
     }
 
     #[inline]
@@ -562,13 +658,19 @@ impl Aabb2 {
 
     #[inline]
     pub fn union(self, other: Self) -> Self {
-        Self { min: self.min.min(other.min), max: self.max.max(other.max) }
+        Self {
+            min: self.min.min(other.min),
+            max: self.max.max(other.max),
+        }
     }
 
     #[inline]
     pub fn expanded(self, margin: f32) -> Self {
         let m = Vec2::splat(margin);
-        Self { min: self.min - m, max: self.max + m }
+        Self {
+            min: self.min - m,
+            max: self.max + m,
+        }
     }
 
     #[inline]
@@ -595,21 +697,31 @@ impl Aabb2 {
     /// Fast slab ray-AABB intersection; returns `Some(t_enter)` in `[0, max_toi]`.
     #[inline]
     pub fn ray_intersect(self, origin: Vec2, inv_dir: Vec2, max_toi: f32) -> Option<f32> {
-        let tx1 = (self.min.x - origin.x) * inv_dir.x;
-        let tx2 = (self.max.x - origin.x) * inv_dir.x;
-        let mut tmin = tx1.min(tx2);
-        let mut tmax = tx1.max(tx2);
-
-        let ty1 = (self.min.y - origin.y) * inv_dir.y;
-        let ty2 = (self.max.y - origin.y) * inv_dir.y;
-        tmin = tmin.max(ty1.min(ty2));
-        tmax = tmax.min(ty1.max(ty2));
-
-        if tmax >= tmin.max(0.0) && tmin <= max_toi {
-            Some(tmin.max(0.0))
-        } else {
-            None
+        if max_toi.is_nan() || max_toi < 0.0 {
+            return None;
         }
+        let mut tmin = 0.0_f32;
+        let mut tmax = max_toi;
+        for (o, inv, min, max) in [
+            (origin.x, inv_dir.x, self.min.x, self.max.x),
+            (origin.y, inv_dir.y, self.min.y, self.max.y),
+        ] {
+            if inv.is_infinite() {
+                // Parallel rays on a slab boundary must not evaluate 0 * inf.
+                if o < min || o > max {
+                    return None;
+                }
+            } else {
+                let near = (min - o) * inv;
+                let far = (max - o) * inv;
+                tmin = tmin.max(near.min(far));
+                tmax = tmax.min(near.max(far));
+                if tmin > tmax {
+                    return None;
+                }
+            }
+        }
+        Some(tmin)
     }
 }
 
@@ -623,7 +735,10 @@ pub struct Ray2 {
 impl Ray2 {
     #[inline]
     pub fn new(origin: Vec2, direction: Vec2) -> Self {
-        Self { origin, direction: direction.normalize_or_zero() }
+        Self {
+            origin,
+            direction: direction.normalize_or_zero(),
+        }
     }
 
     #[inline]
@@ -634,8 +749,16 @@ impl Ray2 {
     #[inline]
     pub fn inv_direction(self) -> Vec2 {
         Vec2::new(
-            if self.direction.x.abs() > 1e-12 { 1.0 / self.direction.x } else { f32::INFINITY },
-            if self.direction.y.abs() > 1e-12 { 1.0 / self.direction.y } else { f32::INFINITY },
+            if self.direction.x.abs() > 1e-12 {
+                1.0 / self.direction.x
+            } else {
+                f32::INFINITY
+            },
+            if self.direction.y.abs() > 1e-12 {
+                1.0 / self.direction.y
+            } else {
+                f32::INFINITY
+            },
         )
     }
 }

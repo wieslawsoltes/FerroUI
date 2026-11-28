@@ -18,6 +18,11 @@ autoexamples = false
 [lib]
 path = "src/lib.rs"
 
+[[bench]]
+name = "physics-step-allocations"
+path = "benches/step_allocations.rs"
+harness = false
+
 [dependencies]
 smallvec.workspace = true
 rustc-hash.workspace = true

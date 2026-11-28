@@ -30,7 +30,7 @@ impl BvhNode {
 ///
 /// Supports O(log N) incremental insertion, removal, displacement-predicted proxy movement,
 /// raycasting, and AABB overlap queries.
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct DynamicBvh {
     nodes: Vec<BvhNode>,
     free_list: Vec<usize>,
@@ -38,9 +38,20 @@ pub struct DynamicBvh {
     query_stack: Vec<usize>,
 }
 
+impl Default for DynamicBvh {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl DynamicBvh {
     pub fn new() -> Self {
-        Self { nodes: Vec::new(), free_list: Vec::new(), root: NULL_NODE, query_stack: Vec::with_capacity(64) }
+        Self {
+            nodes: Vec::new(),
+            free_list: Vec::new(),
+            root: NULL_NODE,
+            query_stack: Vec::with_capacity(64),
+        }
     }
 
     pub fn clear(&mut self) {
@@ -165,17 +176,28 @@ impl DynamicBvh {
 
     /// Traverses the BVH along `ray` up to `max_toi`, invoking `callback(user_index, max_toi)`
     /// which returns an updated (tighter) `max_toi` when a closer hit is found.
-    pub fn query_ray(&self, ray: Ray2, mut max_toi: f32, mut callback: impl FnMut(usize, f32) -> f32) {
+    pub fn query_ray(
+        &self,
+        ray: Ray2,
+        mut max_toi: f32,
+        mut callback: impl FnMut(usize, f32) -> f32,
+    ) {
         if self.root == NULL_NODE {
             return;
         }
         let inv_dir = ray.inv_direction();
-        let mut stack: Vec<usize> = Vec::with_capacity(64);
+        // Most balanced trees fit entirely on the stack. Spill only for unusually
+        // deep trees, instead of allocating for every ray in a multi-bounce cast.
+        let mut stack = smallvec::SmallVec::<[usize; 64]>::new();
         stack.push(self.root);
 
         while let Some(node_id) = stack.pop() {
             let node = &self.nodes[node_id];
-            if node.aabb.ray_intersect(ray.origin, inv_dir, max_toi).is_none() {
+            if node
+                .aabb
+                .ray_intersect(ray.origin, inv_dir, max_toi)
+                .is_none()
+            {
                 continue;
             }
             if node.is_leaf() {
@@ -184,8 +206,12 @@ impl DynamicBvh {
                     break;
                 }
             } else {
-                let left_hit = self.nodes[node.left].aabb.ray_intersect(ray.origin, inv_dir, max_toi);
-                let right_hit = self.nodes[node.right].aabb.ray_intersect(ray.origin, inv_dir, max_toi);
+                let left_hit = self.nodes[node.left]
+                    .aabb
+                    .ray_intersect(ray.origin, inv_dir, max_toi);
+                let right_hit = self.nodes[node.right]
+                    .aabb
+                    .ray_intersect(ray.origin, inv_dir, max_toi);
                 match (left_hit, right_hit) {
                     (Some(tl), Some(tr)) => {
                         // Visit nearer child first so max_toi shrinks quickly
@@ -427,12 +453,18 @@ pub struct SpatialHashGrid {
     cell_size: f32,
     inv_cell_size: f32,
     cells: FxHashMap<(i32, i32), Vec<u32>>,
+    spare_buckets: Vec<Vec<u32>>,
 }
 
 impl SpatialHashGrid {
     pub fn new(cell_size: f32) -> Self {
         let cs = cell_size.max(1e-3);
-        Self { cell_size: cs, inv_cell_size: 1.0 / cs, cells: FxHashMap::default() }
+        Self {
+            cell_size: cs,
+            inv_cell_size: 1.0 / cs,
+            cells: FxHashMap::default(),
+            spare_buckets: Vec::new(),
+        }
     }
 
     pub fn cell_size(&self) -> f32 {
@@ -440,20 +472,30 @@ impl SpatialHashGrid {
     }
 
     pub fn clear(&mut self) {
-        for bucket in self.cells.values_mut() {
+        // Recycle storage without retaining every coordinate ever visited. A
+        // moving fluid otherwise grows this map indefinitely and clear becomes
+        // proportional to its entire history instead of the current population.
+        for (_, mut bucket) in self.cells.drain() {
             bucket.clear();
+            self.spare_buckets.push(bucket);
         }
     }
 
     #[inline]
     pub fn cell_coord(&self, x: f32, y: f32) -> (i32, i32) {
-        ((x * self.inv_cell_size).floor() as i32, (y * self.inv_cell_size).floor() as i32)
+        (
+            (x * self.inv_cell_size).floor() as i32,
+            (y * self.inv_cell_size).floor() as i32,
+        )
     }
 
     #[inline]
     pub fn insert_point(&mut self, id: u32, x: f32, y: f32) {
         let key = self.cell_coord(x, y);
-        self.cells.entry(key).or_default().push(id);
+        self.cells
+            .entry(key)
+            .or_insert_with(|| self.spare_buckets.pop().unwrap_or_default())
+            .push(id);
     }
 
     #[inline]

@@ -14,7 +14,7 @@ use crate::shapes::Shape2D;
 use crate::solver::SolverConfig;
 use crate::ui::{DraggableCard, GestureTracker, MagneticSnap, Spring1D, Spring2D, SpringConfig};
 use crate::world::{PhysicsWorld, StepStats};
-use ferroui_base::media::MatrixTransform;
+use ferroui_base::media::{ITransform, MatrixTransform};
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{Matrix, Rect, Ref, RelativePoint, StyledElement, Visual, WeakRef};
 use std::cell::RefCell;
@@ -57,17 +57,64 @@ impl VisualBodyOptions {
     }
 
     pub fn elastic_card(frequency_hz: f32, damping_ratio: f32) -> Self {
-        Self { home_spring: Some((frequency_hz, damping_ratio)), ..Self::default() }
+        Self {
+            home_spring: Some((frequency_hz, damping_ratio)),
+            ..Self::default()
+        }
     }
 
     pub fn static_collider() -> Self {
-        Self { body_type: BodyType::Static, ..Self::default() }
+        Self {
+            body_type: BodyType::Static,
+            ..Self::default()
+        }
+    }
+}
+
+/// Owns a visual transform override and restores the previous value on detach.
+/// A later user-owned transform is never overwritten during cleanup.
+struct RenderTransformBinding {
+    visual: WeakRef<Visual>,
+    transform: Ref<MatrixTransform>,
+    installed: Rc<dyn ITransform>,
+    previous: Option<Rc<dyn ITransform>>,
+    previous_origin: RelativePoint,
+}
+
+impl RenderTransformBinding {
+    fn new(visual: &Ref<Visual>) -> Self {
+        let previous = visual.render_transform();
+        let previous_origin = visual.render_transform_origin();
+        let transform = MatrixTransform::with_matrix(Matrix::IDENTITY);
+        let installed: Rc<dyn ITransform> = (&transform).into();
+        visual.set_render_transform_origin(RelativePoint::CENTER);
+        visual.set_render_transform(Some(installed.clone()));
+        Self {
+            visual: visual.downgrade(),
+            transform,
+            installed,
+            previous,
+            previous_origin,
+        }
+    }
+}
+
+impl Drop for RenderTransformBinding {
+    fn drop(&mut self) {
+        if let Some(visual) = self.visual.upgrade() {
+            if visual
+                .render_transform()
+                .is_some_and(|current| Rc::ptr_eq(&current, &self.installed))
+            {
+                visual.set_render_transform(self.previous.clone());
+                visual.set_render_transform_origin(self.previous_origin);
+            }
+        }
     }
 }
 
 struct BoundVisual {
-    visual: WeakRef<Visual>,
-    transform: Ref<MatrixTransform>,
+    binding: RenderTransformBinding,
     body: BodyHandle,
     home_anchor: Option<BodyHandle>,
     home_joint: Option<JointHandle>,
@@ -141,6 +188,26 @@ impl VisualPhysicsHost {
         self.last_sync
     }
 
+    /// Detaches one bound visual, restores its prior transform, and removes its
+    /// rigid body and home tether. Other bindings keep their handles.
+    pub fn detach_visual(&mut self, body: BodyHandle) -> bool {
+        let Some(index) = self.bound.iter().position(|entry| entry.body == body) else {
+            return false;
+        };
+        let removed = self.bound.swap_remove(index);
+        if let Some(anchor) = removed.home_anchor {
+            self.world.remove_body(anchor);
+        }
+        self.world.remove_body(removed.body);
+        if self
+            .drag_joint
+            .is_some_and(|joint| self.world.joint(joint).is_none())
+        {
+            self.drag_joint = None;
+        }
+        true
+    }
+
     /// Creates/replaces 4 invisible static boundary walls matching `container_bounds` (in pixels)
     /// so physics-driven UI controls bounce cleanly inside their panel or window.
     pub fn set_container_bounds(&mut self, bounds: Rect) {
@@ -159,13 +226,25 @@ impl VisualPhysicsHost {
 
         let walls = [
             // Floor
-            (Vec2::new(ox + w * 0.5, oy + h + t * 0.5), Vec2::new(w + 2.0 * t, t)),
+            (
+                Vec2::new(ox + w * 0.5, oy + h + t * 0.5),
+                Vec2::new(w + 2.0 * t, t),
+            ),
             // Ceiling
-            (Vec2::new(ox + w * 0.5, oy - t * 0.5), Vec2::new(w + 2.0 * t, t)),
+            (
+                Vec2::new(ox + w * 0.5, oy - t * 0.5),
+                Vec2::new(w + 2.0 * t, t),
+            ),
             // Left wall
-            (Vec2::new(ox - t * 0.5, oy + h * 0.5), Vec2::new(t, h + 2.0 * t)),
+            (
+                Vec2::new(ox - t * 0.5, oy + h * 0.5),
+                Vec2::new(t, h + 2.0 * t),
+            ),
             // Right wall
-            (Vec2::new(ox + w + t * 0.5, oy + h * 0.5), Vec2::new(t, h + 2.0 * t)),
+            (
+                Vec2::new(ox + w + t * 0.5, oy + h * 0.5),
+                Vec2::new(t, h + 2.0 * t),
+            ),
         ];
         for (pos, size) in walls {
             let bh = self.world.add_body(
@@ -185,6 +264,14 @@ impl VisualPhysicsHost {
         fallback_bounds: Option<Rect>,
         options: VisualBodyOptions,
     ) -> BodyHandle {
+        if let Some(existing) = self.bound.iter().find(|item| {
+            item.binding
+                .visual
+                .upgrade()
+                .is_some_and(|bound| bound.ptr_eq(visual))
+        }) {
+            return existing.body;
+        }
         let mut rect = visual.bounds();
         if rect.width <= 1.0 || rect.height <= 1.0 {
             if let Some(fb) = fallback_bounds {
@@ -193,7 +280,10 @@ impl VisualPhysicsHost {
                 rect = Rect::new(0.0, 0.0, 120.0, 48.0);
             }
         }
-        let center_px = Vec2::new((rect.x + rect.width * 0.5) as f32, (rect.y + rect.height * 0.5) as f32);
+        let center_px = Vec2::new(
+            (rect.x + rect.width * 0.5) as f32,
+            (rect.y + rect.height * 0.5) as f32,
+        );
         let size_m = Vec2::new(
             (rect.width as f32 / self.pixels_per_meter).max(0.15),
             (rect.height as f32 / self.pixels_per_meter).max(0.15),
@@ -216,22 +306,29 @@ impl VisualPhysicsHost {
         );
 
         let (home_anchor, home_joint) = if let Some((freq, damp)) = options.home_spring {
-            let anchor = self
-                .world
-                .add_body(BodyBuilder::static_body(Shape2D::circle(0.05)).position(center_m).sensor(true));
-            let joint = self.world.add_joint(Joint::spring(anchor, body, Vec2::ZERO, Vec2::ZERO, 0.0, freq, damp));
+            let anchor = self.world.add_body(
+                BodyBuilder::static_body(Shape2D::circle(0.05))
+                    .position(center_m)
+                    .sensor(true),
+            );
+            let joint = self.world.add_joint(Joint::spring(
+                anchor,
+                body,
+                Vec2::ZERO,
+                Vec2::ZERO,
+                0.0,
+                freq,
+                damp,
+            ));
             (Some(anchor), Some(joint))
         } else {
             (None, None)
         };
 
-        let transform = MatrixTransform::with_matrix(Matrix::IDENTITY);
-        visual.set_render_transform_origin(RelativePoint::CENTER);
-        visual.set_render_transform(Some((&transform).into()));
+        let binding = RenderTransformBinding::new(visual);
 
         self.bound.push(BoundVisual {
-            visual: visual.downgrade(),
-            transform,
+            binding,
             body,
             home_anchor,
             home_joint,
@@ -307,9 +404,11 @@ impl VisualPhysicsHost {
                 continue;
             }
             let rest_m = item.rest_center_px / self.pixels_per_meter;
-            let anchor = self
-                .world
-                .add_body(BodyBuilder::static_body(Shape2D::circle(0.05)).position(rest_m).sensor(true));
+            let anchor = self.world.add_body(
+                BodyBuilder::static_body(Shape2D::circle(0.05))
+                    .position(rest_m)
+                    .sensor(true),
+            );
             let jh = self.world.add_joint(Joint::spring(
                 anchor,
                 item.body,
@@ -365,7 +464,8 @@ impl VisualPhysicsHost {
 
     pub fn update_pointer_drag_px(&mut self, pointer_px: Vec2) {
         if let Some(jh) = self.drag_joint {
-            self.world.set_target_joint_position(jh, self.px_to_world(pointer_px));
+            self.world
+                .set_target_joint_position(jh, self.px_to_world(pointer_px));
         }
     }
 
@@ -377,6 +477,7 @@ impl VisualPhysicsHost {
 
     /// Resets every bound visual cleanly to its original layout position & zero rotation.
     pub fn reset_all_to_rest(&mut self) {
+        self.end_pointer_drag();
         for item in &mut self.bound {
             let rest_m = item.rest_center_px / self.pixels_per_meter;
             if let Some(b) = self.world.body_mut(item.body) {
@@ -384,8 +485,10 @@ impl VisualPhysicsHost {
                 b.set_angle(0.0);
                 b.linear_velocity = Vec2::ZERO;
                 b.angular_velocity = 0.0;
+                b.force = Vec2::ZERO;
+                b.torque = 0.0;
             }
-            item.transform.set_matrix(Matrix::IDENTITY);
+            item.binding.transform.set_matrix(Matrix::IDENTITY);
             item.last_tx = 0.0;
             item.last_ty = 0.0;
             item.last_angle = 0.0;
@@ -395,10 +498,13 @@ impl VisualPhysicsHost {
     /// Re-captures layout `bounds()` for all bound visuals (call after container resize if needed).
     pub fn refresh_rest_layout(&mut self) {
         for item in &mut self.bound {
-            if let Some(vis) = item.visual.upgrade() {
+            if let Some(vis) = item.binding.visual.upgrade() {
                 let rect = vis.bounds();
                 if rect.width > 1.0 && rect.height > 1.0 {
-                    let center_px = Vec2::new((rect.x + rect.width * 0.5) as f32, (rect.y + rect.height * 0.5) as f32);
+                    let center_px = Vec2::new(
+                        (rect.x + rect.width * 0.5) as f32,
+                        (rect.y + rect.height * 0.5) as f32,
+                    );
                     item.rest_center_px = center_px;
                     let center_m = center_px / self.pixels_per_meter;
                     if let Some(ah) = item.home_anchor {
@@ -407,7 +513,17 @@ impl VisualPhysicsHost {
                         }
                     }
                     if let Some(b) = self.world.body_mut(item.body) {
-                        if b.linear_velocity.length_squared() < 1e-4 && item.last_tx.abs() < 0.5 && item.last_ty.abs() < 0.5 {
+                        let width = (rect.width as f32 / self.pixels_per_meter).max(0.15);
+                        let height = (rect.height as f32 / self.pixels_per_meter).max(0.15);
+                        b.shape = match b.shape {
+                            Shape2D::Circle { .. } => Shape2D::circle(width.min(height) * 0.5),
+                            _ => Shape2D::rect(width, height),
+                        };
+                        b.recompute_mass_properties();
+                        if b.linear_velocity.length_squared() < 1e-4
+                            && item.last_tx.abs() < 0.5
+                            && item.last_ty.abs() < 0.5
+                        {
                             b.set_position(center_m);
                         }
                     }
@@ -418,6 +534,9 @@ impl VisualPhysicsHost {
 
     /// Steps physics by `dt` and writes updated [`MatrixTransform`]s to moved visuals (`O(active)`).
     pub fn step_and_sync(&mut self, dt: f32) -> VisualSyncStats {
+        if !dt.is_finite() || dt <= 0.0 {
+            return self.last_sync;
+        }
         let step = self.world.step(dt);
         let t_sync = Instant::now();
         let mut written = 0usize;
@@ -425,7 +544,7 @@ impl VisualPhysicsHost {
         // Prune detached visuals cleanly
         let mut i = 0;
         while i < self.bound.len() {
-            let alive = self.bound[i].visual.upgrade().is_some();
+            let alive = self.bound[i].binding.visual.upgrade().is_some();
             if !alive {
                 let removed = self.bound.swap_remove(i);
                 if let Some(jh) = removed.home_joint {
@@ -458,7 +577,7 @@ impl VisualPhysicsHost {
                 {
                     let (sin, cos) = (angle as f64).sin_cos();
                     let m = Matrix::new(cos, sin, -sin, cos, tx as f64, ty as f64);
-                    item.transform.set_matrix(m);
+                    item.binding.transform.set_matrix(m);
                     item.last_tx = tx;
                     item.last_ty = ty;
                     item.last_angle = angle;
@@ -483,8 +602,7 @@ impl VisualPhysicsHost {
 pub struct SpringVisualId(pub usize);
 
 struct DrivenSpringVisual {
-    visual: WeakRef<Visual>,
-    transform: Ref<MatrixTransform>,
+    binding: RenderTransformBinding,
     offset: Spring2D,
     scale: Spring1D,
     rotation: Spring1D,
@@ -497,7 +615,7 @@ struct DrivenSpringVisual {
 /// Analytical spring & micro-interaction driver for **any** FerroUI [`Visual`] (magnetic hover,
 /// button press pop, error shake, smooth reflow, entry springs) with zero layout invalidation.
 pub struct VisualSpringDriver {
-    entries: Vec<DrivenSpringVisual>,
+    entries: Vec<Option<DrivenSpringVisual>>,
 }
 
 impl Default for VisualSpringDriver {
@@ -508,19 +626,35 @@ impl Default for VisualSpringDriver {
 
 impl VisualSpringDriver {
     pub fn new() -> Self {
-        Self { entries: Vec::new() }
+        Self {
+            entries: Vec::new(),
+        }
+    }
+
+    /// Detaches a spring binding and restores the visual's previous transform.
+    /// IDs are never recycled, so a stale ID cannot affect a newly attached visual.
+    pub fn detach(&mut self, id: SpringVisualId) -> bool {
+        self.entries.get_mut(id.0).and_then(Option::take).is_some()
     }
 
     /// Attaches analytical `(offset, scale, rotation)` springs to `visual`.
     pub fn attach(&mut self, visual: &Ref<Visual>, config: SpringConfig) -> SpringVisualId {
-        let transform = MatrixTransform::with_matrix(Matrix::IDENTITY);
-        visual.set_render_transform_origin(RelativePoint::CENTER);
-        visual.set_render_transform(Some((&transform).into()));
+        if let Some(index) = self.entries.iter().position(|entry| {
+            entry.as_ref().is_some_and(|entry| {
+                entry
+                    .binding
+                    .visual
+                    .upgrade()
+                    .is_some_and(|bound| bound.ptr_eq(visual))
+            })
+        }) {
+            return SpringVisualId(index);
+        }
+        let binding = RenderTransformBinding::new(visual);
 
         let id = SpringVisualId(self.entries.len());
-        self.entries.push(DrivenSpringVisual {
-            visual: visual.downgrade(),
-            transform,
+        self.entries.push(Some(DrivenSpringVisual {
+            binding,
             offset: Spring2D::new(Vec2::ZERO, config),
             scale: Spring1D::new(1.0, config),
             rotation: Spring1D::new(0.0, config),
@@ -528,7 +662,7 @@ impl VisualSpringDriver {
             magnetic_pull_px: 0.0,
             magnetic_tilt_rad: 0.0,
             settled: true,
-        });
+        }));
         id
     }
 
@@ -540,7 +674,7 @@ impl VisualSpringDriver {
         max_pull_px: f32,
         max_tilt_rad: f32,
     ) {
-        if let Some(e) = self.entries.get_mut(id.0) {
+        if let Some(e) = self.entries.get_mut(id.0).and_then(Option::as_mut) {
             e.magnetic_radius_px = radius_px;
             e.magnetic_pull_px = max_pull_px;
             e.magnetic_tilt_rad = max_tilt_rad;
@@ -549,11 +683,13 @@ impl VisualSpringDriver {
 
     /// Updates all magnetic-hover visuals given a pointer position in their shared parent coordinate space.
     pub fn update_pointer_in_parent(&mut self, pointer_px: Vec2) {
-        for e in &mut self.entries {
+        for e in self.entries.iter_mut().filter_map(Option::as_mut) {
             if e.magnetic_radius_px <= 0.0 {
                 continue;
             }
-            let Some(vis) = e.visual.upgrade() else { continue };
+            let Some(vis) = e.binding.visual.upgrade() else {
+                continue;
+            };
             let b = vis.bounds();
             let center = Vec2::new((b.x + b.width * 0.5) as f32, (b.y + b.height * 0.5) as f32);
             let delta = pointer_px - center;
@@ -563,7 +699,8 @@ impl VisualSpringDriver {
                 let pull = (delta / dist) * (e.magnetic_pull_px * factor);
                 e.offset.set_target(pull);
                 e.scale.set_target(1.0 + 0.065 * factor);
-                e.rotation.set_target((delta.x / e.magnetic_radius_px) * e.magnetic_tilt_rad * factor);
+                e.rotation
+                    .set_target((delta.x / e.magnetic_radius_px) * e.magnetic_tilt_rad * factor);
                 e.settled = false;
             } else {
                 e.offset.set_target(Vec2::ZERO);
@@ -576,7 +713,7 @@ impl VisualSpringDriver {
 
     /// Fires a tactile spring pop/click impulse (instant scale kick + quick bounce back).
     pub fn impulse_pop(&mut self, id: SpringVisualId, scale_velocity: f32) {
-        if let Some(e) = self.entries.get_mut(id.0) {
+        if let Some(e) = self.entries.get_mut(id.0).and_then(Option::as_mut) {
             e.scale.impulse(scale_velocity);
             e.settled = false;
         }
@@ -584,7 +721,7 @@ impl VisualSpringDriver {
 
     /// Fires a classic macOS/iOS damped horizontal error-shake impulse on a visual (e.g., invalid form).
     pub fn impulse_shake(&mut self, id: SpringVisualId, horizontal_velocity_px: f32) {
-        if let Some(e) = self.entries.get_mut(id.0) {
+        if let Some(e) = self.entries.get_mut(id.0).and_then(Option::as_mut) {
             e.offset.x.impulse(horizontal_velocity_px);
             e.rotation.impulse(horizontal_velocity_px * 0.0008);
             e.settled = false;
@@ -592,12 +729,19 @@ impl VisualSpringDriver {
     }
 
     /// Sets an initial entrance offset so the visual springs cleanly into its resting layout position.
-    pub fn trigger_entrance(&mut self, id: SpringVisualId, start_offset_px: Vec2, start_scale: f32) {
-        if let Some(e) = self.entries.get_mut(id.0) {
+    pub fn trigger_entrance(
+        &mut self,
+        id: SpringVisualId,
+        start_offset_px: Vec2,
+        start_scale: f32,
+    ) {
+        if let Some(e) = self.entries.get_mut(id.0).and_then(Option::as_mut) {
             e.offset.x.value = start_offset_px.x;
             e.offset.y.value = start_offset_px.y;
+            e.offset.set_velocity(Vec2::ZERO);
             e.offset.set_target(Vec2::ZERO);
             e.scale.value = start_scale;
+            e.scale.velocity = 0.0;
             e.scale.set_target(1.0);
             e.settled = false;
         }
@@ -605,7 +749,7 @@ impl VisualSpringDriver {
 
     /// Updates spring config across all driven visuals.
     pub fn set_all_configs(&mut self, config: SpringConfig) {
-        for e in &mut self.entries {
+        for e in self.entries.iter_mut().filter_map(Option::as_mut) {
             e.offset.set_config(config);
             e.scale.config = config;
             e.rotation.config = config;
@@ -615,17 +759,35 @@ impl VisualSpringDriver {
     /// Advances all unsettled springs and updates their persistent [`MatrixTransform`]s.
     /// Returns the number of active visuals updated this frame.
     pub fn step(&mut self, dt: f32) -> usize {
+        if !dt.is_finite() || dt <= 0.0 {
+            return 0;
+        }
+        for slot in &mut self.entries {
+            if slot
+                .as_ref()
+                .is_some_and(|entry| entry.binding.visual.upgrade().is_none())
+            {
+                *slot = None;
+            }
+        }
         let mut active = 0usize;
-        for e in &mut self.entries {
-            if e.settled || e.visual.upgrade().is_none() {
+        for e in self.entries.iter_mut().filter_map(Option::as_mut) {
+            if e.settled || e.binding.visual.upgrade().is_none() {
                 continue;
             }
             let off = e.offset.step(dt);
             let sc = e.scale.step(dt).max(0.05) as f64;
             let rot = e.rotation.step(dt) as f64;
             let (sin, cos) = rot.sin_cos();
-            let m = Matrix::new(cos * sc, sin * sc, -sin * sc, cos * sc, off.x as f64, off.y as f64);
-            e.transform.set_matrix(m);
+            let m = Matrix::new(
+                cos * sc,
+                sin * sc,
+                -sin * sc,
+                cos * sc,
+                off.x as f64,
+                off.y as f64,
+            );
+            e.binding.transform.set_matrix(m);
             active += 1;
 
             if e.offset.is_settled() && e.scale.is_settled() && e.rotation.is_settled() {
@@ -639,8 +801,7 @@ impl VisualSpringDriver {
 /// Interactive drag-and-throw controller for a live FerroUI [`Visual`] with velocity-coupled tilt
 /// and magnetic slot snapping.
 pub struct DraggableVisual {
-    visual: WeakRef<Visual>,
-    transform: Ref<MatrixTransform>,
+    binding: RenderTransformBinding,
     pub card: DraggableCard,
     pub snap: MagneticSnap,
     tracker: GestureTracker,
@@ -651,14 +812,11 @@ pub struct DraggableVisual {
 
 impl DraggableVisual {
     pub fn attach(visual: &Ref<Visual>, config: SpringConfig, snap_offsets_px: Vec<Vec2>) -> Self {
-        let transform = MatrixTransform::with_matrix(Matrix::IDENTITY);
-        visual.set_render_transform_origin(RelativePoint::CENTER);
-        visual.set_render_transform(Some((&transform).into()));
+        let binding = RenderTransformBinding::new(visual);
         let mut card = DraggableCard::new(Vec2::ZERO, config);
         card.tilt_sensitivity = 0.00035;
         Self {
-            visual: visual.downgrade(),
-            transform,
+            binding,
             card,
             snap: MagneticSnap::new(snap_offsets_px),
             tracker: GestureTracker::default(),
@@ -677,9 +835,12 @@ impl DraggableVisual {
     }
 
     pub fn drag_to(&mut self, pointer_px: Vec2, dt: f32) {
-        if !self.card.is_dragging {
+        if !self.card.is_dragging || !dt.is_finite() || dt <= 0.0 {
             return;
         }
+        // Timestamp pointer samples by event elapsed time, independently of the
+        // render timer; multiple input events can arrive within one frame.
+        self.time_secs += dt as f64;
         self.tracker.push(self.time_secs, pointer_px);
         let target = self.drag_start_offset + (pointer_px - self.drag_start_pointer);
         self.card.drag_to(target, dt);
@@ -699,8 +860,10 @@ impl DraggableVisual {
     }
 
     pub fn step(&mut self, dt: f32) {
-        self.time_secs += dt as f64;
-        if self.visual.upgrade().is_none() {
+        if !dt.is_finite() || dt <= 0.0 {
+            return;
+        }
+        if self.binding.visual.upgrade().is_none() {
             return;
         }
         self.card.step(dt);
@@ -708,8 +871,15 @@ impl DraggableVisual {
         let sc = self.card.scale.value as f64;
         let rot = self.card.tilt_radians.value as f64;
         let (sin, cos) = rot.sin_cos();
-        let m = Matrix::new(cos * sc, sin * sc, -sin * sc, cos * sc, p.x as f64, p.y as f64);
-        self.transform.set_matrix(m);
+        let m = Matrix::new(
+            cos * sc,
+            sin * sc,
+            -sin * sc,
+            cos * sc,
+            p.x as f64,
+            p.y as f64,
+        );
+        self.binding.transform.set_matrix(m);
     }
 }
 
@@ -724,7 +894,10 @@ pub fn start_ui_physics_timer(
     let last = std::cell::Cell::new(Instant::now());
     timer.tick(move |_| {
         let now = Instant::now();
-        let dt = now.duration_since(last.replace(now)).as_secs_f32().clamp(0.001, 0.033);
+        let dt = now
+            .duration_since(last.replace(now))
+            .as_secs_f32()
+            .clamp(0.001, 0.033);
         let sync_stats = host.borrow_mut().step_and_sync(dt);
         let active_springs = springs.borrow_mut().step(dt);
         on_tick(sync_stats, active_springs);

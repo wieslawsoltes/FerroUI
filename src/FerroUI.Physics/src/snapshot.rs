@@ -4,7 +4,7 @@
 use crate::body::{BodyHandle, RigidBody};
 use crate::joints::JointHandle;
 use crate::math::{Rot2, Vec2};
-use crate::world::PhysicsWorld;
+use crate::world::{PhysicsWorld, WorldSnapshotState};
 use std::collections::VecDeque;
 
 /// Compact snapshot of a single rigid body's dynamic state.
@@ -19,12 +19,19 @@ pub struct BodySnapshot {
     pub sleep_time: f32,
 }
 
-/// Complete deterministic snapshot of a [`PhysicsWorld`] at a single simulation tick.
+/// Complete snapshot of a [`PhysicsWorld`] at a single simulation tick.
+///
+/// Captures body/joint topology and generations, forces, configuration, and
+/// warm-start impulses, so spawning, removing, or fracturing bodies can be undone.
+/// The public arrays are compact summaries suitable for a timeline inspector.
+/// Storage is O(body slots + joint slots + contacts); BVH nodes and solver scratch
+/// are not copied. Use a bounded [`WorldHistory`] for long-running applications.
 #[derive(Clone, Debug)]
 pub struct WorldSnapshot {
     pub tick: u64,
     pub bodies: Vec<BodySnapshot>,
     pub joint_broken: Vec<(JointHandle, bool)>,
+    state: WorldSnapshotState,
 }
 
 impl WorldSnapshot {
@@ -42,10 +49,16 @@ impl WorldSnapshot {
             })
             .collect();
         let joint_broken = world.all_joints().map(|j| (j.handle, j.broken)).collect();
-        Self { tick, bodies, joint_broken }
+        Self {
+            tick,
+            bodies,
+            joint_broken,
+            state: world.capture_snapshot_state(),
+        }
     }
 
     pub fn restore(&self, world: &mut PhysicsWorld) {
+        world.restore_snapshot_state(&self.state);
         for snap in &self.bodies {
             if let Some(b) = world.body_mut(snap.handle) {
                 b.position = snap.position;
@@ -55,8 +68,6 @@ impl WorldSnapshot {
                 b.prev_rotation = b.rotation;
                 b.linear_velocity = snap.linear_velocity;
                 b.angular_velocity = snap.angular_velocity;
-                b.force = Vec2::ZERO;
-                b.torque = 0.0;
                 b.is_sleeping = snap.is_sleeping;
                 b.sleep_time = snap.sleep_time;
                 b.aabb = b.shape.compute_aabb(b.transform());
@@ -67,6 +78,7 @@ impl WorldSnapshot {
                 j.broken = broken;
             }
         }
+        world.synchronize_queries();
     }
 }
 
@@ -81,8 +93,13 @@ pub struct WorldHistory {
 
 impl WorldHistory {
     pub fn new(capacity: usize) -> Self {
-        let cap = capacity.max(8);
-        Self { frames: VecDeque::with_capacity(cap), capacity: cap, cursor: 0, tick_counter: 0 }
+        let cap = capacity.max(1);
+        Self {
+            frames: VecDeque::with_capacity(cap),
+            capacity: cap,
+            cursor: 0,
+            tick_counter: 0,
+        }
     }
 
     pub fn clear(&mut self) {
@@ -106,13 +123,15 @@ impl WorldHistory {
     /// Records the current world state, truncating any future redo branch if we scrubbed back.
     pub fn record(&mut self, world: &PhysicsWorld) {
         if self.cursor + 1 < self.frames.len() {
+            self.tick_counter = self.frames[self.cursor].tick;
             self.frames.truncate(self.cursor + 1);
         }
         if self.frames.len() >= self.capacity {
             self.frames.pop_front();
         }
         self.tick_counter += 1;
-        self.frames.push_back(WorldSnapshot::capture(world, self.tick_counter));
+        self.frames
+            .push_back(WorldSnapshot::capture(world, self.tick_counter));
         self.cursor = self.frames.len().saturating_sub(1);
     }
 

@@ -20,7 +20,7 @@
 //! - **[`PhysicsEnergyFieldEffect`]**: a GPU runtime shader rendering dual-harmonic
 //!   plasma fluid refraction and velocity-coupled iridescent aura.
 
-use crate::body::{BodyBuilder, BodyHandle};
+use crate::body::{BodyBuilder, BodyHandle, BodyType};
 use crate::material::PhysicsMaterial;
 use crate::math::Vec2;
 use crate::queries::CollisionEvent;
@@ -29,12 +29,14 @@ use crate::solver::SolverConfig;
 use crate::ui::{Spring1D, Spring2D, SpringConfig};
 use crate::world::PhysicsWorld;
 use ferroui_base::media::effects::{
-    CustomEffect, EffectParameterValue, IImmutableEffect, ImmutableCustomEffect, ShaderEffectDescription,
+    CustomEffect, EffectParameterValue, IImmutableEffect, ImmutableCustomEffect,
+    ShaderEffectDescription,
 };
 use ferroui_base::media::Color;
 use ferroui_base::rendering::composition::{
     CompositionSimulationContext, CompositionSimulationHandle, Compositor, ICompositionSimulation,
-    SimulationEffectUpdate, SimulationMode, SimulationStepResult, SimulationTarget, SimulationVisualPatch,
+    SimulationEffectUpdate, SimulationMode, SimulationStepResult, SimulationTarget,
+    SimulationVisualPatch,
 };
 use ferroui_base::{Point, Vector};
 use rustc_hash::FxHashMap;
@@ -266,7 +268,11 @@ impl CustomEffect for PhysicsKineticGlassEffect {
     }
 
     fn neutral() -> Option<Self> {
-        Some(Self { intensity: 0.0, distortion: 0.0, ..Self::default() })
+        Some(Self {
+            intensity: 0.0,
+            distortion: 0.0,
+            ..Self::default()
+        })
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
@@ -556,7 +562,13 @@ impl Default for PhysicsImpactRippleEffect {
 impl PhysicsImpactRippleEffect {
     /// Convenience constructor for a single shockwave ring.
     pub fn single(origin: Point, progress: f64, amplitude: f64, accent: Color) -> Self {
-        Self { origin_1: origin, progress_1: progress, amp_1: amplitude, accent, ..Self::default() }
+        Self {
+            origin_1: origin,
+            progress_1: progress,
+            amp_1: amplitude,
+            accent,
+            ..Self::default()
+        }
     }
 }
 
@@ -611,11 +623,25 @@ impl CustomEffect for PhysicsImpactRippleEffect {
 
     fn cpu_reference(&self, pixels: &mut [u8], width: usize, height: usize, _scale: f64) -> bool {
         let rings = [
-            (self.origin_1, self.progress_1.clamp(0.0, 1.0) as f32, self.amp_1.clamp(0.0, 1.0) as f32),
-            (self.origin_2, self.progress_2.clamp(0.0, 1.0) as f32, self.amp_2.clamp(0.0, 1.0) as f32),
-            (self.origin_3, self.progress_3.clamp(0.0, 1.0) as f32, self.amp_3.clamp(0.0, 1.0) as f32),
+            (
+                self.origin_1,
+                self.progress_1.clamp(0.0, 1.0) as f32,
+                self.amp_1.clamp(0.0, 1.0) as f32,
+            ),
+            (
+                self.origin_2,
+                self.progress_2.clamp(0.0, 1.0) as f32,
+                self.amp_2.clamp(0.0, 1.0) as f32,
+            ),
+            (
+                self.origin_3,
+                self.progress_3.clamp(0.0, 1.0) as f32,
+                self.amp_3.clamp(0.0, 1.0) as f32,
+            ),
         ];
-        let any_active = rings.iter().any(|&(_, p, a)| a >= 0.002 && p > 0.001 && p < 0.999);
+        let any_active = rings
+            .iter()
+            .any(|&(_, p, a)| a >= 0.002 && p > 0.001 && p < 0.999);
         if width == 0 || height == 0 || !any_active {
             return true;
         }
@@ -655,7 +681,8 @@ impl CustomEffect for PhysicsImpactRippleEffect {
                     let g = total_env.min(1.4) * 0.68 * inten * a;
                     for ch in 0..3 {
                         let c = f32::from(pixels[idx + ch]) / 255.0;
-                        pixels[idx + ch] = ((c + ring_rgb[ch] * g).clamp(0.0, a) * 255.0).round() as u8;
+                        pixels[idx + ch] =
+                            ((c + ring_rgb[ch] * g).clamp(0.0, a) * 255.0).round() as u8;
                     }
                 }
             }
@@ -813,7 +840,12 @@ impl CustomEffect for PhysicsEnergyFieldEffect {
     }
 
     fn neutral() -> Option<Self> {
-        Some(Self { energy: 0.0, intensity: 0.0, distortion: 0.0, ..Self::default() })
+        Some(Self {
+            energy: 0.0,
+            intensity: 0.0,
+            distortion: 0.0,
+            ..Self::default()
+        })
     }
 
     fn shader() -> Option<ShaderEffectDescription> {
@@ -1054,7 +1086,12 @@ impl SharedPhysicsState {
         }
     }
 
-    fn create_arena_walls(world: &mut PhysicsWorld, w_px: f32, h_px: f32, ppm: f32) -> Vec<BodyHandle> {
+    fn create_arena_walls(
+        world: &mut PhysicsWorld,
+        w_px: f32,
+        h_px: f32,
+        ppm: f32,
+    ) -> Vec<BodyHandle> {
         let w = (w_px / ppm).max(2.0);
         let h = (h_px / ppm).max(2.0);
         let t = 0.5;
@@ -1073,7 +1110,7 @@ impl SharedPhysicsState {
             .into_iter()
             .map(|(pos, hx, hy)| {
                 world.add_body(
-                    BodyBuilder::static_body(Shape2D::rect(hx, hy))
+                    BodyBuilder::static_body(Shape2D::box_half_extents(hx, hy))
                         .position(pos)
                         .material(mat),
                 )
@@ -1090,8 +1127,12 @@ impl SharedPhysicsState {
         for wall in self.walls.drain(..) {
             self.world.remove_body(wall);
         }
-        self.walls =
-            Self::create_arena_walls(&mut self.world, self.arena_width, self.arena_height, self.pixels_per_meter);
+        self.walls = Self::create_arena_walls(
+            &mut self.world,
+            self.arena_width,
+            self.arena_height,
+            self.pixels_per_meter,
+        );
         self.wake();
     }
 
@@ -1136,7 +1177,13 @@ impl CompositorPhysicsController {
             arena_height.max(120.0),
             behavior,
         )));
-        (CompositorPhysicsSimulation { name: name.into(), inner: inner.clone() }, Self { inner })
+        (
+            CompositorPhysicsSimulation {
+                name: name.into(),
+                inner: inner.clone(),
+            },
+            Self { inner },
+        )
     }
 
     /// Convenience helper that creates and immediately registers a
@@ -1155,13 +1202,19 @@ impl CompositorPhysicsController {
 
     /// Binds a FerroUI [`SimulationTarget`] (either a UI `Visual` or pure
     /// `CompositionVisual`) to this physics simulation. Returns its index.
-    pub fn bind_visual(&self, target: SimulationTarget, rest_center: Vec2, size: Vec2, accent: Color) -> usize {
+    pub fn bind_visual(
+        &self,
+        target: SimulationTarget,
+        rest_center: Vec2,
+        size: Vec2,
+        accent: Color,
+    ) -> usize {
         let mut st = self.inner.borrow_mut();
         let pos_m = st.px_to_world(rest_center);
         let hx = (size.x * 0.5 / st.pixels_per_meter).max(0.15);
         let hy = (size.y * 0.5 / st.pixels_per_meter).max(0.15);
         let body = st.world.add_body(
-            BodyBuilder::dynamic(Shape2D::rect(hx, hy))
+            BodyBuilder::dynamic(Shape2D::box_half_extents(hx, hy))
                 .position(pos_m)
                 .material(PhysicsMaterial::new(1.2, 0.3, 0.62))
                 .linear_damping(0.45)
@@ -1225,8 +1278,16 @@ impl CompositorPhysicsController {
                     let world_pos = (entry.rest_center + entry.spring_pos.value()) / ppm;
                     let world_vel = entry.spring_pos.velocity() / ppm;
                     if let Some(body) = world.body_mut(entry.body) {
+                        body.body_type = if entry.dragging {
+                            BodyType::Kinematic
+                        } else {
+                            BodyType::Dynamic
+                        };
+                        body.recompute_mass_properties();
                         body.position = world_pos;
                         body.linear_velocity = world_vel;
+                        body.set_angle(entry.spring_tilt.value);
+                        body.angular_velocity = entry.spring_tilt.velocity;
                         body.wake_up();
                     }
                 }
@@ -1310,7 +1371,9 @@ impl CompositorPhysicsController {
         st.invalidate_effect_caches();
         if mode == PhysicsShaderMode::Disabled {
             for entry in &mut st.entries {
-                entry.target.apply(&SimulationVisualPatch::new().without_effect());
+                entry
+                    .target
+                    .apply(&SimulationVisualPatch::new().without_effect());
                 entry.effect_cleared = true;
             }
         }
@@ -1327,12 +1390,17 @@ impl CompositorPhysicsController {
     pub fn begin_drag(&self, index: usize, normalized_origin: Point) {
         let mut st = self.inner.borrow_mut();
         let handle = {
-            let Some(entry) = st.entries.get_mut(index) else { return };
+            let Some(entry) = st.entries.get_mut(index) else {
+                return;
+            };
             entry.dragging = true;
             entry.drag_velocity = Vec2::ZERO;
             entry.spring_scale.target = 1.05;
             entry.push_ripple(ActiveRipple {
-                origin: Point::new(normalized_origin.x.clamp(0.0, 1.0), normalized_origin.y.clamp(0.0, 1.0)),
+                origin: Point::new(
+                    normalized_origin.x.clamp(0.0, 1.0),
+                    normalized_origin.y.clamp(0.0, 1.0),
+                ),
                 progress: 0.02,
                 amplitude: 0.92,
                 speed: 0.92,
@@ -1340,6 +1408,8 @@ impl CompositorPhysicsController {
             entry.body
         };
         if let Some(body) = st.world.body_mut(handle) {
+            body.body_type = BodyType::Kinematic;
+            body.recompute_mass_properties();
             body.linear_velocity = Vec2::ZERO;
             body.angular_velocity = 0.0;
             body.wake_up();
@@ -1349,11 +1419,16 @@ impl CompositorPhysicsController {
 
     /// Moves a dragged visual by `delta_px` (DIPs) and tracks pointer velocity.
     pub fn drag_by(&self, index: usize, delta_px: Vec2, dt: f32) {
+        if !dt.is_finite() || dt <= 0.0 || !delta_px.x.is_finite() || !delta_px.y.is_finite() {
+            return;
+        }
         let mut st = self.inner.borrow_mut();
         let ppm = st.pixels_per_meter;
         let behavior = st.behavior;
         let (handle, drag_vel) = {
-            let Some(entry) = st.entries.get_mut(index) else { return };
+            let Some(entry) = st.entries.get_mut(index) else {
+                return;
+            };
             if !entry.dragging {
                 return;
             }
@@ -1388,7 +1463,9 @@ impl CompositorPhysicsController {
         let ppm = st.pixels_per_meter;
         let behavior = st.behavior;
         let (handle, fling) = {
-            let Some(entry) = st.entries.get_mut(index) else { return };
+            let Some(entry) = st.entries.get_mut(index) else {
+                return;
+            };
             if !entry.dragging {
                 return;
             }
@@ -1402,8 +1479,10 @@ impl CompositorPhysicsController {
             }
             (entry.body, fling)
         };
-        if behavior == PhysicsCompositorBehavior::RigidBody {
-            if let Some(body) = st.world.body_mut(handle) {
+        if let Some(body) = st.world.body_mut(handle) {
+            body.body_type = BodyType::Dynamic;
+            body.recompute_mass_properties();
+            if behavior == PhysicsCompositorBehavior::RigidBody {
                 let v = fling / ppm;
                 let len = v.length();
                 body.linear_velocity = if len > 22.0 { v * (22.0 / len) } else { v };
@@ -1418,9 +1497,14 @@ impl CompositorPhysicsController {
     /// imparting translational impulse.
     pub fn trigger_ripple_at(&self, index: usize, normalized_origin: Point, intensity: f32) {
         let mut st = self.inner.borrow_mut();
-        let Some(entry) = st.entries.get_mut(index) else { return };
+        let Some(entry) = st.entries.get_mut(index) else {
+            return;
+        };
         entry.push_ripple(ActiveRipple {
-            origin: Point::new(normalized_origin.x.clamp(0.0, 1.0), normalized_origin.y.clamp(0.0, 1.0)),
+            origin: Point::new(
+                normalized_origin.x.clamp(0.0, 1.0),
+                normalized_origin.y.clamp(0.0, 1.0),
+            ),
             progress: 0.02,
             amplitude: intensity.clamp(0.25, 1.0),
             speed: 0.86,
@@ -1430,14 +1514,25 @@ impl CompositorPhysicsController {
     }
 
     /// Triggers an immediate GPU impact ripple shader + physical impulse on visual `index`.
-    pub fn trigger_impact(&self, index: usize, normalized_origin: Point, intensity: f32, impulse_px: Vec2) {
+    pub fn trigger_impact(
+        &self,
+        index: usize,
+        normalized_origin: Point,
+        intensity: f32,
+        impulse_px: Vec2,
+    ) {
         let mut st = self.inner.borrow_mut();
         let ppm = st.pixels_per_meter;
         let behavior = st.behavior;
         let handle = {
-            let Some(entry) = st.entries.get_mut(index) else { return };
+            let Some(entry) = st.entries.get_mut(index) else {
+                return;
+            };
             entry.push_ripple(ActiveRipple {
-                origin: Point::new(normalized_origin.x.clamp(0.0, 1.0), normalized_origin.y.clamp(0.0, 1.0)),
+                origin: Point::new(
+                    normalized_origin.x.clamp(0.0, 1.0),
+                    normalized_origin.y.clamp(0.0, 1.0),
+                ),
                 progress: 0.02,
                 amplitude: intensity.clamp(0.25, 1.0),
                 speed: 0.88,
@@ -1470,9 +1565,10 @@ impl CompositorPhysicsController {
         let SharedPhysicsState { world, entries, .. } = &mut *st;
         for (idx, e) in entries.iter_mut().enumerate() {
             let current_px = match behavior {
-                PhysicsCompositorBehavior::RigidBody => {
-                    world.body(e.body).map(|b| b.position * ppm).unwrap_or(e.rest_center)
-                }
+                PhysicsCompositorBehavior::RigidBody => world
+                    .body(e.body)
+                    .map(|b| b.position * ppm)
+                    .unwrap_or(e.rest_center),
                 PhysicsCompositorBehavior::ElasticSprings => e.rest_center + e.spring_pos.value(),
             };
             let diff = current_px - center_px;
@@ -1559,8 +1655,16 @@ impl CompositorPhysicsController {
                 .filter(|e| !e.spring_pos.is_settled() || e.dragging || e.has_active_ripples())
                 .count(),
         };
-        let active_ripples: usize = st.entries.iter().map(BoundVisualEntry::active_ripple_count).sum();
-        let peak_speed_px = st.entries.iter().map(|e| e.last_speed).fold(0.0_f32, f32::max);
+        let active_ripples: usize = st
+            .entries
+            .iter()
+            .map(BoundVisualEntry::active_ripple_count)
+            .sum();
+        let peak_speed_px = st
+            .entries
+            .iter()
+            .map(|e| e.last_speed)
+            .fold(0.0_f32, f32::max);
         let peak_energy = (peak_speed_px / 650.0).clamp(0.0, 1.0);
         CompositorPhysicsTelemetry {
             bound_visuals: st.entries.len(),
@@ -1635,7 +1739,13 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
         // 1. Step rigid-body physics world & harvest real collisions with ZERO per-step
         //    heap allocations and O(1) body_to_entry lookup!
         if behavior == PhysicsCompositorBehavior::RigidBody {
-            let SharedPhysicsState { world, entries, body_to_entry, total_collisions, .. } = &mut *st;
+            let SharedPhysicsState {
+                world,
+                entries,
+                body_to_entry,
+                total_collisions,
+                ..
+            } = &mut *st;
             for entry in entries.iter() {
                 if entry.dragging {
                     if let Some(b) = world.body_mut(entry.body) {
@@ -1648,7 +1758,14 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
             world.step(dt);
 
             for ev in world.collision_events() {
-                let CollisionEvent::Started { body_a, body_b, point, impact_speed, .. } = *ev else {
+                let CollisionEvent::Started {
+                    body_a,
+                    body_b,
+                    point,
+                    impact_speed,
+                    ..
+                } = *ev
+                else {
                     continue;
                 };
                 if impact_speed < 0.75 {
@@ -1665,8 +1782,10 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                         let pos_px = body.position * ppm;
                         let w = entry.size.x.max(1.0);
                         let h = entry.size.y.max(1.0);
-                        let norm_x = ((contact_px.x - (pos_px.x - w * 0.5)) / w).clamp(0.05, 0.95) as f64;
-                        let norm_y = ((contact_px.y - (pos_px.y - h * 0.5)) / h).clamp(0.05, 0.95) as f64;
+                        let norm_x =
+                            ((contact_px.x - (pos_px.x - w * 0.5)) / w).clamp(0.05, 0.95) as f64;
+                        let norm_y =
+                            ((contact_px.y - (pos_px.y - h * 0.5)) / h).clamp(0.05, 0.95) as f64;
                         entry.push_ripple(ActiveRipple {
                             origin: Point::new(norm_x, norm_y),
                             progress: 0.02,
@@ -1689,7 +1808,11 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                         let pos_px = body.position * ppm;
                         let vel = body.linear_velocity * ppm;
                         let spd = vel.length();
-                        let awake = !body.is_sleeping || entry.dragging || spd > 2.5 || body.angular_velocity.abs() > 0.02;
+                        let awake = !body.is_sleeping
+                            || entry.dragging
+                            || spd > 2.5
+                            || body.angular_velocity.abs() > 0.02
+                            || !entry.spring_scale.is_settled();
                         (
                             (pos_px.x - entry.rest_center.x) as f64,
                             (pos_px.y - entry.rest_center.y) as f64,
@@ -1707,7 +1830,8 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                 PhysicsCompositorBehavior::ElasticSprings => {
                     if !entry.dragging {
                         entry.spring_pos.step(dt);
-                        entry.spring_tilt.target = (entry.spring_pos.velocity().x * 0.00024).clamp(-0.24, 0.24);
+                        entry.spring_tilt.target =
+                            (entry.spring_pos.velocity().x * 0.00024).clamp(-0.24, 0.24);
                     }
                     entry.spring_tilt.step(dt);
                     entry.spring_scale.step(dt);
@@ -1723,7 +1847,16 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                         || !entry.spring_pos.is_settled()
                         || !entry.spring_tilt.is_settled()
                         || !entry.spring_scale.is_settled();
-                    (pos.x as f64, pos.y as f64, entry.spring_tilt.value, sx, sy, vel, spd, awake)
+                    (
+                        pos.x as f64,
+                        pos.y as f64,
+                        entry.spring_tilt.value,
+                        sx,
+                        sy,
+                        vel,
+                        spd,
+                        awake,
+                    )
                 }
             };
 
@@ -1756,32 +1889,38 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                 PhysicsShaderMode::KineticGlassOnly => {
                     any_active = true;
                     entry.resting_catchlight_synced = false;
-                    let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                        PhysicsKineticGlassEffect {
+                    let eff: Arc<dyn IImmutableEffect> =
+                        Arc::new(ImmutableCustomEffect::new(PhysicsKineticGlassEffect {
                             velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
-                            energy: if entry.dragging { energy.max(0.62) } else { energy.max(0.28) } as f64,
+                            energy: if entry.dragging {
+                                energy.max(0.62)
+                            } else {
+                                energy.max(0.28)
+                            } as f64,
                             tilt: rot as f64,
                             phase: entry.phase as f64,
                             intensity: shader_intensity as f64,
                             distortion: shader_distortion as f64,
                             accent: entry.accent,
-                        },
-                    ));
+                        }));
                     SimulationEffectUpdate::Set(eff)
                 }
                 PhysicsShaderMode::EnergyFieldOnly => {
                     any_active = true;
                     entry.resting_catchlight_synced = false;
-                    let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                        PhysicsEnergyFieldEffect {
+                    let eff: Arc<dyn IImmutableEffect> =
+                        Arc::new(ImmutableCustomEffect::new(PhysicsEnergyFieldEffect {
                             velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
-                            energy: if entry.dragging { energy.max(0.75) } else { energy.max(0.22) } as f64,
+                            energy: if entry.dragging {
+                                energy.max(0.75)
+                            } else {
+                                energy.max(0.22)
+                            } as f64,
                             phase: entry.phase as f64,
                             intensity: shader_intensity as f64,
                             distortion: shader_distortion as f64,
                             accent: entry.accent,
-                        },
-                    ));
+                        }));
                     SimulationEffectUpdate::Set(eff)
                 }
                 PhysicsShaderMode::ReactiveAuto => {
@@ -1793,24 +1932,27 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                         SimulationEffectUpdate::Set(eff)
                     } else if awake_this || energy > 0.01 || entry.dragging {
                         entry.resting_catchlight_synced = false;
-                        let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                            PhysicsKineticGlassEffect {
+                        let eff: Arc<dyn IImmutableEffect> =
+                            Arc::new(ImmutableCustomEffect::new(PhysicsKineticGlassEffect {
                                 velocity: Vector::new(vel_px.x as f64, vel_px.y as f64),
-                                energy: if entry.dragging { energy.max(0.58) } else { energy.max(0.22) } as f64,
+                                energy: if entry.dragging {
+                                    energy.max(0.58)
+                                } else {
+                                    energy.max(0.22)
+                                } as f64,
                                 tilt: rot as f64,
                                 phase: entry.phase as f64,
                                 intensity: shader_intensity as f64,
                                 distortion: shader_distortion as f64,
                                 accent: entry.accent,
-                            },
-                        ));
+                            }));
                         SimulationEffectUpdate::Set(eff)
                     } else if !entry.resting_catchlight_synced {
                         // Push a clean resting Fresnel catchlight once so the compositor can
                         // sleep at 0% CPU until the next pointer interaction or shockwave!
                         entry.resting_catchlight_synced = true;
-                        let eff: Arc<dyn IImmutableEffect> = Arc::new(ImmutableCustomEffect::new(
-                            PhysicsKineticGlassEffect {
+                        let eff: Arc<dyn IImmutableEffect> =
+                            Arc::new(ImmutableCustomEffect::new(PhysicsKineticGlassEffect {
                                 velocity: Vector::new(0.0, 0.0),
                                 energy: 0.16,
                                 tilt: rot as f64,
@@ -1818,8 +1960,7 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                                 intensity: shader_intensity as f64,
                                 distortion: shader_distortion as f64,
                                 accent: entry.accent,
-                            },
-                        ));
+                            }));
                         SimulationEffectUpdate::Set(eff)
                     } else {
                         SimulationEffectUpdate::Keep
@@ -1838,7 +1979,11 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
                     patch = patch.with_center_point(sz.x * 0.5, sz.y * 0.5, 0.0);
                 }
             } else {
-                patch = patch.with_center_point(entry.size.x as f64 * 0.5, entry.size.y as f64 * 0.5, 0.0);
+                patch = patch.with_center_point(
+                    entry.size.x as f64 * 0.5,
+                    entry.size.y as f64 * 0.5,
+                    0.0,
+                );
             }
 
             ctx.apply(&entry.target, &patch);
@@ -1849,5 +1994,68 @@ impl ICompositionSimulation for CompositorPhysicsSimulation {
         } else {
             SimulationStepResult::Idle
         }
+    }
+}
+
+#[cfg(test)]
+mod regression_tests {
+    use super::*;
+    use ferroui_base::Visual;
+
+    fn controller(behavior: PhysicsCompositorBehavior) -> CompositorPhysicsController {
+        let (_, controller) =
+            CompositorPhysicsController::create("regression", 640.0, 480.0, behavior);
+        controller.bind_visual(
+            SimulationTarget::visual(Visual::new()),
+            Vec2::new(200.0, 100.0),
+            Vec2::new(128.0, 64.0),
+            Color::from_argb(255, 0, 120, 215),
+        );
+        controller
+    }
+
+    #[test]
+    fn collider_and_wall_bounds_match_visual_sizes() {
+        let controller = controller(PhysicsCompositorBehavior::RigidBody);
+        let state = controller.inner.borrow();
+        let body = state.world.body(state.entries[0].body).unwrap();
+        assert_eq!(body.aabb.extents(), Vec2::new(2.0, 1.0));
+        let floor = state.world.body(state.walls[0]).unwrap();
+        assert_eq!(floor.aabb.min.y, 7.5);
+        assert!(floor.aabb.min.x <= 0.0 && floor.aabb.max.x >= 10.0);
+    }
+
+    #[test]
+    fn pointer_drag_pins_body_and_restores_dynamic_mass_on_release() {
+        let controller = controller(PhysicsCompositorBehavior::RigidBody);
+        controller.begin_drag(0, Point::new(0.5, 0.5));
+        controller.drag_by(0, Vec2::new(10.0, 0.0), 0.01);
+        {
+            let state = controller.inner.borrow();
+            let body = state.world.body(state.entries[0].body).unwrap();
+            assert!(body.is_kinematic());
+            assert_eq!(body.inv_mass, 0.0);
+        }
+        controller.end_drag(0);
+        let state = controller.inner.borrow();
+        let body = state.world.body(state.entries[0].body).unwrap();
+        assert!(body.is_dynamic());
+        assert!(body.inv_mass > 0.0);
+        assert!(body.linear_velocity.x > 0.0);
+    }
+
+    #[test]
+    fn switching_to_rigid_mode_preserves_spring_angle_and_angular_velocity() {
+        let controller = controller(PhysicsCompositorBehavior::ElasticSprings);
+        {
+            let mut state = controller.inner.borrow_mut();
+            state.entries[0].spring_tilt.value = 0.4;
+            state.entries[0].spring_tilt.velocity = 0.7;
+        }
+        controller.set_behavior(PhysicsCompositorBehavior::RigidBody);
+        let state = controller.inner.borrow();
+        let body = state.world.body(state.entries[0].body).unwrap();
+        assert_eq!(body.angle, 0.4);
+        assert_eq!(body.angular_velocity, 0.7);
     }
 }

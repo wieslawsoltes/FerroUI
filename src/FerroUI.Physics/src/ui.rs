@@ -99,7 +99,12 @@ pub struct Spring1D {
 
 impl Spring1D {
     pub fn new(initial: f32, config: SpringConfig) -> Self {
-        Self { value: initial, velocity: 0.0, target: initial, config }
+        Self {
+            value: initial,
+            velocity: 0.0,
+            target: initial,
+            config,
+        }
     }
 
     #[inline]
@@ -140,7 +145,14 @@ impl Spring1D {
         let v0 = self.velocity;
 
         if k <= 1e-8 {
-            self.value += v0 * dt;
+            let drag = c / m;
+            if drag > 1e-8 {
+                let exponent = -drag * dt;
+                self.value += v0 * (-exponent.exp_m1() / drag);
+                self.velocity = v0 * exponent.exp();
+            } else {
+                self.value += v0 * dt;
+            }
             return self.value;
         }
 
@@ -155,13 +167,15 @@ impl Spring1D {
             let c1 = x0;
             let c2 = (v0 + zeta * omega0 * x0) / omega_d;
             let x = decay * (c1 * cos_wd + c2 * sin_wd);
-            let v = decay * ((c2 * omega_d - c1 * zeta * omega0) * cos_wd
-                - (c1 * omega_d + c2 * zeta * omega0) * sin_wd);
+            let v = decay
+                * ((c2 * omega_d - c1 * zeta * omega0) * cos_wd
+                    - (c1 * omega_d + c2 * zeta * omega0) * sin_wd);
             (x, v)
         } else if zeta > 1.0 + 1e-4 {
             // Overdamped
             let root = (zeta * zeta - 1.0).sqrt();
-            let r1 = -omega0 * (zeta - root);
+            // Rationalized slow root avoids cancellation for heavy damping.
+            let r1 = -omega0 / (zeta + root);
             let r2 = -omega0 * (zeta + root);
             let c2 = (v0 - r1 * x0) / (r2 - r1);
             let c1 = x0 - c2;
@@ -200,7 +214,10 @@ pub struct Spring2D {
 
 impl Spring2D {
     pub fn new(initial: Vec2, config: SpringConfig) -> Self {
-        Self { x: Spring1D::new(initial.x, config), y: Spring1D::new(initial.y, config) }
+        Self {
+            x: Spring1D::new(initial.x, config),
+            y: Spring1D::new(initial.y, config),
+        }
     }
 
     pub fn set_config(&mut self, config: SpringConfig) {
@@ -357,15 +374,52 @@ impl InertiaScroller {
         self.drag_raw_position = self.position;
     }
 
+    /// Animates to an explicit position using the configured snap spring.
+    /// Ends any current drag and discards fling momentum. Non-finite positions
+    /// are ignored; finite positions are clamped to the current bounds.
+    pub fn animate_to(&mut self, position: f32) {
+        if !position.is_finite() {
+            return;
+        }
+        self.is_dragging = false;
+        self.velocity = 0.0;
+        self.snap_target = Some(position.clamp(self.min_bound, self.max_bound));
+    }
+
+    /// Moves immediately to a bounded position and cancels drag/inertia/snap.
+    pub fn jump_to(&mut self, position: f32) {
+        if !position.is_finite() {
+            return;
+        }
+        self.position = position.clamp(self.min_bound, self.max_bound);
+        self.drag_raw_position = self.position;
+        self.velocity = 0.0;
+        self.is_dragging = false;
+        self.snap_target = None;
+    }
+
     pub fn drag_by(&mut self, delta: f32) {
+        if !delta.is_finite() {
+            return;
+        }
         if !self.is_dragging {
             self.begin_drag();
         }
         self.drag_raw_position += delta;
         self.position = if self.drag_raw_position < self.min_bound {
-            self.min_bound + Self::rubber_band(self.drag_raw_position - self.min_bound, self.viewport_extent, self.rubber_band_coeff)
+            self.min_bound
+                + Self::rubber_band(
+                    self.drag_raw_position - self.min_bound,
+                    self.viewport_extent,
+                    self.rubber_band_coeff,
+                )
         } else if self.drag_raw_position > self.max_bound {
-            self.max_bound + Self::rubber_band(self.drag_raw_position - self.max_bound, self.viewport_extent, self.rubber_band_coeff)
+            self.max_bound
+                + Self::rubber_band(
+                    self.drag_raw_position - self.max_bound,
+                    self.viewport_extent,
+                    self.rubber_band_coeff,
+                )
         } else {
             self.drag_raw_position
         };
@@ -373,26 +427,34 @@ impl InertiaScroller {
 
     pub fn end_drag(&mut self, release_velocity: f32) {
         self.is_dragging = false;
-        self.velocity = release_velocity;
+        self.velocity = if release_velocity.is_finite() {
+            release_velocity
+        } else {
+            0.0
+        };
+        self.snap_target = None;
 
         if self.position < self.min_bound {
             self.snap_target = Some(self.min_bound);
         } else if self.position > self.max_bound {
             self.snap_target = Some(self.max_bound);
         } else if !self.detents.is_empty() {
-            let projected = self.projected_rest_position().clamp(self.min_bound, self.max_bound);
+            let projected = self
+                .projected_rest_position()
+                .clamp(self.min_bound, self.max_bound);
             if let Some(&nearest) = self
                 .detents
                 .iter()
+                .filter(|value| value.is_finite())
                 .min_by(|a, b| (*a - projected).abs().total_cmp(&(*b - projected).abs()))
             {
-                self.snap_target = Some(nearest);
+                self.snap_target = Some(nearest.clamp(self.min_bound, self.max_bound));
             }
         }
     }
 
     pub fn step(&mut self, dt: f32) -> f32 {
-        if self.is_dragging || dt <= 0.0 {
+        if self.is_dragging || dt <= 0.0 || !dt.is_finite() {
             return self.position;
         }
 
@@ -413,9 +475,12 @@ impl InertiaScroller {
         }
 
         // Exponential decay: v(t) = v0 * rate^(1000 * t)
-        let decay = self.deceleration_rate.powf(1000.0 * dt);
-        let avg_v = self.velocity * (1.0 + decay) * 0.5;
-        self.position += avg_v * dt;
+        let lambda = 1000.0 * self.deceleration_rate.clamp(0.9, 0.9999).ln();
+        let exponent = lambda * dt;
+        let decay = exponent.exp();
+        // Exact integral of exponentially decaying velocity, matching the
+        // projection above independently of frame rate or a missed frame.
+        self.position += self.velocity * exponent.exp_m1() / lambda;
         self.velocity *= decay;
 
         if self.position < self.min_bound {
@@ -439,7 +504,10 @@ pub struct MagneticSnap {
 
 impl MagneticSnap {
     pub fn new(anchors: Vec<Vec2>) -> Self {
-        Self { anchors, velocity_projection: 0.14 }
+        Self {
+            anchors,
+            velocity_projection: 0.14,
+        }
     }
 
     /// Selects the best anchor for a released object at `position` with `velocity`.
@@ -449,7 +517,8 @@ impl MagneticSnap {
             .iter()
             .enumerate()
             .min_by(|(_, a), (_, b)| {
-                a.distance_squared(projected).total_cmp(&b.distance_squared(projected))
+                a.distance_squared(projected)
+                    .total_cmp(&b.distance_squared(projected))
             })
             .map(|(i, &p)| (i, p))
     }
@@ -470,7 +539,10 @@ impl Default for GestureTracker {
 
 impl GestureTracker {
     pub fn new(window_secs: f64) -> Self {
-        Self { samples: VecDeque::with_capacity(16), window_secs: window_secs.max(0.01) }
+        Self {
+            samples: VecDeque::with_capacity(16),
+            window_secs: window_secs.max(0.01),
+        }
     }
 
     pub fn clear(&mut self) {
@@ -542,11 +614,16 @@ impl DraggableCard {
     }
 
     pub fn drag_to(&mut self, pos: Vec2, dt: f32) {
-        let vx = if dt > 1e-4 { (pos.x - self.last_drag_pos.x) / dt } else { 0.0 };
+        let vx = if dt > 1e-4 {
+            (pos.x - self.last_drag_pos.x) / dt
+        } else {
+            0.0
+        };
         self.last_drag_pos = pos;
         self.position.set_target(pos);
-        self.tilt_radians
-            .set_target((vx * self.tilt_sensitivity).clamp(-self.max_tilt_radians, self.max_tilt_radians));
+        self.tilt_radians.set_target(
+            (vx * self.tilt_sensitivity).clamp(-self.max_tilt_radians, self.max_tilt_radians),
+        );
     }
 
     pub fn end_drag(&mut self, release_velocity: Vec2, snap_target: Vec2) {
@@ -562,7 +639,8 @@ impl DraggableCard {
         if !self.is_dragging {
             let vx = self.position.velocity().x;
             self.tilt_radians.set_target(
-                (vx * self.tilt_sensitivity * 0.5).clamp(-self.max_tilt_radians, self.max_tilt_radians),
+                (vx * self.tilt_sensitivity * 0.5)
+                    .clamp(-self.max_tilt_radians, self.max_tilt_radians),
             );
         }
         self.tilt_radians.step(dt);
@@ -580,7 +658,9 @@ pub struct SpringChain {
 impl SpringChain {
     pub fn new(count: usize, start: Vec2, config: SpringConfig) -> Self {
         let n = count.max(1);
-        Self { nodes: (0..n).map(|_| Spring2D::new(start, config)).collect() }
+        Self {
+            nodes: (0..n).map(|_| Spring2D::new(start, config)).collect(),
+        }
     }
 
     pub fn set_config(&mut self, config: SpringConfig) {

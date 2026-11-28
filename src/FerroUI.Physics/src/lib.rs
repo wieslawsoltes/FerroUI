@@ -70,29 +70,33 @@ pub mod prelude {
     pub use crate::material::{CollisionFilter, CombineMode, PhysicsMaterial};
     pub use crate::math::{Aabb2, Mat2, Ray2, Rot2, Transform2D, Vec2, Vec3};
     pub use crate::narrowphase::{ContactManifold, ContactPoint, FeatureId};
-    pub use crate::particles::{GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem};
-    pub use crate::queries::{ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent};
+    pub use crate::particles::{
+        GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem,
+    };
+    pub use crate::queries::{
+        ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent,
+    };
     pub use crate::shapes::{ConvexPolygon, MassProperties, Shape2D};
     pub use crate::simd::SimdBackend;
     pub use crate::snapshot::{BodySnapshot, WorldHistory, WorldSnapshot};
     pub use crate::softbody::{ClothMesh, DistanceConstraint, SoftBody2D, SoftNode};
     pub use crate::solver::{FixedTimestep, SolverConfig};
     pub use crate::ui::{
-        DraggableCard, GestureTracker, InertiaScroller, LayoutSpringGroup, MagneticSnap, Spring1D, Spring2D, Spring3D,
-        SpringChain, SpringConfig,
+        DraggableCard, GestureTracker, InertiaScroller, LayoutSpringGroup, MagneticSnap, Spring1D,
+        Spring2D, Spring3D, SpringChain, SpringConfig,
     };
     pub use crate::world::{PhysicsWorld, StepStats};
 
     #[cfg(feature = "gpu")]
     pub use crate::gpu::{
-        GpuAabbRecord, GpuDeviceInfo, GpuParticleSolver, GpuPhysicsContext, GpuRigidBatchIntegrator,
-        GpuRigidBodyRecord,
+        GpuAabbRecord, GpuDeviceInfo, GpuParticleSolver, GpuPhysicsContext,
+        GpuRigidBatchIntegrator, GpuRigidBodyRecord,
     };
 
     #[cfg(feature = "ferroui")]
     pub use crate::ferroui_bridge::{
-        start_ui_physics_timer, DraggableVisual, SpringVisualId, VisualBodyOptions, VisualPhysicsHost,
-        VisualSpringDriver, VisualSyncStats,
+        start_ui_physics_timer, DraggableVisual, SpringVisualId, VisualBodyOptions,
+        VisualPhysicsHost, VisualSpringDriver, VisualSyncStats,
     };
 
     #[cfg(feature = "ferroui")]
@@ -109,8 +113,12 @@ pub use fracture::fracture_body;
 pub use joints::{Joint, JointHandle, JointKind};
 pub use material::{CollisionFilter, PhysicsMaterial};
 pub use math::{Aabb2, Ray2, Rot2, Transform2D, Vec2, Vec3};
-pub use particles::{GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem};
-pub use queries::{ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent};
+pub use particles::{
+    GpuParticle, ParticleConfig, ParticleObstacle, ParticleStepStats, ParticleSystem,
+};
+pub use queries::{
+    ClosestPointHit, CollisionEvent, ForceField, RayHit, ShapeCastHit, TriggerEvent,
+};
 pub use shapes::{ConvexPolygon, Shape2D};
 pub use simd::SimdBackend;
 pub use snapshot::{WorldHistory, WorldSnapshot};
@@ -120,3 +128,6 @@ pub use world::{PhysicsWorld, StepStats};
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod regression_tests;

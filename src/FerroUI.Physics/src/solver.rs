@@ -144,12 +144,21 @@ struct PreparedPoint {
 }
 
 struct PreparedManifold {
+    manifold_index: usize,
     idx_a: usize,
     idx_b: usize,
     normal: Vec2,
     tangent: Vec2,
     friction: f32,
+    initial_separation: f32,
+    penetration_depth: f32,
     points: smallvec::SmallVec<[PreparedPoint; 2]>,
+}
+
+/// Per-world scratch storage retained across substeps and frames.
+#[derive(Default)]
+pub(crate) struct SolverScratch {
+    prepared: Vec<PreparedManifold>,
 }
 
 /// Solves all active contact manifolds and joints for one substep `dt`.
@@ -159,11 +168,13 @@ pub(crate) fn solve_constraints(
     joints: &mut [Option<Joint>],
     config: &SolverConfig,
     dt: f32,
+    scratch: &mut SolverScratch,
 ) {
-    let mut prepared = Vec::with_capacity(manifolds.len());
+    let prepared = &mut scratch.prepared;
+    prepared.clear();
 
     // 1. Prepare contact constraints & apply warm-start impulses
-    for m in manifolds.iter_mut() {
+    for (manifold_index, m) in manifolds.iter_mut().enumerate() {
         if m.is_sensor || m.points.is_empty() {
             continue;
         }
@@ -172,8 +183,13 @@ pub(crate) fn solve_constraints(
         if idx_a == idx_b || idx_a >= bodies.len() || idx_b >= bodies.len() {
             continue;
         }
-        let (Some(a), Some(b)) = get_pair_mut(bodies, idx_a, idx_b) else { continue };
-        if !a.is_dynamic() && !b.is_dynamic() {
+        let (Some(a), Some(b)) = get_pair_mut(bodies, idx_a, idx_b) else {
+            continue;
+        };
+        if a.handle != m.body_a
+            || b.handle != m.body_b
+            || ((!a.is_dynamic() || a.is_sleeping) && (!b.is_dynamic() || b.is_sleeping))
+        {
             continue;
         }
 
@@ -187,12 +203,18 @@ pub(crate) fn solve_constraints(
 
             let rxa_n = ra.cross(normal);
             let rxb_n = rb.cross(normal);
-            let k_n = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_n * rxa_n + b.inv_inertia * rxb_n * rxb_n;
+            let k_n = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_n * rxa_n
+                + b.inv_inertia * rxb_n * rxb_n;
             let normal_mass = if k_n > 1e-8 { 1.0 / k_n } else { 0.0 };
 
             let rxa_t = ra.cross(tangent);
             let rxb_t = rb.cross(tangent);
-            let k_t = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_t * rxa_t + b.inv_inertia * rxb_t * rxb_t;
+            let k_t = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_t * rxa_t
+                + b.inv_inertia * rxb_t * rxb_t;
             let tangent_mass = if k_t > 1e-8 { 1.0 / k_t } else { 0.0 };
 
             // Relative velocity at contact point for restitution bias
@@ -212,26 +234,37 @@ pub(crate) fn solve_constraints(
             b.linear_velocity += warm * b.inv_mass;
             b.angular_velocity += rb.cross(warm) * b.inv_inertia;
 
-            pts.push(PreparedPoint { ra, rb, normal_mass, tangent_mass, velocity_bias });
+            pts.push(PreparedPoint {
+                ra,
+                rb,
+                normal_mass,
+                tangent_mass,
+                velocity_bias,
+            });
         }
 
         prepared.push(PreparedManifold {
+            manifold_index,
             idx_a,
             idx_b,
             normal,
             tangent,
             friction: m.friction,
+            initial_separation: (b.position - a.position).dot(normal),
+            penetration_depth: m.points.iter().map(|p| p.depth).fold(0.0_f32, f32::max),
             points: pts,
         });
     }
 
     // 2. Iterative velocity solver (joints + contacts)
-    let active_manifolds: Vec<usize> = manifolds
-        .iter()
-        .enumerate()
-        .filter_map(|(i, m)| if !m.is_sensor && !m.points.is_empty() { Some(i) } else { None })
-        .collect();
-
+    // Joint impulses accumulate within a substep. Their limits are budgets for
+    // the entire substep, never a fresh force/torque allowance per iteration.
+    for joint in joints.iter_mut().filter_map(Option::as_mut) {
+        joint.impulse_linear = Vec2::ZERO;
+        joint.impulse_angular = 0.0;
+        joint.impulse_motor = 0.0;
+        joint.impulse_limit = 0.0;
+    }
     for _ in 0..config.velocity_iterations {
         // Solve joints
         for slot in joints.iter_mut() {
@@ -244,23 +277,27 @@ pub(crate) fn solve_constraints(
                 continue;
             }
             if joint.body_b == BodyHandle::INVALID {
-                if let Some(a) = bodies[idx_a].as_mut() {
+                if let Some(a) = bodies[idx_a].as_mut().filter(|a| a.handle == joint.body_a) {
                     solve_joint_velocity(joint, a, None, dt);
                 }
             } else {
                 let idx_b = joint.body_b.index();
                 if idx_b < bodies.len() && idx_a != idx_b {
                     if let (Some(a), Some(b)) = get_pair_mut(bodies, idx_a, idx_b) {
-                        solve_joint_velocity(joint, a, Some(b), dt);
+                        if a.handle == joint.body_a && b.handle == joint.body_b {
+                            solve_joint_velocity(joint, a, Some(b), dt);
+                        }
                     }
                 }
             }
         }
 
         // Solve contacts
-        for (p_idx, pm) in prepared.iter().enumerate() {
-            let m = &mut manifolds[active_manifolds[p_idx]];
-            let (Some(a), Some(b)) = get_pair_mut(bodies, pm.idx_a, pm.idx_b) else { continue };
+        for pm in prepared.iter() {
+            let m = &mut manifolds[pm.manifold_index];
+            let (Some(a), Some(b)) = get_pair_mut(bodies, pm.idx_a, pm.idx_b) else {
+                continue;
+            };
 
             for (pt_i, pp) in pm.points.iter().enumerate() {
                 let cp = &mut m.points[pt_i];
@@ -301,24 +338,24 @@ pub(crate) fn solve_constraints(
 
     // 3. Direct positional stabilization (eliminates residual overlap without injecting phantom bounce velocity)
     for _ in 0..config.position_iterations {
-        for m in manifolds.iter() {
-            if m.is_sensor || m.points.is_empty() {
+        for pm in prepared.iter() {
+            let (Some(a), Some(b)) = get_pair_mut(bodies, pm.idx_a, pm.idx_b) else {
                 continue;
-            }
-            let idx_a = m.body_a.index();
-            let idx_b = m.body_b.index();
-            if idx_a == idx_b || idx_a >= bodies.len() || idx_b >= bodies.len() {
-                continue;
-            }
-            let (Some(a), Some(b)) = get_pair_mut(bodies, idx_a, idx_b) else { continue };
+            };
             let inv_mass_sum = a.inv_mass + b.inv_mass;
             if inv_mass_sum <= 1e-8 {
                 continue;
             }
-            let max_depth = m.points.iter().map(|p| p.depth).fold(0.0_f32, f32::max);
-            let correction_mag = ((max_depth - config.penetration_slop).max(0.0) * config.baumgarte) / inv_mass_sum;
+            // Account for corrections already applied in this solve. Reusing the
+            // original depth each iteration can push bodies completely apart.
+            let separation_change =
+                (b.position - a.position).dot(pm.normal) - pm.initial_separation;
+            let depth = pm.penetration_depth - separation_change;
+            let correction_mag = ((depth - config.penetration_slop).max(0.0)
+                * config.baumgarte.clamp(0.0, 1.0))
+                / inv_mass_sum;
             if correction_mag > 0.0 {
-                let corr = m.normal * correction_mag;
+                let corr = pm.normal * correction_mag;
                 a.position -= corr * a.inv_mass;
                 b.position += corr * b.inv_mass;
             }
@@ -328,7 +365,11 @@ pub(crate) fn solve_constraints(
 
 /// Safe mutable borrow of two distinct indices in a slice.
 #[inline]
-pub(crate) fn get_pair_mut<T>(slice: &mut [Option<T>], i: usize, j: usize) -> (Option<&mut T>, Option<&mut T>) {
+pub(crate) fn get_pair_mut<T>(
+    slice: &mut [Option<T>],
+    i: usize,
+    j: usize,
+) -> (Option<&mut T>, Option<&mut T>) {
     if i < j {
         let (left, right) = slice.split_at_mut(j);
         (left[i].as_mut(), right[0].as_mut())
@@ -358,17 +399,39 @@ impl Default for FixedTimestep {
 
 impl FixedTimestep {
     pub const fn new(dt: f32) -> Self {
-        Self { dt, max_frame_time: 0.1, accumulator: 0.0 }
+        Self {
+            dt,
+            max_frame_time: 0.1,
+            accumulator: 0.0,
+        }
     }
 
     /// Advances the accumulator by `frame_dt`, invoking `step_fn(self.dt)` zero or more times,
     /// and returns the interpolation factor `alpha` in `[0.0, 1.0)` for rendering.
+    /// At most 1024 catch-up steps run per call; excess backlog is discarded while
+    /// retaining its fractional remainder. This also bounds pathological tiny `dt` values.
     pub fn advance(&mut self, frame_dt: f32, mut step_fn: impl FnMut(f32)) -> f32 {
+        if !self.dt.is_finite()
+            || self.dt <= 0.0
+            || !self.max_frame_time.is_finite()
+            || self.max_frame_time < 0.0
+        {
+            self.reset();
+            return 0.0;
+        }
+        if !frame_dt.is_finite() {
+            return (self.accumulator / self.dt).clamp(0.0, 1.0);
+        }
         let clamped = frame_dt.clamp(0.0, self.max_frame_time);
         self.accumulator += clamped;
-        while self.accumulator >= self.dt {
+        let mut steps = 0;
+        while self.accumulator >= self.dt && steps < 1024 {
             step_fn(self.dt);
             self.accumulator -= self.dt;
+            steps += 1;
+        }
+        if self.accumulator >= self.dt {
+            self.accumulator %= self.dt;
         }
         (self.accumulator / self.dt).clamp(0.0, 1.0)
     }

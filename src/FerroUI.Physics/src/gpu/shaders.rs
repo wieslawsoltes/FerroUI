@@ -161,15 +161,21 @@ fn resolve_collisions(@builtin(global_invocation_id) gid: vec3<u32>) {
             let bucket = hash_cell(cx + dx, cy + dy);
             var j = atomicLoad(&cell_head[bucket]);
             var guard: u32 = 0u;
-            while (j >= 0 && guard < 48u) {
+            // Hash collisions may put distant cells in the same bucket. Visit
+            // the complete chain and accept each exact cell only once; a fixed
+            // chain cap drops valid neighbors in dense scenes.
+            while (j >= 0 && guard < params.particle_count) {
                 let ju = u32(j);
                 if (ju != idx) {
                     let other = particles_in[ju];
+                    let other_cx = i32(floor(other.pos.x * params.cell_size_inv));
+                    let other_cy = i32(floor(other.pos.y * params.cell_size_inv));
                     let diff = p.pos - other.pos;
                     let d2 = dot(diff, diff);
-                    if (d2 > 0.0000001 && d2 < min_dist_sq) {
+                    if (other_cx == cx + dx && other_cy == cy + dy && d2 < min_dist_sq) {
                         let d = sqrt(d2);
-                        let n = diff / d;
+                        let fallback = vec2<f32>(select(-1.0, 1.0, idx > ju), 0.0);
+                        let n = select(fallback, diff / max(d, 0.00001), d > 0.00001);
                         let overlap = (min_dist - d) * 0.5 * params.stiffness;
                         pos_corr = pos_corr + n * overlap;
 

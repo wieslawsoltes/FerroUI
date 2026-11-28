@@ -20,7 +20,11 @@ fn free_fall_matches_analytic_kinematics() {
 
     let b = world.body(body).unwrap();
     // Analytic: y = 0.5 * g * t^2 = 5.0, v = g * t = 10.0
-    assert!((b.linear_velocity.y - 10.0).abs() < 0.05, "vy = {}", b.linear_velocity.y);
+    assert!(
+        (b.linear_velocity.y - 10.0).abs() < 0.05,
+        "vy = {}",
+        b.linear_velocity.y
+    );
     assert!((b.position.y - 5.0).abs() < 0.12, "y = {}", b.position.y);
 }
 
@@ -58,15 +62,24 @@ fn elastic_head_on_collision_conserves_momentum_and_energy() {
     let final_ke = ba.kinetic_energy() + bb.kinetic_energy();
 
     // Equal masses: ball A stops and transfers velocity to ball B
-    assert!(ba.linear_velocity.x.abs() < 0.15, "va = {:?}", ba.linear_velocity);
-    assert!((bb.linear_velocity.x - 4.0).abs() < 0.15, "vb = {:?}", bb.linear_velocity);
+    assert!(
+        ba.linear_velocity.x.abs() < 0.15,
+        "va = {:?}",
+        ba.linear_velocity
+    );
+    assert!(
+        (bb.linear_velocity.x - 4.0).abs() < 0.15,
+        "vb = {:?}",
+        bb.linear_velocity
+    );
     assert!((final_p - initial_p).abs() < 0.05 * initial_p);
     assert!((final_ke - initial_ke).abs() < 0.08 * initial_ke);
 }
 
 #[test]
 fn stacked_box_tower_remains_stable_and_sleeps() {
-    let mut world = PhysicsWorld::new(Vec2::new(0.0, 9.81)).with_config(SolverConfig::high_precision());
+    let mut world =
+        PhysicsWorld::new(Vec2::new(0.0, 9.81)).with_config(SolverConfig::high_precision());
     world.add_body(
         BodyBuilder::static_body(Shape2D::rect(20.0, 1.0))
             .position((0.0, 5.5))
@@ -92,12 +105,27 @@ fn stacked_box_tower_remains_stable_and_sleeps() {
 
     for (i, &h) in boxes.iter().enumerate() {
         let b = world.body(h).unwrap();
-        assert!(b.position.x.abs() < 0.25, "box {i} drifted horizontally: x={}", b.position.x);
-        assert!(b.position.y < 5.1, "box {i} fell through floor: y={}", b.position.y);
-        assert!(b.linear_velocity.length() < 0.2, "box {i} still moving: v={:?}", b.linear_velocity);
+        assert!(
+            b.position.x.abs() < 0.25,
+            "box {i} drifted horizontally: x={}",
+            b.position.x
+        );
+        assert!(
+            b.position.y < 5.1,
+            "box {i} fell through floor: y={}",
+            b.position.y
+        );
+        assert!(
+            b.linear_velocity.length() < 0.2,
+            "box {i} still moving: v={:?}",
+            b.linear_velocity
+        );
     }
     let stats = world.last_stats();
-    assert!(stats.sleeping_bodies > 0, "expected settled stack to enter sleep: {stats:?}");
+    assert!(
+        stats.sleeping_bodies > 0,
+        "expected settled stack to enter sleep: {stats:?}"
+    );
 }
 
 #[test]
@@ -124,14 +152,23 @@ fn ccd_prevents_fast_bullet_tunneling_through_thin_wall() {
     }
 
     let b = world.body(bullet).unwrap();
-    assert!(b.position.x < 5.0, "bullet tunneled through thin wall! x={}", b.position.x);
-    assert!(b.linear_velocity.x < 0.0, "bullet should have bounced back! vx={}", b.linear_velocity.x);
+    assert!(
+        b.position.x < 5.0,
+        "bullet tunneled through thin wall! x={}",
+        b.position.x
+    );
+    assert!(
+        b.linear_velocity.x < 0.0,
+        "bullet should have bounced back! vx={}",
+        b.linear_velocity.x
+    );
 }
 
 #[test]
 fn revolute_motor_and_distance_joint_behave_accurately() {
     let mut world = PhysicsWorld::new(Vec2::new(0.0, 9.81));
-    let anchor = world.add_body(BodyBuilder::static_body(Shape2D::circle(0.1)).position((0.0, 0.0)));
+    let anchor =
+        world.add_body(BodyBuilder::static_body(Shape2D::circle(0.1)).position((0.0, 0.0)));
     let bob = world.add_body(
         BodyBuilder::dynamic(Shape2D::circle(0.3))
             .position((2.0, 0.0))
@@ -145,33 +182,56 @@ fn revolute_motor_and_distance_joint_behave_accurately() {
 
     let b = world.body(bob).unwrap();
     let dist = b.position.length();
-    assert!((dist - 2.0).abs() < 0.08, "pendulum rod drifted: dist={dist}");
-    assert!(b.position.y > 0.0, "pendulum should swing downward under gravity");
+    assert!(
+        (dist - 2.0).abs() < 0.08,
+        "pendulum rod drifted: dist={dist}"
+    );
+    assert!(
+        b.position.y > 0.0,
+        "pendulum should swing downward under gravity"
+    );
 
     // Motorized spinner
     let hub = world.add_body(BodyBuilder::static_body(Shape2D::circle(0.1)).position((8.0, 0.0)));
-    let blade = world.add_body(BodyBuilder::dynamic(Shape2D::rect(2.0, 0.2)).position((8.0, 0.0)).can_sleep(false));
+    let blade = world.add_body(
+        BodyBuilder::dynamic(Shape2D::rect(2.0, 0.2))
+            .position((8.0, 0.0))
+            .can_sleep(false),
+    );
     world.add_joint(Joint::revolute(hub, blade, Vec2::ZERO, Vec2::ZERO).with_motor(5.0, 50.0));
     for _ in 0..60 {
         world.step(1.0 / 60.0);
     }
     let w = world.body(blade).unwrap().angular_velocity;
-    assert!((w - 5.0).abs() < 0.4, "motor target speed not reached: w={w}");
+    assert!(
+        (w - 5.0).abs() < 0.4,
+        "motor target speed not reached: w={w}"
+    );
 }
 
 #[test]
 fn raycast_and_point_queries_hit_shapes_accurately() {
     let mut world = PhysicsWorld::new(Vec2::ZERO);
-    let box_h = world.add_body(BodyBuilder::static_body(Shape2D::rect(2.0, 2.0)).position((5.0, 0.0)));
-    let poly_h = world.add_body(BodyBuilder::static_body(Shape2D::regular_polygon(6, 1.0)).position((10.0, 0.0)));
+    let box_h =
+        world.add_body(BodyBuilder::static_body(Shape2D::rect(2.0, 2.0)).position((5.0, 0.0)));
+    let poly_h = world
+        .add_body(BodyBuilder::static_body(Shape2D::regular_polygon(6, 1.0)).position((10.0, 0.0)));
     world.step(1.0 / 60.0);
 
     let hit = world
-        .raycast(Ray2::new(Vec2::new(0.0, 0.0), Vec2::X), 20.0, CollisionFilter::ALL)
+        .raycast(
+            Ray2::new(Vec2::new(0.0, 0.0), Vec2::X),
+            20.0,
+            CollisionFilter::ALL,
+        )
         .expect("ray should hit box");
     assert_eq!(hit.body, box_h);
     assert!((hit.toi - 4.0).abs() < 1e-3, "toi = {}", hit.toi);
-    assert!((hit.normal.x + 1.0).abs() < 1e-3, "normal = {:?}", hit.normal);
+    assert!(
+        (hit.normal.x + 1.0).abs() < 1e-3,
+        "normal = {:?}",
+        hit.normal
+    );
 
     let picked = world.pick_body(Vec2::new(10.0, 0.0), false);
     assert_eq!(picked, Some(poly_h));
@@ -190,8 +250,26 @@ fn simd_particle_integration_matches_scalar_reference() {
     let mut vx_ref = vx_simd.clone();
     let mut vy_ref = vy_simd.clone();
 
-    integrate_particles_soa(&mut px_simd, &mut py_simd, &mut vx_simd, &mut vy_simd, 0.5, 9.81, 0.995, 1.0 / 60.0);
-    integrate_particles_scalar(&mut px_ref, &mut py_ref, &mut vx_ref, &mut vy_ref, 0.5, 9.81, 0.995, 1.0 / 60.0);
+    integrate_particles_soa(
+        &mut px_simd,
+        &mut py_simd,
+        &mut vx_simd,
+        &mut vy_simd,
+        0.5,
+        9.81,
+        0.995,
+        1.0 / 60.0,
+    );
+    integrate_particles_scalar(
+        &mut px_ref,
+        &mut py_ref,
+        &mut vx_ref,
+        &mut vy_ref,
+        0.5,
+        9.81,
+        0.995,
+        1.0 / 60.0,
+    );
 
     for i in 0..n {
         assert!((px_simd[i] - px_ref[i]).abs() < 1e-5, "px mismatch at {i}");
@@ -219,25 +297,39 @@ fn ui_springs_and_inertia_scroller_behave_smoothly_and_stably() {
     for _ in 0..180 {
         max_val = max_val.max(bouncy.step(1.0 / 60.0));
     }
-    assert!(max_val > 105.0, "bouncy spring should overshoot, max={max_val}");
+    assert!(
+        max_val > 105.0,
+        "bouncy spring should overshoot, max={max_val}"
+    );
     assert!(bouncy.is_settled());
 
     // Unconditional stability under huge hitch dt = 5.0 seconds
     let mut hitch = Spring1D::new(0.0, SpringConfig::wobbly());
     hitch.set_target(50.0);
     let v = hitch.step(5.0);
-    assert!(v.is_finite() && (v - 50.0).abs() < 1.0, "spring unstable at huge dt: {v}");
+    assert!(
+        v.is_finite() && (v - 50.0).abs() < 1.0,
+        "spring unstable at huge dt: {v}"
+    );
 
     // Inertia scroller rubber-band and snap-back
     let mut scroller = InertiaScroller::new(0.0, 500.0, 200.0);
     scroller.begin_drag();
     scroller.drag_by(-100.0);
-    assert!(scroller.position < 0.0 && scroller.position > -100.0, "rubber band failed: {}", scroller.position);
+    assert!(
+        scroller.position < 0.0 && scroller.position > -100.0,
+        "rubber band failed: {}",
+        scroller.position
+    );
     scroller.end_drag(0.0);
     for _ in 0..120 {
         scroller.step(1.0 / 60.0);
     }
-    assert!(scroller.position.abs() < 0.5, "did not bounce back to 0: {}", scroller.position);
+    assert!(
+        scroller.position.abs() < 0.5,
+        "did not bounce back to 0: {}",
+        scroller.position
+    );
 }
 
 #[test]
@@ -261,19 +353,32 @@ fn wgsl_compute_shaders_validate_with_naga() {
     use crate::gpu::shaders::{PARTICLE_PHYSICS_WGSL, RIGID_INTEGRATE_WGSL};
 
     for (name, src, expected_entries) in [
-        ("PARTICLE_PHYSICS_WGSL", PARTICLE_PHYSICS_WGSL, &["clear_grid", "integrate_and_hash", "resolve_collisions"][..]),
-        ("RIGID_INTEGRATE_WGSL", RIGID_INTEGRATE_WGSL, &["integrate_bodies"][..]),
+        (
+            "PARTICLE_PHYSICS_WGSL",
+            PARTICLE_PHYSICS_WGSL,
+            &["clear_grid", "integrate_and_hash", "resolve_collisions"][..],
+        ),
+        (
+            "RIGID_INTEGRATE_WGSL",
+            RIGID_INTEGRATE_WGSL,
+            &["integrate_bodies"][..],
+        ),
     ] {
         let module = naga::front::wgsl::parse_str(src)
             .unwrap_or_else(|e| panic!("{name} parse failed:\n{}", e.emit_to_string(src)));
-        let mut validator =
-            naga::valid::Validator::new(naga::valid::ValidationFlags::all(), naga::valid::Capabilities::empty());
+        let mut validator = naga::valid::Validator::new(
+            naga::valid::ValidationFlags::all(),
+            naga::valid::Capabilities::empty(),
+        );
         validator
             .validate(&module)
             .unwrap_or_else(|e| panic!("{name} validation failed:\n{}", e.emit_to_string(src)));
         for &ep in expected_entries {
             assert!(
-                module.entry_points.iter().any(|e| e.name == ep && e.stage == naga::ShaderStage::Compute),
+                module
+                    .entry_points
+                    .iter()
+                    .any(|e| e.name == ep && e.stage == naga::ShaderStage::Compute),
                 "{name} missing compute entry point `{ep}`"
             );
         }
@@ -285,8 +390,10 @@ fn wgsl_compute_shaders_validate_with_naga() {
 fn gpu_particle_solver_executes_on_hardware_device() {
     let Some(mut solver) = GpuParticleSolver::try_new(1024) else {
         // Headless CI machine without a GPU adapter: skip execution test cleanly.
+        eprintln!("GPU particle execution skipped: no compatible adapter");
         return;
     };
+    eprintln!("GPU particle adapter: {:?}", solver.device_info());
 
     let config = ParticleConfig::default();
     let mut ps = ParticleSystem::new(config);
@@ -317,6 +424,7 @@ fn gpu_particle_solver_executes_on_hardware_device() {
 #[test]
 fn gpu_rigid_batch_integrator_computes_positions_and_aabbs() {
     let Some(mut integrator) = GpuRigidBatchIntegrator::try_new() else {
+        eprintln!("GPU rigid execution skipped: no compatible adapter");
         return;
     };
     let mut bodies = vec![
@@ -377,24 +485,45 @@ fn buoyancy_force_field_floats_light_body_and_triggers_events() {
     }
     assert!(saw_trigger, "expected sensor Entered trigger event");
     let final_y = world.body(cork).unwrap().position.y;
-    assert!(final_y < 1.5, "light cork should float up toward water surface y=0, got y={final_y}");
+    assert!(
+        final_y < 1.5,
+        "light cork should float up toward water surface y=0, got y={final_y}"
+    );
 }
 
 #[test]
 fn breakable_weld_snaps_under_excessive_impulse_and_prismatic_respects_limits() {
     let mut world = PhysicsWorld::new(Vec2::ZERO);
-    let anchor = world.add_body(BodyBuilder::static_body(Shape2D::rect(1.0, 1.0)).position((0.0, 0.0)));
-    let arm = world.add_body(BodyBuilder::dynamic(Shape2D::rect(1.0, 1.0)).position((1.0, 0.0)).can_sleep(false));
-    let weld = world.add_joint(Joint::weld(anchor, arm, Vec2::new(0.5, 0.0), Vec2::new(-0.5, 0.0), 0.0).with_break_force(10.0));
+    let anchor =
+        world.add_body(BodyBuilder::static_body(Shape2D::rect(1.0, 1.0)).position((0.0, 0.0)));
+    let arm = world.add_body(
+        BodyBuilder::dynamic(Shape2D::rect(1.0, 1.0))
+            .position((1.0, 0.0))
+            .can_sleep(false),
+    );
+    let weld = world.add_joint(
+        Joint::weld(anchor, arm, Vec2::new(0.5, 0.0), Vec2::new(-0.5, 0.0), 0.0)
+            .with_break_force(10.0),
+    );
 
     // Apply strong blast impulse to snap the weld
-    world.body_mut(arm).unwrap().apply_impulse(Vec2::new(0.0, 200.0));
+    world
+        .body_mut(arm)
+        .unwrap()
+        .apply_impulse(Vec2::new(0.0, 200.0));
     world.step(1.0 / 60.0);
-    assert!(world.joint(weld).unwrap().broken, "weld should snap under high impulse");
+    assert!(
+        world.joint(weld).unwrap().broken,
+        "weld should snap under high impulse"
+    );
 
     // Prismatic slider limited to [-1.0, 1.0] along X
     let rail = world.add_body(BodyBuilder::static_body(Shape2D::circle(0.1)).position((10.0, 0.0)));
-    let slider = world.add_body(BodyBuilder::dynamic(Shape2D::rect(0.5, 0.5)).position((10.0, 0.0)).can_sleep(false));
+    let slider = world.add_body(
+        BodyBuilder::dynamic(Shape2D::rect(0.5, 0.5))
+            .position((10.0, 0.0))
+            .can_sleep(false),
+    );
     world.add_joint(
         Joint::prismatic(rail, slider, Vec2::ZERO, Vec2::ZERO, Vec2::X)
             .with_limits(-1.0, 1.0)
@@ -404,16 +533,33 @@ fn breakable_weld_snaps_under_excessive_impulse_and_prismatic_respects_limits() 
         world.step(1.0 / 60.0);
     }
     let pos = world.body(slider).unwrap().position;
-    assert!(pos.x <= 11.15 && pos.x >= 10.8, "slider should stop near upper limit x=11.0, got {}", pos.x);
-    assert!(pos.y.abs() < 0.05, "slider should remain on rail y=0, got {}", pos.y);
+    assert!(
+        pos.x <= 11.15 && pos.x >= 10.8,
+        "slider should stop near upper limit x=11.0, got {}",
+        pos.x
+    );
+    assert!(
+        pos.y.abs() < 0.05,
+        "slider should remain on rail y=0, got {}",
+        pos.y
+    );
 }
 
 #[test]
 fn draggable_card_magnetic_snap_and_fixed_timestep_work_cleanly() {
-    let snap = MagneticSnap::new(vec![Vec2::new(0.0, 0.0), Vec2::new(200.0, 0.0), Vec2::new(400.0, 0.0)]);
+    let snap = MagneticSnap::new(vec![
+        Vec2::new(0.0, 0.0),
+        Vec2::new(200.0, 0.0),
+        Vec2::new(400.0, 0.0),
+    ]);
     // At x=90 with strong rightward throw velocity, velocity projection picks anchor 1 (x=200) or 2 (x=400)
-    let (idx, target) = snap.choose_anchor(Vec2::new(90.0, 0.0), Vec2::new(1000.0, 0.0)).unwrap();
-    assert!(idx >= 1, "expected rightward velocity to project past anchor 0, got idx={idx}");
+    let (idx, target) = snap
+        .choose_anchor(Vec2::new(90.0, 0.0), Vec2::new(1000.0, 0.0))
+        .unwrap();
+    assert!(
+        idx >= 1,
+        "expected rightward velocity to project past anchor 0, got idx={idx}"
+    );
 
     let mut card = DraggableCard::new(Vec2::ZERO, SpringConfig::bouncy());
     card.begin_drag(Vec2::new(20.0, 0.0));
@@ -440,12 +586,26 @@ fn xpbd_cloth_tears_and_softbody_preserves_area() {
     let mut cloth = ClothMesh::grid(Vec2::new(2.0, 1.0), 8, 6, 0.4, 0.0002, Some(2.2), bounds);
     let before = cloth.active_constraint_count();
     for i in 0..30 {
-        cloth.step(1.0 / 60.0, Vec2::new(0.0, 9.81), Vec2::new(4.0, 0.0), i as f32 / 60.0, &[]);
+        cloth.step(
+            1.0 / 60.0,
+            Vec2::new(0.0, 9.81),
+            Vec2::new(4.0, 0.0),
+            i as f32 / 60.0,
+            &[],
+        );
     }
     let torn = cloth.tear_at(Vec2::new(3.4, 2.2), 0.65);
     assert!(torn > 0 && cloth.active_constraint_count() < before);
 
-    let mut jelly = SoftBody2D::circle_blob(Vec2::new(8.0, 3.0), 0.9, 14, 1.12, 0.0004, bounds, 0xFF34D399);
+    let mut jelly = SoftBody2D::circle_blob(
+        Vec2::new(8.0, 3.0),
+        0.9,
+        14,
+        1.12,
+        0.0004,
+        bounds,
+        0xFF34D399,
+    );
     let rest_area = jelly.rest_area;
     for _ in 0..120 {
         jelly.step(1.0 / 60.0, Vec2::new(0.0, 9.81), &[]);
@@ -481,7 +641,10 @@ fn character_controller_slides_grounds_and_pushes_boxes() {
         world.step(1.0 / 60.0);
     }
     assert!(ever_grounded, "character should land on floor");
-    assert!(world.body(crate_h).unwrap().position.x > 6.1, "character should push dynamic crate");
+    assert!(
+        world.body(crate_h).unwrap().position.x > 6.1,
+        "character should push dynamic crate"
+    );
 }
 
 #[test]
@@ -512,8 +675,15 @@ fn fracture_and_world_history_rollback_work_accurately() {
 
     // Fracture box into shards
     let shards = fracture_body(&mut world, box_h, pos0 + Vec2::new(0.1, 0.0), 3.0);
-    assert!(shards.len() >= 4, "expected >=4 shards, got {}", shards.len());
-    assert!(world.body(box_h).is_none(), "original body should be removed after fracture");
+    assert!(
+        shards.len() >= 4,
+        "expected >=4 shards, got {}",
+        shards.len()
+    );
+    assert!(
+        world.body(box_h).is_none(),
+        "original body should be removed after fracture"
+    );
 
     // Verify closest_point and SpringChain
     let hit = world.closest_point(Vec2::new(8.0, 8.2), 3.0, CollisionFilter::ALL);
@@ -524,7 +694,15 @@ fn fracture_and_world_history_rollback_work_accurately() {
     for _ in 0..60 {
         chain.step(1.0 / 60.0);
     }
-    assert!(chain.nodes.last().unwrap().value().distance(Vec2::new(10.0, 5.0)) < 1.0);
+    assert!(
+        chain
+            .nodes
+            .last()
+            .unwrap()
+            .value()
+            .distance(Vec2::new(10.0, 5.0))
+            < 1.0
+    );
 }
 
 #[cfg(feature = "ferroui")]
@@ -536,13 +714,24 @@ fn ferroui_visual_physics_host_and_spring_driver_update_render_transforms() {
     let mut host = VisualPhysicsHost::new(64.0);
     host.world.gravity = Vec2::new(0.0, 9.81);
     host.set_container_bounds(Rect::new(0.0, 0.0, 640.0, 480.0));
-    let bh = host.attach_visual(&vis, Some(Rect::new(100.0, 40.0, 120.0, 48.0)), VisualBodyOptions::dynamic_card());
+    let bh = host.attach_visual(
+        &vis,
+        Some(Rect::new(100.0, 40.0, 120.0, 48.0)),
+        VisualBodyOptions::dynamic_card(),
+    );
 
     for _ in 0..30 {
         host.step_and_sync(1.0 / 60.0);
     }
-    let mat = vis.render_transform().expect("MatrixTransform attached").value();
-    assert!(mat.m32 > 10.0, "expected visual to fall downward under gravity via render_transform, m32={}", mat.m32);
+    let mat = vis
+        .render_transform()
+        .expect("MatrixTransform attached")
+        .value();
+    assert!(
+        mat.m32 > 10.0,
+        "expected visual to fall downward under gravity via render_transform, m32={}",
+        mat.m32
+    );
 
     // Enable home springs and verify it pulls back toward rest (0, 0)
     host.world.gravity = Vec2::ZERO;
@@ -551,7 +740,11 @@ fn ferroui_visual_physics_host_and_spring_driver_update_render_transforms() {
         host.step_and_sync(1.0 / 60.0);
     }
     let mat_home = vis.render_transform().unwrap().value();
-    assert!(mat_home.m32.abs() < 4.0, "home spring should pull visual back to layout origin, m32={}", mat_home.m32);
+    assert!(
+        mat_home.m32.abs() < 4.0,
+        "home spring should pull visual back to layout origin, m32={}",
+        mat_home.m32
+    );
     assert!(host.world.body(bh).is_some());
 
     // VisualSpringDriver error-shake & pop test
@@ -562,7 +755,11 @@ fn ferroui_visual_physics_host_and_spring_driver_update_render_transforms() {
     let active = driver.step(1.0 / 60.0);
     assert_eq!(active, 1);
     let shake_mat = vis2.render_transform().unwrap().value();
-    assert!(shake_mat.m31.abs() > 1.0, "expected horizontal shake offset, m31={}", shake_mat.m31);
+    assert!(
+        shake_mat.m31.abs() > 1.0,
+        "expected horizontal shake offset, m31={}",
+        shake_mat.m31
+    );
 }
 
 #[test]
@@ -608,9 +805,18 @@ fn physics_custom_shader_effects_validate_wgsl_and_uniform_layout() {
     use ferroui_base::media::effects::{ImmutableCustomEffect, ShaderUniformType};
 
     for (label, eff) in [
-        ("kinetic_glass", ImmutableCustomEffect::new(PhysicsKineticGlassEffect::default())),
-        ("impact_ripple", ImmutableCustomEffect::new(PhysicsImpactRippleEffect::default())),
-        ("energy_field", ImmutableCustomEffect::new(PhysicsEnergyFieldEffect::default())),
+        (
+            "kinetic_glass",
+            ImmutableCustomEffect::new(PhysicsKineticGlassEffect::default()),
+        ),
+        (
+            "impact_ripple",
+            ImmutableCustomEffect::new(PhysicsImpactRippleEffect::default()),
+        ),
+        (
+            "energy_field",
+            ImmutableCustomEffect::new(PhysicsEnergyFieldEffect::default()),
+        ),
     ] {
         let shader = eff.shader().expect("effect must expose a runtime shader");
         let wgsl = shader.wgsl_module();
@@ -621,7 +827,12 @@ fn physics_custom_shader_effects_validate_wgsl_and_uniform_layout() {
             naga::valid::Capabilities::empty(),
         )
         .validate(&module)
-        .unwrap_or_else(|e| panic!("{label} WGSL validation error:\n{}", e.emit_to_string(&wgsl)));
+        .unwrap_or_else(|e| {
+            panic!(
+                "{label} WGSL validation error:\n{}",
+                e.emit_to_string(&wgsl)
+            )
+        });
 
         // Also validate WGSL -> Apple Metal MSL 2.4 translation identically to ferroui-quartz!
         let mut msl_options = naga::back::msl::Options {
@@ -640,35 +851,61 @@ fn physics_custom_shader_effects_validate_wgsl_and_uniform_layout() {
                 },
             );
         }
-        msl_options.per_entry_point_map.insert("vs_main".into(), resources.clone());
-        msl_options.per_entry_point_map.insert("fs_main".into(), resources);
-        let (msl, _) = naga::back::msl::write_string(&module, &info, &msl_options, &Default::default())
-            .unwrap_or_else(|e| panic!("{label} MSL translation error: {e}"));
-        assert!(msl.contains("fragment"), "{label} MSL output missing fragment shader");
+        msl_options
+            .per_entry_point_map
+            .insert("vs_main".into(), resources.clone());
+        msl_options
+            .per_entry_point_map
+            .insert("fs_main".into(), resources);
+        let (msl, _) =
+            naga::back::msl::write_string(&module, &info, &msl_options, &Default::default())
+                .unwrap_or_else(|e| panic!("{label} MSL translation error: {e}"));
+        assert!(
+            msl.contains("fragment"),
+            "{label} MSL output missing fragment shader"
+        );
 
         // Verify struct Uniforms fields match `shader_uniform_layout()` identically (what Quartz Metal checks!).
         let var = module
             .global_variables
             .iter()
-            .find(|(_, v)| v.name.as_deref() == Some("uniforms") && v.space == naga::AddressSpace::Uniform)
+            .find(|(_, v)| {
+                v.name.as_deref() == Some("uniforms") && v.space == naga::AddressSpace::Uniform
+            })
             .unwrap_or_else(|| panic!("{label} missing uniforms global"))
             .1;
         let naga::TypeInner::Struct { members, .. } = &module.types[var.ty].inner else {
             panic!("{label} uniforms must be a struct");
         };
         let layout = eff.shader_uniform_layout();
-        assert_eq!(members.len(), layout.len(), "{label} uniform count mismatch");
+        assert_eq!(
+            members.len(),
+            layout.len(),
+            "{label} uniform count mismatch"
+        );
         for (m, (name, ty)) in members.iter().zip(&layout) {
-            assert_eq!(m.name.as_deref(), Some(name.as_str()), "{label} uniform name mismatch");
+            assert_eq!(
+                m.name.as_deref(),
+                Some(name.as_str()),
+                "{label} uniform name mismatch"
+            );
             let ok = match (&module.types[m.ty].inner, ty) {
                 (naga::TypeInner::Scalar(s), ShaderUniformType::Float) => *s == naga::Scalar::F32,
                 (naga::TypeInner::Scalar(s), ShaderUniformType::Int) => *s == naga::Scalar::I32,
-                (naga::TypeInner::Vector { size: naga::VectorSize::Bi, scalar }, ShaderUniformType::Float2) => {
-                    *scalar == naga::Scalar::F32
-                }
-                (naga::TypeInner::Vector { size: naga::VectorSize::Quad, scalar }, ShaderUniformType::Float4) => {
-                    *scalar == naga::Scalar::F32
-                }
+                (
+                    naga::TypeInner::Vector {
+                        size: naga::VectorSize::Bi,
+                        scalar,
+                    },
+                    ShaderUniformType::Float2,
+                ) => *scalar == naga::Scalar::F32,
+                (
+                    naga::TypeInner::Vector {
+                        size: naga::VectorSize::Quad,
+                        scalar,
+                    },
+                    ShaderUniformType::Float4,
+                ) => *scalar == naga::Scalar::F32,
                 _ => false,
             };
             assert!(ok, "{label} uniform type mismatch for {name}");
@@ -701,7 +938,9 @@ fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
     impl IRenderLoop for NoopRenderLoop {
         fn add(&self, _: Arc<dyn IRenderLoopTask>) {}
         fn remove(&self, _: &Arc<dyn IRenderLoopTask>) {}
-        fn runs_in_background(&self) -> bool { false }
+        fn runs_in_background(&self) -> bool {
+            false
+        }
         fn wakeup(&self) {}
     }
     struct NoopScheduler;
@@ -745,7 +984,10 @@ fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
         Vec2::new(140.0, 90.0),
         Color::from_argb(255, 168, 85, 247),
     );
-    assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Physics]);
+    assert_eq!(
+        compositor.active_simulation_modes(),
+        vec![SimulationMode::Physics]
+    );
 
     // Trigger 3 overlapping concentric impact ripples on visual 0, plus live intensity/distortion tuning.
     ctrl.set_shader_intensity(1.35);
@@ -757,21 +999,34 @@ fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
     ctrl.trigger_impact(0, Point::new(0.25, 0.35), 0.9, Vec2::new(220.0, -140.0));
     ctrl.trigger_ripple_at(0, Point::new(0.75, 0.65), 0.8);
     ctrl.trigger_ripple_at(0, Point::new(0.50, 0.50), 0.7);
-    assert_eq!(ctrl.telemetry().active_ripples, 3, "expected 3 simultaneous overlapping ripples");
+    assert_eq!(
+        ctrl.telemetry().active_ripples,
+        3,
+        "expected 3 simultaneous overlapping ripples"
+    );
 
     for _ in 0..20 {
         let res = compositor.step_simulations(1.0 / 60.0);
         assert_eq!(res, SimulationStepResult::Active);
     }
 
-    assert!(v1.translation().x.abs() > 1.0 || v1.translation().y.abs() > 1.0, "expected rigid body displacement");
-    assert!(v1.effect().is_some(), "expected physics-driven GPU shader effect attached to CompositionVisual");
+    assert!(
+        v1.translation().x.abs() > 1.0 || v1.translation().y.abs() > 1.0,
+        "expected rigid body displacement"
+    );
+    assert!(
+        v1.effect().is_some(),
+        "expected physics-driven GPU shader effect attached to CompositionVisual"
+    );
     assert!(ctrl.telemetry().step_count >= 20);
 
     // Switch live to ElasticSprings mode and disable shaders cleanly.
     ctrl.set_behavior(PhysicsCompositorBehavior::ElasticSprings);
     ctrl.set_shader_mode(PhysicsShaderMode::KineticGlassOnly);
-    assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
+    assert_eq!(
+        compositor.step_simulations(1.0 / 60.0),
+        SimulationStepResult::Active
+    );
 
     // Verify a non-physics HarmonicWaveSimulation can take over the same visuals cleanly!
     drop(handle);
@@ -780,8 +1035,14 @@ fn compositor_physics_simulation_drives_composition_visuals_and_shaders() {
         "harmonic-takeover",
         vec![SimulationTarget::composition((*v1).clone())],
     ));
-    assert_eq!(compositor.active_simulation_modes(), vec![SimulationMode::Harmonic]);
-    assert_eq!(compositor.step_simulations(1.0 / 60.0), SimulationStepResult::Active);
+    assert_eq!(
+        compositor.active_simulation_modes(),
+        vec![SimulationMode::Harmonic]
+    );
+    assert_eq!(
+        compositor.step_simulations(1.0 / 60.0),
+        SimulationStepResult::Active
+    );
     assert!(v1.translation().x.abs() > 0.0 || v1.translation().y.abs() > 0.0);
     drop(wave_handle);
 }

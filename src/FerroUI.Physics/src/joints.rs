@@ -13,7 +13,10 @@ pub struct JointHandle {
 }
 
 impl JointHandle {
-    pub const INVALID: Self = Self { index: u32::MAX, generation: 0 };
+    pub const INVALID: Self = Self {
+        index: u32::MAX,
+        generation: 0,
+    };
 }
 
 /// Specific mechanical constraint definition.
@@ -253,7 +256,11 @@ impl Joint {
         Self::new(
             body_a,
             body_b,
-            JointKind::Rope { local_anchor_a, local_anchor_b, max_length: max_length.max(0.0) },
+            JointKind::Rope {
+                local_anchor_a,
+                local_anchor_b,
+                max_length: max_length.max(0.0),
+            },
         )
     }
 
@@ -299,16 +306,31 @@ impl Joint {
 
     pub fn with_motor(mut self, speed: f32, max_effort: f32) -> Self {
         match &mut self.kind {
-            JointKind::Revolute { enable_motor, motor_speed, max_motor_torque, .. }
-            | JointKind::Wheel { enable_motor, motor_speed, max_motor_torque, .. } => {
-                *enable_motor = true;
-                *motor_speed = speed;
-                *max_motor_torque = max_effort;
+            JointKind::Revolute {
+                enable_motor,
+                motor_speed,
+                max_motor_torque,
+                ..
             }
-            JointKind::Prismatic { enable_motor, motor_speed, max_motor_force, .. } => {
+            | JointKind::Wheel {
+                enable_motor,
+                motor_speed,
+                max_motor_torque,
+                ..
+            } => {
                 *enable_motor = true;
                 *motor_speed = speed;
-                *max_motor_force = max_effort;
+                *max_motor_torque = max_effort.max(0.0);
+            }
+            JointKind::Prismatic {
+                enable_motor,
+                motor_speed,
+                max_motor_force,
+                ..
+            } => {
+                *enable_motor = true;
+                *motor_speed = speed;
+                *max_motor_force = max_effort.max(0.0);
             }
             _ => {}
         }
@@ -317,12 +339,22 @@ impl Joint {
 
     pub fn with_limits(mut self, lower: f32, upper: f32) -> Self {
         match &mut self.kind {
-            JointKind::Revolute { enable_limit, lower_angle, upper_angle, .. } => {
+            JointKind::Revolute {
+                enable_limit,
+                lower_angle,
+                upper_angle,
+                ..
+            } => {
                 *enable_limit = true;
                 *lower_angle = lower;
                 *upper_angle = upper;
             }
-            JointKind::Prismatic { enable_limit, lower_translation, upper_translation, .. } => {
+            JointKind::Prismatic {
+                enable_limit,
+                lower_translation,
+                upper_translation,
+                ..
+            } => {
                 *enable_limit = true;
                 *lower_translation = lower;
                 *upper_translation = upper;
@@ -335,26 +367,57 @@ impl Joint {
     /// World-space endpoints `(anchor_a, anchor_b)` for debug/UI rendering.
     pub fn world_anchors(&self, a: &RigidBody, b: Option<&RigidBody>) -> (Vec2, Vec2) {
         match &self.kind {
-            JointKind::Distance { local_anchor_a, local_anchor_b, .. }
-            | JointKind::Revolute { local_anchor_a, local_anchor_b, .. }
-            | JointKind::Prismatic { local_anchor_a, local_anchor_b, .. }
-            | JointKind::Weld { local_anchor_a, local_anchor_b, .. }
-            | JointKind::Wheel { local_anchor_a, local_anchor_b, .. }
-            | JointKind::Rope { local_anchor_a, local_anchor_b, .. } => {
+            JointKind::Distance {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            }
+            | JointKind::Revolute {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            }
+            | JointKind::Prismatic {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            }
+            | JointKind::Weld {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            }
+            | JointKind::Wheel {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            }
+            | JointKind::Rope {
+                local_anchor_a,
+                local_anchor_b,
+                ..
+            } => {
                 let wa = a.transform().transform_point(*local_anchor_a);
                 let wb = b.map_or(wa, |rb| rb.transform().transform_point(*local_anchor_b));
                 (wa, wb)
             }
-            JointKind::Target { local_anchor_a, target, .. } => {
-                (a.transform().transform_point(*local_anchor_a), *target)
-            }
+            JointKind::Target {
+                local_anchor_a,
+                target,
+                ..
+            } => (a.transform().transform_point(*local_anchor_a), *target),
         }
     }
 }
 
 /// Computes Erin Catto's soft-constraint `(gamma, bias_factor)` parameters from `(frequency_hz, damping_ratio, eff_mass, dt)`.
 #[inline]
-fn soft_constraint_params(frequency_hz: f32, damping_ratio: f32, eff_mass: f32, dt: f32) -> (f32, f32) {
+fn soft_constraint_params(
+    frequency_hz: f32,
+    damping_ratio: f32,
+    eff_mass: f32,
+    dt: f32,
+) -> (f32, f32) {
     if frequency_hz <= 0.0 || eff_mass <= 0.0 {
         return (0.0, 0.25 / dt.max(1e-5));
     }
@@ -363,19 +426,34 @@ fn soft_constraint_params(frequency_hz: f32, damping_ratio: f32, eff_mass: f32, 
     let k = eff_mass * omega * omega;
     let h = dt;
     let gamma_denom = h * (d + h * k);
-    let gamma = if gamma_denom > 1e-8 { 1.0 / gamma_denom } else { 0.0 };
+    let gamma = if gamma_denom > 1e-8 {
+        1.0 / gamma_denom
+    } else {
+        0.0
+    };
     let beta_over_h = h * k * gamma;
     (gamma, beta_over_h)
 }
 
 /// Solves one velocity iteration of a [`Joint`].
-pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Option<&mut RigidBody>, dt: f32) {
+pub(crate) fn solve_joint_velocity(
+    joint: &mut Joint,
+    a: &mut RigidBody,
+    b: Option<&mut RigidBody>,
+    dt: f32,
+) {
     if joint.broken {
         return;
     }
 
     match joint.kind {
-        JointKind::Target { local_anchor_a, target, frequency_hz, damping_ratio, max_force } => {
+        JointKind::Target {
+            local_anchor_a,
+            target,
+            frequency_hz,
+            damping_ratio,
+            max_force,
+        } => {
             if !a.is_dynamic() {
                 return;
             }
@@ -385,26 +463,38 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let k12 = -a.inv_inertia * r.x * r.y;
             let k22 = a.inv_mass + a.inv_inertia * r.x * r.x;
 
-            let eff_m = if k11 + k22 > 1e-8 { 2.0 / (k11 + k22) } else { 0.0 };
+            let eff_m = if k11 + k22 > 1e-8 {
+                2.0 / (k11 + k22)
+            } else {
+                0.0
+            };
             let (gamma, bias_rate) = soft_constraint_params(frequency_hz, damping_ratio, eff_m, dt);
 
             let mat = Mat2::from_cols(Vec2::new(k11 + gamma, k12), Vec2::new(k12, k22 + gamma));
             let c = p - target;
             let vel = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, r);
-            let rhs = -(vel + c * bias_rate);
-            let mut impulse = mat.solve(rhs);
+            let rhs = -(vel + c * bias_rate + joint.impulse_linear * gamma);
+            let old_impulse = joint.impulse_linear;
+            let mut accumulated = old_impulse + mat.solve(rhs);
 
-            let max_imp = max_force * dt;
-            let imp_len = impulse.length();
+            let max_imp = max_force.max(0.0) * dt;
+            let imp_len = accumulated.length();
             if imp_len > max_imp {
-                impulse *= max_imp / imp_len;
+                accumulated *= max_imp / imp_len;
             }
+            let impulse = accumulated - old_impulse;
 
             a.linear_velocity += impulse * a.inv_mass;
             a.angular_velocity += r.cross(impulse) * a.inv_inertia;
-            joint.impulse_linear = impulse;
+            joint.impulse_linear = accumulated;
         }
-        JointKind::Distance { local_anchor_a, local_anchor_b, rest_length, frequency_hz, damping_ratio } => {
+        JointKind::Distance {
+            local_anchor_a,
+            local_anchor_b,
+            rest_length,
+            frequency_hz,
+            damping_ratio,
+        } => {
             let Some(b) = b else { return };
             let ra = a.rotation.rotate(local_anchor_a);
             let rb = b.rotation.rotate(local_anchor_b);
@@ -416,7 +506,8 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             }
             let rxa = ra.cross(axis);
             let rxb = rb.cross(axis);
-            let inv_eff = a.inv_mass + b.inv_mass + a.inv_inertia * rxa * rxa + b.inv_inertia * rxb * rxb;
+            let inv_eff =
+                a.inv_mass + b.inv_mass + a.inv_inertia * rxa * rxa + b.inv_inertia * rxb * rxb;
             if inv_eff <= 1e-8 {
                 return;
             }
@@ -428,13 +519,18 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let c_dot = (vb - va).dot(axis);
             let c = dist - rest_length;
 
-            let lambda = -(c_dot + c * bias_rate) / (inv_eff + gamma);
+            let lambda = -(c_dot + c * bias_rate + gamma * joint.impulse_linear.dot(axis))
+                / (inv_eff + gamma);
             let p = axis * lambda;
             apply_pair_impulse(a, b, ra, rb, p);
-            joint.impulse_linear = p;
-            check_break(joint, lambda.abs() / dt.max(1e-5));
+            joint.impulse_linear += p;
+            check_break(joint, joint.impulse_linear.length() / dt.max(1e-5));
         }
-        JointKind::Rope { local_anchor_a, local_anchor_b, max_length } => {
+        JointKind::Rope {
+            local_anchor_a,
+            local_anchor_b,
+            max_length,
+        } => {
             let Some(b) = b else { return };
             let ra = a.rotation.rotate(local_anchor_a);
             let rb = b.rotation.rotate(local_anchor_b);
@@ -447,7 +543,8 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             }
             let rxa = ra.cross(axis);
             let rxb = rb.cross(axis);
-            let inv_eff = a.inv_mass + b.inv_mass + a.inv_inertia * rxa * rxa + b.inv_inertia * rxb * rxb;
+            let inv_eff =
+                a.inv_mass + b.inv_mass + a.inv_inertia * rxa * rxa + b.inv_inertia * rxb * rxb;
             if inv_eff <= 1e-8 {
                 return;
             }
@@ -458,8 +555,8 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let lambda = (-(c_dot + bias) / inv_eff).min(0.0);
             let p = axis * lambda;
             apply_pair_impulse(a, b, ra, rb, p);
-            joint.impulse_linear = p;
-            check_break(joint, lambda.abs() / dt.max(1e-5));
+            joint.impulse_linear += p;
+            check_break(joint, joint.impulse_linear.length() / dt.max(1e-5));
         }
         JointKind::Revolute {
             local_anchor_a,
@@ -477,9 +574,11 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let rb = b.rotation.rotate(local_anchor_b);
 
             // 1. Point-to-point 2-DOF constraint
-            let k11 = a.inv_mass + b.inv_mass + a.inv_inertia * ra.y * ra.y + b.inv_inertia * rb.y * rb.y;
+            let k11 =
+                a.inv_mass + b.inv_mass + a.inv_inertia * ra.y * ra.y + b.inv_inertia * rb.y * rb.y;
             let k12 = -a.inv_inertia * ra.x * ra.y - b.inv_inertia * rb.x * rb.y;
-            let k22 = a.inv_mass + b.inv_mass + a.inv_inertia * ra.x * ra.x + b.inv_inertia * rb.x * rb.x;
+            let k22 =
+                a.inv_mass + b.inv_mass + a.inv_inertia * ra.x * ra.x + b.inv_inertia * rb.x * rb.x;
             let mat = Mat2::from_cols(Vec2::new(k11, k12), Vec2::new(k12, k22));
 
             let va = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, ra);
@@ -488,19 +587,19 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let bias = c * (0.25 / dt.max(1e-5));
             let impulse = mat.solve(-(vb - va + bias));
             apply_pair_impulse(a, b, ra, rb, impulse);
-            joint.impulse_linear = impulse;
+            joint.impulse_linear += impulse;
 
             let inv_i_sum = a.inv_inertia + b.inv_inertia;
             if inv_i_sum > 1e-8 {
                 // 2. Optional motor
                 if enable_motor {
                     let c_dot = b.angular_velocity - a.angular_velocity - motor_speed;
-                    let mut motor_imp = -c_dot / inv_i_sum;
-                    let max_imp = max_motor_torque * dt;
-                    motor_imp = motor_imp.clamp(-max_imp, max_imp);
+                    let old = joint.impulse_motor;
+                    let max_imp = max_motor_torque.max(0.0) * dt;
+                    joint.impulse_motor = (old - c_dot / inv_i_sum).clamp(-max_imp, max_imp);
+                    let motor_imp = joint.impulse_motor - old;
                     a.angular_velocity -= a.inv_inertia * motor_imp;
                     b.angular_velocity += b.inv_inertia * motor_imp;
-                    joint.impulse_motor = motor_imp;
                 }
 
                 // 3. Optional angular limit
@@ -525,16 +624,24 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
                     }
                 }
             }
-            check_break(joint, impulse.length() / dt.max(1e-5));
+            check_break(joint, joint.impulse_linear.length() / dt.max(1e-5));
         }
-        JointKind::Weld { local_anchor_a, local_anchor_b, reference_angle, frequency_hz, damping_ratio } => {
+        JointKind::Weld {
+            local_anchor_a,
+            local_anchor_b,
+            reference_angle,
+            frequency_hz,
+            damping_ratio,
+        } => {
             let Some(b) = b else { return };
             let ra = a.rotation.rotate(local_anchor_a);
             let rb = b.rotation.rotate(local_anchor_b);
 
-            let k11 = a.inv_mass + b.inv_mass + a.inv_inertia * ra.y * ra.y + b.inv_inertia * rb.y * rb.y;
+            let k11 =
+                a.inv_mass + b.inv_mass + a.inv_inertia * ra.y * ra.y + b.inv_inertia * rb.y * rb.y;
             let k12 = -a.inv_inertia * ra.x * ra.y - b.inv_inertia * rb.x * rb.y;
-            let k22 = a.inv_mass + b.inv_mass + a.inv_inertia * ra.x * ra.x + b.inv_inertia * rb.x * rb.x;
+            let k22 =
+                a.inv_mass + b.inv_mass + a.inv_inertia * ra.x * ra.x + b.inv_inertia * rb.x * rb.x;
             let mat = Mat2::from_cols(Vec2::new(k11, k12), Vec2::new(k12, k22));
 
             let va = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, ra);
@@ -543,20 +650,22 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             let bias = c * (0.25 / dt.max(1e-5));
             let impulse = mat.solve(-(vb - va + bias));
             apply_pair_impulse(a, b, ra, rb, impulse);
-            joint.impulse_linear = impulse;
+            joint.impulse_linear += impulse;
 
             // Angular lock (rigid or compliant bendable weld)
             let inv_i_sum = a.inv_inertia + b.inv_inertia;
             if inv_i_sum > 1e-8 {
-                let (gamma, bias_rate) = soft_constraint_params(frequency_hz, damping_ratio, 1.0 / inv_i_sum, dt);
+                let (gamma, bias_rate) =
+                    soft_constraint_params(frequency_hz, damping_ratio, 1.0 / inv_i_sum, dt);
                 let c_ang = b.angle - a.angle - reference_angle;
                 let c_dot = b.angular_velocity - a.angular_velocity;
-                let ang_imp = -(c_dot + c_ang * bias_rate) / (inv_i_sum + gamma);
+                let ang_imp = -(c_dot + c_ang * bias_rate + gamma * joint.impulse_angular)
+                    / (inv_i_sum + gamma);
                 a.angular_velocity -= a.inv_inertia * ang_imp;
                 b.angular_velocity += b.inv_inertia * ang_imp;
-                joint.impulse_angular = ang_imp;
+                joint.impulse_angular += ang_imp;
             }
-            check_break(joint, impulse.length() / dt.max(1e-5));
+            check_break(joint, joint.impulse_linear.length() / dt.max(1e-5));
         }
         JointKind::Prismatic {
             local_anchor_a,
@@ -583,13 +692,16 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             // 1. Constrain motion perpendicular to axis
             let rxa_p = (d + ra).cross(perp);
             let rxb_p = rb.cross(perp);
-            let inv_eff_p = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_p * rxa_p + b.inv_inertia * rxb_p * rxb_p;
+            let inv_eff_p = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_p * rxa_p
+                + b.inv_inertia * rxb_p * rxb_p;
             if inv_eff_p > 1e-8 {
                 let c_p = d.dot(perp);
                 let c_dot_p = (vb - va).dot(perp);
                 let lambda = -(c_dot_p + 0.25 * c_p / dt.max(1e-5)) / inv_eff_p;
                 apply_pair_impulse(a, b, ra, rb, perp * lambda);
-                joint.impulse_linear = perp * lambda;
+                joint.impulse_linear += perp * lambda;
             }
 
             // 2. Lock relative rotation
@@ -606,16 +718,20 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             // 3. Linear motor & translation limits along axis
             let rxa_a = (d + ra).cross(axis);
             let rxb_a = rb.cross(axis);
-            let inv_eff_a = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_a * rxa_a + b.inv_inertia * rxb_a * rxb_a;
+            let inv_eff_a = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_a * rxa_a
+                + b.inv_inertia * rxb_a * rxb_a;
             if inv_eff_a > 1e-8 {
                 if enable_motor {
                     let va2 = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, ra);
                     let vb2 = b.linear_velocity + Vec2::cross_scalar_left(b.angular_velocity, rb);
                     let c_dot = (vb2 - va2).dot(axis) - motor_speed;
-                    let max_imp = max_motor_force * dt;
-                    let imp = (-c_dot / inv_eff_a).clamp(-max_imp, max_imp);
+                    let max_imp = max_motor_force.max(0.0) * dt;
+                    let old = joint.impulse_motor;
+                    joint.impulse_motor = (old - c_dot / inv_eff_a).clamp(-max_imp, max_imp);
+                    let imp = joint.impulse_motor - old;
                     apply_pair_impulse(a, b, ra, rb, axis * imp);
-                    joint.impulse_motor = imp;
                 }
                 if enable_limit {
                     let translation = d.dot(axis);
@@ -656,7 +772,10 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             // 1. Rigid lateral guide (perpendicular to suspension travel)
             let rxa_p = (d + ra).cross(perp);
             let rxb_p = rb.cross(perp);
-            let inv_eff_p = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_p * rxa_p + b.inv_inertia * rxb_p * rxb_p;
+            let inv_eff_p = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_p * rxa_p
+                + b.inv_inertia * rxb_p * rxb_p;
             if inv_eff_p > 1e-8 {
                 let va = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, ra);
                 let vb = b.linear_velocity + Vec2::cross_scalar_left(b.angular_velocity, rb);
@@ -669,27 +788,33 @@ pub(crate) fn solve_joint_velocity(joint: &mut Joint, a: &mut RigidBody, b: Opti
             // 2. Suspension spring along `axis`
             let rxa_s = (d + ra).cross(axis);
             let rxb_s = rb.cross(axis);
-            let inv_eff_s = a.inv_mass + b.inv_mass + a.inv_inertia * rxa_s * rxa_s + b.inv_inertia * rxb_s * rxb_s;
+            let inv_eff_s = a.inv_mass
+                + b.inv_mass
+                + a.inv_inertia * rxa_s * rxa_s
+                + b.inv_inertia * rxb_s * rxb_s;
             if inv_eff_s > 1e-8 {
-                let (gamma, bias_rate) = soft_constraint_params(frequency_hz, damping_ratio, 1.0 / inv_eff_s, dt);
+                let (gamma, bias_rate) =
+                    soft_constraint_params(frequency_hz, damping_ratio, 1.0 / inv_eff_s, dt);
                 let va = a.linear_velocity + Vec2::cross_scalar_left(a.angular_velocity, ra);
                 let vb = b.linear_velocity + Vec2::cross_scalar_left(b.angular_velocity, rb);
                 let c_s = d.dot(axis);
                 let c_dot_s = (vb - va).dot(axis);
-                let lambda = -(c_dot_s + c_s * bias_rate) / (inv_eff_s + gamma);
+                let lambda = -(c_dot_s + c_s * bias_rate + gamma * joint.impulse_linear.dot(axis))
+                    / (inv_eff_s + gamma);
                 apply_pair_impulse(a, b, ra, rb, axis * lambda);
-                joint.impulse_linear = axis * lambda;
+                joint.impulse_linear += axis * lambda;
             }
 
             // 3. Wheel drive motor
             let inv_i_sum = a.inv_inertia + b.inv_inertia;
             if enable_motor && inv_i_sum > 1e-8 {
                 let c_dot = b.angular_velocity - a.angular_velocity - motor_speed;
-                let max_imp = max_motor_torque * dt;
-                let imp = (-c_dot / inv_i_sum).clamp(-max_imp, max_imp);
+                let max_imp = max_motor_torque.max(0.0) * dt;
+                let old = joint.impulse_motor;
+                joint.impulse_motor = (old - c_dot / inv_i_sum).clamp(-max_imp, max_imp);
+                let imp = joint.impulse_motor - old;
                 a.angular_velocity -= a.inv_inertia * imp;
                 b.angular_velocity += b.inv_inertia * imp;
-                joint.impulse_motor = imp;
             }
         }
     }
