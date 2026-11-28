@@ -13,14 +13,18 @@ impl Icons {
     pub const HOME: &'static str = "M10,20V14H14V20H19V12H22L12,3L2,12H5V20H10Z";
     pub const SPARKLE: &'static str = "M12,1L9,9L1,12L9,15L12,23L15,15L23,12L15,9Z";
     pub const LAYERS: &'static str = "M12,16L19.36,10.27L21,9L12,2L3,9L4.63,10.27M12,18.54L4.62,12.81L3,14.07L12,21.07L21,14.07L19.37,12.8Z";
-    pub const NODE_GRAPH: &'static str = "M4,4H10V10H4V4M14,4H20V10H14V4M9,14H15V20H9V14M10,7H14M7,10V17H9M17,10V17H15";
+    pub const NODE_GRAPH: &'static str =
+        "M4,4H10V10H4V4M14,4H20V10H14V4M9,14H15V20H9V14M10,7H14M7,10V17H9M17,10V17H15";
     pub const CUBE: &'static str = "M21,16.5C21,16.88 20.79,17.21 20.47,17.38L12.57,21.82C12.41,21.94 12.21,22 12,22C11.79,22 11.59,21.94 11.43,21.82L3.53,17.38C3.21,17.21 3,16.88 3,16.5V7.5C3,7.12 3.21,6.79 3.53,6.62L11.43,2.18C11.59,2.06 11.79,2 12,2C12.21,2 12.41,2.06 12.57,2.18L20.47,6.62C20.79,6.79 21,7.12 21,7.5V16.5M12,4.15L5,8.09V15.91L12,19.85L19,15.91V8.09L12,4.15Z";
     pub const WATER: &'static str = "M12,2C12,2 5,10.25 5,15A7,7 0 0,0 12,22A7,7 0 0,0 19,15C19,10.25 12,2 12,2M12,20A5,5 0 0,1 7,15C7,12.1 10.1,7.4 12,5C13.9,7.4 17,12.1 17,15A5,5 0 0,1 12,20Z";
-    pub const CLOTH: &'static str = "M3,3H21V5H3V3M3,7H21V9H3V7M3,11H21V13H3V11M3,15H17V17H3V15M3,19H13V21H3V19Z";
+    pub const CLOTH: &'static str =
+        "M3,3H21V5H3V3M3,7H21V9H3V7M3,11H21V13H3V11M3,15H17V17H3V15M3,19H13V21H3V19Z";
     pub const UI_MOTION: &'static str = "M4,4H20A2,2 0 0,1 22,6V18A2,2 0 0,1 20,20H4A2,2 0 0,1 2,18V6A2,2 0 0,1 4,4M4,8V18H20V8H4M6,10H12V16H6V10M14,10H18V12H14V10M14,14H18V16H14V14Z";
-    pub const SHATTER: &'static str = "M12,2L14.8,8.2L21.5,9L16.5,13.6L17.9,20.3L12,16.9L6.1,20.3L7.5,13.6L2.5,9L9.2,8.2L12,2Z";
+    pub const SHATTER: &'static str =
+        "M12,2L14.8,8.2L21.5,9L16.5,13.6L17.9,20.3L12,16.9L6.1,20.3L7.5,13.6L2.5,9L9.2,8.2L12,2Z";
     pub const VEHICLE: &'static str = "M5,11L6.5,6.5H17.5L19,11M17.5,16A1.5,1.5 0 0,1 16,14.5A1.5,1.5 0 0,1 17.5,13A1.5,1.5 0 0,1 19,14.5A1.5,1.5 0 0,1 17.5,16M6.5,16A1.5,1.5 0 0,1 5,14.5A1.5,1.5 0 0,1 6.5,13A1.5,1.5 0 0,1 8,14.5A1.5,1.5 0 0,1 6.5,16M18.92,6C18.72,5.42 18.16,5 17.5,5H6.5C5.84,5 5.28,5.42 5.08,6L3,12V20A1,1 0 0,0 4,21H5A1,1 0 0,0 6,20V19H18V20A1,1 0 0,0 19,21H20A1,1 0 0,0 21,20V12L18.92,6Z";
-    pub const PERSON: &'static str = "M12,3A4,4 0 1,1 12,11A4,4 0 1,1 12,3M4,20C4,16 7.6,13 12,13C16.4,13 20,16 20,20Z";
+    pub const PERSON: &'static str =
+        "M12,3A4,4 0 1,1 12,11A4,4 0 1,1 12,3M4,20C4,16 7.6,13 12,13C16.4,13 20,16 20,20Z";
     pub const ORBIT: &'static str = "M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,8A4,4 0 0,0 8,12A4,4 0 0,0 12,16A4,4 0 0,0 16,12A4,4 0 0,0 12,8Z";
 
     // Transport, tools & shader controls
@@ -72,6 +76,10 @@ pub fn icon_label(path_data: &'static str, text: &'static str, icon_size: f64) -
         .spacing(6.0)
         .vertical_alignment(VerticalAlignment::Center)
         .child(icon_view(path_data, icon_size))
-        .child(text_block().text(text).vertical_alignment(VerticalAlignment::Center))
+        .child(
+            text_block()
+                .text(text)
+                .vertical_alignment(VerticalAlignment::Center),
+        )
         .into()
 }

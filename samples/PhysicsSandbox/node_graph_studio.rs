@@ -1,221 +1,390 @@
-//! **Rhino Grasshopper-style Parametric Physics Studio** wired directly to `ferroui-physics`!
+//! Parametric workspace: edit a graph and inspect its live physics result.
 //!
-//! Split workspace combining:
-//! - Left/Main: Full interactive `ferroui-nodegraph` Grasshopper canvas + Component Ribbon +
-//!   inline sliders/toggles/panels + Fancy Wires + Minimap + DataTree Inspector
-//! - Right: Live hardware-accelerated `PhysicsViewport` running the compiled output of the node
-//!   graph in real time (drag sliders on the canvas and watch the physics world morph live!)
+//! Preview updates are coalesced while sliders move. Clean solutions retain the
+//! same output payload and therefore do not reset a running simulation.
 
 use crate::icons::{icon_label, Icons};
 use crate::scenes::SandboxEngine;
+use crate::showcase_style::{page_header, selection_button, subtle_text, surface};
 use crate::viewport::PhysicsViewport;
-use ferroui_base::layout::Orientation;
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::FontWeight;
-use ferroui_controls::Dock;
+use ferroui_base::threading::DispatcherTimer;
+use ferroui_controls::{Dock, GridResizeBehavior, GridResizeDirection};
 use ferroui_nodegraph::prelude::*;
 use ferroui_physics::Vec2;
 use ferroui_view::prelude::*;
+use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::sync::Arc;
+use std::time::Duration;
 
-/// Builds the full split-screen Grasshopper Parametric Physics Studio tab.
+type ScenePayload = Arc<dyn Any + Send + Sync>;
+
+#[derive(Default)]
+struct PreviewQueue {
+    pending: Option<ScenePayload>,
+    applied: Option<ScenePayload>,
+}
+
+impl PreviewQueue {
+    fn stage(&mut self, payload: ScenePayload) -> bool {
+        if self
+            .applied
+            .as_ref()
+            .is_some_and(|current| Arc::ptr_eq(current, &payload))
+        {
+            self.pending = None;
+            false
+        } else {
+            self.pending = Some(payload);
+            true
+        }
+    }
+
+    fn apply(&mut self, engine: &mut SandboxEngine, paused: bool) -> bool {
+        let Some(payload) = self.pending.take() else {
+            return false;
+        };
+        let Some(blueprint) = payload.downcast_ref::<CompiledPhysicsBlueprint>() else {
+            return false;
+        };
+        engine.load_from_blueprint(blueprint);
+        engine.paused = paused;
+        self.applied = Some(payload);
+        true
+    }
+}
+
+fn scene_payload(graph: &NodeGraph) -> Option<ScenePayload> {
+    graph
+        .nodes
+        .values()
+        .filter(|node| node.type_id == "physics.scene_output" && !node.disabled)
+        .find_map(|node| match node.output_tree(0)?.first_item()? {
+            Value::Custom(payload) if payload.data.is::<CompiledPhysicsBlueprint>() => {
+                Some(payload.data.clone())
+            }
+            _ => None,
+        })
+}
+
+fn template_name(template: PhysicsGraphTemplate) -> &'static str {
+    match template {
+        PhysicsGraphTemplate::AttractorGraphMapper => "Attractor field",
+        PhysicsGraphTemplate::PyramidPendulum => "Pyramid & pendulum",
+        PhysicsGraphTemplate::KeplerianSolarSystem => "Orbital system",
+        PhysicsGraphTemplate::SuspensionBridgeRain => "Suspension bridge",
+        PhysicsGraphTemplate::ClothJellyWindTunnel => "Wind tunnel",
+    }
+}
+
 pub fn node_graph_physics_studio() -> Element {
     let registry = Rc::new(NodeRegistry::with_standard_library());
     let active_template = signal(PhysicsGraphTemplate::AttractorGraphMapper);
-    let live_rebuild = signal(true);
-    let preview_paused = signal(false);
-    let summary_text = signal(String::from("Compiled Grasshopper scene live!"));
-    let template_version = signal(0u64);
+    let live = signal(Some(true));
+    let paused = signal(false);
+    let pending = signal(false);
+    let summary = signal(String::from("Preparing preview…"));
+    let status = signal(String::from(
+        "Edit a parameter or connect two ports. The preview follows valid graph changes.",
+    ));
+    let editor_version = signal(0u64);
+    let wide = signal(true);
+    let compact_preview = signal(std::env::var("FERROUI_GRAPH_VIEW").as_deref() == Ok("preview"));
+    let graph = Rc::new(RefCell::new(
+        active_template.get_untracked().build(&registry),
+    ));
+    // Parametric templates use rigid bodies, cloth and soft bodies; they do
+    // not need a second GPU particle device for the preview.
+    let engine = Rc::new(RefCell::new(SandboxEngine::new_cpu()));
+    let queue = Rc::new(RefCell::new(PreviewQueue::default()));
 
-    // Shared graph & live preview physics engine
-    let initial_graph = {
-        let mut g = PhysicsGraphTemplate::AttractorGraphMapper.build(&registry);
-        let _ = evaluate_graph(&mut g, &registry, 0.0);
-        g
+    let on_evaluated: Rc<dyn Fn(&NodeGraph)> = {
+        let queue = queue.clone();
+        Rc::new(move |graph| {
+            let errors = graph
+                .nodes
+                .values()
+                .filter(|node| matches!(node.state, NodeState::Error(_)))
+                .count();
+            if errors != 0 {
+                queue.borrow_mut().pending = None;
+                pending.set(false);
+                status.set(format!(
+                    "{errors} graph error(s). The preview keeps the last valid scene."
+                ));
+                return;
+            }
+            let Some(payload) = scene_payload(graph) else {
+                queue.borrow_mut().pending = None;
+                pending.set(false);
+                status.set("Connect a Scene Output node to generate a physics preview.".into());
+                return;
+            };
+            if let Some(blueprint) = payload.downcast_ref::<CompiledPhysicsBlueprint>() {
+                summary.set_if_changed(format!(
+                    "{} bodies · {} joints · {} fields · {} soft bodies · {} cloths",
+                    blueprint.bodies.len(),
+                    blueprint.joints.len(),
+                    blueprint.force_fields.len(),
+                    blueprint.soft_bodies.len(),
+                    blueprint.cloths.len()
+                ));
+            }
+            let changed = queue.borrow_mut().stage(payload);
+            pending.set(changed);
+            if changed {
+                status.set(if live.get_untracked() == Some(true) {
+                    "Updating the preview…".into()
+                } else {
+                    "Changes are ready. Choose Apply changes to rebuild the preview.".into()
+                });
+            } else {
+                status.set("Preview is up to date.".into());
+            }
+        })
     };
-    let graph = Rc::new(RefCell::new(initial_graph));
-    let preview_engine = Rc::new(RefCell::new(SandboxEngine::new()));
-
-    // Compile initial blueprint into the live PhysicsViewport
-    if let Some(bp) = extract_physics_blueprint(&graph.borrow()) {
-        preview_engine.borrow_mut().load_from_blueprint(&bp);
-    }
-
-    // Callback invoked on every slider drag, wire edit, or node edit in the Grasshopper canvas!
-    let eng_sync = preview_engine.clone();
-    let on_graph_evaluated: Rc<dyn Fn(&NodeGraph)> = Rc::new(move |g: &NodeGraph| {
-        if let Some(bp) = extract_physics_blueprint(g) {
-            let msg = format!(
-                "{} bodies · {} joints · {} fields · {} soft · {} cloth",
-                bp.bodies.len(),
-                bp.joints.len(),
-                bp.force_fields.len(),
-                bp.soft_bodies.len(),
-                bp.cloths.len(),
-            );
-            if summary_text.is_alive() {
-                summary_text.set_if_changed(msg);
-            }
-            if live_rebuild.get_untracked() {
-                let mut sim = eng_sync.borrow_mut();
-                sim.load_from_blueprint(&bp);
-                sim.paused = preview_paused.get_untracked();
-            }
-        }
-    });
-
-    // -------------------------------------------------------------------------
-    // 1. Top Template & Live-Sync Bar (Stock FerroUI Theme)
-    // -------------------------------------------------------------------------
-    let mut tpl_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
-    for tpl in PhysicsGraphTemplate::ALL {
-        let g_t = graph.clone();
-        let r_t = registry.clone();
-        let eng_t = preview_engine.clone();
-        tpl_row = tpl_row.child(
-            button()
-                .padding((10.0, 5.0, 10.0, 5.0))
-                .border_thickness(move || if active_template.get() == tpl { 1.5 } else { 1.0 })
-                .content(tpl.label())
-                .on_click(move |_| {
-                    let mut next = tpl.build(&r_t);
-                    let _ = evaluate_graph(&mut next, &r_t, 0.0);
-                    if let Some(bp) = extract_physics_blueprint(&next) {
-                        eng_t.borrow_mut().load_from_blueprint(&bp);
-                    }
-                    *g_t.borrow_mut() = next;
-                    active_template.set(tpl);
-                    preview_paused.set(false);
-                    template_version.update(|v| *v = v.wrapping_add(1));
-                }),
+    {
+        let mut graph = graph.borrow_mut();
+        evaluate_graph(&mut graph, &registry, 0.0);
+        on_evaluated(&graph);
+        queue
+            .borrow_mut()
+            .apply(&mut engine.borrow_mut(), paused.get_untracked());
+        pending.set(false);
+        status.set(
+            "Edit a parameter or connect two ports. The preview follows valid graph changes."
+                .into(),
         );
     }
 
-    let g_reb = graph.clone();
-    let r_reb = registry.clone();
-    let eng_reb = preview_engine.clone();
-    let eng_pause = preview_engine.clone();
-    let eng_blast = preview_engine.clone();
+    // At most one world rebuild per 50 ms. The latest evaluated output wins,
+    // and turning Live preview off retains the pending output for Apply.
+    let timer = DispatcherTimer::new();
+    timer.set_interval(Duration::from_millis(50));
+    {
+        let queue = queue.clone();
+        let engine = engine.clone();
+        timer.tick(move |_| {
+            if live.get_untracked() != Some(true) || !pending.get_untracked() {
+                return;
+            }
+            if queue
+                .borrow_mut()
+                .apply(&mut engine.borrow_mut(), paused.get_untracked())
+            {
+                pending.set(false);
+                status.set("Preview is up to date.".into());
+            }
+        });
+    }
+    let start = timer.clone();
+    let stop = timer.clone();
+    on_cleanup(move || timer.stop());
 
-    let controls_row = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(5.0)
+    let mut templates = wrap_panel().item_spacing(8.0).line_spacing(8.0);
+    for template in PhysicsGraphTemplate::ALL {
+        let graph = graph.clone();
+        let registry = registry.clone();
+        let engine = engine.clone();
+        let queue = queue.clone();
+        let evaluated = on_evaluated.clone();
+        templates = templates.child(
+            selection_button(active_template, template, move || {
+                let mut next = template.build(&registry);
+                evaluate_graph(&mut next, &registry, 0.0);
+                evaluated(&next);
+                queue
+                    .borrow_mut()
+                    .apply(&mut engine.borrow_mut(), paused.get_untracked());
+                pending.set(false);
+                status.set(format!(
+                    "{} loaded. Edit its parameters to explore the result.",
+                    template_name(template)
+                ));
+                *graph.borrow_mut() = next;
+                editor_version.update(|version| *version = version.wrapping_add(1));
+            })
+            .content(template_name(template)),
+        );
+    }
+    let apply_queue = queue.clone();
+    let apply_engine = engine.clone();
+    let reset_queue = queue.clone();
+    let reset_engine = engine.clone();
+    let pause_engine = engine.clone();
+    let blast_engine = engine.clone();
+    let controls = wrap_panel()
+        .item_spacing(12.0)
+        .line_spacing(8.0)
+        .child(
+            check_box()
+                .content("Live preview")
+                .is_checked(live.two_way())
+                .vertical_alignment(VerticalAlignment::Center),
+        )
         .child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
+                .content("Apply changes")
+                .is_enabled(move || pending.get())
+                .on_click(move |_| {
+                    if apply_queue
+                        .borrow_mut()
+                        .apply(&mut apply_engine.borrow_mut(), paused.get_untracked())
+                    {
+                        pending.set(false);
+                        status.set("Changes applied to the preview.".into());
+                    }
+                }),
+        )
+        .child(
+            button()
+                .content(icon_label(Icons::RESET, "Restart scene", 16.0))
+                .on_click(move |_| {
+                    let mut queue = reset_queue.borrow_mut();
+                    if let Some(payload) = queue.applied.clone() {
+                        let pending_payload = queue.pending.take();
+                        queue.pending = Some(payload);
+                        queue.apply(&mut reset_engine.borrow_mut(), paused.get_untracked());
+                        queue.pending = pending_payload;
+                        status.set("Preview restarted with its last applied parameters.".into());
+                    }
+                }),
+        )
+        .child(
+            button()
                 .content(dynamic(move || {
-                    if live_rebuild.get() {
-                        icon_label(Icons::LIGHTNING, "Live Sync: On", 13.0)
+                    if paused.get() {
+                        icon_label(Icons::PLAY, "Resume", 16.0)
                     } else {
-                        icon_label(Icons::LIGHTNING, "Live Sync: Off", 13.0)
+                        icon_label(Icons::PAUSE, "Pause", 16.0)
                     }
                 }))
-                .on_click(move |_| live_rebuild.update(|v| *v = !*v)),
-        )
-        .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .content(icon_label(Icons::RESET, "Rebuild", 13.0))
                 .on_click(move |_| {
-                    let mut g = g_reb.borrow_mut();
-                    g.mark_all_dirty();
-                    let _ = evaluate_graph(&mut g, &r_reb, 0.0);
-                    if let Some(bp) = extract_physics_blueprint(&g) {
-                        eng_reb.borrow_mut().load_from_blueprint(&bp);
-                        preview_paused.set(false);
-                    }
+                    let next = !paused.get_untracked();
+                    pause_engine.borrow_mut().paused = next;
+                    paused.set(next);
                 }),
         )
         .child(
             button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .content(dynamic(move || {
-                    if preview_paused.get() {
-                        icon_label(Icons::PLAY, "Play", 13.0)
-                    } else {
-                        icon_label(Icons::PAUSE, "Pause", 13.0)
-                    }
-                }))
+                .content(icon_label(Icons::TARGET, "Impulse", 16.0))
                 .on_click(move |_| {
-                    let next = !preview_paused.get_untracked();
-                    eng_pause.borrow_mut().paused = next;
-                    preview_paused.set(next);
+                    blast_engine
+                        .borrow_mut()
+                        .world
+                        .apply_explosion(Vec2::new(8.0, 5.5), 6.5, 16.0);
                 }),
         )
         .child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .content(icon_label(Icons::TARGET, "Blast", 13.0))
-                .on_click(move |_| {
-                    eng_blast.borrow_mut().world.apply_explosion(Vec2::new(8.0, 5.5), 6.5, 16.0);
-                }),
+            selection_button(compact_preview, false, || {})
+                .is_visible(move || !wide.get())
+                .content(icon_label(Icons::NODE_GRAPH, "Edit graph", 16.0)),
+        )
+        .child(
+            selection_button(compact_preview, true, || {})
+                .is_visible(move || !wide.get())
+                .content(icon_label(Icons::CUBE, "View simulation", 16.0)),
         );
 
-    let top_bar = border()
-        .dock_panel_dock(Dock::Top)
-        .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .padding((12.0, 8.0, 12.0, 8.0))
-        .child(dock_panel().child(controls_row.dock_panel_dock(Dock::Right)).child(tpl_row));
-
-    // -------------------------------------------------------------------------
-    // 2. Right Live Hardware-Rendered Physics Preview Dock
-    // -------------------------------------------------------------------------
-    let eng_vp = preview_engine.clone();
-    let preview_tick_cb: Rc<dyn Fn(&SandboxEngine)> = Rc::new(|_| {});
-
-    let live_preview_pane = border()
-        .dock_panel_dock(Dock::Right)
-        .width(500.0)
-        .border_thickness((1.0, 0.0, 0.0, 0.0))
+    let preview_engine = engine.clone();
+    let preview = surface()
+        .grid_column(move || if wide.get() { 2 } else { 0 })
+        .grid_row(0)
+        .is_visible(move || wide.get() || compact_preview.get())
         .clip_to_bounds(true)
         .child(
             dock_panel()
                 .child(
-                    border()
+                    stack_panel()
                         .dock_panel_dock(Dock::Top)
-                        .border_thickness((0.0, 0.0, 0.0, 1.0))
-                        .padding((10.0, 6.0, 10.0, 6.0))
+                        .spacing(4.0)
+                        .margin(16.0)
                         .child(
-                            stack_panel()
-                                .spacing(2.0)
-                                .child(
-                                    text_block()
-                                        .text("Live Grasshopper Physics Preview")
-                                        .font_size(12.0)
-                                        .font_weight(FontWeight::SemiBold),
-                                )
-                                .child(
-                                    text_block()
-                                        .text(move || summary_text.get())
-                                        .font_size(10.5),
-                                ),
-                        ),
+                            text_block()
+                                .text("Live preview")
+                                .font_size(16.0)
+                                .font_weight(FontWeight::SemiBold),
+                        )
+                        .child(subtle_text().text(move || summary.get()).font_size(12.0)),
                 )
-                .child(
-                    El::<PhysicsViewport>::new()
-                        .with(move |ctrl| {
-                            ctrl.bind_engine(eng_vp.clone(), preview_tick_cb.clone());
-                        })
-                        .into_element(),
-                ),
+                .child(El::<PhysicsViewport>::new().with(move |viewport| {
+                    viewport.bind_engine(preview_engine.clone(), Rc::new(|_| {}));
+                })),
         );
-
-    // -------------------------------------------------------------------------
-    // 3. Left/Main Interactive Rhino Grasshopper Node Graph Editor
-    // -------------------------------------------------------------------------
-    let g_ed = graph.clone();
-    let r_ed = registry.clone();
-    let cb_ed = on_graph_evaluated.clone();
-
-    let editor_pane = border().clip_to_bounds(true).child(dynamic(move || {
-        let _ = template_version.get();
-        node_graph_editor(g_ed.clone(), r_ed.clone(), cb_ed.clone())
-    }));
-
-    dock_panel()
+    let editor_graph = graph.clone();
+    let editor_registry = registry.clone();
+    let editor_callback = on_evaluated.clone();
+    let editor = surface()
+        .grid_column(0)
+        .grid_row(0)
+        .is_visible(move || wide.get() || !compact_preview.get())
         .clip_to_bounds(true)
-        .child(top_bar)
-        .child(live_preview_pane)
-        .child(editor_pane)
+        .child(dynamic(move || {
+            let _ = editor_version.get();
+            node_graph_editor(
+                editor_graph.clone(),
+                editor_registry.clone(),
+                editor_callback.clone(),
+            )
+        }));
+    let split = grid()
+        .set(GridDefinitionsText::columns_property(), move || {
+            if wide.get() {
+                "3*,8,2*"
+            } else {
+                "*"
+            }
+        })
+        .set(GridDefinitionsText::rows_property(), "*")
+        .child(editor)
+        .child(
+            grid_splitter()
+                .grid_column(move || if wide.get() { 1 } else { 0 })
+                .grid_row(0)
+                .is_visible(move || wide.get())
+                .horizontal_alignment(HorizontalAlignment::Stretch)
+                .vertical_alignment(VerticalAlignment::Stretch)
+                .resize_direction(GridResizeDirection::Columns)
+                .resize_behavior(GridResizeBehavior::PreviousAndNext),
+        )
+        .child(preview);
+
+    dock_panel().margin(24.0).clip_to_bounds(true)
+        .on_loaded(move |_| start.start()).on_unloaded(move |_| stop.stop())
+        .on_size_changed(move |e| wide.set_if_changed(e.new_size().width >= 980.0))
+        .child(stack_panel().dock_panel_dock(Dock::Top).spacing(12.0).margin((0.0, 0.0, 0.0, 16.0))
+            .child(page_header("Parametric workspace", "Build a scene from connected components. Start with a template, edit its inputs, and inspect the live simulation."))
+            .child(templates).child(controls))
+        .child(subtle_text().dock_panel_dock(Dock::Bottom).margin((0.0, 12.0, 0.0, 0.0)).text(move || status.get()))
+        .child(split)
         .into()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unchanged_output_does_not_restart_the_preview() {
+        let payload: ScenePayload = Arc::new(CompiledPhysicsBlueprint::default());
+        let mut queue = PreviewQueue {
+            applied: Some(payload.clone()),
+            pending: None,
+        };
+        assert!(!queue.stage(payload));
+        assert!(queue.pending.is_none());
+        assert!(queue.stage(Arc::new(CompiledPhysicsBlueprint::default())));
+        let mut engine = SandboxEngine::new_cpu();
+        assert!(queue.apply(&mut engine, false));
+        for _ in 0..3 {
+            engine.step(1.0 / 60.0);
+        }
+        assert!(
+            engine.history.is_empty(),
+            "graph previews must not allocate hidden playback snapshots"
+        );
+    }
 }

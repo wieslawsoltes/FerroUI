@@ -2813,7 +2813,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-nodegraph"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
@@ -2847,7 +2847,7 @@ dependencies = [
 
 [[package]]
 name = "ferroui-physics"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "naga",
@@ -5494,18 +5494,20 @@ dependencies = [
 
 [[package]]
 name = "physics-sandbox"
-version = "0.5.1-preview.1"
+version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
  "ferroui-desktop",
  "ferroui-direct2d",
+ "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-native",
  "ferroui-nodegraph",
  "ferroui-physics",
  "ferroui-quartz",
+ "ferroui-skia",
  "ferroui-themes-winui",
  "ferroui-view",
 ]

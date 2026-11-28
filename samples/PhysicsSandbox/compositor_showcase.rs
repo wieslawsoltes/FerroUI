@@ -1,32 +1,21 @@
-//! **Compositor Engine & Physics-Driven GPU Shaders Page**
-//!
-//! Styled in the clean `ControlCatalog` gallery layout (stock WinUI theme + vector `PathIcon`s):
-//! - Runs simulations natively on FerroUI's `Compositor` (`ICompositionSimulation` contract)
-//!   with **zero `DispatcherTimer`**, **zero UI layout passes**, and **zero draw-list re-recordings**
-//!   (effects write directly to `CompositionVisual` via `simulation_effect_override`).
-//! - Live multi-mode switcher on the exact same FerroUI visual tree:
-//!   - `Elastic Springs` (`SimulationMode::SpringDynamics`) with selectable analytical spring presets
-//!   - `Rigid Bodies` (`SimulationMode::Physics`) with real collision-triggered multi-ring ripples
-//!   - `Harmonic Wave` (`SimulationMode::Harmonic` — pure `ferroui-base`, zero physics!)
-//! - Live GPU WGSL → Metal MSL / SkSL shader switcher (`Auto`, `Kinetic Glass`, `Impact Ripple`
-//!   with 3 simultaneous overlapping wave interference rings, `Energy Field`, `Off`) plus live
-//!   **Intensity** & **Distortion** controls rendered natively via `ferroui-quartz` `runtime-shaders`!
+//! A Fluent project board with compositor-driven motion and editable stock controls.
 
 use crate::icons::{icon_label, icon_view, Icons};
+use crate::showcase_style::{page_header, subtle_text, surface};
 use ferroui_base::input::InputElement;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::effects::{IImmutableEffect, ImmutableCustomEffect};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Color, FontWeight, IBrush};
+use ferroui_base::media::{Color, FontWeight, IBrush, TextWrapping};
 use ferroui_base::rendering::composition::{
-    CompositionSimulationHandle, Compositor, ElementComposition, HarmonicWaveSimulation,
-    SimulationEffectUpdate, SimulationMode, SimulationTarget,
+    CompositionSimulationHandle, Compositor, HarmonicWaveSimulation, SimulationEffectUpdate,
+    SimulationTarget,
 };
-use ferroui_base::{Point, Ref, Vector, Visual};
+use ferroui_base::{Point, Ref, Vector, Visual, WeakRef};
 use ferroui_controls::{Border, Dock};
 use ferroui_physics::compositor::{
     CompositorPhysicsController, PhysicsCompositorBehavior, PhysicsEnergyFieldEffect,
-    PhysicsKineticGlassEffect, PhysicsShaderMode,
+    PhysicsImpactRippleEffect, PhysicsKineticGlassEffect, PhysicsShaderMode,
 };
 use ferroui_physics::ui::SpringConfig;
 use ferroui_physics::Vec2;
@@ -48,13 +37,17 @@ enum ShowcaseMode {
 }
 
 impl ShowcaseMode {
-    const ALL: [Self; 3] = [Self::SpringElastic, Self::PhysicsRigidBody, Self::HarmonicWave];
+    const ALL: [Self; 3] = [
+        Self::SpringElastic,
+        Self::PhysicsRigidBody,
+        Self::HarmonicWave,
+    ];
 
     fn label(self) -> &'static str {
         match self {
-            Self::PhysicsRigidBody => "Rigid Bodies",
-            Self::SpringElastic => "Elastic Springs",
-            Self::HarmonicWave => "Harmonic Wave (Non-Physics)",
+            Self::PhysicsRigidBody => "Rigid bodies",
+            Self::SpringElastic => "Elastic springs",
+            Self::HarmonicWave => "Harmonic motion",
         }
     }
 
@@ -63,14 +56,6 @@ impl ShowcaseMode {
             Self::PhysicsRigidBody => Icons::CUBE,
             Self::SpringElastic => Icons::MAGNET,
             Self::HarmonicWave => Icons::WAVE,
-        }
-    }
-
-    fn contract_mode(self) -> SimulationMode {
-        match self {
-            Self::PhysicsRigidBody => SimulationMode::Physics,
-            Self::SpringElastic => SimulationMode::SpringDynamics,
-            Self::HarmonicWave => SimulationMode::Harmonic,
         }
     }
 }
@@ -113,99 +98,105 @@ struct CardSpec {
     icon: &'static str,
     accent_argb: u32,
     accent_color: Color,
-    rest_x: f64,
-    rest_y: f64,
 }
 
 const CARD_W: f64 = 264.0;
-const CARD_H: f64 = 166.0;
+const CARD_H: f64 = 208.0;
 
 const CARDS: [CardSpec; 6] = [
     CardSpec {
-        title: "Kinetic Glass Shader",
-        subtitle: "Dual-layer iridescent sheen, Fresnel bevel & velocity dispersion",
-        badge: "WGSL → MSL",
-        metric: "0 Re-records",
+        title: "Design review",
+        subtitle: "Review the navigation flow and approve the interaction details.",
+        badge: "REVIEW",
+        metric: "Ready for feedback",
         icon: Icons::SPARKLE,
-        accent_argb: 0xFF0EA5E9,
+        accent_argb: 0xFF0078D4,
         accent_color: Color::from_argb(255, 14, 165, 233),
-        rest_x: 24.0,
-        rest_y: 22.0,
     },
     CardSpec {
-        title: "3-Ring Shockwaves",
-        subtitle: "Click rapidly or collide to layer 3 interfering wave rings",
-        badge: "3-WAVE GPU",
-        metric: "3-Tap Pass",
+        title: "Release checklist",
+        subtitle: "Track completion while the card remains fully interactive.",
+        badge: "CHECKLIST",
+        metric: "Review in progress",
         icon: Icons::TARGET,
-        accent_argb: 0xFF8B5CF6,
-        accent_color: Color::from_argb(255, 139, 92, 246),
-        rest_x: 312.0,
-        rest_y: 22.0,
+        accent_argb: 0xFF0078D4,
+        accent_color: Color::from_argb(255, 0, 120, 212),
     },
     CardSpec {
-        title: "Aurora Energy Field",
-        subtitle: "Dual-harmonic plasma refraction steered by live velocity",
-        badge: "PLASMA",
-        metric: "60/120 Hz",
+        title: "Motion guidelines",
+        subtitle: "Tune a gentle accent without distracting from the content.",
+        badge: "DESIGN",
+        metric: "Draft guidelines",
         icon: Icons::BLUR,
-        accent_argb: 0xFF10B981,
-        accent_color: Color::from_argb(255, 16, 185, 129),
-        rest_x: 600.0,
-        rest_y: 22.0,
+        accent_argb: 0xFF0078D4,
+        accent_color: Color::from_argb(255, 0, 120, 212),
     },
     CardSpec {
-        title: "Zero-Alloc Pipeline",
-        subtitle: "Stack-packed Metal uniforms & direct CompositionVisual override",
-        badge: "0 ALLOC",
-        metric: "Auto-Idle Sleep",
+        title: "Prototype session",
+        subtitle: "Keep a working note alongside the project board.",
+        badge: "NOTES",
+        metric: "Local workspace",
         icon: Icons::LAYERS,
-        accent_argb: 0xFFF59E0B,
-        accent_color: Color::from_argb(255, 245, 158, 11),
-        rest_x: 24.0,
-        rest_y: 212.0,
+        accent_argb: 0xFF0078D4,
+        accent_color: Color::from_argb(255, 0, 120, 212),
     },
     CardSpec {
-        title: "Multi-Mode Contract",
-        subtitle: "Harmonic wave runs via ferroui-base alone with zero physics",
-        badge: "EXTENSIBLE",
-        metric: "Public Trait",
+        title: "Team readiness",
+        subtitle: "Keep the handoff status with the project notes.",
+        badge: "STATUS",
+        metric: "Ready to review",
         icon: Icons::WAVE,
-        accent_argb: 0xFFEC4899,
-        accent_color: Color::from_argb(255, 236, 72, 153),
-        rest_x: 312.0,
-        rest_y: 212.0,
+        accent_argb: 0xFF0078D4,
+        accent_color: Color::from_argb(255, 0, 120, 212),
     },
     CardSpec {
-        title: "Live Hit-Tested UI",
-        subtitle: "Real FerroUI controls stay interactive while warping on GPU",
-        badge: "LIVE TREE",
-        metric: "Drag & Fling",
+        title: "Export package",
+        subtitle: "Include the review notes with the final package.",
+        badge: "PACKAGE",
+        metric: "Package options",
         icon: Icons::CURSOR,
-        accent_argb: 0xFF06B6D4,
-        accent_color: Color::from_argb(255, 6, 182, 212),
-        rest_x: 600.0,
-        rest_y: 212.0,
+        accent_argb: 0xFF0078D4,
+        accent_color: Color::from_argb(255, 0, 120, 212),
     },
 ];
+
+/// Arrange the board into one, two or three columns without clipping cards.
+fn board_layout(width: f64) -> ([Vec2; 6], f64) {
+    let columns = (((width - 24.0) / (CARD_W + 24.0)).floor() as usize).clamp(1, 3);
+    let points = std::array::from_fn(|i| {
+        Vec2::new(
+            (24.0 + (i % columns) as f64 * (CARD_W + 24.0)) as f32,
+            (24.0 + (i / columns) as f64 * (CARD_H + 24.0)) as f32,
+        )
+    });
+    let rows = 6_usize.div_ceil(columns);
+    (points, 24.0 + rows as f64 * (CARD_H + 24.0))
+}
 
 /// Builds the ControlCatalog-styled **Compositor & GPU Shaders** showcase page.
 pub fn compositor_shader_showcase() -> Element {
     let active_mode = signal(ShowcaseMode::SpringElastic);
     let shader_mode = signal(PhysicsShaderMode::ReactiveAuto);
-    let spring_preset = signal(ShowcaseSpring::Bouncy);
-    let shader_intensity = signal(1.10_f64);
-    let shader_distortion = signal(1.00_f64);
+    let spring_preset = signal(ShowcaseSpring::Gentle);
+    let shader_intensity = signal(0.65_f64);
+    let shader_distortion = signal(0.45_f64);
     let gravity_enabled = signal(true);
     let sim_paused = signal(false);
-    let telemetry_line = signal(String::from("Attaching simulation to FerroUI Compositor…"));
+    let telemetry_line = signal(String::from("Preparing motion workspace…"));
+    let positions = signal(board_layout(900.0).0);
+    let content_height = signal(board_layout(900.0).1);
+    let mounted = Rc::new(Cell::new(false));
 
-    let active_handle: Rc<RefCell<Option<CompositionSimulationHandle>>> = Rc::new(RefCell::new(None));
-    let physics_ctrl: Rc<RefCell<Option<CompositorPhysicsController>>> = Rc::new(RefCell::new(None));
-    let card_targets: Rc<RefCell<Vec<SimulationTarget>>> = Rc::new(RefCell::new(Vec::new()));
+    let active_handle: Rc<RefCell<Option<CompositionSimulationHandle>>> =
+        Rc::new(RefCell::new(None));
+    let physics_ctrl: Rc<RefCell<Option<CompositorPhysicsController>>> =
+        Rc::new(RefCell::new(None));
+    let card_targets: Rc<RefCell<Vec<WeakRef<Visual>>>> = Rc::new(RefCell::new(Vec::new()));
     let compositor_ref: Rc<RefCell<Option<Rc<Compositor>>>> = Rc::new(RefCell::new(None));
-    let commit_sub: Rc<RefCell<Option<ferroui_base::reactive::Subscription>>> = Rc::new(RefCell::new(None));
-    let stage_size: Rc<Cell<(f32, f32)>> = Rc::new(Cell::new((900.0, 440.0)));
+    let commit_sub: Rc<RefCell<Option<ferroui_base::reactive::Subscription>>> =
+        Rc::new(RefCell::new(None));
+    let stage_size: Rc<Cell<(f32, f32)>> =
+        Rc::new(Cell::new((900.0, content_height.get_untracked() as f32)));
 
     // Sync live Intensity & Distortion slider signals into the active physics controller.
     {
@@ -231,12 +222,21 @@ pub fn compositor_shader_showcase() -> Element {
         let compositor_ref = compositor_ref.clone();
         let commit_sub = commit_sub.clone();
         let stage_size = stage_size.clone();
+        let mounted = mounted.clone();
         Rc::new(move |mode: ShowcaseMode| {
+            if !mounted.get() {
+                return;
+            }
             *active_handle.borrow_mut() = None;
             *physics_ctrl.borrow_mut() = None;
 
-            let targets = card_targets.borrow().clone();
-            if targets.is_empty() {
+            let targets: Vec<_> = card_targets
+                .borrow()
+                .iter()
+                .filter_map(|v| v.upgrade())
+                .map(SimulationTarget::visual)
+                .collect();
+            if targets.len() != CARDS.len() {
                 return;
             }
 
@@ -266,8 +266,8 @@ pub fn compositor_shader_showcase() -> Element {
                     if let Some(ctrl) = pctrl.borrow().as_ref() {
                         let t = ctrl.telemetry();
                         telemetry_line.set_if_changed(format!(
-                            "Contract: {}  ·  Awake: {}/{}  ·  Peak: {:.0} px/s  ·  Waves: {}  ·  Hits: {}  ·  0 Layout · 0 Re-records",
-                            m.contract_mode(),
+                            "{}  ·  Active cards: {}/{}  ·  Peak: {:.0} px/s  ·  Ripples: {}  ·  Collisions: {}",
+                            m.label(),
                             t.awake_bodies,
                             t.bound_visuals,
                             t.peak_speed_px,
@@ -276,8 +276,8 @@ pub fn compositor_shader_showcase() -> Element {
                         ));
                     } else {
                         telemetry_line.set_if_changed(format!(
-                            "Contract: {} (Zero-Physics ferroui-base)  ·  Shader: {:?}  ·  0 Layout · 0 Re-records",
-                            m.contract_mode(),
+                            "{}  ·  Effect: {:?}",
+                            m.label(),
                             shader_mode.get_untracked(),
                         ));
                     }
@@ -316,10 +316,9 @@ pub fn compositor_shader_showcase() -> Element {
 
                     for (idx, target) in targets.iter().enumerate() {
                         let spec = &CARDS[idx];
-                        let rest_center = Vec2::new(
-                            (spec.rest_x + CARD_W * 0.5) as f32,
-                            (spec.rest_y + CARD_H * 0.5) as f32,
-                        );
+                        let origin = positions.get_untracked()[idx];
+                        let rest_center =
+                            origin + Vec2::new(CARD_W as f32 * 0.5, CARD_H as f32 * 0.5);
                         ctrl.bind_visual(
                             target.clone(),
                             rest_center,
@@ -328,8 +327,6 @@ pub fn compositor_shader_showcase() -> Element {
                         );
                     }
 
-                    // Launch an immediate radial shockwave so multi-ring GPU ripples & motion are visible right away.
-                    ctrl.shockwave(Vec2::new(aw * 0.5, ah * 0.45), 340.0);
                     if sim_paused.get_untracked() {
                         handle.pause();
                     }
@@ -357,18 +354,36 @@ pub fn compositor_shader_showcase() -> Element {
                         let inten = inten_sig.get_untracked();
                         let dist = dist_sig.get_untracked();
                         let eff: Arc<dyn IImmutableEffect> = match sm {
-                            PhysicsShaderMode::EnergyFieldOnly => Arc::new(ImmutableCustomEffect::new(
-                                PhysicsEnergyFieldEffect {
-                                    velocity: Vector::new((vel_norm * 420.0) as f64, ((energy - 0.5) * 380.0) as f64),
+                            PhysicsShaderMode::ImpactRippleOnly => {
+                                let progress = (phase as f64).rem_euclid(1.0);
+                                Arc::new(ImmutableCustomEffect::new(PhysicsImpactRippleEffect {
+                                    origin_1: Point::new(0.5, 0.5),
+                                    progress_1: progress,
+                                    amp_1: 1.0 - progress,
+                                    intensity: inten,
+                                    distortion: dist,
+                                    accent,
+                                    ..PhysicsImpactRippleEffect::default()
+                                }))
+                            }
+                            PhysicsShaderMode::EnergyFieldOnly => {
+                                Arc::new(ImmutableCustomEffect::new(PhysicsEnergyFieldEffect {
+                                    velocity: Vector::new(
+                                        (vel_norm * 420.0) as f64,
+                                        ((energy - 0.5) * 380.0) as f64,
+                                    ),
                                     energy: (0.35 + energy * 0.65) as f64,
                                     phase: phase as f64,
                                     intensity: inten,
                                     distortion: dist,
                                     accent,
-                                },
-                            )),
+                                }))
+                            }
                             _ => Arc::new(ImmutableCustomEffect::new(PhysicsKineticGlassEffect {
-                                velocity: Vector::new((vel_norm * 460.0) as f64, ((energy - 0.5) * 420.0) as f64),
+                                velocity: Vector::new(
+                                    (vel_norm * 460.0) as f64,
+                                    ((energy - 0.5) * 420.0) as f64,
+                                ),
                                 energy: (0.38 + energy * 0.62) as f64,
                                 tilt: (vel_norm * 0.30) as f64,
                                 phase: phase as f64,
@@ -402,14 +417,12 @@ pub fn compositor_shader_showcase() -> Element {
     // -------------------------------------------------------------------------
     // 1. Clean ControlCatalog-style Page Header & Live Shader Controls
     // -------------------------------------------------------------------------
-    let mut mode_row = stack_panel().orientation(Orientation::Horizontal).spacing(6.0);
+    let mut mode_row = wrap_panel().item_spacing(8.0).line_spacing(8.0);
     for mode in ShowcaseMode::ALL {
         let install = install_mode.clone();
         mode_row = mode_row.child(
-            button()
-                .padding((11.0, 6.0, 11.0, 6.0))
-                .border_brush(move || if active_mode.get() == mode { solid(0xFF0078D4) } else { None })
-                .border_thickness(move || if active_mode.get() == mode { 1.5 } else { 1.0 })
+            toggle_button()
+                .is_checked(move || Some(active_mode.get() == mode))
                 .content(icon_label(mode.icon(), mode.label(), 14.0))
                 .on_click(move |_| {
                     active_mode.set(mode);
@@ -419,21 +432,31 @@ pub fn compositor_shader_showcase() -> Element {
     }
 
     let shader_buttons = [
-        (Icons::SPARKLE, "Auto Shaders", PhysicsShaderMode::ReactiveAuto),
-        (Icons::LAYERS, "Kinetic Glass", PhysicsShaderMode::KineticGlassOnly),
-        (Icons::TARGET, "3-Ring Ripple", PhysicsShaderMode::ImpactRippleOnly),
-        (Icons::BLUR, "Energy Field", PhysicsShaderMode::EnergyFieldOnly),
+        (Icons::SPARKLE, "Reactive", PhysicsShaderMode::ReactiveAuto),
+        (
+            Icons::LAYERS,
+            "Kinetic glass",
+            PhysicsShaderMode::KineticGlassOnly,
+        ),
+        (
+            Icons::TARGET,
+            "Impact ripple",
+            PhysicsShaderMode::ImpactRippleOnly,
+        ),
+        (
+            Icons::BLUR,
+            "Energy field",
+            PhysicsShaderMode::EnergyFieldOnly,
+        ),
         (Icons::BOX_SHAPE, "Off", PhysicsShaderMode::Disabled),
     ];
-    let mut shader_row = stack_panel().orientation(Orientation::Horizontal).spacing(5.0);
+    let mut shader_row = wrap_panel().item_spacing(8.0).line_spacing(8.0);
     for (ic, lbl, sm) in shader_buttons {
         let pctrl = physics_ctrl.clone();
         let ah = active_handle.clone();
         shader_row = shader_row.child(
-            button()
-                .padding((9.0, 5.0, 9.0, 5.0))
-                .border_brush(move || if shader_mode.get() == sm { solid(0xFF8B5CF6) } else { None })
-                .border_thickness(move || if shader_mode.get() == sm { 1.5 } else { 1.0 })
+            toggle_button()
+                .is_checked(move || Some(shader_mode.get() == sm))
                 .content(icon_label(ic, lbl, 13.0))
                 .on_click(move |_| {
                     shader_mode.set(sm);
@@ -447,13 +470,13 @@ pub fn compositor_shader_showcase() -> Element {
         );
     }
 
-    let mut spring_row = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(4.0)
-        .vertical_alignment(VerticalAlignment::Center)
+    let mut spring_row = wrap_panel()
+        .item_spacing(8.0)
+        .line_spacing(8.0)
+        .is_enabled(move || active_mode.get() == ShowcaseMode::SpringElastic)
         .child(
             text_block()
-                .text("Spring:")
+                .text("Response")
                 .font_size(11.0)
                 .opacity(0.72)
                 .vertical_alignment(VerticalAlignment::Center)
@@ -462,11 +485,8 @@ pub fn compositor_shader_showcase() -> Element {
     for sp in ShowcaseSpring::ALL {
         let pctrl = physics_ctrl.clone();
         spring_row = spring_row.child(
-            button()
-                .padding((7.0, 3.0, 7.0, 3.0))
-                .font_size(11.0)
-                .border_brush(move || if spring_preset.get() == sp { solid(0xFF10B981) } else { None })
-                .border_thickness(move || if spring_preset.get() == sp { 1.5 } else { 1.0 })
+            toggle_button()
+                .is_checked(move || Some(spring_preset.get() == sp))
                 .content(sp.label())
                 .on_click(move |_| {
                     spring_preset.set(sp);
@@ -477,9 +497,9 @@ pub fn compositor_shader_showcase() -> Element {
         );
     }
 
-    let tuning_row = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(14.0)
+    let tuning_row = wrap_panel()
+        .item_spacing(16.0)
+        .line_spacing(12.0)
         .vertical_alignment(VerticalAlignment::Center)
         .child(
             stack_panel()
@@ -533,13 +553,14 @@ pub fn compositor_shader_showcase() -> Element {
     let ah_pause = active_handle.clone();
     let ss_blast = stage_size.clone();
 
-    let action_row = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(6.0)
+    let action_row = wrap_panel()
+        .item_spacing(8.0)
+        .line_spacing(8.0)
         .child(
             button()
                 .padding((11.0, 6.0, 11.0, 6.0))
-                .content(icon_label(Icons::LIGHTNING, "Shockwave", 14.0))
+                .content(icon_label(Icons::LIGHTNING, "Impulse", 14.0))
+                .is_enabled(move || active_mode.get() != ShowcaseMode::HarmonicWave)
                 .on_click(move |_| {
                     let (w, h) = ss_blast.get();
                     if let Some(ctrl) = pctrl_blast.borrow().as_ref() {
@@ -548,9 +569,9 @@ pub fn compositor_shader_showcase() -> Element {
                 }),
         )
         .child(
-            button()
-                .padding((10.0, 6.0, 10.0, 6.0))
-                .border_brush(move || if gravity_enabled.get() { solid(0xFF10B981) } else { None })
+            toggle_button()
+                .is_checked(move || Some(gravity_enabled.get()))
+                .is_enabled(move || active_mode.get() == ShowcaseMode::PhysicsRigidBody)
                 .content(dynamic(move || {
                     if gravity_enabled.get() {
                         icon_label(Icons::ORBIT, "Gravity: On", 14.0)
@@ -562,14 +583,19 @@ pub fn compositor_shader_showcase() -> Element {
                     let next = !gravity_enabled.get_untracked();
                     gravity_enabled.set(next);
                     if let Some(ctrl) = pctrl_grav.borrow().as_ref() {
-                        ctrl.set_gravity(if next { Vec2::new(0.0, 12.5) } else { Vec2::ZERO });
+                        ctrl.set_gravity(if next {
+                            Vec2::new(0.0, 12.5)
+                        } else {
+                            Vec2::ZERO
+                        });
                     }
                 }),
         )
         .child(
             button()
                 .padding((10.0, 6.0, 10.0, 6.0))
-                .content(icon_label(Icons::RESET, "Snap Home", 14.0))
+                .content(icon_label(Icons::RESET, "Restore layout", 14.0))
+                .is_enabled(move || active_mode.get() != ShowcaseMode::HarmonicWave)
                 .on_click(move |_| {
                     if let Some(ctrl) = pctrl_home.borrow().as_ref() {
                         ctrl.snap_home();
@@ -595,61 +621,39 @@ pub fn compositor_shader_showcase() -> Element {
                 }),
         );
 
-    let header_block = border()
+    let header_block = stack_panel()
         .dock_panel_dock(Dock::Top)
-        .padding((22.0, 14.0, 22.0, 10.0))
-        .border_brush(solid(0x20808080))
-        .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .child(
-            stack_panel()
-                .spacing(8.0)
-                .child(
-                    dock_panel()
-                        .child(
-                            text_block()
-                                .dock_panel_dock(Dock::Right)
-                                .text(move || telemetry_line.get())
-                                .font_size(11.0)
-                                .opacity(0.76)
-                                .vertical_alignment(VerticalAlignment::Bottom),
-                        )
-                        .child(
-                            stack_panel()
-                                .spacing(2.0)
-                                .child(
-                                    text_block()
-                                        .text("Compositor & GPU Shaders")
-                                        .font_size(22.0)
-                                        .font_weight(FontWeight::SemiBold),
-                                )
-                                .child(
-                                    text_block()
-                                        .text("Native ICompositionSimulation driving CompositionVisual transforms & zero-alloc WGSL/Metal GPU shaders.")
-                                        .font_size(12.0)
-                                        .opacity(0.75),
-                                ),
-                        ),
-                )
-                .child(dock_panel().child(action_row.dock_panel_dock(Dock::Right)).child(mode_row))
-                .child(dock_panel().child(tuning_row.dock_panel_dock(Dock::Right)).child(shader_row)),
-        );
+        .margin((24.0, 24.0, 24.0, 12.0))
+        .spacing(12.0)
+        .child(page_header(
+            "Motion workspace",
+            "A live project board. Edit its controls, drag a card, and compare spring, rigid-body, and harmonic motion.",
+        ))
+        .child(mode_row)
+        .child(expander().header("Motion and appearance").content(
+            stack_panel().spacing(12.0).margin(12.0)
+                .child(action_row).child(shader_row).child(tuning_row)
+                .child(subtle_text().text(move || telemetry_line.get()).font_size(12.0)),
+        ));
 
     // -------------------------------------------------------------------------
     // 2. Interactive Compositor Arena with 6 Live Multi-Ring Shader Cards
     // -------------------------------------------------------------------------
-    let mut stage = canvas().clip_to_bounds(true);
+    let mut stage = canvas()
+        .clip_to_bounds(true)
+        .min_width(CARD_W + 48.0)
+        .height(move || content_height.get());
 
     for (idx, spec) in CARDS.iter().enumerate() {
         let card_ref = NodeRef::<Border>::new();
         let targets_mount = card_targets.clone();
-        let install_mount = install_mode.clone();
-        let comp_mount = compositor_ref.clone();
 
         let pctrl_down = physics_ctrl.clone();
         let pctrl_move = physics_ctrl.clone();
         let pctrl_up = physics_ctrl.clone();
         let pctrl_pulse = physics_ctrl.clone();
         let pctrl_ripple = physics_ctrl.clone();
+        let pctrl_lost = physics_ctrl.clone();
 
         let dragging = Rc::new(Cell::new(false));
         let last_pt = Rc::new(Cell::new(Point::new(0.0, 0.0)));
@@ -658,6 +662,7 @@ pub fn compositor_shader_showcase() -> Element {
         let drag_d = dragging.clone();
         let drag_m = dragging.clone();
         let drag_u = dragging.clone();
+        let drag_lost = dragging.clone();
         let lp_d = last_pt.clone();
         let lp_m = last_pt.clone();
         let lt_d = last_t.clone();
@@ -666,43 +671,21 @@ pub fn compositor_shader_showcase() -> Element {
         let badge_bg = (spec.accent_argb & 0x00FF_FFFF) | 0x2600_0000;
         let pulse_count = signal(0u32);
 
-        let card_el = border()
-            .canvas_left(spec.rest_x)
-            .canvas_top(spec.rest_y)
+        let card_el = surface()
+            .canvas_left(move || positions.get()[idx].x as f64)
+            .canvas_top(move || positions.get()[idx].y as f64)
             .width(CARD_W)
             .height(CARD_H)
-            .background(solid(0x1E808080))
-            .border_brush(solid(spec.accent_argb))
-            .border_thickness(1.5)
-            .corner_radius(10.0)
+            .border_thickness(1.0)
+            .corner_radius(8.0)
             .padding(14.0)
             .node_ref(card_ref)
             .with(move |b: &Ref<Border>| {
                 let vis: Ref<Visual> = b.clone().upcast();
-                let mut list = targets_mount.borrow_mut();
-                list.push(SimulationTarget::visual(vis.clone()));
-                if list.len() == CARDS.len() {
-                    drop(list);
-                    if let Some(cv) = ElementComposition::get_element_visual(&vis) {
-                        *comp_mount.borrow_mut() = Some(cv.compositor().clone());
-                        install_mount(active_mode.get_untracked());
-                    } else {
-                        let vis_att = vis.clone();
-                        let comp_att = comp_mount.clone();
-                        let inst_att = install_mount.clone();
-                        vis.attached_to_visual_tree(move |_| {
-                            if let Some(cv) = ElementComposition::get_element_visual(&vis_att) {
-                                *comp_att.borrow_mut() = Some(cv.compositor().clone());
-                            }
-                            inst_att(active_mode.get_untracked());
-                        })
-                        .detach();
-                        install_mount(active_mode.get_untracked());
-                    }
-                }
+                targets_mount.borrow_mut().push(vis.downgrade());
             })
             .on_pointer_pressed(move |e| {
-                if e.handled() {
+                if e.handled() || active_mode.get_untracked() == ShowcaseMode::HarmonicWave {
                     return;
                 }
                 e.set_handled(true);
@@ -710,7 +693,10 @@ pub fn compositor_shader_showcase() -> Element {
                     let input: Ref<InputElement> = b.clone().upcast();
                     e.pointer().capture(Some(&input));
                     let local = e.get_position(Some(&b));
-                    let norm = Point::new((local.x / CARD_W).clamp(0.0, 1.0), (local.y / CARD_H).clamp(0.0, 1.0));
+                    let norm = Point::new(
+                        (local.x / CARD_W).clamp(0.0, 1.0),
+                        (local.y / CARD_H).clamp(0.0, 1.0),
+                    );
                     if let Some(ctrl) = pctrl_down.borrow().as_ref() {
                         ctrl.begin_drag(idx, norm);
                     }
@@ -739,6 +725,13 @@ pub fn compositor_shader_showcase() -> Element {
                     e.set_handled(true);
                     e.pointer().capture(None);
                     if let Some(ctrl) = pctrl_up.borrow().as_ref() {
+                        ctrl.end_drag(idx);
+                    }
+                }
+            })
+            .on_pointer_capture_lost(move |_| {
+                if drag_lost.replace(false) {
+                    if let Some(ctrl) = pctrl_lost.borrow().as_ref() {
                         ctrl.end_drag(idx);
                     }
                 }
@@ -775,7 +768,9 @@ pub fn compositor_shader_showcase() -> Element {
                                             .background(solid(badge_bg))
                                             .child(
                                                 border()
-                                                    .horizontal_alignment(HorizontalAlignment::Center)
+                                                    .horizontal_alignment(
+                                                        HorizontalAlignment::Center,
+                                                    )
                                                     .vertical_alignment(VerticalAlignment::Center)
                                                     .child(icon_view(spec.icon, 15.0)),
                                             ),
@@ -783,7 +778,9 @@ pub fn compositor_shader_showcase() -> Element {
                                     .child(
                                         text_block()
                                             .text(spec.title)
-                                            .font_size(13.5)
+                                            .max_width(130.0)
+                                            .text_wrapping(TextWrapping::Wrap)
+                                            .font_size(14.0)
                                             .font_weight(FontWeight::SemiBold)
                                             .vertical_alignment(VerticalAlignment::Center),
                                     ),
@@ -802,14 +799,21 @@ pub fn compositor_shader_showcase() -> Element {
                                         button()
                                             .padding((8.0, 4.0, 8.0, 4.0))
                                             .font_size(11.0)
-                                            .content(icon_label(Icons::TARGET, "Wave", 12.0))
+                                            .content(icon_label(Icons::TARGET, "Focus", 12.0))
+                                            .is_enabled(move || {
+                                                active_mode.get() != ShowcaseMode::HarmonicWave
+                                            })
                                             .on_click(move |_| {
                                                 let n = pulse_count.get_untracked().wrapping_add(1);
                                                 pulse_count.set(n);
                                                 let ox = 0.25 + ((n % 3) as f64) * 0.25;
                                                 let oy = 0.30 + (((n / 3) % 2) as f64) * 0.40;
                                                 if let Some(ctrl) = pctrl_ripple.borrow().as_ref() {
-                                                    ctrl.trigger_ripple_at(idx, Point::new(ox, oy), 0.96);
+                                                    ctrl.trigger_ripple_at(
+                                                        idx,
+                                                        Point::new(ox, oy),
+                                                        0.96,
+                                                    );
                                                 }
                                             }),
                                     )
@@ -817,7 +821,10 @@ pub fn compositor_shader_showcase() -> Element {
                                         button()
                                             .padding((8.0, 4.0, 8.0, 4.0))
                                             .font_size(11.0)
-                                            .content(icon_label(Icons::LIGHTNING, "Fling", 12.0))
+                                            .content(icon_label(Icons::LIGHTNING, "Nudge", 12.0))
+                                            .is_enabled(move || {
+                                                active_mode.get() != ShowcaseMode::HarmonicWave
+                                            })
                                             .on_click(move |_| {
                                                 let n = pulse_count.get_untracked().wrapping_add(1);
                                                 pulse_count.set(n);
@@ -827,7 +834,7 @@ pub fn compositor_shader_showcase() -> Element {
                                                         idx,
                                                         Point::new(0.75, 0.72),
                                                         1.0,
-                                                        Vec2::new(angle.cos() * 420.0, -380.0),
+                                                        Vec2::new(angle.cos() * 150.0, -120.0),
                                                     );
                                                 }
                                             }),
@@ -849,42 +856,142 @@ pub fn compositor_shader_showcase() -> Element {
                             ),
                     )
                     .child(
-                        text_block()
+                        stack_panel()
+                            .spacing(8.0)
                             .margin((0.0, 10.0, 0.0, 0.0))
-                            .text(spec.subtitle)
-                            .font_size(11.5)
-                            .opacity(0.84),
+                            .child(subtle_text().text(spec.subtitle).font_size(12.0))
+                            .child(card_control(idx, sim_paused, active_handle.clone())),
                     ),
             );
 
         stage = stage.child(card_el);
     }
 
+    let ctrl_unloaded = physics_ctrl.clone();
     let ss_resize = stage_size.clone();
-    let stage_frame = border()
-        .margin((22.0, 12.0, 22.0, 18.0))
-        .corner_radius(10.0)
-        .border_brush(solid(0x28808080))
-        .border_thickness(1.0)
-        .background(solid(0x0D808080))
+    let install_resize = install_mode.clone();
+    let stage_frame = surface()
+        .margin((24.0, 0.0, 24.0, 24.0))
         .clip_to_bounds(true)
-        .on_size_changed({
-            let pctrl = physics_ctrl.clone();
-            move |e| {
-                let sz = e.new_size();
-                if sz.width > 120.0 && sz.height > 120.0 {
-                    ss_resize.set((sz.width as f32, sz.height as f32));
-                    if let Some(ctrl) = pctrl.borrow().as_ref() {
-                        ctrl.set_arena_size(sz.width as f32, sz.height as f32);
-                    }
-                }
+        .on_size_changed(move |e| {
+            let size = e.new_size();
+            if size.width < 1.0 || size.height < 1.0 {
+                return;
+            }
+            let (next, height) = board_layout(size.width);
+            let changed = positions.get_untracked() != next;
+            positions.set_if_changed(next);
+            content_height.set_if_changed(height.max(size.height));
+            ss_resize.set((
+                size.width.max(CARD_W + 48.0) as f32,
+                content_height.get_untracked() as f32,
+            ));
+            if changed {
+                install_resize(active_mode.get_untracked());
+            } else if let Some(ctrl) = physics_ctrl.borrow().as_ref() {
+                ctrl.set_arena_size(size.width as f32, content_height.get_untracked() as f32);
             }
         })
-        .child(stage);
+        .child(scroll_viewer().content(stage));
 
+    let mount_state = mounted.clone();
+    let unmount_state = mounted.clone();
+    let install_loaded = install_mode.clone();
+    let handle_unloaded = active_handle.clone();
+    let subscription_unloaded = commit_sub.clone();
+    let compositor_unloaded = compositor_ref.clone();
     dock_panel()
         .clip_to_bounds(true)
+        .on_loaded(move |_| {
+            mount_state.set(true);
+            install_loaded(active_mode.get_untracked());
+        })
+        .on_unloaded(move |_| {
+            unmount_state.set(false);
+            // Unregister before the visual tree is released: simulations own
+            // their active targets, while the page only retains weak handles.
+            *handle_unloaded.borrow_mut() = None;
+            *ctrl_unloaded.borrow_mut() = None;
+            *subscription_unloaded.borrow_mut() = None;
+            *compositor_unloaded.borrow_mut() = None;
+        })
         .child(header_block)
         .child(stage_frame)
         .into()
+}
+
+fn card_control(
+    index: usize,
+    paused: Signal<bool>,
+    handle: Rc<RefCell<Option<CompositionSimulationHandle>>>,
+) -> Element {
+    match index {
+        0 => {
+            let approved = signal(Some(false));
+            check_box()
+                .content("Approve navigation")
+                .is_checked(approved.two_way())
+                .into()
+        }
+        1 => {
+            let progress = signal(65.0_f64);
+            slider()
+                .minimum(0.0)
+                .maximum(100.0)
+                .value(progress.two_way())
+                .into()
+        }
+        2 => toggle_switch()
+            .content("Pause animation")
+            .is_checked(move || Some(paused.get()))
+            .on_changed(
+                ferroui_controls::primitives::ToggleButton::is_checked_property(),
+                move |value: &Option<bool>| {
+                    let next = value.unwrap_or(false);
+                    paused.set_if_changed(next);
+                    if let Some(handle) = handle.borrow().as_ref() {
+                        handle.set_paused(next);
+                    }
+                },
+            )
+            .into(),
+        3 => {
+            let notes = signal(Some(String::from("Test the keyboard flow")));
+            text_box().text(notes.two_way()).into()
+        }
+        4 => {
+            let ready = signal(Some(false));
+            check_box()
+                .content("Ready for handoff")
+                .is_checked(ready.two_way())
+                .into()
+        }
+        _ => {
+            let notes = signal(Some(true));
+            check_box()
+                .content("Include review notes")
+                .is_checked(notes.two_way())
+                .into()
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn project_board_wraps_without_overlapping_cards() {
+        for (width, columns) in [(400.0, 1), (640.0, 2), (1024.0, 3)] {
+            let (points, height) = board_layout(width);
+            for (i, point) in points.iter().enumerate() {
+                assert!(point.x as f64 + CARD_W <= width);
+                assert!(point.y as f64 + CARD_H <= height);
+                assert_eq!(
+                    point.x as f64,
+                    24.0 + (i % columns) as f64 * (CARD_W + 24.0)
+                );
+            }
+        }
+    }
 }

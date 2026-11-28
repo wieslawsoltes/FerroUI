@@ -1,4 +1,4 @@
-//! Launches **FerroUI Physics Studio**:
+//! Launches **FerroUI Motion Studio**:
 //! - macOS native Metal: `cargo run --profile fast-release -p physics-sandbox --no-default-features --features quartz-metal`
 //! - Default Skia:       `cargo run --profile fast-release -p physics-sandbox`
 //! - Smoke test:         `FERROUI_SMOKE_EXIT_MS=1500 cargo run -p physics-sandbox --no-default-features --features quartz-metal`
@@ -35,9 +35,11 @@ fn main() {
             let owner = Owner::new_root();
             let win = owner.with(|| {
                 let control = window()
-                    .title("FerroUI Physics Studio — Hardware-Accelerated Engine")
+                    .title("FerroUI Motion Studio")
                     .width(1400.0)
                     .height(860.0)
+                    .min_width(760.0)
+                    .min_height(560.0)
                     .child(physics_sandbox::physics_sandbox())
                     .into_element()
                     .mount();
