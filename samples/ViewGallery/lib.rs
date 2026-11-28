@@ -1,26 +1,32 @@
 //! A gallery of phase 3 of the declarative API (`docs/declarative-ui.md`, section 10): a
 //! component that runs again, under a theme variant it switches, with
 //!
-//! - styles of an element (`styles: [style("Button.accent")...]`) with a nested style;
-//! - the theme variant and resources of the theme ([`use_theme_variant`], [`use_resource_as`]);
+//! - styles of an element (`styles: [style(of::<Button>().class("accent"))...]`) with a nested style;
+//! - the theme variant and typed resources of the theme ([`use_theme_variant`], `keys`,
+//!   `dynamic_resource`, [`use_theme_resource`]);
 //! - a transition of a width ([`transition`]);
 //! - a context menu given as an element;
+//! - a templated control whose whole theme is written in Rust (`chip_theme`);
+//! - a view model bound with typed property paths (`#[derive(ViewModel)]`);
 //! - a colour view of `ferroui-controls-color-picker` and a TreeDataGrid of
 //!   `ferroui-controls-treedatagrid`, written with their generated builders.
 //!
 //! `cargo run -p view-gallery`.
 
+use ferroui_base::data::model::Event;
 use ferroui_base::layout::{Layoutable, Orientation, VerticalAlignment};
-use ferroui_base::media::IBrush;
-use ferroui_base::styling::ThemeVariant;
-use ferroui_base::{BoxedValue, Visual};
-use ferroui_controls::primitives::TemplatedControl;
-use ferroui_controls::GridLength;
+use ferroui_base::styling::{ControlTheme, ThemeVariant};
+use ferroui_base::{BoxedValue, Ref, Visual};
+use ferroui_controls::presenters::ContentPresenter;
+use ferroui_controls::primitives::{TemplatedControl, ToggleButton};
+use ferroui_controls::{ContentControl, GridLength};
 use ferroui_controls_treedatagrid::models::TextColumn;
 use ferroui_controls_treedatagrid::TreeDataGridSourceRef;
 use ferroui_treedatagrid_core::models::ColumnRef;
 use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, Models};
+use ferroui_themes_fluent::keys;
 use ferroui_view::prelude::*;
+use std::cell::RefCell;
 use std::rc::Rc;
 
 /// A row of the TreeDataGrid.
@@ -67,6 +73,64 @@ fn languages() -> TreeDataGridSourceRef {
     TreeDataGridSourceRef::of(source)
 }
 
+/// A view model: state that lives outside of the component and notifies its changes. One
+/// declaration gives the accessors, the names of the changes and the typed properties.
+#[derive(ViewModel)]
+#[computed(text: String, depends_on(name))]
+pub struct Greeting {
+    #[property]
+    name: RefCell<String>,
+    property_changed: Event<str>,
+}
+
+impl Greeting {
+    fn new() -> Rc<Self> {
+        Rc::new(Self { name: RefCell::new(String::from("FerroUI")), property_changed: Event::default() })
+    }
+
+    fn text(&self) -> String {
+        format!("Hello, {}", self.name.borrow())
+    }
+}
+
+/// A toggle button drawn as a chip: its whole control theme is Rust, with its template, its
+/// named parts and the styles of its states, and it follows the resources of the theme variant.
+fn chip_theme() -> Ref<ControlTheme> {
+    control_theme::<ToggleButton>()
+        .set(TemplatedControl::padding_property(), (12.0, 4.0))
+        .set(TemplatedControl::corner_radius_property(), 12.0)
+        .set(TemplatedControl::border_thickness_property(), 1.0)
+        .dynamic_resource(TemplatedControl::background_property(), keys::SystemControlBackgroundAltHighBrush)
+        .dynamic_resource(TemplatedControl::border_brush_property(), keys::SystemControlHighlightAccentBrush)
+        .template(|| {
+            border()
+                .name("PART_Border")
+                .template_bind(ferroui_controls::Border::background_property(), TemplatedControl::background_property())
+                .template_bind(ferroui_controls::Border::border_brush_property(), TemplatedControl::border_brush_property())
+                .template_bind(
+                    ferroui_controls::Border::border_thickness_property(),
+                    TemplatedControl::border_thickness_property(),
+                )
+                .template_bind(ferroui_controls::Border::corner_radius_property(), TemplatedControl::corner_radius_property())
+                .child(
+                    content_presenter()
+                        .name("PART_ContentPresenter")
+                        .template_bind(ContentPresenter::content_property(), ContentControl::content_property())
+                        .template_bind(ContentPresenter::padding_property(), TemplatedControl::padding_property()),
+                )
+                .into_element()
+        })
+        .nested(
+            style(nesting().pointer_over().template().of::<ferroui_controls::Border>())
+                .set(Visual::opacity_property(), 0.85),
+        )
+        .nested(
+            style(nesting().checked().template().of::<ferroui_controls::Border>())
+                .dynamic_resource(ferroui_controls::Border::background_property(), keys::SystemControlHighlightAccentBrush),
+        )
+        .build()
+}
+
 /// The gallery: the theme variant it shows is a hook of its own.
 #[component(rerender)]
 pub fn Gallery(#[prop(default)] start_dark: bool) -> Element {
@@ -84,8 +148,7 @@ pub fn Gallery(#[prop(default)] start_dark: bool) -> Element {
 #[component(rerender)]
 fn Page(dark: Signal<bool>) -> Element {
     let variant = use_theme_variant();
-    let background = use_resource_as::<Rc<dyn IBrush>>("SystemControlBackgroundAltHighBrush");
-    let accent = use_resource_as::<Rc<dyn IBrush>>("SystemControlHighlightAccentBrush");
+    let accent = use_theme_resource(keys::SystemControlHighlightAccentBrush);
     let accent_name = accent
         .as_ref()
         .and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color().to_string()))
@@ -93,16 +156,19 @@ fn Page(dark: Signal<bool>) -> Element {
     let wide = use_signal(|| false);
     let bar_transitions = use_hook(|| transitions([transition(Layoutable::width_property(), ms(400))]));
     let source = use_hook(languages);
+    let greeting = use_hook(Greeting::new);
+    let chip = use_hook(chip_theme);
     let is_dark = variant.as_ref() == Some(&ThemeVariant::dark());
 
     rsx! {
-        Border { background: background, padding: 16.0,
+        Border { dynamic_resource(ferroui_controls::Border::background_property(), keys::SystemControlBackgroundAltHighBrush),
+            padding: 16.0,
             StackPanel { spacing: 12.0,
                 styles: [
-                    style("Button.accent")
-                        .set(TemplatedControl::background_property(), "#0063B1")
+                    style(of::<Button>().class("accent"))
+                        .set(TemplatedControl::background_property(), rgb(0x0063B1))
                         .set(TemplatedControl::foreground_property(), "White")
-                        .nested(style("^:pointerover").set(Visual::opacity_property(), 0.85)),
+                        .nested(style(nesting().pointer_over()).set(Visual::opacity_property(), 0.85)),
                 ],
                 TextBlock { font_size: 20.0,
                     text: format!("Theme variant: {} (use_theme_variant), accent: {accent_name} (use_resource_as)",
@@ -114,10 +180,19 @@ fn Page(dark: Signal<bool>) -> Element {
                         context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } MenuItem { header: "Paste" } } },
                         "Animate the bar (right-click: a context menu)" }
                 }
-                Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: "#0063B1",
+                StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
+                    ToggleButton { name: "ChipRust", theme: chip.clone(), "A theme in Rust" }
+                    ToggleButton { name: "ChipOther", theme: chip.clone(), is_checked: true, "Checked" }
+                }
+                StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
+                    data_context: greeting.clone() as BoxedValue,
+                    TextBox { name: "GreetingName", width: 180.0, text: Greeting::NAME.two_way() }
+                    TextBlock { vertical_alignment: VerticalAlignment::Center, text: Greeting::TEXT.one_way() }
+                }
+                Border { name: "Bar", height: 12.0, corner_radius: 6.0, background: rgb(0x0063B1),
                     horizontal_alignment: ferroui_base::layout::HorizontalAlignment::Left,
                     width: if wide.get() { 480.0 } else { 120.0 }, transitions: bar_transitions }
-                Grid { column_definitions: "Auto,*", height: 330.0,
+                Grid { column_definitions: [auto(), star(1.0)], height: 330.0,
                     ColorView { width: 300.0, vertical_alignment: VerticalAlignment::Top }
                     TreeDataGrid { Grid.column: 1, margin: (16.0, 0.0, 0.0, 0.0), source: source }
                 }

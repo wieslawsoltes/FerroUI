@@ -19,6 +19,8 @@
 //! application.styles().add(FluentTheme::new().as_style());
 //! ```
 
+/// The typed resource keys of the theme (`scripts/generate_theme_keys.py`).
+pub mod keys;
 #[path = "Accents/mod.rs"]
 pub mod accents;
 mod assets;

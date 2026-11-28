@@ -1,6 +1,9 @@
 //! The data formats of the framework and the format strings of the page.
 
 use ferroui_base::input::DataFormat;
+pub(crate) use ferroui_base::input::platform::web_clipboard_format::{
+    from_web_clipboard_format, to_web_clipboard_format,
+};
 use std::rc::Rc;
 
 const FORMAT_TEXT_PLAIN: &str = "text/plain";
@@ -86,6 +89,20 @@ mod tests {
         assert_eq!(DataFormatKind::Application, parsed.kind());
         assert_eq!("my-format", parsed.identifier());
         assert!(parsed == format);
+    }
+
+    #[test]
+    fn invalid_web_clipboard_names_do_not_construct_application_formats() {
+        for name in [
+            "web application/frn-fmt.text.",
+            "web application/frn-fmt.bytes.4",
+            "web application/frn-fmt.text.zz",
+            "web application/frn-fmt.text.20",
+            "web application/frn-fmt.other.41",
+            "web application/anything.41",
+        ] {
+            assert!(from_web_clipboard_format(name).is_none(), "{name}");
+        }
     }
 
     #[test]

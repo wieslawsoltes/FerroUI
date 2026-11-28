@@ -426,6 +426,30 @@ impl VulkanDeviceApi {
         (result, image_index)
     }
 
+    /// `vkCmdCopyImage`.
+    pub fn cmd_copy_image(
+        &self,
+        command_buffer: vk::CommandBuffer,
+        src_image: vk::Image,
+        src_image_layout: vk::ImageLayout,
+        dst_image: vk::Image,
+        dst_image_layout: vk::ImageLayout,
+        regions: &[vk::ImageCopy],
+    ) {
+        // SAFETY: the pointer and the count are those of the slice.
+        unsafe {
+            (self.fp.cmd_copy_image)(
+                command_buffer,
+                src_image,
+                src_image_layout,
+                dst_image,
+                dst_image_layout,
+                regions.len() as u32,
+                regions.as_ptr(),
+            )
+        };
+    }
+
     /// `vkCmdBlitImage`.
     #[allow(clippy::too_many_arguments)]
     pub fn cmd_blit_image(
