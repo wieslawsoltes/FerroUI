@@ -984,8 +984,8 @@ impl FormattedText {
         Some(accumulated_bounds)
     }
 
-    /// Draws the text object.
-    pub(crate) fn draw(&self, drawing_context: &mut dyn ITextDrawingSink, origin: Point) {
+    /// Draws the formatted text at its top-left origin through the native text sink.
+    pub fn draw(&self, drawing_context: &mut dyn ITextDrawingSink, origin: Point) {
         let mut line_origin = origin;
 
         if self.metrics.get().is_some_and(|metrics| !metrics.extent.is_nan()) {

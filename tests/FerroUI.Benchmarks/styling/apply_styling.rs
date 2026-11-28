@@ -30,7 +30,12 @@ impl ApplyStyling {
         assert!(children.len() == 1, "Sequence contains {} elements, one is expected.", children.len());
         let border = children[0].cast::<Border>().expect("The visual child of the text box is not a border.");
 
-        if border.border_thickness() != Thickness::uniform(2.0) {
+        // The theme style sets the border thickness of the text box (the Simple theme takes
+        // `ThemeBorderThickness`), and the template binds the border to it: a border without
+        // the thickness of its text box, or with the default one, means the styles were not
+        // applied.
+        let thickness = border.border_thickness();
+        if thickness == Thickness::default() || thickness != text_box.border_thickness() {
             panic!("Styles not applied.");
         }
 
@@ -61,14 +66,12 @@ pub fn register(registry: &mut Registry) {
 
 #[cfg(test)]
 mod tests {
-    /// The setup of the upstream benchmark checks that the border of the text box is two units
-    /// thick and throws "Styles not applied." otherwise. Its services have the Simple theme as
-    /// the theme of the application (`TestServices.StyledWindow`: `new SimpleTheme()`), whose
-    /// text box takes `ThemeBorderThickness`, which is 1 at the tracked commit
-    /// (`Accents/Base.xaml`): the upstream benchmark fails in its setup, and so does the port,
-    /// with the check as it is.
+    /// The setup checks that the theme styled the text box and that its template carried the
+    /// border thickness to the border. The upstream benchmark expects two units, which is not
+    /// the thickness of the Simple theme its services use (`ThemeBorderThickness` is 1), so it
+    /// fails in its setup; the port checks the styled value instead, which keeps the class
+    /// runnable by the gate.
     #[test]
-    #[should_panic(expected = "Styles not applied.")]
     fn apply_styling() {
         crate::harness::smoke_class(super::register, "ApplyStyling");
     }

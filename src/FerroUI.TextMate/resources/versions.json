@@ -1,0 +1,77 @@
+{
+  "textmate_sharp": {
+    "project": "TextMateSharp",
+    "revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2"
+  },
+  "bundled_resources": {
+    "packages": 51,
+    "language_contributions": 72,
+    "grammar_contributions": 79,
+    "theme_files": 21,
+    "declared_source_components": 58,
+    "component_manifest": "../../FerroUI.TextMate.Grammars/resources/asset-licenses.json"
+  },
+  "native": {
+    "rust_binding": "onig",
+    "binding_version": "6.5.3",
+    "onig_sys_version": "69.9.3",
+    "oniguruma_version": "6.9.10"
+  },
+  "browser": {
+    "package": "vscode-oniguruma",
+    "version": "2.0.1",
+    "repository": "https://github.com/microsoft/vscode-oniguruma",
+    "oniguruma_version": "6.9.5_rev1",
+    "files": {
+      "browser/vendor/oniguruma.js": "sha256:d49f2bfcbffca8732aac82fb84db5aab2521bcf0acb612f27454dc75cab85b82",
+      "browser/vendor/onig.wasm": "sha256:76ebc1f0d87b2e7449a45ff3cd1a1546a9f05f54bdac44ee03e8a2b8348897be",
+      "browser/vendor/LICENSE.txt": "sha256:ddde8aba8fe72b4830e27901fc78733eb6db7b6c653161075de213a6adeda3fd",
+      "browser/vendor/NOTICES.txt": "sha256:615d94d89eacc046241518c247f6650a5df80d1adf4b284a756f500867620b35"
+    }
+  },
+  "conformance_oracle": {
+    "vscode-textmate": "9.3.2",
+    "vscode-oniguruma": "2.0.1",
+    "cases": 11,
+    "lines": 74,
+    "fixture": "tests/fixtures/upstream-tokens.json"
+  },
+  "theme_test_fixtures": {
+    "source_revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+    "license_notices": ["NOTICE.md", "tests/fixtures/MICROSOFT-LICENSE.md"],
+    "files": {
+      "tests/fixtures/theme-dark-plus.json": {
+        "source": "src/TextMateSharp.Tests/Resources/dark_plus.json",
+        "sha256": "bbcf443bcd3b5841d18246094ed2d3b05c61661776e4bb810c2c61203d2a61f6"
+      },
+      "tests/fixtures/theme-dark-vs.json": {
+        "source": "src/TextMateSharp.Tests/Resources/dark_vs.json",
+        "sha256": "71b57ea6a7a3829f0336666e5b9093647d847d0432eaa90c7c2fa684acfff195"
+      }
+    }
+  },
+  "pinned_grammar_test_fixtures": {
+    "source_revision": "e0db45be30278c0f3f80302c31f498c8f8f1c4f2",
+    "source_resources": "src/TextMateSharp.Tests/Resources",
+    "reference_tests": "src/TextMateSharp.Tests/Internal/Grammars/GrammarTests.cs",
+    "directory": "tests/fixtures/pinned-grammars",
+    "sha256": {
+      "batchfile.tmLanguage.json": "21a1e96f5e01295531109ada2dbeca6d15426fa80a0d225bee0ba4e16274630f",
+      "csharp.tmLanguage.json": "61f899fdd893ea556a56aa9911dbdf4877466508254a16f7fa3b52003ad2f2dd",
+      "css.tmLanguage.json": "4bf9521ba471f3ea1c3335b460d03a7af9f511f118fad5856af0e29e8e486525",
+      "expected.json": "2ba3dc766892b52e8cb11437b81522b89a45fa0827ff09bf720c1f07150d2773",
+      "styles.ng.json": "3c72b5fc103715c8b9ba373c8745b4a5db85795c9ec73a424fe18bedb623efe2",
+      "template.ng.json": "796447b20a9cd39f02a6e785141f6e429933cc636ce23700f7245cc57083854e",
+      "TypeScript.tmLanguage.json": "ba7f279a7d0786c6a2ada0f07b07ef72d935b6bae682b9b4976a192986f7e29d",
+      "licenses/batchfile.md": "295aff5c4c9fcecbfb2961c5ddaf6e608bb2265d946afaec9bd600c3bacb7c5d",
+      "licenses/csharp.md": "22844d95411661d8827cdbb724b55c40e779327be9892beb1c684fd393cd290e",
+      "licenses/css.md": "43657f6f5f30b2df702e97d58dac539aa99af06e2700d07cf44133969520277d",
+      "licenses/typescript.md": "860036d2aba3cf1905590ad7e8846960cd748fcf29cfea075d99d9bc852de170"
+    }
+  },
+  "portable_fallback": {
+    "package": "fancy-regex",
+    "version": "0.19.2",
+    "full_oniguruma_compatibility": false
+  }
+}
