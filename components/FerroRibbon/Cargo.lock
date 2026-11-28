@@ -304,6 +304,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-controls-icons",
+ "ferroui-fonts-inter",
  "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-native",

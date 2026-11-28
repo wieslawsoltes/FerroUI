@@ -8,6 +8,7 @@ use ferroui_base::input::KeyboardNavigation;
 use ferroui_base::threading::CancellationToken;
 use ferroui_base::{Rect, Size};
 use ferroui_controls::{AppBuilder, Application, Button, Panel};
+use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, FerroTestApplicationAttribute,
     FerroTestAssembly, HeadlessUnitTestSession,
@@ -16,8 +17,12 @@ use std::any::Any;
 use std::cell::RefCell;
 use std::panic::{AssertUnwindSafe, catch_unwind};
 use std::sync::Once;
+/// The headless platform with the font the themes name (`fonts:Inter`), as an application has
+/// it: without it every text falls back to the glyph of the headless font, one em wide.
 fn build() -> AppBuilder {
-    AppBuilder::configure::<Application>().use_headless(FerroHeadlessPlatformOptions::default())
+    AppBuilder::configure::<Application>()
+        .use_headless(FerroHeadlessPlatformOptions::default())
+        .with_inter_font()
 }
 const TEST_ASSEMBLY: FerroTestAssembly = FerroTestAssembly {
     name: "FerroRibbon.Headless.Tests",

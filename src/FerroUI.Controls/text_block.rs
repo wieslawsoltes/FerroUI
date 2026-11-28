@@ -584,6 +584,18 @@ fn shared_run_properties(
     properties
 }
 
+impl TextBlock {
+    /// Drops the run properties kept to be shared. The kept properties find their glyph
+    /// typeface once, with the font manager of that time; a headless unit test session disposes
+    /// of the font manager of every test with the test, and a later test that found the kept
+    /// properties would shape with a glyph typeface whose font data is gone.
+    #[doc(hidden)]
+    pub fn reset_shared_run_properties_for_unit_tests() {
+        let kept = RUN_PROPERTIES.try_with(|kept| std::mem::take(&mut *kept.borrow_mut()));
+        drop(kept);
+    }
+}
+
 /// The handle through which the inlines of a text block reach it.
 struct TextBlockInlineHost(WeakRef<TextBlock>);
 
