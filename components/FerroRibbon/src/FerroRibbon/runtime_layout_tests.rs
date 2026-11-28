@@ -56,11 +56,36 @@ fn reduction_report(m: &Mounted) -> String {
     }
     report
 }
+/// Writes the inputs of the reduction that the panel cached, without measuring again, to the
+/// standard error of the process: the case runs on the session thread, whose captured output is
+/// not the output of this test. Temporary, to compare a passing run with a failing one.
+fn trace_reduction(m: &Mounted, step: &str) {
+    use std::io::Write;
+    let panel = m.ribbon.selected_tab().unwrap().groups_panel();
+    let mut line = format!(
+        "ribbon-trace {step}: container {} panel {} extent {}",
+        m.ribbon.bounds().width,
+        panel.bounds().width,
+        panel.extent_width()
+    );
+    for group in m.groups() {
+        line.push_str(&format!(
+            " | {:?} {:?} {:?}",
+            group.id(),
+            group.state(),
+            panel.cached_classic_widths(&group)
+        ));
+    }
+    line.push('\n');
+    let _ = std::io::stderr().write_all(line.as_bytes());
+}
 #[test]
 fn narrow_ribbon_reduces_then_collapses_groups() {
     crate::group_tests::run(|| {
         let m = Mounted::new(1400.);
+        trace_reduction(&m, "1400");
         m.resize(620.);
+        trace_reduction(&m, "620");
         assert!(
             m.states().iter().any(|s| *s != RibbonGroupState::Large),
             "{:?}\n{}",
@@ -68,6 +93,7 @@ fn narrow_ribbon_reduces_then_collapses_groups() {
             reduction_report(&m)
         );
         m.resize(300.);
+        trace_reduction(&m, "300");
         assert!(
             m.states()
                 .iter()
