@@ -217,12 +217,104 @@ fn the_sources_root_type_keys_classes_and_keys() {
         names: set(&["CalendarView", "Canvas", "Orientation", "Vertical"]),
         // A key, and strings that are none.
         strings: set(&["CaptionTextBlockStyle", "Hello, World!", "CalendarView"]),
+        ..SourceReferences::default()
     };
     let theme = theme();
     let roots = source_roots(&references, [&theme], &graph);
     assert_eq!(roots, Roots { types: set(&["CalendarView", "Canvas"]), keys: set(&["CaptionTextBlockStyle"]), ..Roots::default() });
     // The calendar view and its buttons, the popup the canvas creates, the caption style.
     assert_eq!(kept_units(&theme, &roots, &graph, false), [0, 1, 2, 3, 4, 7, 8]);
+}
+
+/// A typed key is a root exactly (#1076): a name that merely equals a key is not, unless the code
+/// imports a `keys` module so that its names cannot be told.
+#[test]
+fn typed_keys_are_exact_roots() {
+    let graph = TypeGraph::from_models(&[]);
+    let theme = theme();
+    let by_name = SourceReferences { names: set(&["CaptionTextBlockStyle"]), ..SourceReferences::default() };
+    assert_eq!(source_roots(&by_name, [&theme], &graph).keys, set(&[]), "a name equal to a key is no root");
+    let typed = SourceReferences { key_names: set(&["CaptionTextBlockStyle", "NotAKey"]), ..SourceReferences::default() };
+    assert_eq!(source_roots(&typed, [&theme], &graph).keys, set(&["CaptionTextBlockStyle"]));
+    let glob = SourceReferences { names_may_be_keys: true, ..by_name };
+    assert_eq!(source_roots(&glob, [&theme], &graph).keys, set(&["CaptionTextBlockStyle"]));
+}
+
+/// A theme with the managed file chooser, whose template names a resource of its own unit's
+/// dependency, and a target of a build.
+fn chooser_theme() -> ThemeUnitsModel {
+    ThemeUnitsModel {
+        class: "Tests.Theme".to_string(),
+        table_path: "::tests::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![
+            unit(0, "ambient", &[], &["Window"], &[], &["Window"]),
+            unit(1, "Controls/ManagedFileChooser.xaml", &[], &[MANAGED_FILE_CHOOSER], &["DialogBackground"], &[]),
+            unit(2, "Resources/Dialog.xaml", &["DialogBackground"], &[], &[], &[]),
+        ],
+    }
+}
+
+fn target(os: &str, arch: &str) -> BuildTarget {
+    BuildTarget { os: os.to_string(), arch: arch.to_string() }
+}
+
+/// The units of [`chooser_theme`] an application with these source names and roots keeps.
+fn kept_with_chooser(names: &[&str], roots: &Roots, graph: &TypeGraph, on: &BuildTarget) -> Vec<u32> {
+    let references = SourceReferences { names: set(names), ..SourceReferences::default() };
+    let mut roots = roots.clone();
+    roots.extend(managed_file_chooser_roots(&references, &roots, graph, Some(on)));
+    kept_units(&chooser_theme(), &roots, graph, false)
+}
+
+/// Not from upstream (#612): a window on Linux falls back to the managed file chooser without a
+/// portal or GTK, so what uses its storage provider keeps the template of the chooser and what
+/// it references.
+#[test]
+fn a_storage_provider_keeps_the_chooser_where_the_backend_falls_back_to_it() {
+    let graph = TypeGraph::default();
+    let linux = target("linux", "x86_64");
+    let none = Roots::default();
+    assert_eq!(kept_with_chooser(&["StorageProvider"], &none, &graph, &linux), [0, 1, 2]);
+    // A document that binds `$parent[TopLevel].StorageProvider`.
+    let document = Roots { keys: set(&["StorageProvider"]), ..Roots::default() };
+    assert_eq!(kept_with_chooser(&[], &document, &graph, &linux), [0, 1, 2]);
+    // The other platforms have a system picker and no such fallback.
+    for (os, arch) in [("macos", "aarch64"), ("ios", "aarch64"), ("android", "aarch64"), ("windows", "x86_64")] {
+        assert_eq!(kept_with_chooser(&["StorageProvider"], &none, &graph, &target(os, arch)), [0], "{os}");
+    }
+    assert_eq!(kept_with_chooser(&["StorageProvider"], &none, &graph, &target("emscripten", "wasm32")), [0]);
+}
+
+/// Not from upstream (#612): a picker of the behaviors, through its base class.
+#[test]
+fn a_live_picker_class_keeps_the_chooser() {
+    let graph = TypeGraph::from_pairs(&[("OpenFilePickerAction", "PickerActionBase")]);
+    let linux = target("linux", "x86_64");
+    let picker = Roots { types: set(&["OpenFilePickerAction"]), ..Roots::default() };
+    assert_eq!(kept_with_chooser(&[], &picker, &graph, &linux), [0, 1, 2]);
+    assert_eq!(kept_with_chooser(&[], &picker, &graph, &target("macos", "aarch64")), [0]);
+    let other = Roots { types: set(&["Button"]), ..Roots::default() };
+    assert_eq!(kept_with_chooser(&[], &other, &graph, &linux), [0]);
+}
+
+/// Not from upstream (#612): the managed dialogs an application installs are shown on any target.
+#[test]
+fn installing_the_managed_dialogs_keeps_the_chooser_on_every_target() {
+    let graph = TypeGraph::default();
+    let none = Roots::default();
+    for name in ["UseManagedSystemDialogs", "UseManagedSystemDialogsWith", "ManagedStorageProvider"] {
+        for (os, arch) in [("macos", "aarch64"), ("windows", "x86_64"), ("linux", "x86_64")] {
+            assert_eq!(kept_with_chooser(&[name], &none, &graph, &target(os, arch)), [0, 1, 2], "{name} on {os}");
+        }
+    }
+}
+
+/// Not from upstream (#612): an application that cannot reach the chooser does not keep it.
+#[test]
+fn an_application_without_a_file_picker_does_not_keep_the_chooser() {
+    let roots = Roots { types: set(&["Button", "TextBlock"]), ..Roots::default() };
+    let linux = target("linux", "x86_64");
+    assert_eq!(kept_with_chooser(&["Button", "TextBlock"], &roots, &TypeGraph::default(), &linux), [0]);
 }
 
 /// Not from upstream (#954): a debug build of a declarative application keeps the controls of the

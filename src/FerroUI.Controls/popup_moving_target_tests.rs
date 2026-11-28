@@ -28,7 +28,7 @@ use ferroui_base::animation::{IGlobalClock, IPageTransition, PageSlide, SlideAxi
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{Brushes, MediaContext};
 use ferroui_system::task::JoinHandle;
-use ferroui_base::{FerroLocator, PixelPoint, Point, Rect, Ref, Size, Visual};
+use ferroui_base::{FerroLocator, PixelPoint, Point, Rect, Ref, Size, Thickness, Visual};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
@@ -263,4 +263,82 @@ fn popup_opened_during_the_transition_ends_at_its_target() {
 
     assert_eq!(at_rest(), last_update(&shell).anchor_rectangle);
     assert_eq!(PixelPoint::new(40, 80), popup_position(&shell));
+}
+
+/// A window of 400 by 300 as in `shell`, whose content is `outer` (at the left
+/// top corner) holding `target` 20 to the right and 30 down.
+fn plain_shell(outer: &Ref<Border>, target: &Ref<Border>) -> Shell {
+    let updates = Rc::new(RefCell::new(Vec::new()));
+    let popups = Rc::new(RefCell::new(Vec::new()));
+    let window_impl = MockWindowingPlatform::create_window_mock_with_size(400.0, 300.0);
+    window_impl.setup_create_popup({
+        let updates = updates.clone();
+        let popups = popups.clone();
+        let weak = Rc::downgrade(&window_impl);
+        move |_| {
+            let parent: Rc<dyn ITopLevelImpl> = weak.upgrade()?;
+            let popup = MockWindowingPlatform::create_popup_mock(parent);
+            let inner = IPopupImpl::popup_positioner(&*popup).expect("the popup mock has a positioner");
+            popup.setup_popup_positioner(Some(Rc::new(RecordingPositioner { inner, updates: updates.clone() })));
+            popups.borrow_mut().push(popup.clone());
+            let popup: Rc<dyn IPopupImpl> = popup;
+            Some(popup)
+        }
+    });
+    let window = Window::with_impl(window_impl);
+    outer.set_horizontal_alignment(HorizontalAlignment::Left);
+    outer.set_vertical_alignment(VerticalAlignment::Top);
+    outer.set_padding(Thickness::new(20.0, 30.0, 0.0, 0.0));
+    outer.set_child(Some(target.clone().upcast()));
+    window.set_content(Some(Control::boxed(outer.clone())));
+    window.show();
+    frame();
+    Shell { window, nav: NavigationPage::new(), updates, popups }
+}
+
+/// A layout pass that moves an ancestor of the target (not the target within
+/// its parent, which upstream follows) positions the popup again only when it
+/// opts in (`Popup::set_follows_placement_target_layout`, as the code editor's
+/// popups do): once, at the new place. A popup that does not opt in keeps the
+/// triggers of main and upstream, so it is not positioned again.
+#[test]
+fn a_popup_follows_an_ancestor_moved_by_layout_only_when_it_opts_in() {
+    for follows in [false, true] {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let outer = Border::new();
+        let target = target();
+        let shell = plain_shell(&outer, &target);
+        let popup = popup_below(&target);
+        assert!(!popup.follows_placement_target_layout());
+        popup.set_follows_placement_target_layout(follows);
+
+        popup.open();
+        frame();
+        assert_eq!(at_rest(), last_update(&shell).anchor_rectangle);
+        assert_eq!(PixelPoint::new(40, 80), popup_position(&shell));
+        let opened = shell.updates.borrow().len();
+
+        // A frame without a change positions nothing again.
+        frame();
+        assert_eq!(opened, shell.updates.borrow().len());
+
+        let bounds = target.bounds();
+        outer.set_margin(Thickness::new(0.0, 50.0, 0.0, 0.0));
+        frame();
+        frame();
+        assert_eq!(bounds, target.bounds(), "the target did not move within its parent");
+        let moved = Rect::new(20.0, 80.0, 100.0, 50.0);
+        assert_eq!(Some(moved), position_in(&target, &shell.window));
+
+        if follows {
+            assert_eq!(opened + 1, shell.updates.borrow().len(), "positioned again once");
+            assert_eq!(moved, last_update(&shell).anchor_rectangle);
+            assert_eq!(PixelPoint::new(40, 130), popup_position(&shell));
+        } else {
+            assert_eq!(opened, shell.updates.borrow().len(), "not positioned again");
+            assert_eq!(PixelPoint::new(40, 80), popup_position(&shell));
+        }
+        popup.close();
+        drop(shell);
+    }
 }

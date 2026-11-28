@@ -155,11 +155,22 @@ counted on the WinUI theme, the pools of all its tables are 266,234 bytes with o
 table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
 and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
 pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
-16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
+16 bits in the pool of its unit keeps a pool of its own.
 It is on because the measurement kept it: on macOS the stripped executables were smaller in
 every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
 34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
 typed backend encodes the same runs as its programs; with it no packed table is written.
+
+A run of plain values (numbers, thicknesses, corner radii, colours, texts) is written as an
+`rt::PackedValueRows` when the 48 bytes of that table and its records are smaller than the slice
+of rows; a shorter run keeps its slice. A record is the key as an offset and a length in the pool
+of strings, the line and the position, then the index of the number, the indices of the four
+components, the two halves of the colour, or the text in the pool. The tables of one unit share
+its pool of strings and a static of its numbers, `{DOCUMENT}_UNIT_{n}_NUMBERS`, so a trimmed unit
+takes both with it. `rt::add_packed_double_resources`, `add_packed_thickness_resources`,
+`add_packed_corner_radius_resources`, `add_packed_color_resources` and
+`add_packed_string_resources` add the values in the same order, with the same errors at the same
+positions as the helpers of the slices.
 
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
@@ -304,14 +315,22 @@ needs. The build computes the table from the roots:
    or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
    methods the sources call, read as class names (`text_block()` is `TextBlock`,
    `.tool_tip("..")` is `ToolTip`): the builders of the declarative layer are named after the
-   classes they make;
+   classes they make. A typed key of a theme is read exactly, as what follows `keys::` in a path,
+   a `use` item or a macro (`keys::ButtonBackground`, #1076). An identifier that merely equals a
+   key is no root, unless the crate imports `keys::*` or `keys as k`, which hide the names;
 5. the creates edges of the type models: the controls a class's code constructs (`ListBox`
    creates `ListBoxItem`), transitively. An edge into a class that no code constructs on the
    target of the build does not hold there (`Export::not_created_on`, #1002): the host of a window
    creates its drawn decorations (`WindowDrawnDecorations`, with the caption buttons and the title
    bar resources they need) everywhere but on macOS, iOS, Android and the browser, so applications
    for those targets keep that theme only when they name it;
-6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
+6. the names in `[package.metadata.ferroui] theme-roots = [..]`;
+7. `ManagedFileChooser`, where a file picker can reach it though nothing names it (#612): on every
+   target when the sources install or construct the managed dialogs
+   (`use_managed_system_dialogs`, `ManagedStorageProvider`), and on the targets whose backends
+   fall back to it without a portal or GTK (X11 and Wayland) when the sources or documents use
+   `TopLevel.StorageProvider` or a picker action or behavior is live. An application without a
+   file picker does not keep it.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
 `$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
@@ -374,7 +393,7 @@ them to the applications that depend on it. The documents of a class group that 
 includes root nothing.
 
 The roots are the ones of the list above without the documents: what the sources name and call
-(4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
+(4), what the code of the live classes creates (5), `theme-roots` (6) and the chooser (7). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
 the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds

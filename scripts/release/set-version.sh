@@ -1,8 +1,8 @@
 #!/bin/sh
 # set-version.sh <version>: the version of every crate of the workspace, in the one place it is
-# stated (`[workspace.package]` of the root manifest) and in the pins of the crates of the workspace
-# to one another (`version = "=<version>"` in `[workspace.dependencies]`), then verified with
-# `cargo metadata`, which also brings Cargo.lock up to date. See docs/release.md, "Version scheme".
+# stated (`[workspace.package]` of the root manifest) and in every repository pin between workspace
+# crates. Verifies the manifests with `cargo metadata` and refreshes Cargo.lock with
+# `cargo update --workspace`. See docs/release.md, "Version scheme".
 set -eu
 if [ "$#" -ne 1 ]; then
   echo "usage: scripts/release/set-version.sh <version>   (for example 0.1.0-preview.2)" >&2

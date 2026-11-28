@@ -6,13 +6,27 @@ use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{Point, Ref, Size};
 use std::any::Any;
 use std::cell::Cell;
+use std::fmt;
 use std::rc::Rc;
+
+/// The formatter requires an embedded control run to have positive length.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct EmbeddedControlRunLengthError(pub i32);
+
+impl fmt::Display for EmbeddedControlRunLengthError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Embedded control run length must be positive, got {}", self.0)
+    }
+}
+
+impl std::error::Error for EmbeddedControlRunLengthError {}
 
 /// The text run of a control embedded in text: it reserves the desired size
 /// of the control in the line and draws nothing.
 pub struct EmbeddedControlRun {
     control: Ref<Control>,
     properties: Rc<dyn TextRunProperties>,
+    length: i32,
     measured_metrics: Option<(Size, f64)>,
     hosted_metrics: Option<Rc<Cell<Option<(Size, f64)>>>>,
 }
@@ -22,9 +36,31 @@ impl EmbeddedControlRun {
         Self {
             control,
             properties,
+            length: 1,
             measured_metrics: None,
             hosted_metrics: None,
         }
+    }
+
+    /// Captures the measurement of an inline child for an immutable formatted line.
+    /// The caller owns the control's layout and must measure it before using the run.
+    pub fn from_measurement(control: Ref<Control>, properties: Rc<dyn TextRunProperties>) -> Self {
+        let mut run = Self::new(control, properties);
+        run.measured_metrics = Some((
+            run.control.desired_size(),
+            Self::measured_baseline(&run.control),
+        ));
+        run
+    }
+
+    /// Sets the number of formatter positions used by this atomic control.
+    /// Its physical size and baseline still come from the child measurement.
+    pub fn with_length(mut self, length: i32) -> Result<Self, EmbeddedControlRunLengthError> {
+        if length <= 0 {
+            return Err(EmbeddedControlRunLengthError(length));
+        }
+        self.length = length;
+        Ok(self)
     }
 
     /// The inline owns this cache across source rebuilds. A replacement child
@@ -40,6 +76,7 @@ impl EmbeddedControlRun {
         Self {
             control: self.control.clone(),
             properties: self.properties.clone(),
+            length: self.length,
             measured_metrics: Some((
                 self.control.desired_size(),
                 Self::measured_baseline(&self.control),
@@ -68,6 +105,7 @@ impl EmbeddedControlRun {
         Self {
             control: self.control.clone(),
             properties: self.properties.clone(),
+            length: self.length,
             measured_metrics: Some(
                 self.hosted_metrics
                     .as_ref()
@@ -84,7 +122,8 @@ impl EmbeddedControlRun {
         }
     }
 
-    pub(crate) fn measured_metrics_are_current(&self) -> bool {
+    /// Whether the run still reflects the child's completed measurement and baseline.
+    pub fn measured_metrics_are_current(&self) -> bool {
         self.control.is_measure_valid()
             && self.measured_metrics
                 == Some((
@@ -123,6 +162,10 @@ impl EmbeddedControlRun {
 }
 
 impl TextRun for EmbeddedControlRun {
+    fn length(&self) -> i32 {
+        self.length
+    }
+
     fn properties(&self) -> Option<&Rc<dyn TextRunProperties>> {
         Some(&self.properties)
     }
