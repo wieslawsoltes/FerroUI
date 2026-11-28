@@ -672,11 +672,21 @@ mod ganesh_vk {
     use crate::gpu::ganesh::GaneshGrContext;
     use crate::gpu::vulkan::sk_image_info;
     use crate::gpu::{ISkiaGpu, ISkiaGrContext};
+    #[cfg(target_os = "linux")]
+    use crate::i_drawable_bitmap_impl::IDrawableBitmapImpl;
+    #[cfg(target_os = "linux")]
+    use crate::leased_gpu_bitmap::LeasedGpuBitmap;
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::IOptionalFeatureProvider;
     use ferroui_base::rendering::scene3d::Scene3DSnapshot;
     use ferroui_base::PixelSize;
     use ferroui_render3d::brush::scene_texture_inputs;
+    #[cfg(target_os = "linux")]
+    use ferroui_base::platform::SharedBitmapImpl;
+    #[cfg(target_os = "linux")]
+    use ferroui_render3d::brush::{DeviceBitmap, MaterialBrush};
+    #[cfg(target_os = "linux")]
+    use ferroui_vulkan::scene3d::Scene3DVkDeviceTextures;
     use ferroui_vulkan::ash::vk::{self, Handle};
     use ferroui_vulkan::scene3d::{
         counters, Scene3DVkError, Scene3DVkExecutor, Scene3DVkTarget, Scene3DVkTexture, Scene3DVkViewport,
@@ -727,6 +737,9 @@ mod ganesh_vk {
         /// The queue family of the images.
         queue_family: u32,
         slots: Vec<Slot>,
+        /// The frames of videos and cameras on meshes, drawn into images the executor samples.
+        #[cfg(target_os = "linux")]
+        frames: Vec<FrameTarget>,
         clock: u64,
     }
 
@@ -761,8 +774,15 @@ mod ganesh_vk {
         });
         let Ok(Some(mut entry)) = released else { return };
         let slots = std::mem::take(&mut entry.slots);
+        #[cfg(target_os = "linux")]
+        let frames = std::mem::take(&mut entry.frames);
         match (&mut entry.executor, release_resources) {
             (Ok(executor), true) => {
+                #[cfg(target_os = "linux")]
+                for target in frames {
+                    drop(target.surface);
+                    executor.delete_output_texture(target.texture);
+                }
                 for mut slot in slots {
                     // The image borrows the texture: it goes first.
                     drop(slot.image);
@@ -773,6 +793,172 @@ mod ganesh_vk {
             }
             // A lost device: its handles go with it.
             _ => drop(slots),
+        }
+    }
+
+    /// A frame of a producer drawn by Ganesh into an image of the device: its YUV decoded and its
+    /// curve converted, in the layout the executor samples (#608).
+    #[cfg(target_os = "linux")]
+    struct FrameTarget {
+        bitmap: Weak<SharedBitmapImpl>,
+        /// Declared before the texture: the surface wraps it.
+        surface: sk::Surface,
+        texture: Scene3DVkTexture,
+    }
+
+    /// The frames of a render, as the executor asks for them.
+    #[cfg(target_os = "linux")]
+    struct VkFrames<'a> {
+        targets: &'a [FrameTarget],
+    }
+
+    #[cfg(target_os = "linux")]
+    impl VkFrames<'_> {
+        fn find(&self, bitmap: &SharedBitmapImpl) -> Option<&FrameTarget> {
+            let address = std::ptr::from_ref(bitmap).cast::<()>();
+            self.targets.iter().find(|target| target.bitmap.as_ptr().cast::<()>() == address)
+        }
+    }
+
+    // SAFETY: each image is an image of this device with a sampled usage, left in
+    // `SHADER_READ_ONLY_OPTIMAL` by `prepare_frames`, and is kept until the queue is idle.
+    #[cfg(target_os = "linux")]
+    unsafe impl Scene3DVkDeviceTextures for VkFrames<'_> {
+        fn sampling(&self, bitmap: &SharedBitmapImpl) -> DeviceBitmap {
+            match self.find(bitmap) {
+                Some(_) => DeviceBitmap::Converted,
+                None => DeviceBitmap::NotOnDevice,
+            }
+        }
+
+        fn device_image(&self, bitmap: &SharedBitmapImpl) -> Option<(vk::Image, vk::Format, (u32, u32))> {
+            let target = self.find(bitmap)?;
+            let texture = &target.texture;
+            Some((texture.image(), texture.format(), (texture.width(), texture.height())))
+        }
+    }
+
+    /// The frames on the meshes of `scene` for this context.
+    #[cfg(target_os = "linux")]
+    fn scene_frames(scene: &Scene3DSnapshot, context_id: u64) -> Vec<Arc<SharedBitmapImpl>> {
+        let is_frame = |bitmap: &SharedBitmapImpl| {
+            bitmap.as_any().downcast_ref::<LeasedGpuBitmap>().is_some_and(|frame| frame.context_id() == context_id)
+        };
+        let sampling = |bitmap: &SharedBitmapImpl| {
+            if is_frame(bitmap) {
+                DeviceBitmap::Converted
+            } else {
+                DeviceBitmap::NotOnDevice
+            }
+        };
+        let mut frames: Vec<Arc<SharedBitmapImpl>> = Vec::new();
+        for model in &scene.models {
+            for layer in model.front.iter().chain(&model.back) {
+                let brush = MaterialBrush::of_with(layer.brush.as_ref(), ferroui_base::Rect::default(), &sampling);
+                let bitmap = brush.texture().and_then(|texture| texture.bitmap()).filter(|bitmap| is_frame(bitmap));
+                if let Some(bitmap) = bitmap {
+                    if !frames.iter().any(|known| Arc::ptr_eq(known, bitmap)) {
+                        frames.push(bitmap.clone());
+                    }
+                }
+            }
+        }
+        frames
+    }
+
+    /// A target of `size`: one whose frame is gone, or a new one.
+    #[cfg(target_os = "linux")]
+    fn frame_target(
+        executor: &mut Scene3DVkExecutor,
+        ganesh: &GaneshGrContext,
+        queue_family: u32,
+        targets: &mut Vec<FrameTarget>,
+        size: (u32, u32),
+    ) -> Option<usize> {
+        let free = targets.iter().position(|target| {
+            target.bitmap.strong_count() == 0 && (target.texture.width(), target.texture.height()) == size
+        });
+        if free.is_some() {
+            return free;
+        }
+        let texture = executor.create_output_texture(size.0, size.1)?;
+        let info = VulkanImageInfo {
+            format: texture.format().as_raw() as u32,
+            pixel_size: PixelSize::new(size.0 as i32, size.1 as i32),
+            handle: texture.image().as_raw(),
+            layout: vk::ImageLayout::UNDEFINED.as_raw() as u32,
+            tiling: vk::ImageTiling::OPTIMAL.as_raw() as u32,
+            usage_flags: texture.usage().as_raw(),
+            level_count: 1,
+            sample_count: 1,
+            memory_handle: texture.memory().as_raw(),
+            view_handle: 0,
+            memory_size: texture.allocation_size(),
+            is_protected: false,
+        };
+        let image_info = sk_image_info(&info, queue_family);
+        // SAFETY: the image and its memory are live objects of the device of the context, and the
+        // target keeps them for as long as the surface.
+        let backend = unsafe { backend_textures::make_vk((size.0 as i32, size.1 as i32), &image_info, "") };
+        let surface = ganesh.with_context(|context| {
+            sk::gpu::surfaces::wrap_backend_texture(
+                context,
+                &backend,
+                SurfaceOrigin::TopLeft,
+                1,
+                sk::ColorType::RGBA8888,
+                None,
+                None,
+            )
+        });
+        let Some(surface) = surface else {
+            executor.delete_output_texture(texture);
+            return None;
+        };
+        targets.push(FrameTarget { bitmap: Weak::<LeasedGpuBitmap>::new(), surface, texture });
+        Some(targets.len() - 1)
+    }
+
+    /// Draws each frame of `scene` that has no target into one, on the GPU, and leaves it in the
+    /// layout the executor samples. A frame that fails is left out: its material draws its colour.
+    #[cfg(target_os = "linux")]
+    fn prepare_frames(
+        executor: &mut Scene3DVkExecutor,
+        ganesh: &GaneshGrContext,
+        queue_family: u32,
+        targets: &mut Vec<FrameTarget>,
+        scene: &Scene3DSnapshot,
+        context_id: u64,
+    ) {
+        for bitmap in scene_frames(scene, context_id) {
+            let address = Arc::as_ptr(&bitmap).cast::<()>();
+            if targets.iter().any(|target| target.bitmap.as_ptr().cast::<()>() == address) {
+                continue;
+            }
+            let Some(frame) = bitmap.as_any().downcast_ref::<LeasedGpuBitmap>() else { continue };
+            let pixels = bitmap.pixel_size();
+            let size = (pixels.width.max(1) as u32, pixels.height.max(1) as u32);
+            let Some(index) = frame_target(executor, ganesh, queue_family, targets, size) else { continue };
+            let target = &mut targets[index];
+            let bounds = sk::Rect::from_wh(size.0 as f32, size.1 as f32);
+            let mut paint = sk::Paint::default();
+            paint.set_blend_mode(sk::BlendMode::Src);
+            let sampling = sk::SamplingOptions::new(sk::FilterMode::Nearest, sk::MipmapMode::None);
+            frame.draw(Some(ganesh), target.surface.canvas(), &bounds, &bounds, sampling, &paint);
+            ganesh.with_context(|context| context.flush_and_submit_surface(&mut target.surface, None));
+            let Some(mut backend) = sk::gpu::surfaces::get_backend_texture(
+                &mut target.surface,
+                sk::surface::BackendHandleAccess::FlushRead,
+            ) else {
+                continue;
+            };
+            let Some(info) = backend_textures::get_vk_image_info(&backend) else { continue };
+            let from = vk::ImageLayout::from_raw(info.layout as i32);
+            if executor.transition_to_sampled(target.texture.image(), from).is_err() {
+                continue;
+            }
+            backend_textures::set_vk_image_layout(&mut backend, sk::gpu::vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL);
+            target.bitmap = Arc::downgrade(&bitmap);
         }
     }
 
@@ -889,7 +1075,15 @@ mod ganesh_vk {
                     if let Err(error) = &executor {
                         report_failure(error);
                     }
-                    contexts.push(ContextScenes { context_id, executor, queue_family, slots: Vec::new(), clock: 0 });
+                    contexts.push(ContextScenes {
+                        context_id,
+                        executor,
+                        queue_family,
+                        slots: Vec::new(),
+                        #[cfg(target_os = "linux")]
+                        frames: Vec::new(),
+                        clock: 0,
+                    });
                     contexts.len() - 1
                 }
             };
@@ -969,8 +1163,16 @@ mod ganesh_vk {
             }
             let new_textures = counters().textures_created - textures_before;
 
+            #[cfg(target_os = "linux")]
+            prepare_frames(executor, ganesh, queue_family, &mut entry.frames, scene, context_id);
             let target = Scene3DVkTarget { texture: &slot.texture, size, antialiased };
-            // A frame of a video is drawn with the colour of its layer here (the gap of section 3.21).
+            #[cfg(target_os = "linux")]
+            let rendered = {
+                let frames = VkFrames { targets: &entry.frames };
+                executor.render_with_textures(&mut slot.viewport, scene, &target, &frames)
+            };
+            // Off Linux no producer hands this route a frame: a material with one draws its colour.
+            #[cfg(not(target_os = "linux"))]
             let rendered = executor.render(&mut slot.viewport, scene, &target);
             match rendered {
                 Ok(report) => {
@@ -996,6 +1198,11 @@ mod ganesh_vk {
                 Err(error) => {
                     // The context draws its 3D scenes with the CPU reference from now on.
                     report_failure(&error);
+                    #[cfg(target_os = "linux")]
+                    for target in std::mem::take(&mut entry.frames) {
+                        drop(target.surface);
+                        executor.delete_output_texture(target.texture);
+                    }
                     let slots = std::mem::take(&mut entry.slots);
                     for mut slot in slots {
                         drop(slot.image);

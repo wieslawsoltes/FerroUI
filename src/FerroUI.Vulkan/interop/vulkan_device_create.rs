@@ -69,8 +69,20 @@ impl VulkanDevice {
             .queue_family_index(dev.queue_family_index)
             .queue_priorities(&queue_priorities)];
 
+        // The import of DMA-BUF frames is optional and off by default (#575): each extension is
+        // enabled only where the device has it, as the extensions of the options are.
+        #[cfg(target_os = "linux")]
+        let asked_extensions: Vec<String> = {
+            let mut asked = options.device_extensions.clone();
+            if crate::dma_buf::dma_buf_switched_on() {
+                asked.extend(crate::dma_buf::DMA_BUF_DEVICE_EXTENSIONS.iter().map(|name| (*name).to_owned()));
+            }
+            asked
+        };
+        #[cfg(not(target_os = "linux"))]
+        let asked_extensions = options.device_extensions.clone();
         let enabled_extensions = device_extensions(
-            &options.device_extensions,
+            &asked_extensions,
             VulkanExternalObjectsFeature::required_device_extensions(),
             &dev.extensions,
             options.require_swapchain_extension,

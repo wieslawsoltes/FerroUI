@@ -8,6 +8,8 @@
 //! The module needs a Skia build with Vulkan (the `ferro_skia_vulkan`
 //! configuration: Linux, and the feature `vulkan` of this crate elsewhere).
 
+#[cfg(target_os = "linux")]
+mod dma_buf_frames;
 mod vulkan_skia_external_objects_feature;
 mod vulkan_skia_gpu;
 mod vulkan_skia_render_target;

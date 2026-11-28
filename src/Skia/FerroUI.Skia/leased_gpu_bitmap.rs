@@ -29,6 +29,9 @@ pub(crate) struct LeasedGpuBitmap {
     /// on the other routes and for a texture of another target.
     #[cfg_attr(not(all(feature = "media3d", ferro_skia_ganesh_gl)), allow(dead_code))]
     gl_texture: u32,
+    /// What keeps the storage the image borrows alive (the planes of a DMA-BUF frame on Vulkan).
+    #[cfg_attr(not(all(ferro_skia_vulkan, target_os = "linux")), allow(dead_code))]
+    owner: Option<std::sync::Arc<dyn Any + Send + Sync>>,
 }
 impl LeasedGpuBitmap {
     pub(crate) fn new(image: Image, frame: FrameLease, context_id: u64) -> Self {
@@ -50,7 +53,27 @@ impl LeasedGpuBitmap {
             color,
             metal_texture: metal_texture as usize,
             gl_texture: 0,
+            owner: None,
         }
+    }
+
+    /// A frame whose image borrows the storage of `owner`, with the colour its image has once it
+    /// is decoded: the curve of the video for NV12, whose range Ganesh has expanded.
+    #[cfg(all(ferro_skia_vulkan, target_os = "linux"))]
+    pub(crate) fn with_owner(
+        image: Image,
+        frame: FrameLease,
+        context_id: u64,
+        color: FrameColor,
+        owner: std::sync::Arc<dyn Any + Send + Sync>,
+    ) -> Self {
+        Self { color, owner: Some(owner), ..Self::new(image, frame, context_id) }
+    }
+
+    /// The context the frame is drawn on.
+    #[cfg(all(feature = "media3d", ferro_skia_vulkan))]
+    pub(crate) fn context_id(&self) -> u64 {
+        self.context_id
     }
 
     /// A frame whose image borrows the `GL_TEXTURE_2D` named `gl_texture`.

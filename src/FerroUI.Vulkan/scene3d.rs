@@ -362,7 +362,6 @@ struct BrushTexture {
     /// A view of the renderer's image, which this texture destroys.
     view: vk::ImageView,
     set: vk::DescriptorSet,
-    size: (u32, u32),
     last_used: u64,
 }
 
@@ -1171,6 +1170,62 @@ impl Scene3DVkExecutor {
         self.destroy_image(texture.bundle);
     }
 
+    /// Takes `image`, which a renderer drew into and left in the layout `from`, to
+    /// `SHADER_READ_ONLY_OPTIMAL`, in the order of the queue: what a later render samples.
+    pub fn transition_to_sampled(&mut self, image: vk::Image, from: vk::ImageLayout) -> Result<(), Scene3DVkError> {
+        let device = self.device.clone();
+        let lock = device.lock();
+        let index = self.next_in_flight;
+        self.next_in_flight = (index + 1) % self.in_flight.len();
+        let serial = self.in_flight[index].serial;
+        self.wait_for(serial);
+        self.reclaim();
+        let (command_buffer, fence) = (self.in_flight[index].command_buffer, self.in_flight[index].fence);
+        let range =
+            vk::ImageSubresourceRange::default().aspect_mask(vk::ImageAspectFlags::COLOR).level_count(1).layer_count(1);
+        let barrier = vk::ImageMemoryBarrier::default()
+            .src_access_mask(vk::AccessFlags::MEMORY_WRITE)
+            .dst_access_mask(vk::AccessFlags::SHADER_READ)
+            .old_layout(from)
+            .new_layout(vk::ImageLayout::SHADER_READ_ONLY_OPTIMAL)
+            .src_queue_family_index(vk::QUEUE_FAMILY_IGNORED)
+            .dst_queue_family_index(vk::QUEUE_FAMILY_IGNORED)
+            .image(image)
+            .subresource_range(range);
+        let begin = vk::CommandBufferBeginInfo::default().flags(vk::CommandBufferUsageFlags::ONE_TIME_SUBMIT);
+        let buffers = [command_buffer];
+        let submit = vk::SubmitInfo::default().command_buffers(&buffers);
+        let queue = vk::Queue::from_raw(self.device.main_queue_handle() as u64);
+        // SAFETY: the command buffer and fence are not in flight (waited for above), the device is
+        // locked, and the image is one of this device in the layout the caller names.
+        let result = unsafe {
+            self.api
+                .reset_command_buffer(command_buffer, vk::CommandBufferResetFlags::empty())
+                .and_then(|()| self.api.begin_command_buffer(command_buffer, &begin))
+                .and_then(|()| {
+                    self.api.cmd_pipeline_barrier(
+                        command_buffer,
+                        vk::PipelineStageFlags::ALL_COMMANDS,
+                        vk::PipelineStageFlags::FRAGMENT_SHADER,
+                        vk::DependencyFlags::empty(),
+                        &[],
+                        &[],
+                        &[barrier],
+                    );
+                    self.api.end_command_buffer(command_buffer)
+                })
+                .and_then(|()| self.api.reset_fences(&[fence]))
+                .and_then(|()| self.api.queue_submit(queue, &[submit], fence))
+        };
+        if result.is_ok() {
+            self.serial += 1;
+            self.in_flight[index].serial = self.serial;
+            self.in_flight[index].pending = true;
+        }
+        lock.dispose();
+        result.map_err(failed("the transition of a frame"))
+    }
+
     /// Draws `scene` into `target` and submits it to the main queue, with the device locked by the
     /// caller or by this call. A failure with four samples is reported once and the render is
     /// drawn with one; a failure with one is the error.
@@ -1783,7 +1838,7 @@ impl Scene3DVkExecutor {
         });
         let view = bundle.view;
         let identity = source.identity();
-        self.textures.insert(key, BrushTexture { identity, owned: Some(bundle), view, set, size, last_used: renders });
+        self.textures.insert(key, BrushTexture { identity, owned: Some(bundle), view, set, last_used: renders });
         true
     }
 
@@ -1797,7 +1852,7 @@ impl Scene3DVkExecutor {
         if textures.sampling(&**bitmap) == DeviceBitmap::NotOnDevice {
             return None;
         }
-        let (image, format, size) = textures.device_image(&**bitmap)?;
+        let (image, format, _) = textures.device_image(&**bitmap)?;
         let view = self.create_view(image, format, vk::ImageAspectFlags::COLOR).ok()?;
         match self.texture_set(view) {
             Ok(set) => Some(BrushTexture {
@@ -1805,7 +1860,6 @@ impl Scene3DVkExecutor {
                 owned: None,
                 view,
                 set,
-                size,
                 last_used: self.renders,
             }),
             Err(_) => {
