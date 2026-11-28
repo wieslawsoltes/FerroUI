@@ -2112,6 +2112,81 @@ fn input_method_client_surrounding_text_returns_empty_for_empty_line() {
 }
 
 #[test]
+fn input_method_client_of_a_masked_field_has_no_real_text_and_edits_the_real_text() {
+    let _scope = test_scope();
+
+    let text_box = templated_text_box(Some("a\u{1F600}cd"));
+    text_box.set_password_char('*');
+    text_box.apply_template();
+    let client = get_input_method_client(&text_box);
+
+    // The mask has the UTF-16 length of the text, so offsets address the real text.
+    let masked = client.surrounding_text();
+    assert!(!masked.contains(['a', '\u{1F600}', 'c', 'd']), "{masked:?}");
+    assert_eq!(5, masked.encode_utf16().count());
+
+    // Replacing a selection the input method reports.
+    client.set_selection(TextSelection::new(3, 4));
+    text_box.handle_text_input(Some("X"));
+    assert_eq!(Some("a\u{1F600}Xd"), text_box.text().as_deref());
+
+    // A reveal changes what is drawn, not what an input method may read.
+    text_box.set_reveal_password(true);
+    assert!(!client.surrounding_text().contains('X'));
+
+    text_box.set_password_char('\0');
+    assert_eq!("a\u{1F600}Xd", client.surrounding_text());
+}
+
+#[test]
+fn input_method_client_is_told_when_masking_starts_and_ends() {
+    let _scope = test_scope();
+
+    let text_box = templated_text_box(Some("text"));
+    text_box.apply_template();
+    let client = get_input_method_client(&text_box);
+    let raised = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counter = raised.clone();
+    let _token = client.surrounding_text_changed(std::rc::Rc::new(move || counter.set(counter.get() + 1)));
+
+    text_box.set_password_char('*');
+    assert_eq!(1, raised.get());
+    text_box.set_password_char('#');
+    assert_eq!(1, raised.get());
+    text_box.set_password_char('\0');
+    assert_eq!(2, raised.get());
+}
+
+#[test]
+fn copy_and_cut_do_nothing_while_the_text_is_masked() {
+    let _scope = test_scope();
+    let text_box = templated_text_box(Some("1234"));
+    text_box.set_password_char('*');
+    text_box.set_selection_start(0);
+    text_box.set_selection_end(4);
+
+    let raised = std::rc::Rc::new(std::cell::Cell::new(0));
+    let copied = raised.clone();
+    text_box.copying_to_clipboard(move |_, _| copied.set(copied.get() + 1));
+    let cut = raised.clone();
+    text_box.cutting_to_clipboard(move |_, _| cut.set(cut.get() + 1));
+
+    text_box.copy();
+    text_box.cut();
+    // The input method of the platform can ask for both through its context menu actions.
+    let client = get_input_method_client(&text_box);
+    client.execute_context_menu_action(ferroui_base::input::text_input::ContextMenuAction::Copy);
+    client.execute_context_menu_action(ferroui_base::input::text_input::ContextMenuAction::Cut);
+    assert_eq!(0, raised.get());
+    assert_eq!(Some("1234"), text_box.text().as_deref());
+
+    // An explicit copy of a revealed password stays possible, as upstream.
+    text_box.set_reveal_password(true);
+    text_box.copy();
+    assert_eq!(1, raised.get());
+}
+
+#[test]
 fn input_method_client_surrounding_text_uses_full_document_for_multiline_text() {
     let _scope = test_scope();
 
@@ -2527,6 +2602,25 @@ fn pointer_selection_is_not_published_to_primary_selection_for_password_box() {
 
     assert_eq!(0, target.selection_start().min(target.selection_end()));
     assert_eq!(4, target.selection_start().max(target.selection_end()));
+    assert_eq!(None, get_clipboard_text(&primary_selection_of(&window)));
+    assert_eq!(0, primary_selection.set_data_count());
+}
+
+#[test]
+fn pointer_selection_of_a_revealed_password_is_not_published_to_primary_selection() {
+    let _scope = test_scope();
+    let primary_selection = TestClipboardImpl::new();
+    let target = text_box_to_show();
+    target.set_password_char('*');
+    target.set_reveal_password(true);
+    let window = window_with_primary_selection(&target, &primary_selection);
+
+    let mouse = MouseTestHelper::new();
+    mouse.down_at(&target, MouseButton::Left, Point::new(1.0, 300.0), 1);
+    mouse.move_(&target, Point::new(700.0, 300.0));
+    mouse.up_at(&target, MouseButton::Left, Point::new(700.0, 300.0));
+
+    assert_ne!(target.selection_start(), target.selection_end());
     assert_eq!(None, get_clipboard_text(&primary_selection_of(&window)));
     assert_eq!(0, primary_selection.set_data_count());
 }

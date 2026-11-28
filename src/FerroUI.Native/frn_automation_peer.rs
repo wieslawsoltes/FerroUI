@@ -1082,6 +1082,19 @@ mod tests {
         peer.bring_into_view();
     }
 
+    #[test]
+    fn a_masked_text_box_is_no_value_provider_for_the_native_layer() {
+        let text_box = ferroui_controls::TextBox::new();
+        text_box.set_text(Some("synthetic fixture"));
+        let peer = FrnAutomationPeer::wrap(Some(ControlAutomationPeer::create_peer_for_element(&text_box)))
+            .expect("native wrapper");
+        assert!(peer.is_value_provider());
+
+        text_box.set_password_char('*');
+        assert!(!peer.is_value_provider());
+        assert!(peer.value_provider_get_value().is_none());
+    }
+
     use crate::frn_string::frn_string_to_string;
     use ferroui_base::threading::Dispatcher;
     use ferroui_controls::automation::AutomationProperties;

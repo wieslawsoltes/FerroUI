@@ -7,7 +7,9 @@ import { transform } from "esbuild";
 
 const source = await readFile(new URL("../modules/ferroui/inputOptions.ts", import.meta.url), "utf8");
 const { code } = await transform(source, { loader: "ts", format: "esm", target: "es2020" });
-const { applyTextInputOptions } = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
+const {
+    applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion, rememberMaskedText, restoreMaskedText
+} = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
 
 function composingInput() {
     const attributes = new Map([["type", "text"]]);
@@ -82,4 +84,65 @@ test("unchanged attributes do not generate repeated DOM mutations", () => {
     assert.deepEqual(writes, []);
     applyTextInputOptions(input, "url", "go", "none", false, false, "");
     assert.deepEqual(writes, [["inputmode", "url"], ["enterkeyhint", "go"]]);
+});
+
+test("a masked field uses a password input without spelling or autofill services", () => {
+    const attributes = new Map([["spellcheck", "false"], ["autocapitalize", "none"]]);
+    const input = {
+        type: "text",
+        getAttribute(name) { return attributes.get(name) ?? null; },
+        setAttribute(name, value) { attributes.set(name, value); },
+        removeAttribute(name) { attributes.delete(name); }
+    };
+
+    applyMaskedInput(input, true);
+    assert.equal(input.type, "password");
+    assert.equal(attributes.get("spellcheck"), "false");
+    assert.equal(attributes.get("autocorrect"), "off");
+    assert.equal(attributes.get("autocapitalize"), "off");
+    assert.equal(attributes.get("autocomplete"), "new-password");
+
+    applyMaskedInput(input, false);
+    assert.equal(input.type, "text");
+    assert.equal(attributes.get("spellcheck"), "false");
+    assert.equal(attributes.has("autocorrect"), false);
+    assert.equal(attributes.get("autocapitalize"), "none");
+    assert.equal(attributes.has("autocomplete"), false);
+});
+
+test("a masked field refuses the insertions that are not forwarded to the real text", () => {
+    for (const inputType of ["insertFromPaste", "insertFromDrop", "insertReplacementText", "insertFromYank"]) {
+        assert.equal(isUnforwardedMaskedInsertion("password", inputType), true, inputType);
+        assert.equal(isUnforwardedMaskedInsertion("text", inputType), false, inputType);
+    }
+    for (const inputType of ["insertText", "insertCompositionText", "deleteContentBackward"]) {
+        assert.equal(isUnforwardedMaskedInsertion("password", inputType), false, inputType);
+    }
+});
+
+test("composed text does not stay in a masked element", () => {
+    const selections = [];
+    const input = { type: "password", value: "", setSelectionRange(start, end) { selections.push([start, end]); } };
+
+    rememberMaskedText(input, "\u2022\u2022", 1, 2);
+    input.value = "\u2022composed\u2022";
+    restoreMaskedText(input);
+    assert.equal(input.value, "\u2022\u2022");
+    assert.deepEqual(selections, [[1, 2]]);
+
+    // Nothing to do when the element already holds the mask.
+    restoreMaskedText(input);
+    assert.equal(selections.length, 1);
+
+    // An element the framework never wrote a mask into holds nothing.
+    const fresh = { type: "password", value: "composed", setSelectionRange() {} };
+    restoreMaskedText(fresh);
+    assert.equal(fresh.value, "");
+
+    // A text input is not touched.
+    const plain = { type: "text", value: "visible", setSelectionRange() { assert.fail("not a masked input"); } };
+    rememberMaskedText(plain, "visible", 0, 0);
+    plain.value = "edited";
+    restoreMaskedText(plain);
+    assert.equal(plain.value, "edited");
 });
