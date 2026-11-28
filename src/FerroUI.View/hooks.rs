@@ -307,6 +307,13 @@ pub fn use_resource(key: &str) -> Option<BoxedValue> {
     value.get()
 }
 
+/// The resource of a typed key of a theme (`keys::ButtonBackground`) as the type of the key (see
+/// [`use_resource`]): the component runs again when it changes. A property that only shows a
+/// resource follows it with [`dynamic_resource`](crate::El::dynamic_resource), with no run.
+pub fn use_theme_resource<T: Clone + 'static>(key: ferroui_base::controls::ThemeResourceKey<T>) -> Option<T> {
+    use_resource_as::<T>(key.name())
+}
+
 /// The `DataContext` of the control the component is mounted in, when it
 /// holds a `T` (see [`use_data_context_value`]).
 pub fn use_data_context<T: Clone + 'static>() -> Option<T> {

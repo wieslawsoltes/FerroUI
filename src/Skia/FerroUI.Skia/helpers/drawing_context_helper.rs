@@ -64,7 +64,9 @@ pub fn try_create_dash_effect(pen: Option<&dyn IPen>) -> Option<PathEffect> {
 
     let count = if src_dashes.len() % 2 == 0 { src_dashes.len() } else { src_dashes.len() * 2 };
     let thickness = pen.thickness() as f32;
-    let dashes_array: Vec<f32> = (0..count).map(|i| src_dashes[i % src_dashes.len()] as f32 * thickness).collect();
+    // On the stack up to 16 intervals.
+    let dashes_array: smallvec::SmallVec<[f32; 16]> =
+        (0..count).map(|i| src_dashes[i % src_dashes.len()] as f32 * thickness).collect();
 
     let offset = (dash_style.offset() * pen.thickness()) as f32;
 
