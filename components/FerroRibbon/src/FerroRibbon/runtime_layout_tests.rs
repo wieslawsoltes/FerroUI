@@ -54,6 +54,30 @@ fn reduction_report(m: &Mounted) -> String {
             group.can_collapse(),
         ));
     }
+    for group in m.groups() {
+        let Some(button) = group.collapsed_button() else {
+            continue;
+        };
+        report.push_str(&format!(
+            "\n{:?} collapsed button font {} theme {}",
+            group.id(),
+            button.font_size(),
+            button.theme().is_some()
+        ));
+        for text in button
+            .get_visual_descendants()
+            .filter_map(|v| v.cast::<ferroui_controls::TextBlock>())
+        {
+            report.push_str(&format!(
+                " | {:?} size {} family {} visible {} width {}",
+                text.text(),
+                text.font_size(),
+                text.font_family(),
+                text.is_visible(),
+                text.desired_size().width
+            ));
+        }
+    }
     report
 }
 /// Writes the inputs of the reduction that the panel cached, without measuring again, to the
