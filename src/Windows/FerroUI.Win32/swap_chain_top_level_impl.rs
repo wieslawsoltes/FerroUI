@@ -207,6 +207,11 @@ impl ITopLevelImpl for SwapChainTopLevelImpl {
         PixelPoint::from_point(point, self.scaling.get())
     }
 
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        let scale = self.scaling.get();
+        Some(ferroui_base::Matrix::create_scale(scale, scale))
+    }
+
     fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
         let cursor_changed = self.cursor_changed.borrow().clone();
         if let Some(cursor_changed) = cursor_changed {

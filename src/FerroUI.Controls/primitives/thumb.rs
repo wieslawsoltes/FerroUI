@@ -8,10 +8,21 @@ use ferroui_base::input::{
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, ferro_routed_event, instantiate, FerroObjectImpl, Point,
+    ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, FerroObjectImpl, FerroProperty, StyledProperty, Point,
     Ref, StyledElementImpl, Vector, VisualImpl,
 };
 use std::cell::Cell;
+
+/// Optional policy for starting a thumb drag. Existing controls retain `AnyPress`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum ThumbDragStartPolicy {
+    /// Retains the existing behavior: each delivered press starts a drag.
+    #[default]
+    AnyPress,
+    /// Starts only when the left button is pressed and no drag is active.
+    /// A rejected press is left unhandled for the rest of the input route.
+    PrimaryPressWhenIdle,
+}
 
 const PC_PRESSED: &str = ":pressed";
 
@@ -78,6 +89,13 @@ impl InputElementImpl for Thumb {
     }
 
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
+        if this.drag_start_policy() == ThumbDragStartPolicy::PrimaryPressWhenIdle
+            && (this.last_point.get().is_some()
+                || !e.get_current_point(Some(this)).properties.is_left_button_pressed)
+        {
+            return;
+        }
+
         e.set_handled(true);
         let last_point = e.get_position(Some(this));
         this.last_point.set(Some(last_point));
@@ -117,7 +135,26 @@ impl ThumbImpl for Thumb {
     fn on_drag_completed(_this: &Self, _e: &VectorEventArgs) {}
 }
 
+ferroui_base::ferro_properties! { impl Thumb {
+    ferro_property!(
+        /// Optional press policy. Defaults to the unchanged native behavior.
+        pub fn drag_start_policy_property() -> StyledProperty<ThumbDragStartPolicy> {
+            FerroProperty::register::<Thumb, _>("DragStartPolicy", ThumbDragStartPolicy::AnyPress)
+        }
+    );
+} }
+
 impl Thumb {
+    /// Gets the optional policy for starting a drag.
+    pub fn drag_start_policy(&self) -> ThumbDragStartPolicy {
+        self.get_value(Self::drag_start_policy_property())
+    }
+
+    /// Sets the optional policy for starting a drag.
+    pub fn set_drag_start_policy(&self, value: ThumbDragStartPolicy) {
+        self.set_value(Self::drag_start_policy_property(), value);
+    }
+
     /// The pseudoclasses set by the class.
     pub const PSEUDO_CLASSES: PseudoClassesAttribute = PseudoClassesAttribute::new(&[PC_PRESSED]);
 

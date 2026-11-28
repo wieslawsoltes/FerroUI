@@ -1439,6 +1439,49 @@ fn closing_previous_light_dismiss_popup_should_not_affect_overlay_for_next_popup
     assert!(!overlay.is_visible());
 }
 
+fn winui_pointer_light_dismiss_uses_the_opening_value(use_popup_host: bool) {
+    let _app = create_services(use_popup_host);
+    let placement_target = Border::new();
+    let window = prepared_window(Some(placement_target.clone().upcast()));
+    let popup = Popup::new();
+    popup.set_placement_target(placement_target);
+    let overlay = LightDismissOverlayLayer::get_light_dismiss_overlay_layer(&window).unwrap();
+    let deactivate = window.platform_impl().unwrap().deactivated().unwrap();
+    let press_outside = || {
+        overlay.raise_event(&create_pointer_pressed_event_args(&window, Point::new(10.0, 15.0)));
+    };
+
+    popup.set_is_light_dismiss_enabled(true);
+    popup.open();
+    popup.set_is_light_dismiss_enabled(false);
+    press_outside();
+    assert!(popup.is_open());
+    popup.close();
+
+    popup.set_use_winui_light_dismiss_overlay(true);
+    popup.set_is_light_dismiss_enabled(true);
+    popup.open();
+    popup.set_is_light_dismiss_enabled(false);
+    deactivate();
+    assert!(popup.is_open());
+    let old_route = overlay.build_event_route(InputElement::pointer_pressed_event());
+    press_outside();
+    assert!(!popup.is_open());
+    assert!(!overlay.is_visible());
+
+    popup.open();
+    popup.set_is_light_dismiss_enabled(true);
+    assert!(!overlay.is_visible());
+    press_outside();
+    old_route.raise_event(
+        &overlay.clone().upcast(),
+        &create_pointer_pressed_event_args(&window, Point::new(10.0, 15.0)),
+    );
+    assert!(popup.is_open());
+    deactivate();
+    assert!(!popup.is_open());
+}
+
 fn opened_popup_should_be_in_opened_popups(use_popup_host: bool) {
     let _app = create_services(use_popup_host);
     let target = Popup::new();
@@ -1647,6 +1690,7 @@ popup_tests! {
     popup_open_with_correct_is_using_overlay_layer_and_disabled_overlay_layer,
     popup_open_with_correct_is_using_overlay_layer_and_enabled_overlay_layer,
     closing_previous_light_dismiss_popup_should_not_affect_overlay_for_next_popup,
+    winui_pointer_light_dismiss_uses_the_opening_value,
     opened_popup_should_be_in_opened_popups,
     closing_popup_with_is_open_should_remove_it_from_opened_popups,
     closing_window_should_clear_opened_popups,

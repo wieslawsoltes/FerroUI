@@ -123,6 +123,14 @@ pub trait ITopLevelImpl: IOptionalFeatureProvider + IDisposable {
     /// Converts a point from client to screen coordinates.
     fn point_to_screen(&self, point: Point) -> PixelPoint;
 
+    /// A continuous client-DIP to desktop transform in the coordinate space of
+    /// `point_to_screen`. Render scaling and desktop scaling are not necessarily
+    /// equal (macOS and Wayland use logical desktop coordinates). Existing custom
+    /// implementations remain compatible and explicitly opt in to this service.
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        None
+    }
+
     /// Sets the cursor associated with the toplevel; `None` stands for the
     /// default cursor.
     fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>);

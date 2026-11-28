@@ -124,6 +124,8 @@ ENUM_EXTRA = {
     "DayOfWeek", "DateTimeKind", "NumberStyles", "CalendarWeekRule",
 }
 ENUM_NAMESPACE = {
+    # Additive native Thumb policy; no upstream managed equivalent.
+    "ThumbDragStartPolicy": "FerroUI.Controls.Primitives",
     "RelativeUnit": "FerroUI",
     "GridUnitType": "FerroUI.Controls",
     "Key": "FerroUI.Input",

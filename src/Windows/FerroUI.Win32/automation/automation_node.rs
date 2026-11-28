@@ -32,7 +32,7 @@ use super::interop::{
     IExpandCollapseProvider, IInvokeProvider, IInvokeProviderImpl, IRangeValueProvider, IRawElementProviderFragment,
     IRawElementProviderFragmentImpl, IRawElementProviderFragmentRoot, IRawElementProviderFragmentRootImpl,
     IRawElementProviderSimple, IRawElementProviderSimple2, IRawElementProviderSimple2Impl, IRawElementProviderSimpleImpl,
-    IScrollItemProvider, IScrollProvider, ISelectionItemProvider, ISelectionProvider, ITextProvider2, ITextChildProvider, ITextEditProvider, IToggleProvider, IValueProvider,
+    IScrollItemProvider, IScrollProvider, ISelectionItemProvider, ISelectionProvider, ITextProvider2, ITextChildProvider, ITextEditProvider, IToggleProvider, IValueProvider, IWindowProvider,
     NavigateDirection, ProviderOptions, StructureChangeType, UiaControlTypeId, UiaCoreProviderApi, UiaCoreTypesApi,
     UiaEventId, UiaHeadingLevel, UiaLandmarkType, UiaLiveSetting, UiaPatternId, UiaPropertyId, UiaRect,
 };
@@ -225,7 +225,7 @@ impl AutomationNode {
         };
 
         macro_rules! patterns {
-            () => {
+            ($($extra:expr),*) => {
                 [
                     InterfaceEntry::of::<IRawElementProviderFragment>(),
                     InterfaceEntry::of::<IInvokeProvider>(),
@@ -240,6 +240,8 @@ impl AutomationNode {
                     InterfaceEntry::of::<ITextProvider2>(),
                     InterfaceEntry::of::<ITextChildProvider>(),
                     InterfaceEntry::of::<ITextEditProvider>(),
+                    InterfaceEntry::of::<IWindowProvider>(),
+                    $($extra),*
                 ]
             };
         }
@@ -248,11 +250,7 @@ impl AutomationNode {
         let provider: ComPtr<IRawElementProviderSimple2> = match kind {
             NodeKind::Node => make_com_with(node, patterns!()),
             NodeKind::Root | NodeKind::Interop { .. } => {
-                let [a, b, c, d, e, f, g, h, i, j, k, l, m] = patterns!();
-                make_com_with(
-                    node,
-                    [a, b, c, d, e, f, g, h, i, j, k, l, m, InterfaceEntry::of::<IRawElementProviderFragmentRoot>()],
-                )
+                make_com_with(node, patterns!(InterfaceEntry::of::<IRawElementProviderFragmentRoot>()))
             }
         };
         let provider = provider.cast::<IRawElementProviderSimple>().expect("a node is a simple provider");
@@ -411,6 +409,7 @@ impl AutomationNode {
             UiaPatternId::TextEdit => has::<dyn aap::ITextEditProvider>(self)?,
             UiaPatternId::Toggle => has::<dyn aap::IToggleProvider>(self)?,
             UiaPatternId::Value => has::<dyn aap::IValueProvider>(self)?,
+            UiaPatternId::Window => has::<dyn aap::IWindowProvider>(self)?,
             _ => false,
         };
         Ok(if this_if_peer_implements_provider { self.this().cast::<IUnknown>().ok() } else { None })
@@ -452,9 +451,13 @@ impl AutomationNode {
             UiaPropertyId::HasKeyboardFocus => Plain::Bool(peer.has_keyboard_focus()),
             UiaPropertyId::IsContentElement => Plain::Bool(peer.is_content_element()),
             UiaPropertyId::IsControlElement => Plain::Bool(peer.is_control_element()),
+            UiaPropertyId::IsDialog => Plain::Bool(peer.is_dialog()),
             UiaPropertyId::IsEnabled => Plain::Bool(peer.is_enabled()),
             UiaPropertyId::IsKeyboardFocusable => Plain::Bool(peer.is_keyboard_focusable()),
             UiaPropertyId::IsOffscreen => Plain::Bool(peer.is_offscreen()),
+            UiaPropertyId::IsWindowPatternAvailable if peer.get_provider::<dyn aap::IWindowProvider>().is_some() => {
+                Plain::Bool(true)
+            }
             UiaPropertyId::IsTextPatternAvailable => Plain::Bool(peer.get_provider::<dyn aap::ITextProvider>().is_some()),
             UiaPropertyId::IsTextPattern2Available => Plain::Bool(peer.get_provider::<dyn aap::ITextProvider2>().is_some()),
             UiaPropertyId::IsTextEditPatternAvailable => Plain::Bool(peer.get_provider::<dyn aap::ITextEditProvider>().is_some()),
@@ -523,14 +526,17 @@ impl AutomationNode {
     /// table has for it, or a new one.
     pub fn get_or_create(peer: Option<&Ref<AutomationPeer>>) -> Option<ComPtr<IRawElementProviderSimple>> {
         let peer = peer?;
-        let existing = S_NODES.with(|nodes| {
+        Some(Self::existing(peer).unwrap_or_else(|| Self::create(peer).provider.clone()))
+    }
+
+    pub(super) fn existing(peer: &Ref<AutomationPeer>) -> Option<ComPtr<IRawElementProviderSimple>> {
+        S_NODES.with(|nodes| {
             let nodes = nodes.borrow();
             let entry = nodes.by_id.get(nodes.by_peer.get(&peer_key(peer))?)?;
             // The address of a peer that is gone may be the one of a new
             // peer: the entry has to be the one of this peer.
             entry.peer.upgrade().filter(|known| known.ptr_eq(peer)).map(|_| entry.provider.clone())
-        });
-        Some(existing.unwrap_or_else(|| Self::create(peer).provider.clone()))
+        })
     }
 
     /// `Release`: forgets the node of a peer.

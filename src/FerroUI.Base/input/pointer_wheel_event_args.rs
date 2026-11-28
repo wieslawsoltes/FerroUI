@@ -1,3 +1,4 @@
+use crate::input::PlatformWheelDelta;
 use super::{IPointer, InputElement, KeyModifiers, PointerEventArgs, PointerPointProperties};
 use crate::{ferro_routed_event_args, FerroObject, Nullable, Point, Vector, Visual};
 use std::rc::Rc;
@@ -7,6 +8,7 @@ use std::rc::Rc;
 pub struct PointerWheelEventArgs {
     base: PointerEventArgs,
     delta: Vector,
+    platform_delta: Option<PlatformWheelDelta>,
 }
 
 ferro_routed_event_args!(PointerWheelEventArgs: PointerEventArgs);
@@ -36,6 +38,7 @@ impl PointerWheelEventArgs {
                 modifiers,
             ),
             delta,
+            platform_delta: None,
         }
     }
 
@@ -44,4 +47,16 @@ impl PointerWheelEventArgs {
     pub fn delta(&self) -> Vector {
         self.delta
     }
+
+    /// Original platform wheel data, when the backend supplies it.
+    pub fn platform_delta(&self) -> Option<PlatformWheelDelta> {
+        self.platform_delta
+    }
+
+    /// Adds original platform wheel data without changing the normalized delta.
+    pub fn with_platform_delta(mut self, delta: PlatformWheelDelta) -> Self {
+        self.platform_delta = Some(delta);
+        self
+    }
+
 }

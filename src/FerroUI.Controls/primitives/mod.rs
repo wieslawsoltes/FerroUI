@@ -94,7 +94,7 @@ pub use range_base_value_changed_event_args::RangeBaseValueChangedEventArgs;
 pub use scroll_bar::{ScrollBar, ScrollEventArgs};
 pub use scroll_event_type::ScrollEventType;
 pub use track::{Track, TrackImpl, TrackImplExt, TrackVTable};
-pub use thumb::{Thumb, ThumbImpl, ThumbImplExt, ThumbVTable};
+pub use thumb::{Thumb, ThumbDragStartPolicy, ThumbImpl, ThumbImplExt, ThumbVTable};
 #[cfg(test)]
 mod range_base_tests;
 #[cfg(test)]

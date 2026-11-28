@@ -192,8 +192,11 @@ check("the accessibility tree is built on demand and mirrors the controls of the
     assert(await page.evaluate(`${A11Y}.children.length === 1 && ${A11Y}.firstElementChild.classList.contains("ferroui-enable-accessibility")`),
         "the accessibility host has more than the enable button before it is activated");
     assert(await page.evaluate(`${element(".ferroui-enable-accessibility")}.tabIndex === -1`), "the enable button is in the Tab order");
-    await page.evaluate(`(${element(".ferroui-enable-accessibility")}.click(), true)`);
+    await page.evaluate(`${element(".ferroui-enable-accessibility")}.focus()`);
+    await page.press("Enter");
     await page.waitFor(`!!${element('[role="button"][aria-label="Button"]')}`, 10000);
+    assert((await page.evaluate("document.activeElement.id")) === "out",
+        "enabling accessibility gives the view keyboard focus");
     assert(await page.evaluate(`!${element(".ferroui-enable-accessibility")}`), "the enable button stays after the tree was built");
     assert(await page.evaluate(`document.getElementById("out").getAttribute("role") === "application"`), "the container is not an application");
 
@@ -230,6 +233,12 @@ check("the accessibility tree is built on demand and mirrors the controls of the
     await page.evaluate(`(themedView.themedViewAccessibility(false), true)`);
     assert(await page.evaluate(`${A11Y}.children.length === 1 && !!${element(".ferroui-enable-accessibility")}`), "the elements stay after the tree was turned off");
     assert(await page.evaluate(`!document.getElementById("out").hasAttribute("aria-activedescendant")`), "the focus reference stays after the tree was turned off");
+
+    await page.evaluate(`${element(".ferroui-enable-accessibility")}.focus()`);
+    await page.press("Space");
+    await page.waitFor(`!!${element('[role="button"][aria-label="Button"]')}`, 10000);
+    assert((await page.evaluate("document.activeElement.id")) === "out",
+        "enabling accessibility with Space gives the view keyboard focus");
 });
 
 check("the cursor of the page follows the control under the pointer", async (page) => {
@@ -343,6 +352,33 @@ check("a click on a list item selects it", async (page) => {
     assert((await page.state()).selected === "1", "the second item starts selected");
     await page.click(60, 279);
     assert((await page.state()).selected === "0", `selected is ${(await page.state()).selected}`);
+});
+
+check("a primary press on empty canvas content gives the view keyboard focus", async (page) => {
+    await page.evaluate(`(document.body.insertAdjacentHTML("afterbegin",
+        '<button id="before" style="position:fixed;left:380px;top:470px;z-index:10">before</button>'),
+        document.getElementById("before").focus(), true)`);
+    await page.click(...EMPTY);
+    assert(await page.evaluate("document.activeElement.id") === "out", "the empty canvas press left focus outside the view");
+    await page.type("a");
+    assert((await page.lastKey()).prevented, "the view did not receive the next key");
+});
+
+check("a pointer handler can move focus out of the view", async (page) => {
+    await page.evaluate(`(async () => {
+        document.body.insertAdjacentHTML("afterbegin",
+            '<button id="outside" style="position:fixed;left:380px;top:470px;z-index:10">outside</button>');
+        const module = await import("./ferroui.js");
+        const original = themedView.InputHelper_OnPointerDown;
+        themedView.InputHelper_OnPointerDown = (...args) => {
+            original(...args);
+            document.getElementById("outside").focus();
+        };
+        module.FerroExports.attach(themedView);
+        return true;
+    })()`);
+    await page.click(...EMPTY);
+    assert(await page.evaluate("document.activeElement.id") === "outside", "the press took focus back from the outside button");
 });
 
 check("the focus leaving the view is reported", async (page) => {

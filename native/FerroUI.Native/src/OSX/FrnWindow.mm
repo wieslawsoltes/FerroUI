@@ -34,7 +34,17 @@
     double _standardButtonsTitleBarHeight;
     FrnMenu* _menu;
     ComPtr<IFrnAutomationPeer> _automationPeer;
-    FrnAutomationNode* _automationNode;
+    ComPtr<FrnAutomationNode> _automationNode;
+}
+
+- (void)dealloc
+{
+    if (_automationNode != nullptr)
+        _automationNode->Dispose();
+    if (_automationPeer != nullptr)
+        _automationPeer->SetNode(nullptr);
+    _automationPeer = nullptr;
+    _automationNode = nullptr;
 }
 
 -(FrnView* _Nullable) view
@@ -668,7 +678,7 @@
     if (automationPeer == nullptr || !automationPeer->IsRootProvider())
         return nil;
 
-    auto focusedPeer = automationPeer->RootProvider_GetFocus();
+    ComPtr<IFrnAutomationPeer> focusedPeer(automationPeer->RootProvider_GetFocus(), true);
     if (focusedPeer == nullptr)
         return nil;
 
@@ -692,8 +702,8 @@
         auto peer = parent->BaseEvents->GetAutomationPeer();
         if (peer != nullptr)
         {
-            _automationPeer = peer;
-            _automationNode = new FrnAutomationNode(self);
+            _automationPeer.setNoAddRef(peer);
+            _automationNode.setNoAddRef(new FrnAutomationNode(self));
             _automationPeer->SetNode(_automationNode);
         }
     }

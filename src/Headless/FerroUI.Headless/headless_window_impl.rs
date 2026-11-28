@@ -389,6 +389,12 @@ impl ITopLevelImpl for HeadlessWindowImpl {
         PixelPoint::from_point(point, ITopLevelImpl::desktop_scaling(self)) + IWindowBaseImpl::position(self)
     }
 
+    fn client_to_screen_transform(&self) -> Option<ferroui_base::Matrix> {
+        let origin = IWindowBaseImpl::position(self);
+        let scale = ITopLevelImpl::desktop_scaling(self);
+        Some(ferroui_base::Matrix::new(scale, 0.0, 0.0, scale, f64::from(origin.x), f64::from(origin.y)))
+    }
+
     fn set_cursor(&self, _cursor: Option<Rc<dyn ICursorImpl>>) {}
 
     fn closed(&self) -> Option<Rc<dyn Fn()>> {

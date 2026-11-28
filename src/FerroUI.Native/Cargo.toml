@@ -26,6 +26,10 @@ text-editor = []
 # read: the Rust side and clipboard.mm. Off by default, so an application without it has main's
 # clipboard and links none of it; `ferroui-edit` turns it on.
 chromium-clipboard-map = ["ferroui-base/chromium-clipboard-map"]
+# The AppKit wheel axes (`PlatformWheelDelta::MacOS`) of the wheel events: the top-level answers the
+# view's wheel extension. Off by default, so an application that does not read them links none of it;
+# the ribbon turns it on. Without it the wheel events carry no platform data, as on main.
+platform-wheel-delta = []
 
 [dependencies]
 ferroui-base.workspace = true

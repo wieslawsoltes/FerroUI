@@ -125,9 +125,13 @@ pub(crate) fn read_attributes(peer: &AutomationPeer, state: &mut NodeState) {
     let control_type = peer.get_automation_control_type();
     let toggle = peer.get_provider::<dyn IToggleProvider>();
     // A landmark (AutomationProperties.LandmarkType) names the region a container is.
-    let role = match (aria_role(control_type, toggle.is_some()), peer.get_landmark_type()) {
-        (None | Some("group" | "region"), Some(landmark)) => landmark_role(landmark),
-        (role, _) => role.unwrap_or(""),
+    let role = if peer.is_dialog() {
+        "dialog"
+    } else {
+        match (aria_role(control_type, toggle.is_some()), peer.get_landmark_type()) {
+            (None | Some("group" | "region"), Some(landmark)) => landmark_role(landmark),
+            (role, _) => role.unwrap_or(""),
+        }
     };
     let name = peer.get_name();
     let value = peer.get_provider::<dyn IValueProvider>();

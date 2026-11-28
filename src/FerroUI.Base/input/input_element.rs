@@ -706,6 +706,39 @@ impl InputElement {
         instantiate(Self::construct())
     }
 
+    /// Captures a pointer to this element and returns whether capture succeeded.
+    /// Custom `IPointer` implementations should use this entry point so that
+    /// element-wide capture operations can observe them as well.
+    pub fn capture_pointer(&self, pointer: &Rc<dyn super::IPointer>) -> bool {
+        super::pointer::remember_pointer(pointer);
+        pointer.capture(Some(&self.to_ref()));
+        pointer.captured().is_some_and(|p| p.ptr_eq(&self.to_ref()))
+    }
+
+    /// A snapshot of the pointers currently captured by this element. Native
+    /// `Pointer::capture` also participates, even when called directly.
+    /// The pointers are known weakly; this does not extend a pointer's lifetime.
+    pub fn pointer_captures(&self) -> Vec<Rc<dyn super::IPointer>> {
+        let this = self.to_ref();
+        super::pointer::known_pointers()
+            .into_iter()
+            .filter(|p| p.captured().is_some_and(|c| c.ptr_eq(&this)))
+            .collect()
+    }
+
+    /// Releases the current snapshot of captures, respecting capture-changing
+    /// cancellation. A handler may transfer another pointer before it is
+    /// visited; that pointer is not released from its new owner. A new capture
+    /// installed during notification is outside this snapshot.
+    pub fn release_pointer_captures(&self) {
+        let this = self.to_ref();
+        for pointer in self.pointer_captures() {
+            if pointer.captured().is_some_and(|c| c.ptr_eq(&this)) {
+                pointer.capture(None);
+            }
+        }
+    }
+
     // --- events -------------------------------------------------------------
 
     routed_event_accessor!(
