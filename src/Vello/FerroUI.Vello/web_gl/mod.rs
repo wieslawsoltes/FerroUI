@@ -33,6 +33,7 @@ mod layer_programs;
 #[cfg(feature = "media3d")]
 mod scene3d;
 mod shader_programs;
+pub(crate) mod shadow_programs;
 
 pub use external_objects::{VelloWebGlExternalObjectsFeature, VelloWebGlFrameBitmap};
 pub use frame_textures::VelloWebGlTexture;
@@ -106,6 +107,8 @@ struct WebGlState {
     programs: LayerPrograms,
     /// The programs of the shader effects, compiled when first needed.
     shaders: ShaderPrograms,
+    /// The blurred box shadows of the last frames.
+    shadows: shadow_programs::ShadowCache,
     /// The GL executor of 3D scenes and its kept outputs, made when a scene is first drawn.
     #[cfg(feature = "media3d")]
     scenes: scene3d::WebGlScenes,
@@ -179,6 +182,7 @@ impl VelloWebGlGpu {
                 textures: TexturePool::default(),
                 programs: LayerPrograms::default(),
                 shaders: ShaderPrograms::default(),
+                shadows: shadow_programs::ShadowCache::default(),
                 #[cfg(feature = "media3d")]
                 scenes: scene3d::WebGlScenes::default(),
             })),
@@ -244,6 +248,7 @@ impl VelloWebGlGpu {
             for image in state.images.values() {
                 self.gl.delete_texture(Some(&image.texture));
             }
+            state.shadows.clear();
             state.textures.dispose(&self.gl);
             state.programs.dispose(&self.gl);
             state.shaders.dispose(&self.gl);
@@ -407,6 +412,25 @@ impl VelloWebGlGpu {
         let WebGlState { scenes, textures, .. } = state.as_mut()?;
         let limit = self.max_texture_size;
         scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, scene, size, scale, antialiased, origin)
+    }
+
+    /// The blurred shadow of `key` this context kept.
+    pub(crate) fn kept_shadow(
+        &self,
+        key: &crate::drawing_context_impl::box_shadows::ShadowKey,
+    ) -> Option<shadow_programs::WebGlBlurredShape> {
+        self.state.borrow_mut().as_mut()?.shadows.get(key)
+    }
+
+    /// Keeps a blurred shadow for the next frames.
+    pub(crate) fn keep_shadow(
+        &self,
+        key: crate::drawing_context_impl::box_shadows::ShadowKey,
+        shadow: shadow_programs::WebGlBlurredShape,
+    ) {
+        if let Some(state) = self.state.borrow_mut().as_mut() {
+            state.shadows.insert(key, shadow);
+        }
     }
 
     /// What names this GPU: the frame bitmaps of its pool carry it.
