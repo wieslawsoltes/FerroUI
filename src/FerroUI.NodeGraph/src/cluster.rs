@@ -4,10 +4,11 @@
 //! parameter mappings so complex parametric recipes become single clean nodes!
 
 use crate::data_tree::Value;
-use crate::eval::evaluate_graph;
+use crate::eval::evaluate_graph_with_inputs;
 use crate::graph::NodeGraph;
 use crate::node::{EvalContext, NodeComponent, NodeRegistry};
 use crate::types::{NodeCategory, NodeId, ParamAccess, PortSpec, PortType};
+use rustc_hash::FxHashMap;
 use std::sync::Arc;
 
 /// Maps an external input port of a [`ClusterComponent`] to an internal `(node_id, input_port)`.
@@ -99,33 +100,51 @@ impl NodeComponent for ClusterComponent {
             .collect()
     }
 
+    fn is_time_dependent(&self, _: &crate::types::ParamWidget) -> bool {
+        self.inner_graph.nodes.values().any(|node| {
+            !node.disabled
+                && self
+                    .inner_registry
+                    .get(&node.type_id)
+                    .is_some_and(|component| component.is_time_dependent(&node.widget))
+        })
+    }
+
     fn evaluate(&self, ctx: &mut EvalContext<'_>) -> Result<(), String> {
-        let mut g = self.inner_graph.clone();
-        // Inject outer input DataTrees into bound inner nodes' default overrides (first item) or widget
-        for (i, bind) in self.input_bindings.iter().enumerate() {
-            let tree = ctx.input(i);
-            if let Some(first) = tree.first_item() {
-                g.set_input_default(bind.target_node, bind.target_input_port, first.clone());
-                if let Some(node) = g.nodes.get_mut(&bind.target_node) {
-                    if let crate::types::ParamWidget::Slider { ref mut value, min, max, .. } = node.widget {
-                        if let Some(f) = first.as_float() {
-                            *value = f.clamp(min, max);
-                        }
-                    }
-                }
+        let mut graph = self.inner_graph.clone_definition();
+        graph.solution_locked = false;
+        let mut bound_inputs = FxHashMap::default();
+        for (port, binding) in self.input_bindings.iter().enumerate() {
+            let Some(target) = graph.nodes.get(&binding.target_node) else {
+                return Err(format!("Cluster input {port} references a missing node"));
+            };
+            if binding.target_input_port >= target.input_modifiers.len() {
+                return Err(format!("Cluster input {port} references an invalid port"));
             }
+            bound_inputs.insert(
+                (binding.target_node, binding.target_input_port),
+                ctx.input(port),
+            );
         }
-        g.mark_all_dirty();
-        let report = evaluate_graph(&mut g, &self.inner_registry, ctx.time_secs);
+        let report = evaluate_graph_with_inputs(
+            &mut graph,
+            &self.inner_registry,
+            ctx.time_secs,
+            &bound_inputs,
+        );
         if report.errors > 0 {
-            return Err(format!("Cluster `{}` failed with {} inner errors", self.display_name, report.errors));
+            return Err(format!(
+                "Cluster `{}` failed with {} inner errors",
+                self.display_name, report.errors
+            ));
         }
         for (o, bind) in self.output_bindings.iter().enumerate() {
-            if let Some(src) = g.nodes.get(&bind.source_node) {
-                if let Some(tree) = src.output_tree(bind.source_output_port) {
-                    ctx.set_output(o, tree.clone());
-                }
-            }
+            let tree = graph
+                .nodes
+                .get(&bind.source_node)
+                .and_then(|source| source.output_tree(bind.source_output_port))
+                .ok_or_else(|| format!("Cluster output {o} references an invalid port"))?;
+            ctx.set_output(o, tree.clone());
         }
         Ok(())
     }

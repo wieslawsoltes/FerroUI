@@ -15,8 +15,7 @@ use crate::eval::evaluate_graph;
 use crate::graph::NodeGraph;
 use crate::node::NodeRegistry;
 use crate::node_visual::build_node_visual;
-use crate::serialization::graph_to_json;
-use crate::types::{AlignMode, DataMatching, NodeCategory, NodeId, WireDisplay};
+use crate::types::{AlignMode, DataMatching, NodeCategory, WireDisplay};
 use ferroui_base::input::Key;
 use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
@@ -77,12 +76,29 @@ pub fn node_graph_editor(
         on_cleanup(move || timer.stop());
     }
 
+    // Run only clock-driven components (and pending momentary-button releases).
+    // Clean static definitions do no evaluation work between edits.
+    {
+        let state = state.clone();
+        let timer = DispatcherTimer::new();
+        timer.set_interval(Duration::from_millis(33));
+        timer.tick(move |_| {
+            if state.needs_clock_tick() {
+                state.reevaluate_and_notify();
+            }
+        });
+        timer.start();
+        on_cleanup(move || timer.stop());
+    }
+
     let is_dark = state.is_dark_theme;
 
     // -------------------------------------------------------------------------
     // 1. Top Component Ribbon & Canvas Toolbar (Stock FerroUI Controls)
     // -------------------------------------------------------------------------
-    let mut cat_tabs = stack_panel().orientation(Orientation::Horizontal).spacing(3.0);
+    let mut cat_tabs = stack_panel()
+        .orientation(Orientation::Horizontal)
+        .spacing(3.0);
     for cat in &categories {
         let c = cat.clone();
         let c_act = c.clone();
@@ -90,7 +106,13 @@ pub fn node_graph_editor(
         cat_tabs = cat_tabs.child(
             button()
                 .padding((10.0, 4.0, 10.0, 4.0))
-                .border_brush(move || if active_cat.get() == c_act { solid(0xFF0078D4) } else { None })
+                .border_brush(move || {
+                    if active_cat.get() == c_act {
+                        solid(0xFF0078D4)
+                    } else {
+                        None
+                    }
+                })
                 .border_thickness(move || if active_cat.get() == c { 1.5 } else { 1.0 })
                 .font_size(11.0)
                 .content(c_cl.label().to_string())
@@ -123,7 +145,7 @@ pub fn node_graph_editor(
                 .content("↶")
                 .on_click(move |_| {
                     if st_undo.graph.borrow_mut().undo() {
-                        st_undo.notify_topology_changed();
+                        st_undo.notify_history_restored();
                         st_undo.sync_all_node_positions();
                     }
                 }),
@@ -135,7 +157,7 @@ pub fn node_graph_editor(
                 .content("↷")
                 .on_click(move |_| {
                     if st_redo.graph.borrow_mut().redo() {
-                        st_redo.notify_topology_changed();
+                        st_redo.notify_history_restored();
                         st_redo.sync_all_node_positions();
                     }
                 }),
@@ -165,7 +187,12 @@ pub fn node_graph_editor(
                 .font_size(10.5)
                 .content("▢ Group")
                 .on_click(move |_| {
-                    if st_grp.graph.borrow_mut().group_selection("Group", 0x337C3AED).is_some() {
+                    if st_grp
+                        .graph
+                        .borrow_mut()
+                        .group_selection("Group", 0x337C3AED)
+                        .is_some()
+                    {
                         st_grp.invalidate_wires();
                     }
                 }),
@@ -197,9 +224,21 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || if solution_locked.get() { solid(0xFFD97706) } else { None })
+                .border_brush(move || {
+                    if solution_locked.get() {
+                        solid(0xFFD97706)
+                    } else {
+                        None
+                    }
+                })
                 .font_size(10.5)
-                .content(move || if solution_locked.get() { "🔒 Locked" } else { "🔓 Live" })
+                .content(move || {
+                    if solution_locked.get() {
+                        "🔒 Locked"
+                    } else {
+                        "🔓 Live"
+                    }
+                })
                 .on_click(move |_| {
                     let next = !solution_locked.get_untracked();
                     st_lock.graph.borrow_mut().solution_locked = next;
@@ -212,7 +251,13 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || if fancy_wires.get() { solid(0xFF22C55E) } else { None })
+                .border_brush(move || {
+                    if fancy_wires.get() {
+                        solid(0xFF22C55E)
+                    } else {
+                        None
+                    }
+                })
                 .font_size(10.5)
                 .content("Fancy")
                 .on_click(move |_| {
@@ -225,7 +270,13 @@ pub fn node_graph_editor(
         .child(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || if show_profiler.get() { solid(0xFF22C55E) } else { None })
+                .border_brush(move || {
+                    if show_profiler.get() {
+                        solid(0xFF22C55E)
+                    } else {
+                        None
+                    }
+                })
                 .font_size(10.5)
                 .content("Prof")
                 .on_click(move |_| {
@@ -239,16 +290,8 @@ pub fn node_graph_editor(
             button()
                 .padding((7.0, 4.0, 7.0, 4.0))
                 .font_size(10.5)
-                .content("{ }")
-                .on_click(move |_| {
-                    let json = graph_to_json(&st_json.graph.borrow());
-                    st_json.status_msg.set(format!(
-                        "Exported Grasshopper JSON ({} bytes · {} nodes · {} wires)",
-                        json.len(),
-                        st_json.graph.borrow().nodes.len(),
-                        st_json.graph.borrow().wires.len(),
-                    ));
-                }),
+                .content("Copy JSON")
+                .on_click(move |_| st_json.copy_definition_to_clipboard()),
         );
 
     let st_shelf = state.clone();
@@ -260,7 +303,9 @@ pub fn node_graph_editor(
         } else {
             st_shelf.registry.search(&q)
         };
-        let mut row = stack_panel().orientation(Orientation::Horizontal).spacing(4.0);
+        let mut row = stack_panel()
+            .orientation(Orientation::Horizontal)
+            .spacing(4.0);
         for meta in items.into_iter().take(13) {
             let tid = meta.type_id.clone();
             let disp = meta.display_name.clone();
@@ -274,8 +319,10 @@ pub fn node_graph_editor(
                         let added = {
                             let mut g = st_add.graph.borrow_mut();
                             g.push_undo_checkpoint();
-                            let cx = (220.0 - g.camera_pan[0]) / g.camera_zoom + (g.nodes.len() % 5) as f64 * 28.0;
-                            let cy = (150.0 - g.camera_pan[1]) / g.camera_zoom + (g.nodes.len() % 4) as f64 * 24.0;
+                            let cx = (220.0 - g.camera_pan[0]) / g.camera_zoom
+                                + (g.nodes.len() % 5) as f64 * 28.0;
+                            let cy = (150.0 - g.camera_pan[1]) / g.camera_zoom
+                                + (g.nodes.len() % 4) as f64 * 24.0;
                             let id = g.add_node(&st_add.registry, &tid, cx, cy);
                             if let Some(nid) = id {
                                 g.selected_nodes.clear();
@@ -286,7 +333,9 @@ pub fn node_graph_editor(
                         if added.is_some() {
                             st_add.notify_topology_changed();
                             st_add.notify_selection_changed();
-                            st_add.status_msg.set(format!("Placed `{disp}` component on canvas."));
+                            st_add
+                                .status_msg
+                                .set(format!("Placed `{disp}` component on canvas."));
                         }
                     }),
             );
@@ -296,14 +345,24 @@ pub fn node_graph_editor(
 
     let ribbon = border()
         .dock_panel_dock(Dock::Top)
-        .border_brush(move || if is_dark.get() { solid(0x1FFFFFFF) } else { solid(0x1F000000) })
+        .border_brush(move || {
+            if is_dark.get() {
+                solid(0x1FFFFFFF)
+            } else {
+                solid(0x1F000000)
+            }
+        })
         .border_thickness((0.0, 0.0, 0.0, 1.0))
         .padding((10.0, 6.0, 10.0, 6.0))
         .clip_to_bounds(true)
         .child(
             stack_panel()
                 .spacing(5.0)
-                .child(dock_panel().child(action_bar.dock_panel_dock(Dock::Right)).child(cat_tabs))
+                .child(
+                    dock_panel()
+                        .child(action_bar.dock_panel_dock(Dock::Right))
+                        .child(cat_tabs),
+                )
                 .child(
                     dock_panel()
                         .child(
@@ -345,11 +404,18 @@ pub fn node_graph_editor(
         .child(for_each(
             move || {
                 let _ = st_nodes.topology_rev.get();
-                let ids: Vec<NodeId> = st_nodes.graph.borrow().nodes.keys().copied().collect();
-                ids
+                let revision = st_nodes.history_rev.get();
+                st_nodes
+                    .graph
+                    .borrow()
+                    .nodes
+                    .keys()
+                    .copied()
+                    .map(|id| (id, revision))
+                    .collect::<Vec<_>>()
             },
-            |nid| nid.0 as i64,
-            move |nid| build_node_visual(st_build.clone(), nid),
+            |(id, revision)| ((*revision as u64) << 32 | id.0 as u64) as i64,
+            move |(id, _)| build_node_visual(st_build.clone(), id),
         ));
 
     let align_overlay = build_align_overlay(&state);
@@ -361,7 +427,12 @@ pub fn node_graph_editor(
         .clip_to_bounds(true)
         .on_pointer_wheel_changed(move |e| {
             if !e.handled() {
-                if let Some(layer) = st_wheel.wire_layer.borrow().as_ref().and_then(|w| w.upgrade()) {
+                if let Some(layer) = st_wheel
+                    .wire_layer
+                    .borrow()
+                    .as_ref()
+                    .and_then(|w| w.upgrade())
+                {
                     st_wheel.zoom_at(e.get_position(Some(&layer)), e.delta().y);
                     e.set_handled(true);
                 }
@@ -408,8 +479,20 @@ fn build_align_overlay(state: &VisualGraphState) -> Element {
         .horizontal_alignment(HorizontalAlignment::Center)
         .vertical_alignment(VerticalAlignment::Top)
         .margin((0.0, 10.0, 0.0, 0.0))
-        .background(move || if is_dark.get() { solid(0xF02B2B2B) } else { solid(0xF0F9F9F9) })
-        .border_brush(move || if is_dark.get() { solid(0x33FFFFFF) } else { solid(0x33000000) })
+        .background(move || {
+            if is_dark.get() {
+                solid(0xF02B2B2B)
+            } else {
+                solid(0xF0F9F9F9)
+            }
+        })
+        .border_brush(move || {
+            if is_dark.get() {
+                solid(0x33FFFFFF)
+            } else {
+                solid(0x33000000)
+            }
+        })
         .border_thickness(1.0)
         .corner_radius(7.0)
         .padding((8.0, 4.0, 8.0, 4.0))
@@ -421,7 +504,12 @@ fn build_align_overlay(state: &VisualGraphState) -> Element {
             stack_panel()
                 .orientation(Orientation::Horizontal)
                 .spacing(4.0)
-                .child(text_block().text("ALIGN").font_size(10.0).vertical_alignment(VerticalAlignment::Center))
+                .child(
+                    text_block()
+                        .text("ALIGN")
+                        .font_size(10.0)
+                        .vertical_alignment(VerticalAlignment::Center),
+                )
                 .child(make_align_btn("⇤ Left", AlignMode::Left))
                 .child(make_align_btn("⇥ Right", AlignMode::Right))
                 .child(make_align_btn("⤒ Top", AlignMode::Top))
@@ -459,12 +547,20 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                             .padding((8.0, 4.0, 8.0, 4.0))
                             .border_brush(if i == 0 { solid(0xFF0078D4) } else { None })
                             .font_size(11.0)
-                            .content(format!("{}  [{}]  ·  {}", meta.display_name, meta.nickname, cat))
+                            .content(format!(
+                                "{}  [{}]  ·  {}",
+                                meta.display_name, meta.nickname, cat
+                            ))
                             .on_click(move |_| {
                                 let added = {
                                     let mut g = st_pick.graph.borrow_mut();
                                     g.push_undo_checkpoint();
-                                    let id = g.add_node(&st_pick.registry, &tid, canvas_pt[0], canvas_pt[1]);
+                                    let id = g.add_node(
+                                        &st_pick.registry,
+                                        &tid,
+                                        canvas_pt[0],
+                                        canvas_pt[1],
+                                    );
                                     if let Some(nid) = id {
                                         g.selected_nodes.clear();
                                         g.selected_nodes.insert(nid);
@@ -476,7 +572,9 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                                 if added.is_some() {
                                     st_pick.notify_topology_changed();
                                     st_pick.notify_selection_changed();
-                                    st_pick.status_msg.set(format!("Placed `{disp}` via Canvas Search."));
+                                    st_pick
+                                        .status_msg
+                                        .set(format!("Placed `{disp}` via Canvas Search."));
                                 }
                             }),
                     );
@@ -488,8 +586,16 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                     .canvas_left(screen_pt.x.max(12.0))
                     .canvas_top(screen_pt.y.max(12.0))
                     .width(268.0)
-                    .background(if dark { solid(0xF52C2C2C) } else { solid(0xF5F9F9F9) })
-                    .border_brush(if dark { solid(0x38FFFFFF) } else { solid(0x38000000) })
+                    .background(if dark {
+                        solid(0xF52C2C2C)
+                    } else {
+                        solid(0xF5F9F9F9)
+                    })
+                    .border_brush(if dark {
+                        solid(0x38FFFFFF)
+                    } else {
+                        solid(0x38000000)
+                    })
                     .border_thickness(1.0)
                     .corner_radius(8.0)
                     .padding(9.0)
@@ -505,7 +611,11 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                                             .content("✕")
                                             .on_click(move |_| st_close.quick_search.set(None)),
                                     )
-                                    .child(text_block().text("Enter a search keyword…").font_size(10.5)),
+                                    .child(
+                                        text_block()
+                                            .text("Enter a search keyword…")
+                                            .font_size(10.5),
+                                    ),
                             )
                             .child(
                                 text_box()
@@ -517,7 +627,12 @@ fn build_quick_search_overlay(state: &VisualGraphState, quick_query: Signal<Stri
                                                 let added = {
                                                     let mut g = st_enter.graph.borrow_mut();
                                                     g.push_undo_checkpoint();
-                                                    let id = g.add_node(&st_enter.registry, &m.type_id, canvas_pt[0], canvas_pt[1]);
+                                                    let id = g.add_node(
+                                                        &st_enter.registry,
+                                                        &m.type_id,
+                                                        canvas_pt[0],
+                                                        canvas_pt[1],
+                                                    );
                                                     if let Some(nid) = id {
                                                         g.selected_nodes.clear();
                                                         g.selected_nodes.insert(nid);
@@ -556,11 +671,18 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                 let dark = st_in.is_dark_theme.get();
                 let (title, disabled, matching) = {
                     let g = st_in.graph.borrow();
-                    let Some(n) = g.nodes.get(&nid) else { return Element::Empty };
+                    let Some(n) = g.nodes.get(&nid) else {
+                        return Element::Empty;
+                    };
                     let t = n
                         .custom_title
                         .clone()
-                        .or_else(|| st_in.registry.get(&n.type_id).map(|c| c.display_name().to_string()))
+                        .or_else(|| {
+                            st_in
+                                .registry
+                                .get(&n.type_id)
+                                .map(|c| c.display_name().to_string())
+                        })
                         .unwrap_or_else(|| n.type_id.clone());
                     (t, n.disabled, n.matching)
                 };
@@ -586,8 +708,16 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                     .canvas_left(screen_pt.x.max(12.0))
                     .canvas_top(screen_pt.y.max(12.0))
                     .width(216.0)
-                    .background(if dark { solid(0xF52C2C2C) } else { solid(0xF5F9F9F9) })
-                    .border_brush(if dark { solid(0x38FFFFFF) } else { solid(0x38000000) })
+                    .background(if dark {
+                        solid(0xF52C2C2C)
+                    } else {
+                        solid(0xF5F9F9F9)
+                    })
+                    .border_brush(if dark {
+                        solid(0x38FFFFFF)
+                    } else {
+                        solid(0x38000000)
+                    })
                     .border_thickness(1.0)
                     .corner_radius(7.0)
                     .padding(7.0)
@@ -624,21 +754,29 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                     st_dis.reevaluate_and_notify();
                                 }),
                             )
-                            .child(menu_btn(format!("Lacing: {matching:?} ↻")).on_click(move |_| {
-                                {
-                                    let mut g = st_lac.graph.borrow_mut();
-                                    if let Some(n) = g.nodes.get_mut(&nid) {
-                                        n.matching = match n.matching {
-                                            DataMatching::LongestList => DataMatching::ShortestList,
-                                            DataMatching::ShortestList => DataMatching::CrossReference,
-                                            DataMatching::CrossReference => DataMatching::LongestList,
-                                        };
+                            .child(menu_btn(format!("Lacing: {matching:?} ↻")).on_click(
+                                move |_| {
+                                    {
+                                        let mut g = st_lac.graph.borrow_mut();
+                                        if let Some(n) = g.nodes.get_mut(&nid) {
+                                            n.matching = match n.matching {
+                                                DataMatching::LongestList => {
+                                                    DataMatching::ShortestList
+                                                }
+                                                DataMatching::ShortestList => {
+                                                    DataMatching::CrossReference
+                                                }
+                                                DataMatching::CrossReference => {
+                                                    DataMatching::LongestList
+                                                }
+                                            };
+                                        }
+                                        g.mark_dirty(nid);
                                     }
-                                    g.mark_dirty(nid);
-                                }
-                                st_lac.context_menu.set(None);
-                                st_lac.reevaluate_and_notify();
-                            }))
+                                    st_lac.context_menu.set(None);
+                                    st_lac.reevaluate_and_notify();
+                                },
+                            ))
                             .child(
                                 stack_panel()
                                     .orientation(Orientation::Horizontal)
@@ -649,7 +787,10 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                             .font_size(10.0)
                                             .content("Wire: Def")
                                             .on_click(move |_| {
-                                                st_wdef.graph.borrow_mut().set_node_wire_display(nid, WireDisplay::Default);
+                                                st_wdef.graph.borrow_mut().set_node_wire_display(
+                                                    nid,
+                                                    WireDisplay::Default,
+                                                );
                                                 st_wdef.context_menu.set(None);
                                                 st_wdef.invalidate_wires();
                                             }),
@@ -660,7 +801,10 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                             .font_size(10.0)
                                             .content("Faint")
                                             .on_click(move |_| {
-                                                st_wfnt.graph.borrow_mut().set_node_wire_display(nid, WireDisplay::Faint);
+                                                st_wfnt
+                                                    .graph
+                                                    .borrow_mut()
+                                                    .set_node_wire_display(nid, WireDisplay::Faint);
                                                 st_wfnt.context_menu.set(None);
                                                 st_wfnt.invalidate_wires();
                                             }),
@@ -671,7 +815,10 @@ fn build_context_menu_overlay(state: &VisualGraphState) -> Element {
                                             .font_size(10.0)
                                             .content("Hidden")
                                             .on_click(move |_| {
-                                                st_whid.graph.borrow_mut().set_node_wire_display(nid, WireDisplay::Hidden);
+                                                st_whid.graph.borrow_mut().set_node_wire_display(
+                                                    nid,
+                                                    WireDisplay::Hidden,
+                                                );
                                                 st_whid.context_menu.set(None);
                                                 st_whid.invalidate_wires();
                                             }),
@@ -714,7 +861,13 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
     let is_dark = state.is_dark_theme;
     border()
         .dock_panel_dock(Dock::Bottom)
-        .border_brush(move || if is_dark.get() { solid(0x1FFFFFFF) } else { solid(0x1F000000) })
+        .border_brush(move || {
+            if is_dark.get() {
+                solid(0x1FFFFFFF)
+            } else {
+                solid(0x1F000000)
+            }
+        })
         .border_thickness((0.0, 1.0, 0.0, 0.0))
         .padding((10.0, 5.0, 10.0, 5.0))
         .clip_to_bounds(true)
@@ -729,7 +882,9 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
 
             let (title, out_summary, cur_match, in0_mod, has_in) = {
                 let g = st_i.graph.borrow();
-                let Some(n) = g.nodes.get(&nid) else { return text_block().text("").into() };
+                let Some(n) = g.nodes.get(&nid) else {
+                    return text_block().text("").into();
+                };
                 let comp = st_i.registry.get(&n.type_id);
                 let title = n
                     .custom_title
@@ -738,7 +893,14 @@ fn build_bottom_inspector(state: &VisualGraphState) -> Element {
                     .unwrap_or_else(|| n.type_id.clone());
                 let out_s = n
                     .output_tree(0)
-                    .map(|t| format!("Out[0]: {} br · {} items · {}", t.branch_count(), t.item_count(), t.format_panel(1)))
+                    .map(|t| {
+                        format!(
+                            "Out[0]: {} br · {} items · {}",
+                            t.branch_count(),
+                            t.item_count(),
+                            t.format_panel(1)
+                        )
+                    })
                     .unwrap_or_else(|| "Empty parameter".into());
                 let m0 = n.input_modifiers.first().copied().unwrap_or_default();
                 (title, out_s, n.matching, m0, !n.input_modifiers.is_empty())

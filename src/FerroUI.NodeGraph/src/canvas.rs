@@ -12,7 +12,9 @@
 use crate::eval::evaluate_graph;
 use crate::graph::{NodeGraph, NodeInstance};
 use crate::node::NodeRegistry;
+use crate::serialization::try_graph_to_json;
 use crate::types::{NodeId, PortDirection, WireDataKind, WireDisplay, WireId};
+use ferroui_base::input::platform::ClipboardExtensions;
 use ferroui_base::input::{
     InputElement, InputElementImpl, Key, KeyEventArgs, KeyModifiers, PointerEventArgs,
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerWheelEventArgs,
@@ -26,17 +28,19 @@ use ferroui_base::media::{
 };
 use ferroui_base::platform::IGeometryContext;
 use ferroui_base::styling::ThemeVariant;
+use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Matrix, Point,
     Rect, Ref, StyledElementImpl, Visual, VisualImpl, WeakRef,
 };
-use ferroui_controls::{Application, Control, ControlImpl};
+use ferroui_controls::{Application, Control, ControlImpl, TopLevel};
 use ferroui_view::prelude::*;
 use ferroui_view::ViewClass;
 use rustc_hash::FxHashMap;
 use std::cell::RefCell;
 use std::rc::Rc;
+use std::time::Instant;
 
 /// Live drag-to-wire gesture initiated from any real FerroUI port socket visual.
 #[derive(Clone, Debug)]
@@ -64,6 +68,8 @@ pub struct VisualGraphState {
     pub hover_port: Rc<RefCell<Option<(NodeId, PortDirection, usize, Point)>>>,
     pub on_evaluated: Rc<dyn Fn(&NodeGraph)>,
     pub topology_rev: Signal<u64>,
+    /// Recreates inline widget state after undo/redo while retaining keyed views for normal edits.
+    pub history_rev: Signal<u32>,
     pub eval_rev: Signal<u64>,
     pub selection_rev: Signal<u64>,
     /// Tracks whether the host application's stock `ThemeVariant` is currently dark.
@@ -71,6 +77,8 @@ pub struct VisualGraphState {
     pub quick_search: Signal<Option<(Point, [f64; 2])>>,
     pub context_menu: Signal<Option<(NodeId, Point)>>,
     pub status_msg: Signal<String>,
+    /// Monotonic clock shared by all views of this editor instance.
+    pub solution_clock: Rc<Instant>,
 }
 
 impl VisualGraphState {
@@ -85,6 +93,7 @@ impl VisualGraphState {
         Self {
             graph,
             registry,
+            solution_clock: Rc::new(Instant::now()),
             socket_visuals: Rc::new(RefCell::new(FxHashMap::default())),
             node_visuals: Rc::new(RefCell::new(FxHashMap::default())),
             world_transform: Rc::new(RefCell::new(None)),
@@ -94,6 +103,7 @@ impl VisualGraphState {
             hover_port: Rc::new(RefCell::new(None)),
             on_evaluated,
             topology_rev: signal(0),
+            history_rev: signal(0),
             eval_rev: signal(0),
             selection_rev: signal(0),
             is_dark_theme: signal(init_dark),
@@ -125,10 +135,28 @@ impl VisualGraphState {
     }
 
     pub fn notify_topology_changed(&self) {
+        {
+            let graph = self.graph.borrow();
+            self.node_visuals
+                .borrow_mut()
+                .retain(|id, _| graph.nodes.contains_key(id));
+            self.socket_visuals
+                .borrow_mut()
+                .retain(|(id, _, _), _| graph.nodes.contains_key(id));
+        }
         if self.topology_rev.is_alive() {
             self.topology_rev.update(|v| *v = v.wrapping_add(1));
         }
         self.reevaluate_and_notify();
+    }
+
+    pub fn notify_history_restored(&self) {
+        if self.history_rev.is_alive() {
+            self.history_rev
+                .update(|revision| *revision = revision.wrapping_add(1));
+        }
+        self.notify_topology_changed();
+        self.notify_selection_changed();
     }
 
     pub fn notify_selection_changed(&self) {
@@ -139,15 +167,66 @@ impl VisualGraphState {
     }
 
     pub fn reevaluate_and_notify(&self) {
+        self.reevaluate_at(self.solution_clock.elapsed().as_secs_f64());
+    }
+
+    /// Evaluates with an explicit clock value for externally driven editors.
+    pub fn reevaluate_at(&self, time_secs: f64) {
         {
             let mut g = self.graph.borrow_mut();
-            let _ = evaluate_graph(&mut g, &self.registry, 0.0);
+            let _ = evaluate_graph(&mut g, &self.registry, time_secs);
         }
         if self.eval_rev.is_alive() {
             self.eval_rev.update(|v| *v = v.wrapping_add(1));
         }
         (self.on_evaluated)(&self.graph.borrow());
         self.invalidate_wires();
+    }
+
+    pub fn needs_clock_tick(&self) -> bool {
+        let graph = self.graph.borrow();
+        !graph.solution_locked
+            && graph.nodes.values().any(|node| {
+                !node.disabled
+                    && (self
+                        .registry
+                        .get(&node.type_id)
+                        .is_some_and(|component| component.is_time_dependent(&node.widget))
+                        || (node.dirty
+                            && matches!(node.widget, crate::types::ParamWidget::Button { .. })))
+            })
+    }
+
+    pub fn copy_definition_to_clipboard(&self) {
+        let json = match try_graph_to_json(&self.graph.borrow()) {
+            Ok(json) => json,
+            Err(error) => {
+                self.status_msg.set(format!("Cannot export: {error}"));
+                return;
+            }
+        };
+        let clipboard = self
+            .wire_layer
+            .borrow()
+            .as_ref()
+            .and_then(|weak| weak.upgrade())
+            .and_then(|layer| TopLevel::get_top_level(Some(&layer)))
+            .and_then(|top_level| top_level.clipboard());
+        let Some(clipboard) = clipboard else {
+            self.status_msg
+                .set("Clipboard is unavailable on this platform".into());
+            return;
+        };
+        let status = self.status_msg;
+        drop(Dispatcher::ui_thread().spawn_local(async move {
+            let message = match clipboard.set_text_async(Some(&json)).await {
+                Ok(()) => format!("Copied graph JSON to clipboard ({} bytes)", json.len()),
+                Err(error) => format!("Could not copy graph: {error}"),
+            };
+            if status.is_alive() {
+                status.set(message);
+            }
+        }));
     }
 
     pub fn sync_all_node_positions(&self) {
@@ -268,13 +347,17 @@ impl VisualGraphState {
             if nid == from_node {
                 continue;
             }
-            let Some(comp) = self.registry.get(&node.type_id) else { continue };
+            let Some(comp) = self.registry.get(&node.type_id) else {
+                continue;
+            };
             let count = match want_dir {
                 PortDirection::Input => comp.inputs().len(),
                 PortDirection::Output => comp.outputs().len(),
             };
             for pidx in 0..count {
-                let Some(sp) = self.port_screen_pos(&layer, nid, want_dir, pidx) else { continue };
+                let Some(sp) = self.port_screen_pos(&layer, nid, want_dir, pidx) else {
+                    continue;
+                };
                 let d2 = (sp.x - screen_pt.x).powi(2) + (sp.y - screen_pt.y).powi(2);
                 if d2 <= max_d2 && best.as_ref().map_or(true, |b| d2 < b.0) {
                     let (src_n, dst_n) = match from_dir {
@@ -339,7 +422,10 @@ fn fallback_port_canvas(
         [x, node.position[1] + node.size[1] * 0.5]
     } else {
         let usable = (node.size[1] - 24.0).max(1.0);
-        [x, node.position[1] + 12.0 + usable * (port_idx as f64 / (count - 1) as f64)]
+        [
+            x,
+            node.position[1] + 12.0 + usable * (port_idx as f64 / (count - 1) as f64),
+        ]
     }
 }
 
@@ -350,8 +436,13 @@ fn fallback_port_canvas(
 #[derive(Clone, Debug)]
 enum BackdropDrag {
     Idle,
-    Panning { start_screen: Point, start_pan: [f64; 2] },
-    Marquee { start_screen: Point },
+    Panning {
+        start_screen: Point,
+        start_pan: [f64; 2],
+    },
+    Marquee {
+        start_screen: Point,
+    },
     Minimap,
 }
 
@@ -396,21 +487,46 @@ impl ThemeBrushes {
         let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
         let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
-        let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFE07A00));
-        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF3A3A3A));
-        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF3F3F3));
-        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF16A34A));
+        let empty_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFE07A00));
+        let tree_outer_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF3A3A3A));
+        let tree_inner_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFFF3F3F3));
+        let cross_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF16A34A));
         Self {
             bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0x00000000)),
             minor_grid: Rc::new(ImmutablePen::from_uint32(0x14000000, 1.0)),
             major_grid: Rc::new(ImmutablePen::from_uint32(0x24000000, 1.0)),
             origin_pen: Rc::new(ImmutablePen::from_uint32(0x3C000000, 1.4)),
-            wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.9, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
+            wire_empty: Rc::new(ImmutablePen::new(
+                Some(empty_br),
+                1.9,
+                Some(dashed_empty),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             wire_item: Rc::new(ImmutablePen::from_uint32(0xCC3A3A3A, 2.0)),
             wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD343434, 4.6)),
             wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFFF3F3F3, 1.8)),
-            wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
-            wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.8, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
+            wire_tree_outer: Rc::new(ImmutablePen::new(
+                Some(tree_outer_br),
+                5.0,
+                Some(dashed_tree.clone()),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
+            wire_tree_inner: Rc::new(ImmutablePen::new(
+                Some(tree_inner_br),
+                1.8,
+                Some(dashed_tree),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF16A34A, 3.6)),
             wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFFDCFCE7, 1.3)),
             wire_faint: Rc::new(ImmutablePen::from_uint32(0x44484848, 1.2)),
@@ -419,7 +535,14 @@ impl ThemeBrushes {
             window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x220078D4)),
             window_border: Rc::new(ImmutablePen::from_uint32(0xCC0078D4, 1.4)),
             crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2216A34A)),
-            crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
+            crossing_border: Rc::new(ImmutablePen::new(
+                Some(cross_br),
+                1.5,
+                Some(dashed_cross),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDCF3F3F3)),
             minimap_border: Rc::new(ImmutablePen::from_uint32(0x38000000, 1.0)),
             minimap_view: Rc::new(ImmutablePen::from_uint32(0xFF0078D4, 1.5)),
@@ -441,21 +564,46 @@ impl ThemeBrushes {
         let dashed_tree = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
         let dashed_empty = Rc::new(ImmutableDashStyle::new(Some(&[4.0, 3.5]), 0.0));
         let dashed_cross = Rc::new(ImmutableDashStyle::new(Some(&[5.0, 3.5]), 0.0));
-        let empty_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xCCF59E0B));
-        let tree_outer_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xDD93C5FD));
-        let tree_inner_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF202020));
-        let cross_br: Rc<dyn IImmutableBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF34D399));
+        let empty_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xCCF59E0B));
+        let tree_outer_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xDD93C5FD));
+        let tree_inner_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF202020));
+        let cross_br: Rc<dyn IImmutableBrush> =
+            Rc::new(ImmutableSolidColorBrush::from_uint32(0xFF34D399));
         Self {
             bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0x00000000)),
             minor_grid: Rc::new(ImmutablePen::from_uint32(0x10FFFFFF, 1.0)),
             major_grid: Rc::new(ImmutablePen::from_uint32(0x1FFFFFFF, 1.0)),
             origin_pen: Rc::new(ImmutablePen::from_uint32(0x34FFFFFF, 1.4)),
-            wire_empty: Rc::new(ImmutablePen::new(Some(empty_br), 1.8, Some(dashed_empty), PenLineCap::Round, Default::default(), 4.0)),
+            wire_empty: Rc::new(ImmutablePen::new(
+                Some(empty_br),
+                1.8,
+                Some(dashed_empty),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             wire_item: Rc::new(ImmutablePen::from_uint32(0xCCA8A8A8, 2.2)),
             wire_list_outer: Rc::new(ImmutablePen::from_uint32(0xDD60CDFF, 4.8)),
             wire_list_inner: Rc::new(ImmutablePen::from_uint32(0xFF202020, 1.9)),
-            wire_tree_outer: Rc::new(ImmutablePen::new(Some(tree_outer_br), 5.0, Some(dashed_tree.clone()), PenLineCap::Round, Default::default(), 4.0)),
-            wire_tree_inner: Rc::new(ImmutablePen::new(Some(tree_inner_br), 1.9, Some(dashed_tree), PenLineCap::Round, Default::default(), 4.0)),
+            wire_tree_outer: Rc::new(ImmutablePen::new(
+                Some(tree_outer_br),
+                5.0,
+                Some(dashed_tree.clone()),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
+            wire_tree_inner: Rc::new(ImmutablePen::new(
+                Some(tree_inner_br),
+                1.9,
+                Some(dashed_tree),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             wire_selected: Rc::new(ImmutablePen::from_uint32(0xFF22C55E, 3.6)),
             wire_selected_inner: Rc::new(ImmutablePen::from_uint32(0xFF202020, 1.3)),
             wire_faint: Rc::new(ImmutablePen::from_uint32(0x44A8A8A8, 1.2)),
@@ -464,7 +612,14 @@ impl ThemeBrushes {
             window_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2260CDFF)),
             window_border: Rc::new(ImmutablePen::from_uint32(0xCC60CDFF, 1.4)),
             crossing_fill: Rc::new(ImmutableSolidColorBrush::from_uint32(0x2234D399)),
-            crossing_border: Rc::new(ImmutablePen::new(Some(cross_br), 1.5, Some(dashed_cross), PenLineCap::Round, Default::default(), 4.0)),
+            crossing_border: Rc::new(ImmutablePen::new(
+                Some(cross_br),
+                1.5,
+                Some(dashed_cross),
+                PenLineCap::Round,
+                Default::default(),
+                4.0,
+            )),
             minimap_bg: Rc::new(ImmutableSolidColorBrush::from_uint32(0xDC242424)),
             minimap_border: Rc::new(ImmutablePen::from_uint32(0x2EFFFFFF, 1.0)),
             minimap_view: Rc::new(ImmutablePen::from_uint32(0xCC60CDFF, 1.5)),
@@ -499,7 +654,9 @@ ferro_impl_classes!(
     InteractiveImpl,
     ControlImpl
 );
-ferro_class_info!(WireBackdropLayer { new: WireBackdropLayer::new });
+ferro_class_info!(WireBackdropLayer {
+    new: WireBackdropLayer::new
+});
 
 impl ViewClass for WireBackdropLayer {
     fn create() -> Ref<Self> {
@@ -533,23 +690,41 @@ impl WireBackdropLayer {
 
     fn minimap_rect(&self) -> Rect {
         let b = self.bounds();
-        Rect::new((b.width - 178.0).max(8.0), (b.height - 114.0).max(8.0), 166.0, 102.0)
+        Rect::new(
+            (b.width - 178.0).max(8.0),
+            (b.height - 114.0).max(8.0),
+            166.0,
+            102.0,
+        )
     }
 
     fn hit_test_wire_screen(&self, st: &VisualGraphState, screen_pt: Point) -> Option<WireId> {
         let g = st.graph.borrow();
         let thresh2 = 10.0 * 10.0;
         for (_, w) in &g.wires {
-            let Some(p0) = st.port_screen_pos(self, w.from_node, PortDirection::Output, w.from_port) else { continue };
-            let Some(p3) = st.port_screen_pos(self, w.to_node, PortDirection::Input, w.to_port) else { continue };
+            let Some(p0) =
+                st.port_screen_pos(self, w.from_node, PortDirection::Output, w.from_port)
+            else {
+                continue;
+            };
+            let Some(p3) = st.port_screen_pos(self, w.to_node, PortDirection::Input, w.to_port)
+            else {
+                continue;
+            };
             let dx = ((p3.x - p0.x).abs() * 0.48).clamp(32.0, 180.0);
             let p1 = Point::new(p0.x + dx, p0.y);
             let p2 = Point::new(p3.x - dx, p3.y);
             for step in 0..=18 {
                 let t = step as f64 / 18.0;
                 let u = 1.0 - t;
-                let bx = u * u * u * p0.x + 3.0 * u * u * t * p1.x + 3.0 * u * t * t * p2.x + t * t * t * p3.x;
-                let by = u * u * u * p0.y + 3.0 * u * u * t * p1.y + 3.0 * u * t * t * p2.y + t * t * t * p3.y;
+                let bx = u * u * u * p0.x
+                    + 3.0 * u * u * t * p1.x
+                    + 3.0 * u * t * t * p2.x
+                    + t * t * t * p3.x;
+                let by = u * u * u * p0.y
+                    + 3.0 * u * u * t * p1.y
+                    + 3.0 * u * t * t * p2.y
+                    + t * t * t * p3.y;
                 if (bx - screen_pt.x).powi(2) + (by - screen_pt.y).powi(2) <= thresh2 {
                     return Some(w.id);
                 }
@@ -562,7 +737,9 @@ impl WireBackdropLayer {
         let mm = self.minimap_rect();
         let b = self.bounds();
         let mut g = st.graph.borrow_mut();
-        let Some([min_x, min_y, max_x, max_y]) = g.content_bounds() else { return };
+        let Some([min_x, min_y, max_x, max_y]) = g.content_bounds() else {
+            return;
+        };
         let pad = 120.0;
         let bx0 = min_x - pad;
         let by0 = min_y - pad;
@@ -572,7 +749,10 @@ impl WireBackdropLayer {
         let ny = ((screen_pt.y - mm.y) / mm.height).clamp(0.0, 1.0);
         let cx = bx0 + nx * bw;
         let cy = by0 + ny * bh;
-        g.camera_pan = [b.width * 0.5 - cx * g.camera_zoom, b.height * 0.5 - cy * g.camera_zoom];
+        g.camera_pan = [
+            b.width * 0.5 - cx * g.camera_zoom,
+            b.height * 0.5 - cy * g.camera_zoom,
+        ];
         drop(g);
         st.sync_camera_transform();
     }
@@ -581,7 +761,9 @@ impl WireBackdropLayer {
 impl InputElementImpl for WireBackdropLayer {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         this.focus();
-        let Some(st) = this.state.borrow().clone() else { return };
+        let Some(st) = this.state.borrow().clone() else {
+            return;
+        };
         st.quick_search.set(None);
         st.context_menu.set(None);
 
@@ -614,13 +796,19 @@ impl InputElementImpl for WireBackdropLayer {
                 return;
             }
             let start_pan = st.graph.borrow().camera_pan;
-            *this.drag.borrow_mut() = BackdropDrag::Panning { start_screen: pt, start_pan };
+            *this.drag.borrow_mut() = BackdropDrag::Panning {
+                start_screen: pt,
+                start_pan,
+            };
             return;
         }
 
         if is_middle || alt {
             let start_pan = st.graph.borrow().camera_pan;
-            *this.drag.borrow_mut() = BackdropDrag::Panning { start_screen: pt, start_pan };
+            *this.drag.borrow_mut() = BackdropDrag::Panning {
+                start_screen: pt,
+                start_pan,
+            };
             return;
         }
 
@@ -628,9 +816,15 @@ impl InputElementImpl for WireBackdropLayer {
         if let Some(wid) = this.hit_test_wire_screen(&st, pt) {
             if e.click_count() >= 2 {
                 let c = st.screen_to_canvas(pt);
-                if st.graph.borrow_mut().insert_relay_on_wire(wid, c[0], c[1], &st.registry).is_some() {
+                if st
+                    .graph
+                    .borrow_mut()
+                    .insert_relay_on_wire(wid, c[0], c[1], &st.registry)
+                    .is_some()
+                {
                     st.notify_topology_changed();
-                    st.status_msg.set("Inserted Grasshopper Relay node inline on wire.".into());
+                    st.status_msg
+                        .set("Inserted Grasshopper Relay node inline on wire.".into());
                 }
                 return;
             }
@@ -662,12 +856,17 @@ impl InputElementImpl for WireBackdropLayer {
     }
 
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
-        let Some(st) = this.state.borrow().clone() else { return };
+        let Some(st) = this.state.borrow().clone() else {
+            return;
+        };
         let pt = e.get_position(Some(this));
         match this.drag.borrow().clone() {
             BackdropDrag::Idle => {}
             BackdropDrag::Minimap => this.jump_minimap(&st, pt),
-            BackdropDrag::Panning { start_screen, start_pan } => {
+            BackdropDrag::Panning {
+                start_screen,
+                start_pan,
+            } => {
                 {
                     let mut g = st.graph.borrow_mut();
                     g.camera_pan = [
@@ -732,7 +931,9 @@ impl InputElementImpl for WireBackdropLayer {
     }
 
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
-        let Some(st) = this.state.borrow().clone() else { return };
+        let Some(st) = this.state.borrow().clone() else {
+            return;
+        };
         let cmd = e.key_modifiers.contains(KeyModifiers::CONTROL)
             || e.key_modifiers.contains(KeyModifiers::META);
         let shift = e.key_modifiers.contains(KeyModifiers::SHIFT);
@@ -741,7 +942,8 @@ impl InputElementImpl for WireBackdropLayer {
             Key::Space => {
                 let b = this.bounds();
                 let center = Point::new(b.width * 0.5 - 124.0, b.height * 0.34);
-                st.quick_search.set(Some((center, st.screen_to_canvas(center))));
+                st.quick_search
+                    .set(Some((center, st.screen_to_canvas(center))));
                 e.set_handled(true);
             }
             Key::Escape => {
@@ -758,21 +960,21 @@ impl InputElementImpl for WireBackdropLayer {
             }
             Key::Z if cmd && shift => {
                 if st.graph.borrow_mut().redo() {
-                    st.notify_topology_changed();
+                    st.notify_history_restored();
                     st.sync_all_node_positions();
                     e.set_handled(true);
                 }
             }
             Key::Z if cmd => {
                 if st.graph.borrow_mut().undo() {
-                    st.notify_topology_changed();
+                    st.notify_history_restored();
                     st.sync_all_node_positions();
                     e.set_handled(true);
                 }
             }
             Key::Y if cmd => {
                 if st.graph.borrow_mut().redo() {
-                    st.notify_topology_changed();
+                    st.notify_history_restored();
                     st.sync_all_node_positions();
                     e.set_handled(true);
                 }
@@ -785,7 +987,12 @@ impl InputElementImpl for WireBackdropLayer {
                 }
             }
             Key::G if cmd => {
-                if st.graph.borrow_mut().group_selection("Group", 0x337C3AED).is_some() {
+                if st
+                    .graph
+                    .borrow_mut()
+                    .group_selection("Group", 0x337C3AED)
+                    .is_some()
+                {
                     st.invalidate_wires();
                     e.set_handled(true);
                 }
@@ -862,10 +1069,18 @@ impl VisualImpl for WireBackdropLayer {
         }
         // Subtle canvas origin axes (0, 0)
         if g.camera_pan[0] >= 0.0 && g.camera_pan[0] <= w {
-            dc.draw_line(&pal.origin_pen, Point::new(g.camera_pan[0], 0.0), Point::new(g.camera_pan[0], h));
+            dc.draw_line(
+                &pal.origin_pen,
+                Point::new(g.camera_pan[0], 0.0),
+                Point::new(g.camera_pan[0], h),
+            );
         }
         if g.camera_pan[1] >= 0.0 && g.camera_pan[1] <= h {
-            dc.draw_line(&pal.origin_pen, Point::new(0.0, g.camera_pan[1]), Point::new(w, g.camera_pan[1]));
+            dc.draw_line(
+                &pal.origin_pen,
+                Point::new(0.0, g.camera_pan[1]),
+                Point::new(w, g.camera_pan[1]),
+            );
         }
 
         // 2. Authentic Rhino Grasshopper Pastel Group Envelopes
@@ -925,7 +1140,14 @@ impl VisualImpl for WireBackdropLayer {
                 let border_col = (group.color_argb & 0x00FF_FFFF) | 0x9900_0000;
                 let fill: Rc<dyn IBrush> = Rc::new(ImmutableSolidColorBrush::from_uint32(fill_col));
                 let border_pen: Rc<dyn IPen> = Rc::new(ImmutablePen::from_uint32(border_col, 1.4));
-                dc.draw_rectangle(Some(&fill), Some(&border_pen), rect, 14.0, 14.0, &BoxShadows::default());
+                dc.draw_rectangle(
+                    Some(&fill),
+                    Some(&border_pen),
+                    rect,
+                    14.0,
+                    14.0,
+                    &BoxShadows::default(),
+                );
                 draw_text(
                     &mut dc,
                     &group.title,
@@ -942,8 +1164,16 @@ impl VisualImpl for WireBackdropLayer {
             if wire.display == WireDisplay::Hidden {
                 continue;
             }
-            let Some(p0) = st.port_screen_pos(this, wire.from_node, PortDirection::Output, wire.from_port) else { continue };
-            let Some(p3) = st.port_screen_pos(this, wire.to_node, PortDirection::Input, wire.to_port) else { continue };
+            let Some(p0) =
+                st.port_screen_pos(this, wire.from_node, PortDirection::Output, wire.from_port)
+            else {
+                continue;
+            };
+            let Some(p3) =
+                st.port_screen_pos(this, wire.to_node, PortDirection::Input, wire.to_port)
+            else {
+                continue;
+            };
             let is_sel = g.selected_wires.contains(&wire.id)
                 || g.selected_nodes.contains(&wire.from_node)
                 || g.selected_nodes.contains(&wire.to_node);
@@ -968,7 +1198,9 @@ impl VisualImpl for WireBackdropLayer {
 
         // 4. Live Drag-to-Wire Preview + Magnetic Target Halo + Shift `+` Badge
         if let Some(drag) = st.active_wire.borrow().as_ref() {
-            if let Some(anchor) = st.port_screen_pos(this, drag.from_node, drag.from_dir, drag.from_port) {
+            if let Some(anchor) =
+                st.port_screen_pos(this, drag.from_node, drag.from_dir, drag.from_port)
+            {
                 let (end_pt, ok) = match drag.snap_target {
                     Some((_, _, _, sp, compat)) => (sp, compat),
                     None => (drag.cursor_screen, true),
@@ -977,16 +1209,30 @@ impl VisualImpl for WireBackdropLayer {
                     PortDirection::Output => (anchor, end_pt),
                     PortDirection::Input => (end_pt, anchor),
                 };
-                let pen = if ok { &pal.wire_preview_ok } else { &pal.wire_preview_bad };
+                let pen = if ok {
+                    &pal.wire_preview_ok
+                } else {
+                    &pal.wire_preview_bad
+                };
                 draw_bezier(&mut dc, pen, p0, p3);
                 if let Some((_, _, _, sp, compat)) = drag.snap_target {
-                    let ring = if compat { &pal.snap_ok_pen } else { &pal.snap_bad_pen };
+                    let ring = if compat {
+                        &pal.snap_ok_pen
+                    } else {
+                        &pal.snap_bad_pen
+                    };
                     dc.draw_ellipse_at(None, Some(ring), sp, 9.5, 9.5);
                 }
                 if drag.multi_wire {
                     let badge = Rect::new(end_pt.x + 10.0, end_pt.y - 10.0, 18.0, 18.0);
                     dc.fill_rectangle(&pal.badge_bg, badge, 9.0);
-                    draw_text(&mut dc, "+", Point::new(badge.x + 5.0, badge.y + 1.0), 12.0, &this.dark.text_primary);
+                    draw_text(
+                        &mut dc,
+                        "+",
+                        Point::new(badge.x + 5.0, badge.y + 1.0),
+                        12.0,
+                        &this.dark.text_primary,
+                    );
                 }
             }
         }
@@ -994,18 +1240,44 @@ impl VisualImpl for WireBackdropLayer {
         // 5. Authentic Rhino Window (Blue, L→R) vs Crossing (Green Dashed, R→L) Marquee!
         if let Some((s0, s1)) = *st.marquee.borrow() {
             let crossing = s1.x < s0.x;
-            let rect = Rect::new(s0.x.min(s1.x), s0.y.min(s1.y), (s1.x - s0.x).abs(), (s1.y - s0.y).abs());
+            let rect = Rect::new(
+                s0.x.min(s1.x),
+                s0.y.min(s1.y),
+                (s1.x - s0.x).abs(),
+                (s1.y - s0.y).abs(),
+            );
             if crossing {
-                dc.draw_rectangle(Some(&pal.crossing_fill), Some(&pal.crossing_border), rect, 2.0, 2.0, &BoxShadows::default());
+                dc.draw_rectangle(
+                    Some(&pal.crossing_fill),
+                    Some(&pal.crossing_border),
+                    rect,
+                    2.0,
+                    2.0,
+                    &BoxShadows::default(),
+                );
             } else {
-                dc.draw_rectangle(Some(&pal.window_fill), Some(&pal.window_border), rect, 2.0, 2.0, &BoxShadows::default());
+                dc.draw_rectangle(
+                    Some(&pal.window_fill),
+                    Some(&pal.window_border),
+                    rect,
+                    2.0,
+                    2.0,
+                    &BoxShadows::default(),
+                );
             }
         }
 
         // 6. Interactive Minimap (bottom-right)
         if w > 340.0 && h > 220.0 {
             let mm = this.minimap_rect();
-            dc.draw_rectangle(Some(&pal.minimap_bg), Some(&pal.minimap_border), mm, 7.0, 7.0, &BoxShadows::default());
+            dc.draw_rectangle(
+                Some(&pal.minimap_bg),
+                Some(&pal.minimap_border),
+                mm,
+                7.0,
+                7.0,
+                &BoxShadows::default(),
+            );
             if let Some([min_x, min_y, max_x, max_y]) = g.content_bounds() {
                 let pad = 120.0;
                 let bx0 = min_x - pad;
@@ -1019,7 +1291,11 @@ impl VisualImpl for WireBackdropLayer {
                     let ny = mm.y + (n.position[1] - by0) * sy;
                     let nw = (n.size[0] * sx).max(4.0);
                     let nh = (n.size[1] * sy).max(3.0);
-                    let br = if g.selected_nodes.contains(&n.id) { &pal.node_dot_sel } else { &pal.node_dot };
+                    let br = if g.selected_nodes.contains(&n.id) {
+                        &pal.node_dot_sel
+                    } else {
+                        &pal.node_dot
+                    };
                     dc.fill_rectangle(br, Rect::new(nx, ny, nw, nh), 1.5);
                 }
                 let vx0 = (-g.camera_pan[0]) / z;
@@ -1044,13 +1320,27 @@ impl VisualImpl for WireBackdropLayer {
                         let detail = match dir {
                             PortDirection::Output => node
                                 .output_tree(pidx)
-                                .map(|t| format!("{} br · {} items · {}", t.branch_count(), t.item_count(), t.format_panel(1)))
+                                .map(|t| {
+                                    format!(
+                                        "{} br · {} items · {}",
+                                        t.branch_count(),
+                                        t.item_count(),
+                                        t.format_panel(1)
+                                    )
+                                })
                                 .unwrap_or_else(|| "Empty parameter".into()),
                             PortDirection::Input => {
                                 let wcnt = g.incoming_wires(nid, pidx).len();
-                                let m = node.input_modifiers.get(pidx).map(|x| x.badge()).unwrap_or_default();
+                                let m = node
+                                    .input_modifiers
+                                    .get(pidx)
+                                    .map(|x| x.badge())
+                                    .unwrap_or_default();
                                 if m.is_empty() {
-                                    format!("{wcnt} source(s) · default {}", spec.default_value.short_summary())
+                                    format!(
+                                        "{wcnt} source(s) · default {}",
+                                        spec.default_value.short_summary()
+                                    )
                                 } else {
                                     format!("{wcnt} source(s) · modifier [{m}]")
                                 }
@@ -1058,10 +1348,34 @@ impl VisualImpl for WireBackdropLayer {
                         };
                         let tx = (spt.x + 14.0).min(w - 262.0).max(8.0);
                         let ty = (spt.y - 48.0).clamp(8.0, h - 58.0);
-                        dc.draw_rectangle(Some(&pal.tooltip_bg), Some(&pal.tooltip_border), Rect::new(tx, ty, 252.0, 44.0), 5.0, 5.0, &BoxShadows::default());
-                        draw_text(&mut dc, &format!("{} ({}) · {}", spec.name, spec.nickname, spec.port_type.label()), Point::new(tx + 8.0, ty + 5.0), 10.5, &pal.text_accent);
+                        dc.draw_rectangle(
+                            Some(&pal.tooltip_bg),
+                            Some(&pal.tooltip_border),
+                            Rect::new(tx, ty, 252.0, 44.0),
+                            5.0,
+                            5.0,
+                            &BoxShadows::default(),
+                        );
+                        draw_text(
+                            &mut dc,
+                            &format!(
+                                "{} ({}) · {}",
+                                spec.name,
+                                spec.nickname,
+                                spec.port_type.label()
+                            ),
+                            Point::new(tx + 8.0, ty + 5.0),
+                            10.5,
+                            &pal.text_accent,
+                        );
                         let short: String = detail.chars().take(38).collect();
-                        draw_text(&mut dc, &short, Point::new(tx + 8.0, ty + 22.0), 10.0, &pal.text_primary);
+                        draw_text(
+                            &mut dc,
+                            &short,
+                            Point::new(tx + 8.0, ty + 22.0),
+                            10.0,
+                            &pal.text_primary,
+                        );
                     }
                 }
             }

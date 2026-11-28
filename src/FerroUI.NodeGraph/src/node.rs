@@ -86,6 +86,15 @@ pub trait NodeComponent: Send + Sync {
     fn inputs(&self) -> Vec<PortSpec>;
     /// Output port specifications.
     fn outputs(&self) -> Vec<PortSpec>;
+    /// Whether this component depends on the solution clock even with unchanged inputs.
+    /// Override for custom clock-driven components; dependent nodes update automatically.
+    fn is_time_dependent(&self, widget: &ParamWidget) -> bool {
+        self.type_id() == "params.time"
+            || (self.type_id() == "math.expression"
+                && matches!(widget, ParamWidget::Text { text }
+                    if text.split(|c: char| !c.is_ascii_alphanumeric() && c != '_')
+                        .any(|token| token.eq_ignore_ascii_case("t"))))
+    }
     /// Evaluates this component's inputs & widget into its outputs.
     fn evaluate(&self, ctx: &mut EvalContext<'_>) -> Result<(), String>;
 }
@@ -156,7 +165,9 @@ pub struct NodeRegistry {
 
 impl NodeRegistry {
     pub fn new() -> Self {
-        Self { components: IndexMap::new() }
+        Self {
+            components: IndexMap::new(),
+        }
     }
 
     /// Creates a registry pre-populated with all built-in Grasshopper standard library components
@@ -217,7 +228,10 @@ impl NodeRegistry {
     }
 
     pub fn by_category(&self, category: &NodeCategory) -> Vec<ComponentMeta> {
-        self.all_meta().into_iter().filter(|m| &m.category == category).collect()
+        self.all_meta()
+            .into_iter()
+            .filter(|m| &m.category == category)
+            .collect()
     }
 
     /// Grasshopper-style fuzzy search across display name, nickname, type_id, category, and description.
@@ -254,7 +268,10 @@ impl NodeRegistry {
                 Some((score, m))
             })
             .collect();
-        scored.sort_by(|a, b| b.0.cmp(&a.0).then_with(|| a.1.display_name.cmp(&b.1.display_name)));
+        scored.sort_by(|a, b| {
+            b.0.cmp(&a.0)
+                .then_with(|| a.1.display_name.cmp(&b.1.display_name))
+        });
         scored.into_iter().map(|(_, m)| m).collect()
     }
 
@@ -268,7 +285,9 @@ impl NodeRegistry {
 
 fn subsequence_match(needle: &str, haystack: &str) -> bool {
     let mut chars = needle.chars();
-    let Some(mut target) = chars.next() else { return true };
+    let Some(mut target) = chars.next() else {
+        return true;
+    };
     for ch in haystack.chars() {
         if ch == target {
             match chars.next() {

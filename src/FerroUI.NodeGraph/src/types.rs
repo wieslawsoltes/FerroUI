@@ -49,7 +49,12 @@ pub struct ParamModifier {
 }
 
 impl ParamModifier {
-    pub const NONE: Self = Self { flatten: false, graft: false, reverse: false, simplify: false };
+    pub const NONE: Self = Self {
+        flatten: false,
+        graft: false,
+        reverse: false,
+        simplify: false,
+    };
 
     pub fn is_empty(self) -> bool {
         !self.flatten && !self.graft && !self.reverse && !self.simplify
@@ -157,8 +162,13 @@ impl PortType {
         }
         match (self, target) {
             // Numbers & bools & strings convert freely in Grasshopper
-            (Self::Bool | Self::Int | Self::Float, Self::Bool | Self::Int | Self::Float | Self::String) => true,
-            (Self::Vec2, Self::Vec3 | Self::String) | (Self::Vec3, Self::Vec2 | Self::String) => true,
+            (
+                Self::Bool | Self::Int | Self::Float,
+                Self::Bool | Self::Int | Self::Float | Self::String,
+            ) => true,
+            (Self::Vec2, Self::Vec3 | Self::String) | (Self::Vec3, Self::Vec2 | Self::String) => {
+                true
+            }
             (Self::Domain, Self::Float | Self::Vec2 | Self::String) => true,
             (_, Self::String) => true,
             _ => false,
@@ -297,7 +307,13 @@ pub enum GraphCurveKind {
 }
 
 impl GraphCurveKind {
-    pub const ALL: [Self; 5] = [Self::Bezier, Self::Sine, Self::Parabola, Self::Gaussian, Self::Linear];
+    pub const ALL: [Self; 5] = [
+        Self::Bezier,
+        Self::Sine,
+        Self::Parabola,
+        Self::Gaussian,
+        Self::Linear,
+    ];
 
     pub fn label(self) -> &'static str {
         match self {
@@ -325,9 +341,40 @@ impl GraphCurveKind {
         match self {
             Self::Linear => p1[1] + (p2[1] - p1[1]) * t,
             Self::Bezier => {
-                // Cubic Bezier y(t) with endpoints (0, 0), p1, p2, (1, 1)
-                let u = 1.0 - t;
-                3.0 * u * u * t * p1[1] + 3.0 * u * t * t * p2[1] + t * t * t
+                // The argument is x, not the curve parameter. Solve Bx(u) = x so
+                // moving a handle horizontally changes the graph's mapping as well.
+                let x1 = p1[0].clamp(0.0, 1.0);
+                let x2 = p2[0].clamp(0.0, 1.0);
+                let mut parameter = t;
+                let (mut lower, mut upper) = (0.0, 1.0);
+                for _ in 0..32 {
+                    let inverse = 1.0 - parameter;
+                    let curve_x = 3.0 * inverse * inverse * parameter * x1
+                        + 3.0 * inverse * parameter * parameter * x2
+                        + parameter * parameter * parameter;
+                    let error = curve_x - t;
+                    if error.abs() < 1e-12 {
+                        break;
+                    }
+                    if error < 0.0 {
+                        lower = parameter;
+                    } else {
+                        upper = parameter;
+                    }
+                    let derivative = 3.0 * inverse * inverse * x1
+                        + 6.0 * inverse * parameter * (x2 - x1)
+                        + 3.0 * parameter * parameter * (1.0 - x2);
+                    let candidate = parameter - error / derivative;
+                    parameter = if derivative > 1e-12 && candidate > lower && candidate < upper {
+                        candidate
+                    } else {
+                        (lower + upper) * 0.5
+                    };
+                }
+                let inverse = 1.0 - parameter;
+                3.0 * inverse * inverse * parameter * p1[1]
+                    + 3.0 * inverse * parameter * parameter * p2[1]
+                    + parameter * parameter * parameter
             }
             Self::Sine => {
                 let freq = (0.5 + p2[0] * 3.0).max(0.25);

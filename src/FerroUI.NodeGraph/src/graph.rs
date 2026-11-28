@@ -4,8 +4,8 @@
 use crate::data_tree::{DataTree, Value};
 use crate::node::NodeRegistry;
 use crate::types::{
-    AlignMode, DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier,
-    ParamWidget, WireDisplay, WireId,
+    AlignMode, DataMatching, GroupId, NodeId, NodeKind, NodeState, ParamModifier, ParamWidget,
+    WireDisplay, WireId,
 };
 use indexmap::IndexMap;
 use rustc_hash::{FxHashMap, FxHashSet};
@@ -49,6 +49,27 @@ pub struct NodeInstance {
 impl NodeInstance {
     pub fn output_tree(&self, port_idx: usize) -> Option<&DataTree> {
         self.cached_outputs.get(port_idx)
+    }
+
+    fn clone_definition(&self) -> Self {
+        Self {
+            id: self.id,
+            type_id: self.type_id.clone(),
+            custom_title: self.custom_title.clone(),
+            position: self.position,
+            size: self.size,
+            widget: self.widget.clone(),
+            input_modifiers: self.input_modifiers.clone(),
+            output_modifiers: self.output_modifiers.clone(),
+            input_defaults: self.input_defaults.clone(),
+            matching: self.matching,
+            preview: self.preview,
+            disabled: self.disabled,
+            cached_outputs: vec![DataTree::new(); self.output_modifiers.len()],
+            state: NodeState::Normal,
+            eval_us: 0,
+            dirty: true,
+        }
     }
 }
 
@@ -137,11 +158,12 @@ impl NodeGraph {
     }
 
     fn snapshot(&self) -> GraphSnapshot {
-        let mut nodes = self.nodes.clone();
-        for n in nodes.values_mut() {
-            n.cached_outputs.clear();
-            n.dirty = true;
-        }
+        // Never clone potentially large geometry/physics caches just to discard them.
+        let nodes = self
+            .nodes
+            .iter()
+            .map(|(&id, n)| (id, n.clone_definition()))
+            .collect();
         GraphSnapshot {
             nodes,
             wires: self.wires.clone(),
@@ -150,6 +172,21 @@ impl NodeGraph {
             next_wire_id: self.next_wire_id,
             next_group_id: self.next_group_id,
         }
+    }
+
+    /// Clones document state without evaluation caches, selection, or undo/redo history.
+    /// Useful for independent cluster evaluation and reusable templates.
+    pub fn clone_definition(&self) -> Self {
+        let mut graph = Self::new(self.name.clone());
+        graph.restore_snapshot(self.snapshot());
+        graph.camera_pan = self.camera_pan;
+        graph.camera_zoom = self.camera_zoom;
+        graph.fancy_wires = self.fancy_wires;
+        graph.show_profiler = self.show_profiler;
+        graph.snap_to_grid = self.snap_to_grid;
+        graph.solution_locked = self.solution_locked;
+        graph.generation = self.generation;
+        graph
     }
 
     /// Saves a checkpoint on the undo stack before a mutating user gesture.
@@ -170,14 +207,18 @@ impl NodeGraph {
     }
 
     pub fn undo(&mut self) -> bool {
-        let Some(prev) = self.undo_stack.pop() else { return false };
+        let Some(prev) = self.undo_stack.pop() else {
+            return false;
+        };
         self.redo_stack.push(self.snapshot());
         self.restore_snapshot(prev);
         true
     }
 
     pub fn redo(&mut self) -> bool {
-        let Some(next) = self.redo_stack.pop() else { return false };
+        let Some(next) = self.redo_stack.pop() else {
+            return false;
+        };
         self.undo_stack.push(self.snapshot());
         self.restore_snapshot(next);
         true
@@ -226,7 +267,13 @@ impl NodeGraph {
     }
 
     /// Adds a node of `type_id` at canvas coordinates `(x, y)`.
-    pub fn add_node(&mut self, registry: &NodeRegistry, type_id: &str, x: f64, y: f64) -> Option<NodeId> {
+    pub fn add_node(
+        &mut self,
+        registry: &NodeRegistry,
+        type_id: &str,
+        x: f64,
+        y: f64,
+    ) -> Option<NodeId> {
         let comp = registry.get(type_id)?;
         let id = NodeId(self.next_node_id);
         self.next_node_id += 1;
@@ -274,6 +321,15 @@ impl NodeGraph {
         step: f64,
         integer: bool,
     ) {
+        if !min.is_finite()
+            || !max.is_finite()
+            || !step.is_finite()
+            || !value.is_finite()
+            || min > max
+            || step < 0.0
+        {
+            return;
+        }
         if let Some(n) = self.nodes.get_mut(&id) {
             n.custom_title = Some(title.into());
             n.widget = ParamWidget::Slider {
@@ -283,8 +339,7 @@ impl NodeGraph {
                 step,
                 integer,
             };
-            n.dirty = true;
-            self.generation += 1;
+            self.mark_dirty(id);
         }
     }
 
@@ -292,17 +347,20 @@ impl NodeGraph {
         if let Some(n) = self.nodes.get_mut(&id) {
             n.custom_title = Some(title.into());
             n.widget = ParamWidget::Toggle { value };
-            n.dirty = true;
-            self.generation += 1;
+            self.mark_dirty(id);
         }
     }
 
-    pub fn configure_text(&mut self, id: NodeId, title: impl Into<String>, text: impl Into<String>) {
+    pub fn configure_text(
+        &mut self,
+        id: NodeId,
+        title: impl Into<String>,
+        text: impl Into<String>,
+    ) {
         if let Some(n) = self.nodes.get_mut(&id) {
             n.custom_title = Some(title.into());
             n.widget = ParamWidget::Text { text: text.into() };
-            n.dirty = true;
-            self.generation += 1;
+            self.mark_dirty(id);
         }
     }
 
@@ -310,8 +368,7 @@ impl NodeGraph {
         if let Some(n) = self.nodes.get_mut(&id) {
             n.custom_title = Some(title.into());
             n.widget = ParamWidget::Color { argb };
-            n.dirty = true;
-            self.generation += 1;
+            self.mark_dirty(id);
         }
     }
 
@@ -344,12 +401,14 @@ impl NodeGraph {
             .filter(|w| w.from_node == id)
             .map(|w| w.to_node)
             .collect();
-        self.wires.retain(|_, w| w.from_node != id && w.to_node != id);
+        self.wires
+            .retain(|_, w| w.from_node != id && w.to_node != id);
         for g in self.groups.values_mut() {
             g.members.retain(|&m| m != id);
         }
         self.groups.retain(|_, g| !g.members.is_empty());
         self.selected_nodes.remove(&id);
+        self.selected_wires.retain(|id| self.wires.contains_key(id));
         for dn in affected_downstream {
             self.mark_dirty(dn);
         }
@@ -375,14 +434,34 @@ impl NodeGraph {
         if !self.nodes.contains_key(&from_node) || !self.nodes.contains_key(&to_node) {
             return Err("Unknown node id");
         }
+        if from_port >= self.nodes[&from_node].output_modifiers.len()
+            || to_port >= self.nodes[&to_node].input_modifiers.len()
+        {
+            return Err("Unknown port index");
+        }
         // Duplicate check
-        if let Some(existing) = self.wires.values().find(|w| {
-            w.from_node == from_node
-                && w.from_port == from_port
-                && w.to_node == to_node
-                && w.to_port == to_port
-        }) {
-            return Ok(existing.id);
+        if let Some(existing) = self
+            .wires
+            .values()
+            .find(|w| {
+                w.from_node == from_node
+                    && w.from_port == from_port
+                    && w.to_node == to_node
+                    && w.to_port == to_port
+            })
+            .map(|w| w.id)
+        {
+            if !multi_wire {
+                let before = self.wires.len();
+                self.wires.retain(|&id, w| {
+                    id == existing || w.to_node != to_node || w.to_port != to_port
+                });
+                if self.wires.len() != before {
+                    self.selected_wires.retain(|id| self.wires.contains_key(id));
+                    self.mark_dirty(to_node);
+                }
+            }
+            return Ok(existing);
         }
         // Cycle check: would adding from_node -> to_node make from_node reachable from to_node?
         if self.is_reachable(to_node, from_node) {
@@ -390,7 +469,9 @@ impl NodeGraph {
         }
 
         if !multi_wire {
-            self.wires.retain(|_, w| !(w.to_node == to_node && w.to_port == to_port));
+            self.wires
+                .retain(|_, w| !(w.to_node == to_node && w.to_port == to_port));
+            self.selected_wires.retain(|id| self.wires.contains_key(id));
         }
 
         let id = WireId(self.next_wire_id);
@@ -424,9 +505,11 @@ impl NodeGraph {
 
     pub fn disconnect_input_port(&mut self, node: NodeId, port: usize) -> usize {
         let before = self.wires.len();
-        self.wires.retain(|_, w| !(w.to_node == node && w.to_port == port));
+        self.wires
+            .retain(|_, w| !(w.to_node == node && w.to_port == port));
         let removed = before - self.wires.len();
         if removed > 0 {
+            self.selected_wires.retain(|id| self.wires.contains_key(id));
             self.mark_dirty(node);
             self.generation += 1;
         }
@@ -449,6 +532,7 @@ impl NodeGraph {
 
     /// Checks whether `target` can be reached from `start` following directed wires.
     pub fn is_reachable(&self, start: NodeId, target: NodeId) -> bool {
+        let outgoing = self.outgoing_index();
         let mut visited = FxHashSet::default();
         let mut queue = VecDeque::new();
         queue.push_back(start);
@@ -459,17 +543,27 @@ impl NodeGraph {
             if !visited.insert(cur) {
                 continue;
             }
-            for w in self.wires.values() {
-                if w.from_node == cur && !visited.contains(&w.to_node) {
-                    queue.push_back(w.to_node);
-                }
+            if let Some(children) = outgoing.get(&cur) {
+                queue.extend(children.iter().copied().filter(|id| !visited.contains(id)));
             }
         }
         false
     }
 
+    fn outgoing_index(&self) -> FxHashMap<NodeId, Vec<NodeId>> {
+        let mut outgoing: FxHashMap<NodeId, Vec<NodeId>> = FxHashMap::default();
+        for wire in self.wires.values() {
+            outgoing
+                .entry(wire.from_node)
+                .or_default()
+                .push(wire.to_node);
+        }
+        outgoing
+    }
+
     /// Marks `root` and all downstream dependent nodes dirty for incremental re-evaluation.
     pub fn mark_dirty(&mut self, root: NodeId) {
+        let outgoing = self.outgoing_index();
         let mut queue = VecDeque::new();
         let mut visited = FxHashSet::default();
         queue.push_back(root);
@@ -480,10 +574,8 @@ impl NodeGraph {
             if let Some(n) = self.nodes.get_mut(&cur) {
                 n.dirty = true;
             }
-            for w in self.wires.values() {
-                if w.from_node == cur && !visited.contains(&w.to_node) {
-                    queue.push_back(w.to_node);
-                }
+            if let Some(children) = outgoing.get(&cur) {
+                queue.extend(children.iter().copied().filter(|id| !visited.contains(id)));
             }
         }
         self.generation += 1;
@@ -497,17 +589,37 @@ impl NodeGraph {
     }
 
     /// Creates a colored Grasshopper Group container around `members`.
-    pub fn create_group(&mut self, title: impl Into<String>, color_argb: u32, members: Vec<NodeId>) -> GroupId {
+    pub fn create_group(
+        &mut self,
+        title: impl Into<String>,
+        color_argb: u32,
+        members: Vec<NodeId>,
+    ) -> GroupId {
         let id = GroupId(self.next_group_id);
         self.next_group_id += 1;
-        let members: Vec<NodeId> = members.into_iter().filter(|m| self.nodes.contains_key(m)).collect();
-        self.groups.insert(id, NodeGroup { id, title: title.into(), color_argb, members });
+        let members: Vec<NodeId> = members
+            .into_iter()
+            .filter(|m| self.nodes.contains_key(m))
+            .collect();
+        self.groups.insert(
+            id,
+            NodeGroup {
+                id,
+                title: title.into(),
+                color_argb,
+                members,
+            },
+        );
         self.generation += 1;
         id
     }
 
     /// Groups the current selection into a colored Grasshopper blob.
-    pub fn group_selection(&mut self, title: impl Into<String>, color_argb: u32) -> Option<GroupId> {
+    pub fn group_selection(
+        &mut self,
+        title: impl Into<String>,
+        color_argb: u32,
+    ) -> Option<GroupId> {
         if self.selected_nodes.is_empty() {
             return None;
         }
@@ -540,11 +652,16 @@ impl NodeGraph {
         }
         self.push_undo_checkpoint();
         let mut remap: FxHashMap<NodeId, NodeId> = FxHashMap::default();
-        let old_ids: Vec<NodeId> = self.selected_nodes.iter().copied().collect();
+        let old_ids: Vec<NodeId> = self
+            .nodes
+            .keys()
+            .copied()
+            .filter(|id| self.selected_nodes.contains(id))
+            .collect();
         let mut new_ids = Vec::with_capacity(old_ids.len());
 
         for old_id in &old_ids {
-            if let Some(orig) = self.nodes.get(old_id).cloned() {
+            if let Some(orig) = self.nodes.get(old_id).map(NodeInstance::clone_definition) {
                 let nid = NodeId(self.next_node_id);
                 self.next_node_id += 1;
                 let mut copy = orig;
@@ -625,6 +742,9 @@ impl NodeGraph {
         new_node: NodeId,
         new_port: usize,
     ) -> usize {
+        if old_node == new_node && old_port == new_port {
+            return 0;
+        }
         let sources: Vec<(WireId, NodeId, usize)> = self
             .wires
             .values()
@@ -665,61 +785,99 @@ impl NodeGraph {
         let mut ids: Vec<NodeId> = self.selected_nodes.iter().copied().collect();
         match mode {
             AlignMode::Left => {
-                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0])).fold(f64::INFINITY, f64::min);
+                let target = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[0]))
+                    .fold(f64::INFINITY, f64::min);
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = target; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[0] = target;
+                    }
                 }
             }
             AlignMode::Right => {
-                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0])).fold(f64::NEG_INFINITY, f64::max);
+                let target = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0]))
+                    .fold(f64::NEG_INFINITY, f64::max);
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = target - n.size[0]; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[0] = target - n.size[0];
+                    }
                 }
             }
             AlignMode::Top => {
-                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1])).fold(f64::INFINITY, f64::min);
+                let target = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[1]))
+                    .fold(f64::INFINITY, f64::min);
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = target; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[1] = target;
+                    }
                 }
             }
             AlignMode::Bottom => {
-                let target = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1])).fold(f64::NEG_INFINITY, f64::max);
+                let target = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1]))
+                    .fold(f64::NEG_INFINITY, f64::max);
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = target - n.size[1]; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[1] = target - n.size[1];
+                    }
                 }
             }
             AlignMode::CenterHorizontal => {
-                let sum: f64 = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0] * 0.5)).sum();
+                let sum: f64 = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[0] + n.size[0] * 0.5))
+                    .sum();
                 let mid = sum / ids.len() as f64;
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = mid - n.size[0] * 0.5; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[0] = mid - n.size[0] * 0.5;
+                    }
                 }
             }
             AlignMode::CenterVertical => {
-                let sum: f64 = ids.iter().filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1] * 0.5)).sum();
+                let sum: f64 = ids
+                    .iter()
+                    .filter_map(|id| self.nodes.get(id).map(|n| n.position[1] + n.size[1] * 0.5))
+                    .sum();
                 let mid = sum / ids.len() as f64;
                 for id in ids {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = mid - n.size[1] * 0.5; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[1] = mid - n.size[1] * 0.5;
+                    }
                 }
             }
             AlignMode::DistributeHorizontal => {
-                if ids.len() < 3 { return false; }
+                if ids.len() < 3 {
+                    return false;
+                }
                 ids.sort_by(|a, b| self.nodes[a].position[0].total_cmp(&self.nodes[b].position[0]));
                 let x0 = self.nodes[&ids[0]].position[0];
                 let x1 = self.nodes[&ids[ids.len() - 1]].position[0];
                 let step = (x1 - x0) / (ids.len() - 1) as f64;
                 for (i, id) in ids.into_iter().enumerate() {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[0] = x0 + step * i as f64; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[0] = x0 + step * i as f64;
+                    }
                 }
             }
             AlignMode::DistributeVertical => {
-                if ids.len() < 3 { return false; }
+                if ids.len() < 3 {
+                    return false;
+                }
                 ids.sort_by(|a, b| self.nodes[a].position[1].total_cmp(&self.nodes[b].position[1]));
                 let y0 = self.nodes[&ids[0]].position[1];
                 let y1 = self.nodes[&ids[ids.len() - 1]].position[1];
                 let step = (y1 - y0) / (ids.len() - 1) as f64;
                 for (i, id) in ids.into_iter().enumerate() {
-                    if let Some(n) = self.nodes.get_mut(&id) { n.position[1] = y0 + step * i as f64; }
+                    if let Some(n) = self.nodes.get_mut(&id) {
+                        n.position[1] = y0 + step * i as f64;
+                    }
                 }
             }
         }
@@ -815,7 +973,9 @@ impl NodeGraph {
         let pad = 64.0;
         let cw = (max_x - min_x).max(120.0);
         let ch = (max_y - min_y).max(100.0);
-        let zoom = ((vw - pad * 2.0) / cw).min((vh - pad * 2.0) / ch).clamp(0.35, 1.35);
+        let zoom = ((vw - pad * 2.0) / cw)
+            .min((vh - pad * 2.0) / ch)
+            .clamp(0.35, 1.35);
         self.camera_zoom = zoom;
         self.camera_pan = [
             (vw - cw * zoom) * 0.5 - min_x * zoom,

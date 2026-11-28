@@ -39,3 +39,8 @@ group = "core"
 
 [package.metadata.docs.rs]
 features = ["ferroui", "physics"]
+
+[[bench]]
+name = "evaluation"
+path = "benches/evaluation.rs"
+harness = false

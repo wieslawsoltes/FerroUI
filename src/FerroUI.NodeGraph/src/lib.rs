@@ -10,7 +10,7 @@
 //! - Incremental dirty-propagating topological DAG evaluator with microsecond per-node profiling
 //! - 45+ built-in standard library nodes + recursive-descent math expression parser
 //! - Zero-dependency JSON serialization (`graph_to_json` / `graph_from_json`)
-//! - Optional `ferroui` feature: interactive [`NodeGraphCanvas`] control + [`node_graph_editor`] view
+//! - Optional `ferroui` feature: interactive [`WireBackdropLayer`] control + [`node_graph_editor`] view
 //!   with Fancy Wires, inline sliders/toggles/panels, colored groups, marquee selection, minimap,
 //!   and undo/redo
 //! - Optional `physics` feature: parametric physics node library compiling directly into live
@@ -41,17 +41,19 @@ pub mod widgets;
 mod tests;
 
 pub mod prelude {
-    pub use crate::cluster::{cluster_port, ClusterComponent, ClusterInputBinding, ClusterOutputBinding};
+    pub use crate::cluster::{
+        cluster_port, ClusterComponent, ClusterInputBinding, ClusterOutputBinding,
+    };
     pub use crate::data_tree::{lace_item_inputs, DataPath, DataTree, Value};
     pub use crate::eval::{evaluate_graph, topological_order, EvalReport};
     pub use crate::graph::{NodeGraph, NodeGroup, NodeInstance, Wire};
     pub use crate::node::{ComponentMeta, EvalContext, FnComponent, NodeComponent, NodeRegistry};
-    pub use crate::serialization::{graph_from_json, graph_to_json};
+    pub use crate::serialization::{graph_from_json, graph_to_json, try_graph_to_json};
     pub use crate::stdlib::{eval_math_expression, register_standard_nodes};
     pub use crate::types::{
-        AlignMode, DataMatching, GraphCurveKind, GroupId, NodeCategory, NodeId,
-        NodeKind, NodeState, ParamAccess, ParamModifier, ParamWidget, PortDirection, PortSpec,
-        PortType, WireDataKind, WireDisplay, WireId,
+        AlignMode, DataMatching, GraphCurveKind, GroupId, NodeCategory, NodeId, NodeKind,
+        NodeState, ParamAccess, ParamModifier, ParamWidget, PortDirection, PortSpec, PortType,
+        WireDataKind, WireDisplay, WireId,
     };
 
     #[cfg(feature = "physics")]
@@ -70,3 +72,6 @@ pub mod prelude {
     #[cfg(feature = "ferroui")]
     pub use crate::widgets::{GraphMapperControl, MdSliderControl};
 }
+
+/// Common graph types are available at the crate root as well as in [`prelude`].
+pub use prelude::*;

@@ -39,7 +39,7 @@ impl DataPath {
         }
         let n = self.0.len();
         if offset < 0 {
-            let drop = (-offset as usize).min(n - 1);
+            let drop = offset.unsigned_abs().min(n - 1);
             Self(SmallVec::from_slice(&self.0[..n - drop]))
         } else {
             let drop = (offset as usize).min(n - 1);
@@ -212,7 +212,13 @@ impl Value {
     pub fn short_summary(&self) -> String {
         match self {
             Self::Null => "<null>".into(),
-            Self::Bool(b) => if *b { "True".into() } else { "False".into() },
+            Self::Bool(b) => {
+                if *b {
+                    "True".into()
+                } else {
+                    "False".into()
+                }
+            }
             Self::Int(i) => format!("{i}"),
             Self::Float(v) => {
                 if (v - v.round()).abs() < 1e-6 && v.abs() < 1e9 {
@@ -227,7 +233,9 @@ impl Value {
             Self::String(s) => s.clone(),
             Self::Domain(a, b) => format!("{a:.2} To {b:.2}"),
             Self::Curve(pts) => format!("Curve({} pts)", pts.len()),
-            Self::Mesh { vertices, indices } => format!("Mesh({}v, {}f)", vertices.len(), indices.len()),
+            Self::Mesh { vertices, indices } => {
+                format!("Mesh({}v, {}f)", vertices.len(), indices.len())
+            }
             Self::Custom(p) => p.summary.clone(),
         }
     }
@@ -241,7 +249,9 @@ pub struct DataTree {
 
 impl DataTree {
     pub fn new() -> Self {
-        Self { branches: IndexMap::new() }
+        Self {
+            branches: IndexMap::new(),
+        }
     }
 
     pub fn single(value: Value) -> Self {
@@ -286,7 +296,10 @@ impl DataTree {
 
     /// Returns the first non-null item if any exists.
     pub fn first_item(&self) -> Option<&Value> {
-        self.branches.values().flat_map(|v| v.iter()).next()
+        self.branches
+            .values()
+            .flat_map(|v| v.iter())
+            .find(|value| !value.is_null())
     }
 
     /// Collects every item in branch order into a flat slice.
@@ -352,7 +365,11 @@ impl DataTree {
         let mut common_prefix = 0usize;
         while common_prefix + 1 < min_len {
             let first_val = self.branches.keys().next().unwrap().0[common_prefix];
-            if self.branches.keys().all(|p| p.0[common_prefix] == first_val) {
+            if self
+                .branches
+                .keys()
+                .all(|p| p.0[common_prefix] == first_val)
+            {
                 common_prefix += 1;
             } else {
                 break;
@@ -363,7 +380,10 @@ impl DataTree {
         }
         let mut out = Self::new();
         for (path, items) in &self.branches {
-            out.insert_branch(DataPath::from_slice(&path.0[common_prefix..]), items.clone());
+            out.insert_branch(
+                DataPath::from_slice(&path.0[common_prefix..]),
+                items.clone(),
+            );
         }
         out
     }
@@ -389,7 +409,10 @@ impl DataTree {
         let mut out = Self::new();
         for (path, items) in &self.branches {
             let shifted = path.shift(offset);
-            out.branches.entry(shifted).or_default().extend(items.iter().cloned());
+            out.branches
+                .entry(shifted)
+                .or_default()
+                .extend(items.iter().cloned());
         }
         out
     }
@@ -456,7 +479,10 @@ impl DataTree {
     /// Merges another `DataTree` into `self` preserving matching branch paths.
     pub fn merge_from(&mut self, other: &DataTree) {
         for (path, items) in &other.branches {
-            self.branches.entry(path.clone()).or_default().extend(items.iter().cloned());
+            self.branches
+                .entry(path.clone())
+                .or_default()
+                .extend(items.iter().cloned());
         }
     }
 
@@ -533,10 +559,7 @@ pub fn lace_item_inputs(
     }
 
     // Pick branch paths from the tree with the most branches
-    let primary_tree = inputs
-        .iter()
-        .max_by_key(|t| t.branch_count())
-        .unwrap();
+    let primary_tree = inputs.iter().max_by_key(|t| t.branch_count()).unwrap();
     let primary_paths: Vec<DataPath> = primary_tree.branches.keys().cloned().collect();
 
     for b_idx in 0..max_branches {
@@ -552,7 +575,10 @@ pub fn lace_item_inputs(
                     &[][..]
                 } else {
                     let idx = b_idx.min(t.branches.len() - 1);
-                    t.branches.get_index(idx).map(|(_, v)| v.as_slice()).unwrap_or(&[])
+                    t.branches
+                        .get_index(idx)
+                        .map(|(_, v)| v.as_slice())
+                        .unwrap_or(&[])
                 }
             })
             .collect();
@@ -595,25 +621,29 @@ pub fn lace_item_inputs(
                 }
             }
             DataMatching::CrossReference => {
-                // Cartesian product across input lists in this branch
-                let mut combos: Vec<Vec<Value>> = vec![Vec::with_capacity(inputs.len())];
-                for s in &branch_slices {
-                    let mut next = Vec::with_capacity(combos.len() * s.len());
-                    for prefix in &combos {
-                        for item in *s {
-                            let mut row = prefix.clone();
-                            row.push(item.clone());
-                            next.push(row);
-                        }
+                // Stream the Cartesian product in the same order as nested loops.
+                // Temporary storage is O(input count), not O(product of list lengths).
+                let mut indices = vec![0; branch_slices.len()];
+                let mut args = Vec::with_capacity(inputs.len());
+                loop {
+                    args.clear();
+                    for (values, &index) in branch_slices.iter().zip(&indices) {
+                        args.push(values[index].clone());
                     }
-                    combos = next;
-                }
-                for args in &combos {
-                    let vals = f(args)?;
-                    for (o, v) in vals.into_iter().enumerate() {
-                        if o < num_outputs {
-                            outputs[o].push(path.clone(), v);
+                    for (output, value) in f(&args)?.into_iter().enumerate().take(num_outputs) {
+                        outputs[output].push(path.clone(), value);
+                    }
+                    let mut column = indices.len();
+                    while column > 0 {
+                        column -= 1;
+                        indices[column] += 1;
+                        if indices[column] < branch_slices[column].len() {
+                            break;
                         }
+                        indices[column] = 0;
+                    }
+                    if column == 0 && indices[0] == 0 {
+                        break;
                     }
                 }
             }
@@ -635,13 +665,21 @@ fn parse_path_mask(mask: &str) -> Result<(Vec<String>, Option<String>), String> 
     } else {
         (trimmed, None)
     };
-    let inner = brace_part.trim().trim_start_matches('{').trim_end_matches('}');
+    let inner = brace_part
+        .trim()
+        .trim_start_matches('{')
+        .trim_end_matches('}');
     let vars: Vec<String> = inner
         .split(';')
         .map(|s| s.trim().to_string())
         .filter(|s| !s.is_empty())
         .collect();
-    let item_var = item_part.map(|p| p.trim_start_matches('(').trim_end_matches(')').trim().to_string());
+    let item_var = item_part.map(|p| {
+        p.trim_start_matches('(')
+            .trim_end_matches(')')
+            .trim()
+            .to_string()
+    });
     Ok((vars, item_var))
 }
 
