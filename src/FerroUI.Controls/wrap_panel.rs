@@ -353,19 +353,37 @@ impl LineArrangement<'_> {
             }
         }
 
-        for (index, child) in children.iter().enumerate().take(end_excluded).skip(start) {
-            let layout_slot_u = if self.stretch_last && index + 1 == children.len() && child.is_visible() {
+        // The final item of the panel (ItemsStretch Last) is arranged on its own, so that the loop
+        // over the other items is the one of upstream.
+        let line = &children[start..end_excluded];
+        let (items, last) = if self.stretch_last && end_excluded == children.len() {
+            line.split_at(line.len().saturating_sub(1))
+        } else {
+            (line, &[][..])
+        };
+        for child in items {
+            let layout_slot_u = self.child_u(child) * stretch_ratio;
+            u = self.arrange_child(child, u, accumulated_v, line_v, layout_slot_u, spacing);
+        }
+        for child in last {
+            let layout_slot_u = if child.is_visible() {
                 max(self.final_u - u, 0.0)
             } else {
                 self.child_u(child) * stretch_ratio
             };
-            child.arrange(if self.is_horizontal {
-                Rect::new(u, accumulated_v, layout_slot_u, line_v)
-            } else {
-                Rect::new(accumulated_v, u, line_v, layout_slot_u)
-            });
-            u += layout_slot_u + (if child.is_visible() { spacing } else { 0.0 });
+            u = self.arrange_child(child, u, accumulated_v, line_v, layout_slot_u, spacing);
         }
+    }
+
+    /// Arranges `child` at `u` of its line and returns where the next item starts.
+    #[inline(always)]
+    fn arrange_child(&self, child: &Control, u: f64, accumulated_v: f64, line_v: f64, layout_slot_u: f64, spacing: f64) -> f64 {
+        child.arrange(if self.is_horizontal {
+            Rect::new(u, accumulated_v, layout_slot_u, line_v)
+        } else {
+            Rect::new(accumulated_v, u, line_v, layout_slot_u)
+        });
+        u + layout_slot_u + (if child.is_visible() { spacing } else { 0.0 })
     }
 }
 
