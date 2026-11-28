@@ -113,6 +113,16 @@ fn pump(duration: Duration) {
     Dispatcher::current_dispatcher().push_frame(&frame);
     stop.dispose();
 }
+/// Pumps the dispatcher in short steps until `done` holds or `deadline` has passed, and returns
+/// how long it pumped: a timer of the code under test fires on the wall clock, which a loaded
+/// machine runs late, so a test waits for what it checks instead of a fixed time past the delay.
+fn pump_until(deadline: Duration, mut done: impl FnMut() -> bool) -> Duration {
+    let start = std::time::Instant::now();
+    while !done() && start.elapsed() < deadline {
+        pump(Duration::from_millis(10));
+    }
+    start.elapsed()
+}
 fn reset() {
     RibbonScreenTipService::set_extended_delay(SignedDuration::from_ticks(15_000_000));
     RibbonScreenTipService::set_is_extended_enabled(true);
@@ -382,12 +392,20 @@ fn cad_runtime_scenario_900ms_with_native_dispatcher_and_unload_cancellation() {
         w.set_width(400.);
         w.set_height(300.);
         w.set_content(Some(Control::boxed(t.clone())));
+        // The delay starts when the tip loads, which is after this.
+        let shown = std::time::Instant::now();
         w.show();
         pump(Duration::from_millis(40));
         assert!(!t.is_extended());
         assert!(t.extend_timer.borrow().is_some());
-        pump(Duration::from_millis(1000));
+        pump_until(Duration::from_secs(5), || t.is_extended());
         assert!(t.is_extended());
+        // Not before the delay of 900 ms (the dispatcher counts its timers in whole milliseconds).
+        assert!(
+            shown.elapsed() >= Duration::from_millis(880),
+            "{:?}",
+            shown.elapsed()
+        );
         assert_eq!(t.max_width(), 440.);
         let copy = RibbonScreenTipService::create(
             Some("Line".into()),

@@ -72,6 +72,16 @@ fn pump(duration: Duration) {
     Dispatcher::current_dispatcher().push_frame(&frame);
     stop.dispose();
 }
+/// Pumps the dispatcher in short steps until `done` holds or `deadline` has passed, and returns
+/// how long it pumped: a timer of the code under test fires on the wall clock, which a loaded
+/// machine runs late, so a test waits for what it checks instead of a fixed time past the delay.
+fn pump_until(deadline: Duration, mut done: impl FnMut() -> bool) -> Duration {
+    let start = std::time::Instant::now();
+    while !done() && start.elapsed() < deadline {
+        pump(Duration::from_millis(10));
+    }
+    start.elapsed()
+}
 fn with_slide_out() -> (Ref<Ribbon>, Ref<RibbonGroup>) {
     let ribbon = sample::create();
     let group = sample::find_group(&ribbon, "clipboard");
@@ -198,7 +208,7 @@ fn expanded_panel_opens_pins_and_returns_with_its_tab() {
         assert!(!group.is_slide_out_open());
         m.ribbon.select_tab_id("home");
         m.settle();
-        pump(Duration::from_millis(400));
+        pump_until(Duration::from_secs(5), || group.is_slide_out_open());
         assert!(group.is_slide_out_open());
         group.set_is_slide_out_pinned(false);
         group.close_slide_out();
@@ -360,11 +370,22 @@ fn progressive_tooltip_extends_after_the_delay() {
         tip.set_description(Some("Creates straight line segments.".into()));
         tip.set_extended_description(Some("Specify points to draw connected segments.".into()));
         tip.set_extended_image(Some(Rc::new("\u{e8c6}".to_string())));
+        // The delay starts when the tip loads, which is after this.
+        let shown = std::time::Instant::now();
         let host = RuntimeHost::new(tip.clone().upcast(), Some(400.));
         assert!(!tip.is_extended());
-        pump(Duration::from_millis(1000));
+        pump_until(Duration::from_secs(5), || {
+            host.settle();
+            tip.is_extended()
+        });
         host.settle();
         assert!(tip.is_extended());
+        // Not before the delay of 900 ms (the dispatcher counts its timers in whole milliseconds).
+        assert!(
+            shown.elapsed() >= Duration::from_millis(880),
+            "{:?}",
+            shown.elapsed()
+        );
         let copy = RibbonScreenTipService::create(
             Some("Line".into()),
             Some(Control::boxed(tip.clone())),
