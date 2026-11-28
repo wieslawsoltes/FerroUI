@@ -310,7 +310,7 @@ struct ErasedRegistry {
     views: IdMap<TypeId, ReferenceViewFn>,
 }
 
-thread_local! {
+crate::ferro_thread_local! {
     static ERASED: RefCell<ErasedRegistry> = RefCell::new(ErasedRegistry::default());
     /// The lookup of a reference view (`find_reference_view`), installed by the first view
     /// registered: until then `reference_object` reads no view.

@@ -352,7 +352,7 @@ impl IPointer for Pointer {
     }
 }
 
-thread_local! {
+crate::ferro_thread_local! {
     /// The pointers of the thread, held weakly: what an element reads its captures from
     /// (`InputElement::pointer_captures`), whoever captured them.
     static KNOWN_POINTERS: RefCell<Vec<Weak<dyn IPointer>>> = const { RefCell::new(Vec::new()) };
