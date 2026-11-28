@@ -242,8 +242,8 @@ The route, in pull requests stacked on the Skia ones:
    - *Done: the shared media frames of a web page* (#575, `web_gl/external_objects.rs`). A frame
      of the context (`SHARED_GL_TEXTURE`) or one transferred to the render worker is copied on the
      GPU with `blitFramebuffer` into a texture of the pool, and drawn like an image. The lease of
-     a frame of the context is held by a WebGL2 fence until the copy is done. **Not done:** a video
-     frame on a 3D mesh on this route is drawn with the colour of its layer.
+     a frame of the context is held by a WebGL2 fence until the copy is done. A frame on a 3D mesh
+     (#608) is copied once more on the GPU into a texture the GL executor can name.
    - *Written, off by default: DMA-BUF frames on Vello's own Vulkan device on Linux* (#575,
      `gpu/dma_buf_external_objects.rs`, `ferroui-media-linux/dma_buf.rs`). It needs both
      `FERROUI_MEDIA_DMA_BUF=1` and `FERROUI_VELLO_DMA_BUF_IMPORT=1`, and has not run yet. The GL route
