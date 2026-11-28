@@ -67,6 +67,10 @@ fn a_text_box_shows_its_value_as_its_text() {
     assert_eq!(state.role, "textbox");
     assert_eq!(state.name, "User name");
     assert_eq!(state.text, "ada");
+    assert_eq!(aria(&state, "aria-multiline"), "");
+
+    text_box.set_accepts_return(true);
+    assert_eq!(aria(&state_of(&text_box), "aria-multiline"), "true");
 }
 
 #[test]

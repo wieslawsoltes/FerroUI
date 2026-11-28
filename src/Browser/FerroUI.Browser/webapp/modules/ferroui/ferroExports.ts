@@ -114,6 +114,8 @@ export class FerroExports {
             OnKeyUp: "InputHelper_OnKeyUp",
             OnBeforeInput: "InputHelper_OnBeforeInput",
             OnTextInput: "InputHelper_OnTextInput",
+            OnStandaloneDelete: "InputHelper_OnStandaloneDelete",
+            OnReplacementText: "InputHelper_OnReplacementText",
             OnCompositionStart: "InputHelper_OnCompositionStart",
             OnCompositionUpdate: "InputHelper_OnCompositionUpdate",
             OnCompositionEnd: "InputHelper_OnCompositionEnd",

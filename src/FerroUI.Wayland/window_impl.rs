@@ -21,6 +21,7 @@ use ferroui_base::input::LocalBoxFuture;
 use ferroui_freedesktop::dbus_system_dialog::{DBusSystemDialog, ParentLeaseProvider};
 use ferroui_freedesktop::i_portal_parent_lease::IPortalParentLease;
 use crate::window_impl_text_input::WaylandTextInputMethod;
+use ferroui_base::input::platform::IClipboard;
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::raw::{IRawInputEventArgs, RawPointerEventArgs, RawPointerEventType};
 use ferroui_base::input::{IInputRoot, KeyboardDevice, PointerPressedEventArgs, WindowDecorationsElementRole};
@@ -39,7 +40,7 @@ use ferroui_controls::{
     AcrylicPlatformCompensationLevels, TopLevel, WindowCloseReason, WindowDecorations, WindowEdge, WindowResizeReason,
     WindowState, WindowTransparencyLevel,
 };
-use ferroui_dialogs::ManagedStorageProvider;
+use ferroui_controls::platform::managed_storage_fallback;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
@@ -321,7 +322,7 @@ impl WindowImpl {
         // floating, unparented window is worse UX than a managed in-process picker.
         // If the probe fails (no exporter global, surface not mapped, or compositor
         // never delivers the handle), return None and let FallbackStorageProvider
-        // move on to ManagedStorageProvider. The factory is re-evaluated on every
+        // move on to the managed chooser of the theme. The factory is re-evaluated on every
         // (re)connect via FallbackStorageProvider::reset.
         let portal: StorageProviderFactory = Rc::new(move || {
             let window = portal_window.clone();
@@ -339,7 +340,7 @@ impl WindowImpl {
                 .upgrade()
                 .and_then(|window| window.base.input_root())
                 .and_then(|input_root| input_root.focus_root().cast::<TopLevel>())
-                .map(|tl| Rc::new(ManagedStorageProvider::new(Some(&tl), None)) as Rc<dyn IStorageProvider>);
+                .map(|tl| managed_storage_fallback(&tl));
             Box::pin(std::future::ready(provider))
         })]
     }
@@ -495,6 +496,11 @@ impl ISinkOwner for WindowImpl {
 
 impl IOptionalFeatureProvider for WindowImpl {
     fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn IClipboard>() {
+            let clipboard = FerroLocator::current().get_service::<dyn IClipboard>()?;
+            return Some(Rc::new(clipboard));
+        }
+
         if feature_type == TypeId::of::<dyn ITextInputMethodImpl>() {
             let text_input_method: Rc<dyn ITextInputMethodImpl> = self
                 .text_input_method

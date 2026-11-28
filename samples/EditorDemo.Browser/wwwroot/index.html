@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
+  <title>FerroUI code editor</title>
+  <link rel="stylesheet" href="./app.css">
+  <link rel="modulepreload" href="./main.js">
+  <link rel="modulepreload" href="./editor-demo-browser.js">
+  <link rel="modulepreload" href="./ferroui.js">
+  <link rel="modulepreload" href="./ferroui-loader.js">
+  <link rel="modulepreload" href="./ferroui-textmate-oniguruma.js">
+  <link rel="preload" href="./editor_demo_browser.wasm" as="fetch" type="application/wasm" crossorigin>
+</head>
+<body>
+  <div id="out">
+    <div class="ferroui-splash" role="status">Loading FerroUI code editor…</div>
+  </div>
+  <script type="module" src="./main.js"></script>
+</body>
+</html>

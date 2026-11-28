@@ -135,6 +135,14 @@ fn main() {
         if arc {
             b.flag("-fobjc-weak");
         }
+        // The text range accessibility of the `text-editor` feature (automation.mm).
+        if env::var_os("CARGO_FEATURE_TEXT_EDITOR").is_some() {
+            b.define("FRN_TEXT_EDITOR", "1");
+        }
+        // The web custom formats of the `chromium-clipboard-map` feature (clipboard.mm).
+        if env::var_os("CARGO_FEATURE_CHROMIUM_CLIPBOARD_MAP").is_some() {
+            b.define("FRN_WEB_CUSTOM_FORMATS", "1");
+        }
         if debug {
             b.define("DEBUG", "1");
         } else {

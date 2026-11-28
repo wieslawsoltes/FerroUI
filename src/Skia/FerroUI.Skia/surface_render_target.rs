@@ -1,4 +1,4 @@
-use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
+use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl, FrameEnd};
 use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGpu, ISkiaGpuRenderSession, ISkiaGrContext, ISkiaSurface};
 use crate::helpers::image_saving_helper;
 use crate::helpers::pixel_format_helper;
@@ -40,6 +40,16 @@ impl ISkiaSurface for SkiaSurfaceWrapper {
     fn dispose(&self) {
         self.surface.borrow_mut().take();
     }
+}
+
+/// Whether a layer of `size` pixels covers all of `canvas`: the canvas is no larger, has no
+/// layer saved on it and no clip (its device clip is all of it). Only then does drawing the layer
+/// with the `Src` blend mode give the pixels of a clear and the layer over it.
+pub(crate) fn covers(canvas: &Canvas, size: (i32, i32)) -> bool {
+    let base = canvas.base_layer_size();
+    canvas.save_count() == 1
+        && (base.width, base.height) == size
+        && canvas.device_clip_bounds() == Some(skia_safe::IRect::from_wh(size.0, size.1))
 }
 
 /// Create info of a [`SurfaceRenderTarget`].
@@ -295,6 +305,35 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
         true
     }
 
+    /// The layer replaces the pixels of a canvas it covers: drawn with the `Src` blend mode, as
+    /// [`blit`](IDrawingContextLayerImpl::blit) draws it over a transparent canvas.
+    fn blit_replacing(&self, context: &mut dyn IDrawingContextImpl) -> bool {
+        let Some(context) = context.as_any_mut().downcast_mut::<DrawingContextImpl>() else {
+            return false;
+        };
+        let gr_context = context.gr_context().cloned();
+        let canvas = context.canvas();
+        let size = self.pixel_size();
+        if !covers(canvas, (size.width, size.height)) {
+            return false;
+        }
+        if self.surface.can_blit() {
+            return self.surface.blit_replacing(canvas);
+        }
+        let image = drawable_image(gr_context.as_deref(), self.snapshot_image(), false);
+        let mut paint = Paint::default();
+        paint.set_blend_mode(skia_safe::BlendMode::Src);
+        let old_matrix = canvas.local_to_device();
+        canvas.reset_matrix();
+        canvas.draw_image_with_sampling_options(image, (0.0, 0.0), SamplingOptions::default(), Some(&paint));
+        canvas.set_matrix(&old_matrix);
+        true
+    }
+
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        self.surface.set_frame_dirty_rows(rows);
+    }
+
     fn is_corrupted(&self) -> bool {
         // Deviation (DEVIATIONS.md, Skia backend): a layer of the render target of a window is
         // also stale when the text rendering of the window's frames is no longer the one its
@@ -321,8 +360,8 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
         // A surface that records its frames gives the canvas of the frame by
         // itself, and draws the frame when the drawing context is disposed.
-        let version = self.version.clone();
-        let mut disposables: Vec<Box<dyn FnOnce()>> = vec![Box::new(move || version.set(version.get() + 1))];
+        // The end of the frame: the version goes up, and a surface drawn on directly is told the frame ended.
+        let mut drawn = None;
 
         let (canvas, surface) = match self.surface.begin_recorded_frame() {
             Some(canvas) => (Some(canvas), None),
@@ -333,9 +372,7 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
                     canvas.restore_to_count(1);
                     canvas.reset_matrix();
                 }
-                // The surface is told when the frame drawn on its canvas ends.
-                let drawn = self.surface.clone();
-                disposables.push(Box::new(move || drawn.end_drawn_frame()));
+                drawn = Some(self.surface.clone());
                 (None, Some(surface))
             }
         };
@@ -353,7 +390,8 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
             ..CreateInfo::default()
         };
 
-        Box::new(DrawingContextImpl::new(create_info, disposables))
+        let frame_end = FrameEnd::Surface { version: self.version.clone(), drawn };
+        Box::new(DrawingContextImpl::with_frame_end(create_info, Vec::new(), Some(frame_end)))
     }
 
     fn has_pending_frame(&self) -> bool {

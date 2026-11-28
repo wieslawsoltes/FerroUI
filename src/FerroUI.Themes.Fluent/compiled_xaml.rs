@@ -308,14 +308,14 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(134,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 134, 47)?, rt::string_object("ComboBoxThemeMinWidth"), rt::to_object(64.0_f64)), 134, 47)?;
     // FluentTheme.xaml(135,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_47)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_47)?;
     // FluentTheme.xaml(138,57) Content (resource)
     let value_4 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 138, 57)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 138, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_4))), 138, 57)?;
     // FluentTheme.xaml(139,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_48)?;
     // FluentTheme.xaml(195,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_49)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_49)?;
     // FluentTheme.xaml(202,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 202, 51)?, rt::string_object("ProgressBarThemeMinHeight"), rt::to_object(4.0_f64)), 202, 51)?;
     // FluentTheme.xaml(203,58) Content (resource)
@@ -323,7 +323,7 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(206,56) Content (resource)
     rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_50)?;
     // FluentTheme.xaml(208,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_51)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_51)?;
     // FluentTheme.xaml(211,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_52)?;
     // FluentTheme.xaml(233,53) Content (resource)
@@ -363,7 +363,7 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(360,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_66)?;
     // FluentTheme.xaml(417,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_67)?;
+    rt::add_packed_double_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_67)?;
     // FluentTheme.xaml(420,55) Content (resource)
     let value_5 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 420, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 420, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_5))), 420, 55)?;
@@ -413,7 +413,7 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(525,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_85)?;
     // FluentTheme.xaml(539,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_86)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_86)?;
     // FluentTheme.xaml(541,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_87)?;
     // FluentTheme.xaml(556,8) Content (resource)
@@ -433,7 +433,7 @@ fn populate_fluenttheme_xaml_unit_1(
     // FluentTheme.xaml(643,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 643, 47)?, rt::string_object("TabItemHeaderFontSize"), rt::to_object(24.0_f64)), 643, 47)?;
     // FluentTheme.xaml(644,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_1, POPULATE_FLUENTTHEME_XAML_ROWS_92)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_1, &POPULATE_FLUENTTHEME_XAML_ROWS_92)?;
     // FluentTheme.xaml(646,56) Content (resource)
     let value_7 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 646, 56)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_1.clone(), 646, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_7))), 646, 56)?;
@@ -645,14 +645,14 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(982,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 982, 47)?, rt::string_object("ComboBoxThemeMinWidth"), rt::to_object(64.0_f64)), 982, 47)?;
     // FluentTheme.xaml(983,55) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_156)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_156)?;
     // FluentTheme.xaml(986,57) Content (resource)
     let value_11 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("Normal")), 986, 57)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 986, 57)?, rt::string_object("ComboBoxHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_11))), 986, 57)?;
     // FluentTheme.xaml(987,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_157)?;
     // FluentTheme.xaml(1044,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_158)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_158)?;
     // FluentTheme.xaml(1051,51) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1051, 51)?, rt::string_object("ProgressBarThemeMinHeight"), rt::to_object(4.0_f64)), 1051, 51)?;
     // FluentTheme.xaml(1052,58) Content (resource)
@@ -660,7 +660,7 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1055,56) Content (resource)
     rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_159)?;
     // FluentTheme.xaml(1057,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_160)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_160)?;
     // FluentTheme.xaml(1060,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_161)?;
     // FluentTheme.xaml(1082,53) Content (resource)
@@ -700,7 +700,7 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1211,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_175)?;
     // FluentTheme.xaml(1268,42) Content (resource)
-    rt::add_double_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_176)?;
+    rt::add_packed_double_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_176)?;
     // FluentTheme.xaml(1271,55) Content (resource)
     let value_12 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiBold")), 1271, 55)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1271, 55)?, rt::string_object("CalendarViewTodayFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_12))), 1271, 55)?;
@@ -758,7 +758,7 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1376,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_194)?;
     // FluentTheme.xaml(1390,56) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_195)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_195)?;
     // FluentTheme.xaml(1392,8) Content (resource)
     rt::add_packed_resource_aliases(&resource_dictionary_2, &context, &POPULATE_FLUENTTHEME_XAML_DOCUMENT, &POPULATE_FLUENTTHEME_XAML_ROWS_196)?;
     // FluentTheme.xaml(1407,8) Content (resource)
@@ -782,7 +782,7 @@ fn populate_fluenttheme_xaml_unit_3(
     // FluentTheme.xaml(1495,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1495, 47)?, rt::string_object("TabItemHeaderFontSize"), rt::to_object(24.0_f64)), 1495, 47)?;
     // FluentTheme.xaml(1496,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_2, POPULATE_FLUENTTHEME_XAML_ROWS_203)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_2, &POPULATE_FLUENTTHEME_XAML_ROWS_203)?;
     // FluentTheme.xaml(1498,56) Content (resource)
     let value_14 = rt::invoked(::ferroui_base::media::FontWeight::__markup_parse(::std::string::String::from("SemiLight")), 1498, 56)?;
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_2.clone(), 1498, 56)?, rt::string_object("TabItemHeaderThemeFontWeight"), rt::to_object(::core::clone::Clone::clone(&value_14))), 1498, 56)?;
@@ -857,27 +857,27 @@ fn populate_fluenttheme_xaml_unit_4(
     // FluentTheme.xaml(10,44) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 10, 44)?, rt::string_object("UseSystemFocusVisuals"), rt::to_object(::core::clone::Clone::clone(&true))), 10, 44)?;
     // FluentTheme.xaml(11,54) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_220)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_220)?;
     // FluentTheme.xaml(14,46) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_221)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_221)?;
     // FluentTheme.xaml(17,36) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_222)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_222)?;
     // FluentTheme.xaml(35,44) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_223)?;
     // FluentTheme.xaml(37,52) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_224)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_224)?;
     // FluentTheme.xaml(39,59) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_225)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_225)?;
     // FluentTheme.xaml(53,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 48)?, rt::string_object("DatePickerBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 53, 48)?;
     // FluentTheme.xaml(54,46) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_226)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_226)?;
     // FluentTheme.xaml(73,63) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 73, 63)?, rt::string_object("PipsPagerNavigationButtonBorderThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 73, 63)?;
     // FluentTheme.xaml(74,40) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_227)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_227)?;
     // FluentTheme.xaml(83,45) Content (resource)
-    rt::add_corner_radius_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_228)?;
+    rt::add_packed_corner_radius_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_228)?;
     // FluentTheme.xaml(87,71) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "VerticalSmallScrollThumbScaleTransform", ::ferroui_base::data::core::ValueType::object(), &context, populate_fluenttheme_xaml_deferred_1365, 87, 71)?;
     // FluentTheme.xaml(88,73) Content (resource)
@@ -893,15 +893,15 @@ fn populate_fluenttheme_xaml_unit_4(
     // FluentTheme.xaml(95,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 95, 47)?, rt::string_object("AutoCompleteListMaxHeight"), rt::to_object(374.0_f64)), 95, 47)?;
     // FluentTheme.xaml(96,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_229)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_229)?;
     // FluentTheme.xaml(99,47) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_230)?;
     // FluentTheme.xaml(102,58) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_231)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_231)?;
     // FluentTheme.xaml(107,41) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_232)?;
     // FluentTheme.xaml(112,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_233)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_233)?;
     ::core::result::Result::Ok(())
 }
 
@@ -912,12 +912,15 @@ fn populate_fluenttheme_xaml_unit_5(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // FluentTheme.xaml(5,52) Content (resource)
-    rt::add_string_resources(&resource_dictionary_0, POPULATE_FLUENTTHEME_XAML_ROWS_234)?;
+    rt::add_packed_string_resources(&resource_dictionary_0, &POPULATE_FLUENTTHEME_XAML_ROWS_234)?;
     ::core::result::Result::Ok(())
 }
 
 /// The keys and targets of the packed tables of the unit 1 of `FluentTheme.xaml`, each once (#855).
-const POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS: &str = "SystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColorSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlFocusVisualPrimaryBrushSystemControlFocusVisualSecondaryBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemErrorTextColorSystemControlHighlightListLowRevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlHighlightAccentRevealBackgroundBrushSystemControlBackgroundChromeWhiteRevealBorderBrushSystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushSystemControlTransientBackgroundBrushSystemControlDescriptionTextForegroundBrushSystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrushSystemRegionBrushSystemRegionColorSystemControlTransparentBrush";
+const POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS: &str = "SystemControlBackgroundAccentBrushSystemAccentColorSystemControlBackgroundAltHighBrushSystemAltHighColorSystemControlBackgroundAltMediumHighBrushSystemAltMediumHighColorSystemControlBackgroundAltMediumBrushSystemAltMediumColorSystemControlBackgroundAltMediumLowBrushSystemAltMediumLowColorSystemControlBackgroundBaseHighBrushSystemBaseHighColorSystemControlBackgroundBaseLowBrushSystemBaseLowColorSystemControlBackgroundBaseMediumBrushSystemBaseMediumColorSystemControlBackgroundBaseMediumHighBrushSystemBaseMediumHighColorSystemControlBackgroundBaseMediumLowBrushSystemBaseMediumLowColorSystemControlBackgroundChromeBlackHighBrushSystemChromeBlackHighColorSystemControlBackgroundChromeBlackMediumBrushSystemChromeBlackMediumColorSystemControlBackgroundChromeBlackLowBrushSystemChromeBlackLowColorSystemControlBackgroundChromeBlackMediumLowBrushSystemChromeBlackMediumLowColorSystemControlBackgroundChromeMediumBrushSystemChromeMediumColorSystemControlBackgroundChromeMediumLowBrushSystemChromeMediumLowColorSystemControlBackgroundChromeWhiteBrushSystemChromeWhiteColorSystemControlBackgroundListLowBrushSystemListLowColorSystemControlBackgroundListMediumBrushSystemListMediumColorSystemControlDisabledAccentBrushSystemControlDisabledBaseHighBrushSystemControlDisabledBaseLowBrushSystemControlDisabledBaseMediumLowBrushSystemControlDisabledChromeDisabledHighBrushSystemChromeDisabledHighColorSystemControlDisabledChromeDisabledLowBrushSystemChromeDisabledLowColorSystemControlDisabledChromeHighBrushSystemChromeHighColorSystemControlDisabledChromeMediumLowBrushSystemControlDisabledListMediumBrushSystemControlDisabledTransparentBrushSystemControlFocusVisualPrimaryBrushSystemControlFocusVisualSecondaryBrushSystemControlRevealFocusVisualBrushSystemControlForegroundAccentBrushSystemControlForegroundAltHighBrushSystemControlForegroundAltMediumHighBrushSystemControlForegroundBaseHighBrushSystemControlForegroundBaseLowBrushSystemControlForegroundBaseMediumBrushSystemControlForegroundBaseMediumHighBrushSystemControlForegroundBaseMediumLowBrushSystemControlForegroundChromeBlackHighBrushSystemControlForegroundChromeHighBrushSystemControlForegroundChromeMediumBrushSystemControlForegroundChromeDisabledLowBrushSystemControlForegroundChromeWhiteBrushSystemControlForegroundChromeBlackMediumBrushSystemControlForegroundChromeBlackMediumLowBrushSystemControlForegroundChromeGrayBrushSystemChromeGrayColorSystemControlForegroundListLowBrushSystemControlForegroundListMediumBrushSystemControlForegroundTransparentBrushSystemControlHighlightAccentBrushSystemControlHighlightAltAccentBrushSystemControlHighlightAltAltHighBrushSystemControlHighlightAltBaseHighBrushSystemControlHighlightAltBaseLowBrushSystemControlHighlightAltBaseMediumBrushSystemControlHighlightAltBaseMediumHighBrushSystemControlHighlightAltAltMediumHighBrushSystemControlHighlightAltBaseMediumLowBrushSystemControlHighlightAltChromeWhiteBrushSystemControlHighlightAltTransparentBrushSystemControlHighlightBaseHighBrushSystemControlHighlightBaseLowBrushSystemControlHighlightBaseMediumBrushSystemControlHighlightBaseMediumHighBrushSystemControlHighlightBaseMediumLowBrushSystemControlHighlightChromeAltLowBrushSystemChromeAltLowColorSystemControlHighlightChromeHighBrushSystemControlHighlightListMediumBrushSystemControlHighlightListLowBrushSystemControlHighlightChromeWhiteBrushSystemControlHighlightTransparentBrushSystemControlHyperlinkTextBrushSystemControlHyperlinkBaseHighBrushSystemControlHyperlinkBaseMediumBrushSystemControlHyperlinkBaseMediumHighBrushSystemControlPageBackgroundAltMediumBrushSystemControlPageBackgroundAltHighBrushSystemControlPageBackgroundMediumAltMediumBrushSystemControlPageBackgroundBaseLowBrushSystemControlPageBackgroundBaseMediumBrushSystemControlPageBackgroundListLowBrushSystemControlPageBackgroundChromeLowBrushSystemChromeLowColorSystemControlPageBackgroundChromeMediumLowBrushSystemControlPageBackgroundTransparentBrushSystemControlPageTextBaseHighBrushSystemControlPageTextBaseMediumBrushSystemControlPageTextChromeBlackMediumLowBrushSystemControlErrorTextForegroundBrushSystemErrorTextColorSystemControlHighlightListLowRevealBackgroundBrushSystemControlHighlightListMediumRevealBackgroundBrushSystemControlHighlightAccentRevealBackgroundBrushSystemControlBackgroundChromeWhiteRevealBorderBrushSystemControlHighlightAltTransparentRevealBorderBrushSystemControlBackgroundTransparentRevealBorderBrushSystemControlTransientBackgroundBrushSystemControlDescriptionTextForegroundBrushSystemControlTransparentRevealBackgroundBrushSystemControlTransparentRevealBorderBrushSystemRegionBrushSystemRegionColorSystemControlTransparentBrushTextControlBorderThemeThicknessTextControlBorderThemeThicknessFocusedTextControlThemePaddingIconElementThemeHeightIconElementThemeWidthRefreshVisualizerIndicatorSizeButtonPaddingCheckBoxPaddingRadioButtonPaddingButtonSpinnerPaddingLabelPaddingHeaderedContentControlPaddingCalendarDatePickerPaddingCommandBarButtonPaddingCommandBarToggleButtonPaddingCommandBarSeparatorMarginCommandBarSeparatorOverflowMarginCommandBarPaddingCommandBarOverflowButtonPaddingManagedFileChooserQuickLinksPaddingManagedFileChooserQuickLinksItemPaddingNavigationPageCommandBarButtonPaddingCalendarButtonBorderThicknessCalendarBorderThicknessCalendarDatePickerDropDownButtonWidthCommandBarButtonWidthCommandBarButtonCompactWidthCommandBarButtonLabelRightMinWidthCommandBarButtonMinHeightCommandBarButtonIsInOverflowMinHeightCommandBarSeparatorWidthCommandBarSeparatorOverflowHeightCommandBarSeparatorMinHeightCommandBarMinHeightDatePickerPresenterWidthTimePickerPresenterWidthDateTimePickerButtonHeightGridSplitterThicknessManagedFileChooserOverwritePromptMinWidthManagedFileChooserQuickLinksWidthManagedFileChooserQuickLinksItemHeightManagedFileChooserNavBarControlHeightManagedFileChooserNavBarButtonWidthNotificationCardWidthPipsPagerNavigationButtonSizePipsPagerItemWidthPipsPagerItemHeightPipsPagerItemDotSizePipsPagerItemDotSizeActiveTextControlInnerButtonMinWidthControlCornerRadiusOverlayCornerRadiusAutoCompleteListMarginAutoCompleteListBorderThemeThicknessAutoCompleteListPaddingDateTimeFlyoutButtonBorderThicknessDateTimeFlyoutBorderThicknessDateTimeFlyoutBorderPaddingFlyoutContentThemePaddingFlyoutBorderThemePaddingMenuFlyoutScrollerMarginMenuBarItemPadding";
+
+/// The numbers of the packed tables of the unit 1 of `FluentTheme.xaml`, each once (#855).
+static POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS: [f64; 27] = [1.0_f64, 2.0_f64, 10.0_f64, 6.0_f64, 5.0_f64, 20.0_f64, 24.0_f64, 8.0_f64, 0.0_f64, 3.0_f64, 4.0_f64, 12.0_f64, 30.0_f64, 68.0_f64, 40.0_f64, 36.0_f64, 48.0_f64, 296.0_f64, 242.0_f64, 22.0_f64, 270.0_f64, 240.0_f64, 32.0_f64, 350.0_f64, 34.0_f64, -1.0_f64, 11.0_f64];
 
 /// The brushes bound to a dynamic resource of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_0: rt::PackedRows = rt::PackedRows {
@@ -1237,7 +1240,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_26: rt::PackedRows = rt::PackedRows {
 };
 
 /// The keys and targets of the packed tables of the unit 2 of `FluentTheme.xaml`, each once (#855).
-const POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS: &str = "AccentButtonBackgroundSystemControlBackgroundAccentBrushAccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSystemControlBackgroundBaseMediumLowBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushRepeatButtonBackgroundRepeatButtonBackgroundPressedRepeatButtonBackgroundDisabledRepeatButtonForegroundRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedRepeatButtonForegroundDisabledRepeatButtonBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedRepeatButtonBorderBrushDisabledToggleButtonBackgroundToggleButtonBackgroundPressedToggleButtonBackgroundDisabledToggleButtonBackgroundCheckedSystemControlHighlightAccentBrushToggleButtonBackgroundCheckedPointerOverToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundToggleButtonForegroundPointerOverToggleButtonForegroundPressedToggleButtonForegroundDisabledToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabledGroupBoxBackgroundGroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColorHyperlinkVisitedBrushHyperlinkVisitedColorHyperlinkButtonForegroundHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedHyperlinkButtonForegroundDisabledHyperlinkButtonForegroundVisitedHyperlinkButtonForegroundVisitedPointerOverHyperlinkButtonBackgroundHyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressedHyperlinkButtonBackgroundDisabledHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabledComboBoxItemForegroundComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedComboBoxBackgroundBorderBrushUnfocusedComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrushMenuFlyoutItemBackgroundMenuFlyoutItemBackgroundPointerOverMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledMenuFlyoutSubItemChevronMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledMenuFlyoutPresenterBackgroundMenuFlyoutPresenterBorderBrushTextControlForegroundTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledTextControlBorderBrushFocusedTextControlBorderBrushDisabledTextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledTextControlSelectionHighlightColorTextControlButtonBackgroundTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushPointerOverTextControlForegroundFocusedTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundAutoCompleteBoxSuggestionsListBorderBrushCheckBoxForegroundUncheckedCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedPointerOverCheckBoxCheckBackgroundStrokeCheckedPressedCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverSystemControlForegroundChromeWhiteBrushCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushCalendarViewSelectedBorderBrushCalendarViewHoverBorderBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledExpanderChevronBackgroundExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabledExpanderChevronForegroundExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabledExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushNotificationCardBackgroundBrushNotificationCardForegroundBrushNotificationCardProgressBackgroundBrushNotificationCardInformationBackgroundBrushNotificationCardSuccessBackgroundBrushNotificationCardWarningBackgroundBrushNotificationCardErrorBackgroundBrushRadioButtonForegroundRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledRadioButtonBackgroundRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeRadioButtonOuterEllipseCheckedStrokePointerOverRadioButtonOuterEllipseCheckedStrokePressedRadioButtonOuterEllipseCheckedStrokeDisabledRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledSliderContainerBackgroundSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrushSliderThumbBackgroundPointerOverSliderThumbBackgroundPressedSliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillToggleSwitchContentForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedToggleSwitchFillOffDisabledToggleSwitchStrokeOffToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnToggleSwitchFillOnPointerOverToggleSwitchFillOnPressedToggleSwitchFillOnDisabledToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrushToolTipForegroundToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushDatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledDatePickerButtonBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundDatePickerButtonBackgroundPointerOverDatePickerButtonBackgroundPressedDatePickerButtonBackgroundDisabledDatePickerButtonForegroundDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerFlyoutPresenterBackgroundDatePickerFlyoutPresenterBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillDateTimePickerFlyoutButtonBackgroundDateTimePickerFlyoutButtonBackgroundPointerOverDateTimePickerFlyoutButtonBackgroundPressedDateTimePickerFlyoutButtonBorderBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFillTabControlBackgroundTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedTabItemHeaderForegroundUnselectedPointerOverTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrushScrollBarBackgroundScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColorTreeViewItemBackgroundTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledSplitButtonBackgroundSplitButtonBackgroundPressedSplitButtonBackgroundDisabledSplitButtonBackgroundCheckedSplitButtonBackgroundCheckedPointerOverSplitButtonBackgroundCheckedPressedSplitButtonBackgroundCheckedDisabledSplitButtonForegroundSplitButtonForegroundPointerOverSplitButtonForegroundPressedSplitButtonForegroundDisabledSplitButtonForegroundCheckedSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSplitButtonBorderBrushDisabledSplitButtonBorderBrushCheckedSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabledSplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundCalendarDatePickerForegroundDisabledCalendarDatePickerCalendarGlyphForegroundCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundCalendarDatePickerBackgroundPointerOverCalendarDatePickerBackgroundPressedCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundFlyoutBorderThemeBrushRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushTableViewColumnHeaderSeparatorBackgroundTableViewRowForegroundDisabledTableViewRowBackgroundPointerOverTableViewRowForegroundPointerOverTableViewRowBackgroundPressedTableViewRowForegroundPressedTableViewRowBackgroundSelectedTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedTableViewRowForegroundSelectedPressed";
+const POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS: &str = "AccentButtonBackgroundSystemControlBackgroundAccentBrushAccentButtonBackgroundPointerOverSystemAccentColorLight1AccentButtonBackgroundPressedSystemAccentColorDark1AccentButtonBackgroundDisabledSystemControlBackgroundBaseLowBrushAccentButtonForegroundSystemControlBackgroundChromeWhiteBrushAccentButtonForegroundPointerOverAccentButtonForegroundPressedAccentButtonForegroundDisabledSystemControlDisabledBaseMediumLowBrushAccentButtonBorderBrushSystemControlForegroundTransparentBrushAccentButtonBorderBrushPointerOverAccentButtonBorderBrushPressedSystemControlHighlightTransparentBrushAccentButtonBorderBrushDisabledSystemControlDisabledTransparentBrushSystemControlBackgroundBaseMediumLowBrushSystemControlForegroundBaseHighBrushSystemControlHighlightBaseHighBrushRepeatButtonBackgroundRepeatButtonBackgroundPressedRepeatButtonBackgroundDisabledRepeatButtonForegroundRepeatButtonForegroundPointerOverRepeatButtonForegroundPressedRepeatButtonForegroundDisabledRepeatButtonBorderBrushRepeatButtonBorderBrushPointerOverRepeatButtonBorderBrushPressedRepeatButtonBorderBrushDisabledToggleButtonBackgroundToggleButtonBackgroundPressedToggleButtonBackgroundDisabledToggleButtonBackgroundCheckedSystemControlHighlightAccentBrushToggleButtonBackgroundCheckedPointerOverToggleButtonBackgroundCheckedPressedSystemControlHighlightBaseMediumLowBrushToggleButtonBackgroundCheckedDisabledToggleButtonBackgroundIndeterminateToggleButtonBackgroundIndeterminatePointerOverToggleButtonBackgroundIndeterminatePressedToggleButtonBackgroundIndeterminateDisabledToggleButtonForegroundToggleButtonForegroundPointerOverToggleButtonForegroundPressedToggleButtonForegroundDisabledToggleButtonForegroundCheckedSystemControlHighlightAltChromeWhiteBrushToggleButtonForegroundCheckedPointerOverToggleButtonForegroundCheckedPressedToggleButtonForegroundCheckedDisabledToggleButtonForegroundIndeterminateToggleButtonForegroundIndeterminatePointerOverToggleButtonForegroundIndeterminatePressedToggleButtonForegroundIndeterminateDisabledToggleButtonBorderBrushToggleButtonBorderBrushPointerOverToggleButtonBorderBrushPressedToggleButtonBorderBrushDisabledToggleButtonBorderBrushCheckedSystemControlHighlightAltTransparentBrushToggleButtonBorderBrushCheckedPointerOverToggleButtonBorderBrushCheckedPressedSystemControlTransparentBrushToggleButtonBorderBrushCheckedDisabledToggleButtonBorderBrushIndeterminateToggleButtonBorderBrushIndeterminatePointerOverToggleButtonBorderBrushIndeterminatePressedToggleButtonBorderBrushIndeterminateDisabledGroupBoxBackgroundGroupBoxBorderBrushSystemControlForegroundBaseMediumBrushGroupBoxHeaderForegroundSystemBaseHighColorHyperlinkVisitedBrushHyperlinkVisitedColorHyperlinkButtonForegroundHyperlinkButtonForegroundPointerOverHyperlinkButtonForegroundPressedHyperlinkButtonForegroundDisabledHyperlinkButtonForegroundVisitedHyperlinkButtonForegroundVisitedPointerOverHyperlinkButtonBackgroundHyperlinkButtonBackgroundPointerOverHyperlinkButtonBackgroundPressedHyperlinkButtonBackgroundDisabledHyperlinkButtonBorderBrushHyperlinkButtonBorderBrushPointerOverHyperlinkButtonBorderBrushPressedHyperlinkButtonBorderBrushDisabledComboBoxBorderThemeThicknessComboBoxDropdownBorderThicknessComboBoxItemThemePaddingComboBoxItemForegroundComboBoxItemForegroundPressedSystemControlHighlightAltBaseHighBrushComboBoxItemForegroundPointerOverComboBoxItemForegroundDisabledComboBoxItemForegroundSelectedComboBoxItemForegroundSelectedPressedComboBoxItemForegroundSelectedPointerOverComboBoxItemForegroundSelectedDisabledComboBoxItemBackgroundComboBoxItemBackgroundPressedSystemControlHighlightListMediumBrushComboBoxItemBackgroundPointerOverSystemControlHighlightListLowBrushComboBoxItemBackgroundDisabledComboBoxItemBackgroundSelectedSystemControlHighlightListAccentLowBrushComboBoxItemBackgroundSelectedPressedSystemControlHighlightListAccentHighBrushComboBoxItemBackgroundSelectedPointerOverSystemControlHighlightListAccentMediumBrushComboBoxItemBackgroundSelectedDisabledComboBoxItemBorderBrushPressedComboBoxItemBorderBrushPointerOverComboBoxItemBorderBrushDisabledComboBoxItemBorderBrushSelectedComboBoxItemBorderBrushSelectedPressedComboBoxItemBorderBrushSelectedPointerOverComboBoxItemBorderBrushSelectedDisabledComboBoxBackgroundSystemControlBackgroundAltMediumLowBrushComboBoxBackgroundPointerOverSystemControlPageBackgroundAltMediumBrushComboBoxBackgroundPressedSystemControlBackgroundListMediumBrushComboBoxBackgroundDisabledComboBoxBackgroundUnfocusedComboBoxBackgroundBorderBrushFocusedComboBoxBackgroundBorderBrushUnfocusedComboBoxForegroundComboBoxForegroundDisabledComboBoxForegroundFocusedComboBoxForegroundFocusedPressedComboBoxPlaceHolderForegroundSystemControlPageTextBaseHighBrushComboBoxPlaceHolderForegroundFocusedPressedComboBoxBorderBrushComboBoxBorderBrushPointerOverSystemControlHighlightBaseMediumHighBrushComboBoxBorderBrushPressedSystemControlHighlightBaseMediumBrushComboBoxBorderBrushDisabledSystemControlDisabledBaseLowBrushComboBoxDropDownGlyphForegroundSystemControlForegroundBaseMediumHighBrushComboBoxDropDownGlyphForegroundDisabledComboBoxDropDownGlyphForegroundFocusedSystemControlHighlightAltBaseMediumHighBrushComboBoxDropDownGlyphForegroundFocusedPressedComboBoxDropDownBackgroundSystemControlTransientBackgroundBrushComboBoxDropDownBorderBrushSystemControlTransientBorderBrushComboBoxDropdownBorderPaddingComboBoxDropdownContentMarginListBoxBorderThemeThicknessMenuFlyoutPresenterThemePaddingMenuFlyoutItemChevronMarginMenuFlyoutSeparatorThemePaddingMenuFlyoutItemBackgroundMenuFlyoutItemBackgroundPointerOverMenuFlyoutItemBackgroundPressedMenuFlyoutItemBackgroundDisabledMenuFlyoutItemForegroundMenuFlyoutItemForegroundPointerOverMenuFlyoutItemForegroundPressedMenuFlyoutItemForegroundDisabledMenuFlyoutSubItemChevronMenuFlyoutSubItemChevronPointerOverMenuFlyoutSubItemChevronPressedMenuFlyoutSubItemChevronSubMenuOpenedMenuFlyoutSubItemChevronDisabledMenuFlyoutItemKeyboardAcceleratorTextForegroundMenuFlyoutItemKeyboardAcceleratorTextForegroundPointerOverSystemControlHighlightAltBaseMediumBrushMenuFlyoutItemKeyboardAcceleratorTextForegroundPressedMenuFlyoutItemKeyboardAcceleratorTextForegroundDisabledMenuFlyoutPresenterBackgroundMenuFlyoutPresenterBorderBrushTextControlForegroundTextControlForegroundPointerOverTextControlForegroundDisabledSystemControlDisabledChromeDisabledLowBrushTextControlBackgroundTextControlBackgroundPointerOverSystemControlBackgroundAltMediumBrushTextControlBackgroundDisabledTextControlBorderBrushFocusedTextControlBorderBrushDisabledTextControlPlaceholderForegroundSystemControlPageTextBaseMediumBrushTextControlPlaceholderForegroundPointerOverTextControlPlaceholderForegroundDisabledTextControlSelectionHighlightColorTextControlButtonBackgroundTextControlButtonBackgroundPointerOverTextControlButtonBackgroundPressedTextControlButtonBorderBrushTextControlButtonBorderBrushPointerOverTextControlButtonBorderBrushPressedTextControlButtonForegroundPointerOverTextControlButtonForegroundPressedTextControlBackgroundFocusedSystemControlBackgroundAltHighBrushTextControlBorderBrushPointerOverTextControlForegroundFocusedTextControlPlaceholderForegroundFocusedSystemControlForegroundBaseMediumLowBrushAutoCompleteBoxSuggestionsListBackgroundAutoCompleteBoxSuggestionsListBorderBrushCheckBoxForegroundUncheckedCheckBoxForegroundUncheckedPointerOverCheckBoxForegroundUncheckedPressedCheckBoxForegroundUncheckedDisabledCheckBoxForegroundCheckedCheckBoxForegroundCheckedPointerOverCheckBoxForegroundCheckedPressedCheckBoxForegroundCheckedDisabledCheckBoxForegroundIndeterminateCheckBoxForegroundIndeterminatePointerOverCheckBoxForegroundIndeterminatePressedCheckBoxForegroundIndeterminateDisabledCheckBoxBackgroundUncheckedCheckBoxBackgroundUncheckedPointerOverCheckBoxBackgroundUncheckedPressedCheckBoxBackgroundUncheckedDisabledCheckBoxBackgroundCheckedCheckBoxBackgroundCheckedPointerOverCheckBoxBackgroundCheckedPressedCheckBoxBackgroundCheckedDisabledCheckBoxBackgroundIndeterminateCheckBoxBackgroundIndeterminatePointerOverCheckBoxBackgroundIndeterminatePressedCheckBoxBackgroundIndeterminateDisabledCheckBoxBorderBrushUncheckedCheckBoxBorderBrushUncheckedPointerOverCheckBoxBorderBrushUncheckedPressedCheckBoxBorderBrushUncheckedDisabledCheckBoxBorderBrushCheckedCheckBoxBorderBrushCheckedPointerOverCheckBoxBorderBrushCheckedPressedCheckBoxBorderBrushCheckedDisabledCheckBoxBorderBrushIndeterminateCheckBoxBorderBrushIndeterminatePointerOverCheckBoxBorderBrushIndeterminatePressedCheckBoxBorderBrushIndeterminateDisabledCheckBoxCheckBackgroundStrokeUncheckedCheckBoxCheckBackgroundStrokeUncheckedPointerOverCheckBoxCheckBackgroundStrokeUncheckedPressedCheckBoxCheckBackgroundStrokeUncheckedDisabledCheckBoxCheckBackgroundStrokeCheckedPointerOverCheckBoxCheckBackgroundStrokeCheckedPressedCheckBoxCheckBackgroundStrokeCheckedDisabledCheckBoxCheckBackgroundStrokeIndeterminateCheckBoxCheckBackgroundStrokeIndeterminatePointerOverCheckBoxCheckBackgroundStrokeIndeterminatePressedCheckBoxCheckBackgroundStrokeIndeterminateDisabledCheckBoxCheckBackgroundFillUncheckedCheckBoxCheckBackgroundFillUncheckedPointerOverCheckBoxCheckBackgroundFillUncheckedPressedCheckBoxCheckBackgroundFillUncheckedDisabledCheckBoxCheckBackgroundFillCheckedCheckBoxCheckBackgroundFillCheckedPointerOverCheckBoxCheckBackgroundFillCheckedPressedCheckBoxCheckBackgroundFillCheckedDisabledCheckBoxCheckBackgroundFillIndeterminateCheckBoxCheckBackgroundFillIndeterminatePointerOverCheckBoxCheckBackgroundFillIndeterminatePressedCheckBoxCheckBackgroundFillIndeterminateDisabledCheckBoxCheckGlyphForegroundUncheckedCheckBoxCheckGlyphForegroundUncheckedPointerOverCheckBoxCheckGlyphForegroundUncheckedPressedCheckBoxCheckGlyphForegroundUncheckedDisabledCheckBoxCheckGlyphForegroundCheckedCheckBoxCheckGlyphForegroundCheckedPointerOverSystemControlForegroundChromeWhiteBrushCheckBoxCheckGlyphForegroundCheckedPressedCheckBoxCheckGlyphForegroundCheckedDisabledCheckBoxCheckGlyphForegroundIndeterminateCheckBoxCheckGlyphForegroundIndeterminatePointerOverCheckBoxCheckGlyphForegroundIndeterminatePressedCheckBoxCheckGlyphForegroundIndeterminateDisabledCalendarViewSelectedHoverBorderBrushCalendarViewSelectedPressedBorderBrushCalendarViewSelectedBorderBrushCalendarViewHoverBorderBrushCalendarViewPressedBorderBrushCalendarViewTodayForegroundCalendarViewBlackoutForegroundCalendarViewOutOfScopeForegroundSystemControlHyperlinkBaseHighBrushCalendarViewCalendarItemForegroundCalendarViewOutOfScopeBackgroundSystemControlDisabledChromeMediumLowBrushCalendarViewForegroundSystemControlHyperlinkBaseMediumHighBrushCalendarViewBackgroundCalendarViewBorderBrushSystemControlForegroundChromeMediumBrushCalendarViewWeekDayForegroundDisabledCalendarViewNavigationButtonBackgroundCalendarViewNavigationButtonForegroundPointerOverCalendarViewNavigationButtonForegroundPressedCalendarViewCalendarItemRevealBackgroundSystemControlTransparentRevealBackgroundBrushCalendarViewCalendarItemRevealBorderBrushSystemControlTransparentRevealBorderBrushCalendarViewNavigationButtonBorderBrushPointerOverCalendarFontSizeCalendarDayButtonFontSizeCalendarWeekNumberFontSizeExpanderHeaderBackgroundSystemAltMediumHighColorExpanderHeaderBackgroundPointerOverExpanderHeaderBackgroundPressedExpanderHeaderBackgroundDisabledExpanderHeaderForegroundExpanderHeaderForegroundPointerOverExpanderHeaderForegroundPressedExpanderHeaderForegroundDisabledExpanderHeaderBorderBrushSystemBaseLowColorExpanderHeaderBorderBrushPointerOverExpanderHeaderBorderBrushPressedExpanderHeaderBorderBrushDisabledExpanderChevronBackgroundExpanderChevronBackgroundPressedExpanderChevronBackgroundDisabledExpanderChevronForegroundExpanderChevronForegroundPointerOverExpanderChevronForegroundPressedExpanderChevronForegroundDisabledExpanderChevronBorderBrushExpanderChevronBorderBrushPointerOverExpanderChevronBorderBrushPressedExpanderChevronBorderBrushDisabledExpanderContentBackgroundSystemChromeMediumLowColorExpanderContentBorderBrushNotificationCardBackgroundBrushNotificationCardForegroundBrushNotificationCardProgressBackgroundBrushNotificationCardInformationBackgroundBrushNotificationCardSuccessBackgroundBrushNotificationCardWarningBackgroundBrushNotificationCardErrorBackgroundBrushRadioButtonForegroundRadioButtonForegroundPointerOverRadioButtonForegroundPressedRadioButtonForegroundDisabledRadioButtonBackgroundRadioButtonBackgroundPointerOverRadioButtonBackgroundPressedRadioButtonBackgroundDisabledRadioButtonBorderBrushRadioButtonBorderBrushPointerOverRadioButtonBorderBrushPressedRadioButtonBorderBrushDisabledRadioButtonOuterEllipseStrokeRadioButtonOuterEllipseStrokePointerOverRadioButtonOuterEllipseStrokePressedRadioButtonOuterEllipseStrokeDisabledRadioButtonOuterEllipseFillRadioButtonOuterEllipseFillPointerOverRadioButtonOuterEllipseFillPressedRadioButtonOuterEllipseFillDisabledRadioButtonOuterEllipseCheckedStrokeRadioButtonOuterEllipseCheckedStrokePointerOverRadioButtonOuterEllipseCheckedStrokePressedRadioButtonOuterEllipseCheckedStrokeDisabledRadioButtonOuterEllipseCheckedFillRadioButtonOuterEllipseCheckedFillPointerOverRadioButtonOuterEllipseCheckedFillPressedRadioButtonOuterEllipseCheckedFillDisabledRadioButtonCheckGlyphFillRadioButtonCheckGlyphFillPointerOverRadioButtonCheckGlyphFillPressedRadioButtonCheckGlyphFillDisabledRadioButtonCheckGlyphStrokeRadioButtonCheckGlyphStrokePointerOverRadioButtonCheckGlyphStrokePressedRadioButtonCheckGlyphStrokeDisabledSliderContainerBackgroundSliderContainerBackgroundPointerOverSliderContainerBackgroundPressedSliderContainerBackgroundDisabledSliderThumbBackgroundSystemControlForegroundAccentBrushSliderThumbBackgroundPointerOverSliderThumbBackgroundPressedSliderThumbBackgroundDisabledSystemControlDisabledChromeDisabledHighBrushSliderTrackFillSliderTrackFillPointerOverSliderTrackFillPressedSliderTrackFillDisabledSliderTrackValueFillSliderTrackValueFillPointerOverSliderTrackValueFillPressedSliderTrackValueFillDisabledSliderTickBarFillSliderTickBarFillDisabledSliderInlineTickBarFillToggleSwitchOnStrokeThicknessToggleSwitchOuterBorderStrokeThicknessToggleSwitchContentForegroundToggleSwitchHeaderForegroundDisabledToggleSwitchContainerBackgroundToggleSwitchContainerBackgroundPointerOverToggleSwitchContainerBackgroundPressedToggleSwitchFillOffToggleSwitchFillOffPointerOverToggleSwitchFillOffPressedToggleSwitchFillOffDisabledToggleSwitchStrokeOffToggleSwitchStrokeOffPointerOverToggleSwitchStrokeOffPressedToggleSwitchStrokeOffDisabledToggleSwitchFillOnToggleSwitchFillOnPointerOverToggleSwitchFillOnPressedToggleSwitchFillOnDisabledToggleSwitchStrokeOnToggleSwitchStrokeOnPointerOverToggleSwitchStrokeOnPressedToggleSwitchStrokeOnDisabledToggleSwitchKnobFillOffToggleSwitchKnobFillOffPointerOverToggleSwitchKnobFillOffPressedToggleSwitchKnobFillOffDisabledToggleSwitchKnobFillOnToggleSwitchKnobFillOnPointerOverSystemControlHighlightChromeWhiteBrushToggleSwitchKnobFillOnPressedToggleSwitchKnobFillOnDisabledSystemControlPageBackgroundBaseLowBrushToolTipForegroundToolTipBackgroundSystemControlBackgroundChromeMediumLowBrushToolTipBorderBrushDatePickerSpacerFillSystemControlForegroundBaseLowBrushDatePickerSpacerFillDisabledDatePickerButtonBorderBrushDatePickerButtonBorderBrushPointerOverDatePickerButtonBorderBrushPressedDatePickerButtonBorderBrushDisabledDatePickerButtonBackgroundDatePickerButtonBackgroundPointerOverDatePickerButtonBackgroundPressedDatePickerButtonBackgroundDisabledDatePickerButtonForegroundDatePickerButtonForegroundPointerOverDatePickerButtonForegroundPressedDatePickerButtonForegroundDisabledDatePickerFlyoutPresenterBackgroundDatePickerFlyoutPresenterBorderBrushDatePickerFlyoutPresenterSpacerFillDatePickerFlyoutPresenterHighlightFillDateTimePickerFlyoutButtonBackgroundDateTimePickerFlyoutButtonBackgroundPointerOverDateTimePickerFlyoutButtonBackgroundPressedDateTimePickerFlyoutButtonBorderBrushDateTimePickerFlyoutButtonBorderBrushPointerOverDateTimePickerFlyoutButtonBorderBrushPressedDateTimePickerFlyoutButtonForegroundPointerOverDateTimePickerFlyoutButtonForegroundPressedTimePickerSpacerFillTimePickerSpacerFillDisabledTimePickerButtonBorderBrushTimePickerButtonBorderBrushPointerOverTimePickerButtonBorderBrushPressedTimePickerButtonBorderBrushDisabledTimePickerButtonBackgroundTimePickerButtonBackgroundPointerOverTimePickerButtonBackgroundPressedTimePickerButtonBackgroundDisabledTimePickerButtonForegroundTimePickerButtonForegroundPointerOverTimePickerButtonForegroundPressedTimePickerButtonForegroundDisabledTimePickerFlyoutPresenterBackgroundTimePickerFlyoutPresenterBorderBrushTimePickerFlyoutPresenterSpacerFillTimePickerFlyoutPresenterHighlightFillTabItemHeaderMarginTabItemMarginTabControlBackgroundTabItemHeaderBackgroundUnselectedTabItemHeaderBackgroundUnselectedPointerOverTabItemHeaderBackgroundUnselectedPressedTabItemHeaderBackgroundSelectedTabItemHeaderBackgroundSelectedPointerOverTabItemHeaderBackgroundSelectedPressedTabItemHeaderBackgroundDisabledTabItemHeaderForegroundUnselectedTabItemHeaderForegroundUnselectedPointerOverTabItemHeaderForegroundUnselectedPressedTabItemHeaderForegroundSelectedTabItemHeaderForegroundSelectedPointerOverTabItemHeaderForegroundSelectedPressedTabItemHeaderForegroundDisabledTabItemHeaderSelectedPipeFillSystemControlHighlightAltAccentBrushScrollBarBackgroundScrollBarBackgroundPointerOverScrollBarForegroundScrollBarBorderBrushScrollBarButtonBackgroundScrollBarButtonBackgroundPointerOverSystemControlBackgroundListLowBrushScrollBarButtonBackgroundPressedSystemControlBackgroundBaseMediumBrushScrollBarButtonBackgroundDisabledScrollBarButtonBorderBrushScrollBarButtonBorderBrushPointerOverScrollBarButtonBorderBrushPressedScrollBarButtonBorderBrushDisabledScrollBarButtonArrowForegroundScrollBarButtonArrowForegroundPointerOverScrollBarButtonArrowForegroundPressedSystemControlForegroundAltHighBrushScrollBarButtonArrowForegroundDisabledScrollBarThumbFillPointerOverScrollBarThumbFillPressedScrollBarThumbFillDisabledScrollBarTrackStrokeScrollBarTrackStrokePointerOverScrollBarThumbBackgroundColorScrollBarPanningThumbBackgroundColorSystemChromeDisabledLowColorTreeViewItemBackgroundTreeViewItemBackgroundPointerOverSystemControlHighlightListLowRevealBackgroundBrushTreeViewItemBackgroundPressedSystemControlHighlightListMediumRevealBackgroundBrushTreeViewItemBackgroundDisabledTreeViewItemBackgroundSelectedSystemControlHighlightAccent3RevealBackgroundBrushTreeViewItemBackgroundSelectedPointerOverSystemControlHighlightAccent2RevealBackgroundBrushTreeViewItemBackgroundSelectedPressedTreeViewItemBackgroundSelectedDisabledTreeViewItemForegroundTreeViewItemForegroundPointerOverTreeViewItemForegroundPressedTreeViewItemForegroundDisabledTreeViewItemForegroundSelectedTreeViewItemForegroundSelectedPointerOverTreeViewItemForegroundSelectedPressedTreeViewItemForegroundSelectedDisabledTreeViewItemBorderBrushTreeViewItemBorderBrushPointerOverSystemControlHighlightAltTransparentRevealBorderBrushTreeViewItemBorderBrushPressedTreeViewItemBorderBrushDisabledTreeViewItemBorderBrushSelectedTreeViewItemBorderBrushSelectedPointerOverSystemControlBackgroundTransparentRevealBorderBrushTreeViewItemBorderBrushSelectedPressedTreeViewItemBorderBrushSelectedDisabledSplitButtonBackgroundSplitButtonBackgroundPressedSplitButtonBackgroundDisabledSplitButtonBackgroundCheckedSplitButtonBackgroundCheckedPointerOverSplitButtonBackgroundCheckedPressedSplitButtonBackgroundCheckedDisabledSplitButtonForegroundSplitButtonForegroundPointerOverSplitButtonForegroundPressedSplitButtonForegroundDisabledSplitButtonForegroundCheckedSplitButtonForegroundCheckedPointerOverSplitButtonForegroundCheckedPressedSplitButtonForegroundCheckedDisabledSplitButtonBorderBrushSplitButtonBorderBrushPointerOverSplitButtonBorderBrushPressedSplitButtonBorderBrushDisabledSplitButtonBorderBrushCheckedSplitButtonBorderBrushCheckedPointerOverSplitButtonBorderBrushCheckedPressedSplitButtonBorderBrushCheckedDisabledSplitViewLightDismissOverlayBackgroundSystemControlPageBackgroundMediumAltMediumBrushCalendarDatePickerForegroundCalendarDatePickerForegroundDisabledCalendarDatePickerCalendarGlyphForegroundCalendarDatePickerCalendarGlyphForegroundDisabledCalendarDatePickerTextForegroundCalendarDatePickerTextForegroundDisabledCalendarDatePickerTextForegroundSelectedCalendarDatePickerBackgroundCalendarDatePickerBackgroundPointerOverCalendarDatePickerBackgroundPressedCalendarDatePickerBackgroundDisabledCalendarDatePickerBackgroundFocusedCalendarDatePickerBorderBrushCalendarDatePickerBorderBrushPointerOverCalendarDatePickerBorderBrushPressedCalendarDatePickerBorderBrushDisabledCalendarDatePickerLightDismissOverlayBackgroundFlyoutBorderThemeBrushRefreshVisualizerForegroundRefreshVisualizerBackgroundCaptionButtonForegroundCaptionButtonBackgroundCaptionButtonBorderBrushTitleBarBackgroundBrushTableViewColumnHeaderSeparatorBackgroundTableViewRowForegroundDisabledTableViewRowBackgroundPointerOverTableViewRowForegroundPointerOverTableViewRowBackgroundPressedTableViewRowForegroundPressedTableViewRowBackgroundSelectedTableViewRowForegroundSelectedTableViewRowBackgroundSelectedPointerOverTableViewRowForegroundSelectedPointerOverTableViewRowBackgroundSelectedPressedTableViewRowForegroundSelectedPressed";
+
+/// The numbers of the packed tables of the unit 2 of `FluentTheme.xaml`, each once (#855).
+static POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS: [f64; 8] = [1.0_f64, 11.0_f64, 5.0_f64, 7.0_f64, 0.0_f64, 4.0_f64, 12.0_f64, 20.0_f64];
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_27: rt::PackedRows = rt::PackedRows {
@@ -1484,73 +1490,81 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_46: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_47: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 135, position: 55 },
-    rt::ValueRow { key: "ComboBoxDropdownBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 136, position: 58 },
-    rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 137, position: 51 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_47: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        3123, 28, 135, 55, 0, 0, 0, 0,
+        3151, 31, 136, 58, 0, 0, 0, 0,
+        3182, 24, 137, 51, 1, 2, 1, 3,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_48: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3123, 22, 693, 36, 1, 139, 8, 139, 8,
-        3145, 29, 3174, 38, 1, 140, 8, 140, 8,
-        3212, 33, 3174, 38, 1, 141, 8, 141, 8,
-        3245, 30, 381, 39, 1, 142, 8, 142, 8,
-        3275, 30, 3174, 38, 1, 143, 8, 143, 8,
-        3305, 37, 3174, 38, 1, 144, 8, 144, 8,
-        3342, 41, 3174, 38, 1, 146, 8, 146, 8,
-        3383, 38, 381, 39, 1, 148, 8, 148, 8,
-        3421, 22, 2269, 29, 1, 150, 8, 150, 8,
-        3443, 29, 3472, 37, 1, 151, 8, 151, 8,
-        3509, 33, 3542, 34, 1, 152, 8, 152, 8,
-        3576, 30, 2269, 29, 1, 153, 8, 153, 8,
-        3606, 30, 3636, 40, 1, 154, 8, 154, 8,
-        3676, 37, 3713, 41, 1, 155, 8, 155, 8,
-        3754, 41, 3795, 43, 1, 157, 8, 157, 8,
-        3838, 38, 2269, 29, 1, 159, 8, 159, 8,
-        3876, 30, 2269, 29, 1, 160, 8, 160, 8,
-        3906, 34, 2269, 29, 1, 161, 8, 161, 8,
-        3940, 31, 2269, 29, 1, 162, 8, 162, 8,
-        3971, 31, 2269, 29, 1, 163, 8, 163, 8,
-        4002, 38, 2269, 29, 1, 164, 8, 164, 8,
-        4040, 42, 2269, 29, 1, 165, 8, 165, 8,
-        4082, 39, 2269, 29, 1, 166, 8, 166, 8,
-        4121, 18, 4139, 40, 1, 167, 8, 167, 8,
-        4179, 29, 4208, 41, 1, 168, 8, 168, 8,
-        4249, 25, 4274, 38, 1, 169, 8, 169, 8,
-        4312, 26, 193, 35, 1, 170, 8, 170, 8,
-        4338, 27, 3636, 40, 1, 171, 8, 171, 8,
-        4365, 36, 546, 38, 1, 172, 8, 172, 8,
-        4401, 38, 1296, 40, 1, 173, 8, 173, 8,
-        4439, 18, 693, 36, 1, 175, 8, 175, 8,
-        4457, 26, 381, 39, 1, 176, 8, 176, 8,
-        4483, 25, 3174, 38, 1, 177, 8, 177, 8,
-        4508, 32, 3174, 38, 1, 178, 8, 178, 8,
-        4540, 29, 4569, 34, 1, 179, 8, 179, 8,
-        4603, 43, 3174, 38, 1, 180, 8, 180, 8,
-        4646, 19, 2543, 38, 1, 182, 8, 182, 8,
-        4665, 30, 4695, 41, 1, 183, 8, 183, 8,
-        4736, 26, 4762, 37, 1, 184, 8, 184, 8,
-        4799, 27, 4826, 33, 1, 185, 8, 185, 8,
-        4859, 31, 4890, 42, 1, 186, 8, 186, 8,
-        4932, 39, 381, 39, 1, 187, 8, 187, 8,
-        4971, 38, 5009, 44, 1, 189, 8, 189, 8,
-        5053, 45, 5009, 44, 1, 191, 8, 191, 8,
-        5098, 26, 5124, 37, 1, 193, 8, 193, 8,
-        5161, 27, 5188, 33, 1, 194, 8, 194, 8,
+        3206, 22, 693, 36, 1, 139, 8, 139, 8,
+        3228, 29, 3257, 38, 1, 140, 8, 140, 8,
+        3295, 33, 3257, 38, 1, 141, 8, 141, 8,
+        3328, 30, 381, 39, 1, 142, 8, 142, 8,
+        3358, 30, 3257, 38, 1, 143, 8, 143, 8,
+        3388, 37, 3257, 38, 1, 144, 8, 144, 8,
+        3425, 41, 3257, 38, 1, 146, 8, 146, 8,
+        3466, 38, 381, 39, 1, 148, 8, 148, 8,
+        3504, 22, 2269, 29, 1, 150, 8, 150, 8,
+        3526, 29, 3555, 37, 1, 151, 8, 151, 8,
+        3592, 33, 3625, 34, 1, 152, 8, 152, 8,
+        3659, 30, 2269, 29, 1, 153, 8, 153, 8,
+        3689, 30, 3719, 40, 1, 154, 8, 154, 8,
+        3759, 37, 3796, 41, 1, 155, 8, 155, 8,
+        3837, 41, 3878, 43, 1, 157, 8, 157, 8,
+        3921, 38, 2269, 29, 1, 159, 8, 159, 8,
+        3959, 30, 2269, 29, 1, 160, 8, 160, 8,
+        3989, 34, 2269, 29, 1, 161, 8, 161, 8,
+        4023, 31, 2269, 29, 1, 162, 8, 162, 8,
+        4054, 31, 2269, 29, 1, 163, 8, 163, 8,
+        4085, 38, 2269, 29, 1, 164, 8, 164, 8,
+        4123, 42, 2269, 29, 1, 165, 8, 165, 8,
+        4165, 39, 2269, 29, 1, 166, 8, 166, 8,
+        4204, 18, 4222, 40, 1, 167, 8, 167, 8,
+        4262, 29, 4291, 41, 1, 168, 8, 168, 8,
+        4332, 25, 4357, 38, 1, 169, 8, 169, 8,
+        4395, 26, 193, 35, 1, 170, 8, 170, 8,
+        4421, 27, 3719, 40, 1, 171, 8, 171, 8,
+        4448, 36, 546, 38, 1, 172, 8, 172, 8,
+        4484, 38, 1296, 40, 1, 173, 8, 173, 8,
+        4522, 18, 693, 36, 1, 175, 8, 175, 8,
+        4540, 26, 381, 39, 1, 176, 8, 176, 8,
+        4566, 25, 3257, 38, 1, 177, 8, 177, 8,
+        4591, 32, 3257, 38, 1, 178, 8, 178, 8,
+        4623, 29, 4652, 34, 1, 179, 8, 179, 8,
+        4686, 43, 3257, 38, 1, 180, 8, 180, 8,
+        4729, 19, 2543, 38, 1, 182, 8, 182, 8,
+        4748, 30, 4778, 41, 1, 183, 8, 183, 8,
+        4819, 26, 4845, 37, 1, 184, 8, 184, 8,
+        4882, 27, 4909, 33, 1, 185, 8, 185, 8,
+        4942, 31, 4973, 42, 1, 186, 8, 186, 8,
+        5015, 39, 381, 39, 1, 187, 8, 187, 8,
+        5054, 38, 5092, 44, 1, 189, 8, 189, 8,
+        5136, 45, 5092, 44, 1, 191, 8, 191, 8,
+        5181, 26, 5207, 37, 1, 193, 8, 193, 8,
+        5244, 27, 5271, 33, 1, 194, 8, 194, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_49: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxDropdownBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 195, position: 56 },
-    rt::ValueRow { key: "ComboBoxDropdownContentMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 196, position: 56 },
-    rt::ValueRow { key: "ListBoxBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 199, position: 54 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_49: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        5304, 29, 195, 56, 4, 4, 4, 4,
+        5333, 29, 196, 56, 4, 5, 4, 5,
+        5362, 27, 199, 54, 4, 4, 4, 4,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_50: &[rt::ValueRow<f64>] = &[
@@ -1558,35 +1572,39 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_50: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MenuFlyoutThemeMinHeight", value: 32.0_f64, line: 207, position: 50 },
 ];
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_51: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutPresenterThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 208, position: 58 },
-    rt::ValueRow { key: "MenuFlyoutItemChevronMargin", value: [12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 209, position: 54 },
-    rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [12.0_f64, 4.0_f64, 12.0_f64, 4.0_f64], line: 210, position: 58 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_51: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        5389, 31, 208, 58, 4, 4, 4, 4,
+        5420, 27, 209, 54, 6, 4, 4, 4,
+        5447, 31, 210, 58, 6, 5, 6, 5,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_52: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5221, 24, 2269, 29, 1, 211, 8, 211, 8,
-        5245, 35, 3542, 34, 1, 212, 8, 212, 8,
-        5280, 31, 3472, 37, 1, 213, 8, 213, 8,
-        5311, 32, 2269, 29, 1, 214, 8, 214, 8,
-        5343, 24, 693, 36, 1, 215, 8, 215, 8,
-        5367, 35, 3174, 38, 1, 216, 8, 216, 8,
-        5402, 31, 3174, 38, 1, 217, 8, 217, 8,
-        5433, 32, 381, 39, 1, 218, 8, 218, 8,
-        5465, 24, 4890, 42, 1, 219, 8, 219, 8,
-        5489, 35, 3174, 38, 1, 220, 8, 220, 8,
-        5524, 31, 3174, 38, 1, 221, 8, 221, 8,
-        5555, 37, 3174, 38, 1, 222, 8, 222, 8,
-        5592, 32, 381, 39, 1, 224, 8, 224, 8,
-        5624, 47, 2543, 38, 1, 225, 8, 225, 8,
-        5671, 58, 5729, 40, 1, 227, 8, 227, 8,
-        5769, 54, 5729, 40, 1, 229, 8, 229, 8,
-        5823, 55, 381, 39, 1, 231, 8, 231, 8,
+        5478, 24, 2269, 29, 1, 211, 8, 211, 8,
+        5502, 35, 3625, 34, 1, 212, 8, 212, 8,
+        5537, 31, 3555, 37, 1, 213, 8, 213, 8,
+        5568, 32, 2269, 29, 1, 214, 8, 214, 8,
+        5600, 24, 693, 36, 1, 215, 8, 215, 8,
+        5624, 35, 3257, 38, 1, 216, 8, 216, 8,
+        5659, 31, 3257, 38, 1, 217, 8, 217, 8,
+        5690, 32, 381, 39, 1, 218, 8, 218, 8,
+        5722, 24, 4973, 42, 1, 219, 8, 219, 8,
+        5746, 35, 3257, 38, 1, 220, 8, 220, 8,
+        5781, 31, 3257, 38, 1, 221, 8, 221, 8,
+        5812, 37, 3257, 38, 1, 222, 8, 222, 8,
+        5849, 32, 381, 39, 1, 224, 8, 224, 8,
+        5881, 47, 2543, 38, 1, 225, 8, 225, 8,
+        5928, 58, 5986, 40, 1, 227, 8, 227, 8,
+        6026, 54, 5986, 40, 1, 229, 8, 229, 8,
+        6080, 55, 381, 39, 1, 231, 8, 231, 8,
     ],
 };
 
@@ -1601,8 +1619,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_54: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5878, 29, 5124, 37, 1, 235, 8, 235, 8,
-        5907, 30, 5188, 33, 1, 236, 8, 236, 8,
+        6135, 29, 5207, 37, 1, 235, 8, 235, 8,
+        6164, 30, 5271, 33, 1, 236, 8, 236, 8,
     ],
 };
 
@@ -1617,14 +1635,14 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_56: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5937, 21, 693, 36, 1, 244, 8, 244, 8,
-        5958, 32, 693, 36, 1, 245, 8, 245, 8,
-        5990, 29, 6019, 43, 1, 246, 8, 246, 8,
-        6062, 21, 4139, 40, 1, 247, 8, 247, 8,
-        6083, 32, 6115, 37, 1, 248, 8, 248, 8,
-        6152, 29, 193, 35, 1, 249, 8, 249, 8,
-        6181, 29, 1187, 33, 1, 250, 8, 250, 8,
-        6210, 30, 4826, 33, 1, 251, 8, 251, 8,
+        6194, 21, 693, 36, 1, 244, 8, 244, 8,
+        6215, 32, 693, 36, 1, 245, 8, 245, 8,
+        6247, 29, 6276, 43, 1, 246, 8, 246, 8,
+        6319, 21, 4222, 40, 1, 247, 8, 247, 8,
+        6340, 32, 6372, 37, 1, 248, 8, 248, 8,
+        6409, 29, 193, 35, 1, 249, 8, 249, 8,
+        6438, 29, 1187, 33, 1, 250, 8, 250, 8,
+        6467, 30, 4909, 33, 1, 251, 8, 251, 8,
     ],
 };
 
@@ -1633,26 +1651,26 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_57: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6240, 32, 6272, 36, 1, 253, 8, 253, 8,
-        6308, 43, 6272, 36, 1, 254, 8, 254, 8,
-        6351, 40, 6019, 43, 1, 256, 8, 256, 8,
-        6391, 34, 1187, 33, 1, 258, 8, 258, 8,
-        6425, 27, 2269, 29, 1, 259, 8, 259, 8,
-        6452, 38, 2269, 29, 1, 260, 8, 260, 8,
-        6490, 34, 1187, 33, 1, 261, 8, 261, 8,
-        6524, 28, 2269, 29, 1, 262, 8, 262, 8,
-        6552, 39, 2269, 29, 1, 263, 8, 263, 8,
-        6591, 35, 2269, 29, 1, 264, 8, 264, 8,
-        6626, 38, 1187, 33, 1, 265, 8, 265, 8,
-        6664, 34, 1682, 41, 1, 266, 8, 266, 8,
-        6698, 28, 6726, 35, 1, 268, 8, 268, 8,
-        6181, 22, 2543, 38, 1, 269, 8, 269, 8,
-        6761, 33, 4695, 41, 1, 270, 8, 270, 8,
-        6626, 27, 4890, 42, 1, 271, 8, 271, 8,
-        6794, 28, 693, 36, 1, 272, 8, 272, 8,
-        6822, 39, 6861, 41, 1, 273, 8, 273, 8,
-        6902, 40, 5124, 37, 1, 277, 8, 277, 8,
-        6942, 41, 5188, 33, 1, 279, 8, 279, 8,
+        6497, 32, 6529, 36, 1, 253, 8, 253, 8,
+        6565, 43, 6529, 36, 1, 254, 8, 254, 8,
+        6608, 40, 6276, 43, 1, 256, 8, 256, 8,
+        6648, 34, 1187, 33, 1, 258, 8, 258, 8,
+        6682, 27, 2269, 29, 1, 259, 8, 259, 8,
+        6709, 38, 2269, 29, 1, 260, 8, 260, 8,
+        6747, 34, 1187, 33, 1, 261, 8, 261, 8,
+        6781, 28, 2269, 29, 1, 262, 8, 262, 8,
+        6809, 39, 2269, 29, 1, 263, 8, 263, 8,
+        6848, 35, 2269, 29, 1, 264, 8, 264, 8,
+        6883, 38, 1187, 33, 1, 265, 8, 265, 8,
+        6921, 34, 1682, 41, 1, 266, 8, 266, 8,
+        6955, 28, 6983, 35, 1, 268, 8, 268, 8,
+        6438, 22, 2543, 38, 1, 269, 8, 269, 8,
+        7018, 33, 4778, 41, 1, 270, 8, 270, 8,
+        6883, 27, 4973, 42, 1, 271, 8, 271, 8,
+        7051, 28, 693, 36, 1, 272, 8, 272, 8,
+        7079, 39, 7118, 41, 1, 273, 8, 273, 8,
+        7159, 40, 5207, 37, 1, 277, 8, 277, 8,
+        7199, 41, 5271, 33, 1, 279, 8, 279, 8,
     ],
 };
 
@@ -1661,46 +1679,46 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_58: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6983, 27, 693, 36, 1, 283, 8, 283, 8,
-        7010, 38, 693, 36, 1, 284, 8, 284, 8,
-        7048, 34, 693, 36, 1, 285, 8, 285, 8,
-        7082, 35, 381, 39, 1, 286, 8, 286, 8,
-        7117, 25, 693, 36, 1, 287, 8, 287, 8,
-        7142, 36, 693, 36, 1, 288, 8, 288, 8,
-        7178, 32, 693, 36, 1, 289, 8, 289, 8,
-        7210, 33, 381, 39, 1, 290, 8, 290, 8,
-        7243, 31, 693, 36, 1, 291, 8, 291, 8,
-        7274, 42, 693, 36, 1, 292, 8, 292, 8,
-        7316, 38, 693, 36, 1, 294, 8, 294, 8,
-        7354, 39, 381, 39, 1, 295, 8, 295, 8,
-        7393, 27, 2269, 29, 1, 297, 8, 297, 8,
-        7420, 38, 2269, 29, 1, 298, 8, 298, 8,
-        7458, 34, 2269, 29, 1, 299, 8, 299, 8,
-        7492, 35, 2269, 29, 1, 300, 8, 300, 8,
-        7527, 25, 2269, 29, 1, 301, 8, 301, 8,
-        7552, 36, 2269, 29, 1, 302, 8, 302, 8,
-        7588, 32, 2269, 29, 1, 303, 8, 303, 8,
-        7620, 33, 2269, 29, 1, 304, 8, 304, 8,
-        7653, 31, 2269, 29, 1, 305, 8, 305, 8,
-        7684, 42, 2269, 29, 1, 306, 8, 306, 8,
-        7726, 38, 2269, 29, 1, 307, 8, 307, 8,
-        7764, 39, 2269, 29, 1, 308, 8, 308, 8,
-        7803, 28, 2269, 29, 1, 309, 8, 309, 8,
-        7831, 39, 2269, 29, 1, 310, 8, 310, 8,
-        7870, 35, 2269, 29, 1, 311, 8, 311, 8,
-        7905, 36, 2269, 29, 1, 312, 8, 312, 8,
-        7941, 26, 2269, 29, 1, 313, 8, 313, 8,
-        7967, 37, 2269, 29, 1, 314, 8, 314, 8,
-        8004, 33, 2269, 29, 1, 315, 8, 315, 8,
-        8037, 34, 2269, 29, 1, 316, 8, 316, 8,
-        8071, 32, 2269, 29, 1, 317, 8, 317, 8,
-        8103, 43, 2269, 29, 1, 318, 8, 318, 8,
-        8146, 39, 2269, 29, 1, 319, 8, 319, 8,
-        8185, 40, 2269, 29, 1, 320, 8, 320, 8,
-        8225, 38, 2543, 38, 1, 321, 8, 321, 8,
-        8263, 49, 4695, 41, 1, 323, 8, 323, 8,
-        8312, 45, 729, 35, 1, 325, 8, 325, 8,
-        8357, 46, 381, 39, 1, 327, 8, 327, 8,
+        7240, 27, 693, 36, 1, 283, 8, 283, 8,
+        7267, 38, 693, 36, 1, 284, 8, 284, 8,
+        7305, 34, 693, 36, 1, 285, 8, 285, 8,
+        7339, 35, 381, 39, 1, 286, 8, 286, 8,
+        7374, 25, 693, 36, 1, 287, 8, 287, 8,
+        7399, 36, 693, 36, 1, 288, 8, 288, 8,
+        7435, 32, 693, 36, 1, 289, 8, 289, 8,
+        7467, 33, 381, 39, 1, 290, 8, 290, 8,
+        7500, 31, 693, 36, 1, 291, 8, 291, 8,
+        7531, 42, 693, 36, 1, 292, 8, 292, 8,
+        7573, 38, 693, 36, 1, 294, 8, 294, 8,
+        7611, 39, 381, 39, 1, 295, 8, 295, 8,
+        7650, 27, 2269, 29, 1, 297, 8, 297, 8,
+        7677, 38, 2269, 29, 1, 298, 8, 298, 8,
+        7715, 34, 2269, 29, 1, 299, 8, 299, 8,
+        7749, 35, 2269, 29, 1, 300, 8, 300, 8,
+        7784, 25, 2269, 29, 1, 301, 8, 301, 8,
+        7809, 36, 2269, 29, 1, 302, 8, 302, 8,
+        7845, 32, 2269, 29, 1, 303, 8, 303, 8,
+        7877, 33, 2269, 29, 1, 304, 8, 304, 8,
+        7910, 31, 2269, 29, 1, 305, 8, 305, 8,
+        7941, 42, 2269, 29, 1, 306, 8, 306, 8,
+        7983, 38, 2269, 29, 1, 307, 8, 307, 8,
+        8021, 39, 2269, 29, 1, 308, 8, 308, 8,
+        8060, 28, 2269, 29, 1, 309, 8, 309, 8,
+        8088, 39, 2269, 29, 1, 310, 8, 310, 8,
+        8127, 35, 2269, 29, 1, 311, 8, 311, 8,
+        8162, 36, 2269, 29, 1, 312, 8, 312, 8,
+        8198, 26, 2269, 29, 1, 313, 8, 313, 8,
+        8224, 37, 2269, 29, 1, 314, 8, 314, 8,
+        8261, 33, 2269, 29, 1, 315, 8, 315, 8,
+        8294, 34, 2269, 29, 1, 316, 8, 316, 8,
+        8328, 32, 2269, 29, 1, 317, 8, 317, 8,
+        8360, 43, 2269, 29, 1, 318, 8, 318, 8,
+        8403, 39, 2269, 29, 1, 319, 8, 319, 8,
+        8442, 40, 2269, 29, 1, 320, 8, 320, 8,
+        8482, 38, 2543, 38, 1, 321, 8, 321, 8,
+        8520, 49, 4778, 41, 1, 323, 8, 323, 8,
+        8569, 45, 729, 35, 1, 325, 8, 325, 8,
+        8614, 46, 381, 39, 1, 327, 8, 327, 8,
     ],
 };
 
@@ -1709,7 +1727,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_59: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8403, 47, 89, 23, 1, 329, 8, 330, 24,
+        8660, 47, 89, 23, 1, 329, 8, 330, 24,
     ],
 };
 
@@ -1718,9 +1736,9 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_60: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8450, 43, 546, 38, 1, 331, 8, 331, 8,
-        8493, 44, 2269, 29, 1, 333, 8, 333, 8,
-        8537, 42, 1187, 33, 1, 334, 8, 334, 8,
+        8707, 43, 546, 38, 1, 331, 8, 331, 8,
+        8750, 44, 2269, 29, 1, 333, 8, 333, 8,
+        8794, 42, 1187, 33, 1, 334, 8, 334, 8,
     ],
 };
 
@@ -1729,8 +1747,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_61: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8579, 53, 89, 23, 1, 336, 8, 337, 24,
-        8632, 49, 141, 22, 1, 338, 8, 339, 24,
+        8836, 53, 89, 23, 1, 336, 8, 337, 24,
+        8889, 49, 141, 22, 1, 338, 8, 339, 24,
     ],
 };
 
@@ -1739,12 +1757,12 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_62: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8681, 50, 2269, 29, 1, 340, 8, 340, 8,
-        8731, 36, 2269, 29, 1, 342, 8, 342, 8,
-        8767, 47, 2269, 29, 1, 343, 8, 343, 8,
-        8814, 43, 652, 41, 1, 345, 8, 345, 8,
-        8857, 44, 2269, 29, 1, 347, 8, 347, 8,
-        8901, 34, 1187, 33, 1, 348, 8, 348, 8,
+        8938, 50, 2269, 29, 1, 340, 8, 340, 8,
+        8988, 36, 2269, 29, 1, 342, 8, 342, 8,
+        9024, 47, 2269, 29, 1, 343, 8, 343, 8,
+        9071, 43, 652, 41, 1, 345, 8, 345, 8,
+        9114, 44, 2269, 29, 1, 347, 8, 347, 8,
+        9158, 34, 1187, 33, 1, 348, 8, 348, 8,
     ],
 };
 
@@ -1753,8 +1771,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_63: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8935, 45, 89, 23, 1, 349, 8, 350, 24,
-        8980, 41, 141, 22, 1, 351, 8, 352, 24,
+        9192, 45, 89, 23, 1, 349, 8, 350, 24,
+        9237, 41, 141, 22, 1, 351, 8, 352, 24,
     ],
 };
 
@@ -1763,8 +1781,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_64: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9021, 42, 193, 35, 1, 353, 8, 353, 8,
-        9063, 40, 1187, 33, 1, 355, 8, 355, 8,
+        9278, 42, 193, 35, 1, 353, 8, 353, 8,
+        9320, 40, 1187, 33, 1, 355, 8, 355, 8,
     ],
 };
 
@@ -1773,8 +1791,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_65: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9103, 51, 89, 23, 1, 356, 8, 357, 24,
-        9154, 47, 141, 22, 1, 358, 8, 359, 24,
+        9360, 51, 89, 23, 1, 356, 8, 357, 24,
+        9411, 47, 141, 22, 1, 358, 8, 359, 24,
     ],
 };
 
@@ -1783,67 +1801,71 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_66: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9201, 48, 193, 35, 1, 360, 8, 360, 8,
-        9249, 37, 1682, 41, 1, 362, 8, 362, 8,
-        9286, 48, 1682, 41, 1, 364, 8, 364, 8,
-        9334, 44, 1682, 41, 1, 366, 8, 366, 8,
-        9378, 45, 1682, 41, 1, 368, 8, 368, 8,
-        9423, 35, 1682, 41, 1, 370, 8, 370, 8,
-        9458, 46, 9504, 39, 1, 372, 8, 372, 8,
-        9543, 42, 9504, 39, 1, 374, 8, 374, 8,
-        9585, 43, 9504, 39, 1, 376, 8, 376, 8,
-        9628, 41, 9504, 39, 1, 378, 8, 378, 8,
-        9669, 52, 9504, 39, 1, 380, 8, 380, 8,
-        9721, 48, 9504, 39, 1, 382, 8, 382, 8,
-        9769, 49, 9504, 39, 1, 384, 8, 384, 8,
-        9818, 36, 3795, 43, 1, 388, 8, 388, 8,
-        9854, 38, 3713, 41, 1, 390, 8, 390, 8,
-        9892, 31, 1187, 33, 1, 392, 8, 392, 8,
-        9923, 28, 1296, 40, 1, 393, 8, 393, 8,
-        9951, 30, 4762, 37, 1, 394, 8, 394, 8,
-        9981, 27, 1682, 41, 1, 395, 8, 395, 8,
-        10008, 30, 381, 39, 1, 396, 8, 396, 8,
-        10038, 32, 10070, 35, 1, 397, 8, 397, 8,
-        10105, 34, 693, 36, 1, 398, 8, 398, 8,
-        10139, 32, 10171, 41, 1, 399, 8, 399, 8,
-        10212, 22, 10234, 41, 1, 400, 8, 400, 8,
-        10275, 22, 6726, 35, 1, 401, 8, 401, 8,
-        10297, 23, 10320, 40, 1, 402, 8, 402, 8,
-        10360, 37, 381, 39, 1, 403, 8, 403, 8,
-        10397, 38, 2269, 29, 1, 405, 8, 405, 8,
-        10435, 49, 693, 36, 1, 406, 8, 406, 8,
-        10484, 45, 2543, 38, 1, 408, 8, 408, 8,
-        10529, 40, 10569, 45, 1, 410, 8, 410, 8,
-        10614, 41, 10655, 41, 1, 412, 8, 412, 8,
-        10696, 50, 546, 38, 1, 414, 8, 414, 8,
-        10696, 39, 2269, 29, 1, 416, 8, 416, 8,
+        9458, 48, 193, 35, 1, 360, 8, 360, 8,
+        9506, 37, 1682, 41, 1, 362, 8, 362, 8,
+        9543, 48, 1682, 41, 1, 364, 8, 364, 8,
+        9591, 44, 1682, 41, 1, 366, 8, 366, 8,
+        9635, 45, 1682, 41, 1, 368, 8, 368, 8,
+        9680, 35, 1682, 41, 1, 370, 8, 370, 8,
+        9715, 46, 9761, 39, 1, 372, 8, 372, 8,
+        9800, 42, 9761, 39, 1, 374, 8, 374, 8,
+        9842, 43, 9761, 39, 1, 376, 8, 376, 8,
+        9885, 41, 9761, 39, 1, 378, 8, 378, 8,
+        9926, 52, 9761, 39, 1, 380, 8, 380, 8,
+        9978, 48, 9761, 39, 1, 382, 8, 382, 8,
+        10026, 49, 9761, 39, 1, 384, 8, 384, 8,
+        10075, 36, 3878, 43, 1, 388, 8, 388, 8,
+        10111, 38, 3796, 41, 1, 390, 8, 390, 8,
+        10149, 31, 1187, 33, 1, 392, 8, 392, 8,
+        10180, 28, 1296, 40, 1, 393, 8, 393, 8,
+        10208, 30, 4845, 37, 1, 394, 8, 394, 8,
+        10238, 27, 1682, 41, 1, 395, 8, 395, 8,
+        10265, 30, 381, 39, 1, 396, 8, 396, 8,
+        10295, 32, 10327, 35, 1, 397, 8, 397, 8,
+        10362, 34, 693, 36, 1, 398, 8, 398, 8,
+        10396, 32, 10428, 41, 1, 399, 8, 399, 8,
+        10469, 22, 10491, 41, 1, 400, 8, 400, 8,
+        10532, 22, 6983, 35, 1, 401, 8, 401, 8,
+        10554, 23, 10577, 40, 1, 402, 8, 402, 8,
+        10617, 37, 381, 39, 1, 403, 8, 403, 8,
+        10654, 38, 2269, 29, 1, 405, 8, 405, 8,
+        10692, 49, 693, 36, 1, 406, 8, 406, 8,
+        10741, 45, 2543, 38, 1, 408, 8, 408, 8,
+        10786, 40, 10826, 45, 1, 410, 8, 410, 8,
+        10871, 41, 10912, 41, 1, 412, 8, 412, 8,
+        10953, 50, 546, 38, 1, 414, 8, 414, 8,
+        10953, 39, 2269, 29, 1, 416, 8, 416, 8,
     ],
 };
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_67: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarFontSize", value: 20.0_f64, line: 417, position: 42 },
-    rt::ValueRow { key: "CalendarDayButtonFontSize", value: 12.0_f64, line: 418, position: 51 },
-    rt::ValueRow { key: "CalendarWeekNumberFontSize", value: 12.0_f64, line: 419, position: 52 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_67: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        11003, 16, 417, 42, 7,
+        11019, 25, 418, 51, 6,
+        11044, 26, 419, 52, 6,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_68: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        10746, 24, 10770, 24, 1, 424, 8, 424, 8,
-        10794, 35, 10770, 24, 1, 425, 8, 425, 8,
-        10829, 31, 10770, 24, 1, 426, 8, 426, 8,
-        10860, 32, 10770, 24, 1, 427, 8, 427, 8,
-        10892, 24, 2605, 19, 1, 428, 8, 428, 8,
-        10916, 35, 2605, 19, 1, 429, 8, 429, 8,
-        10951, 31, 2605, 19, 1, 430, 8, 430, 8,
-        10982, 32, 381, 39, 1, 431, 8, 431, 8,
-        11014, 25, 11039, 18, 1, 432, 8, 432, 8,
-        11057, 36, 11039, 18, 1, 433, 8, 433, 8,
-        11093, 32, 11039, 18, 1, 434, 8, 434, 8,
-        11125, 33, 4826, 33, 1, 435, 8, 435, 8,
+        11070, 24, 11094, 24, 1, 424, 8, 424, 8,
+        11118, 35, 11094, 24, 1, 425, 8, 425, 8,
+        11153, 31, 11094, 24, 1, 426, 8, 426, 8,
+        11184, 32, 11094, 24, 1, 427, 8, 427, 8,
+        11216, 24, 2605, 19, 1, 428, 8, 428, 8,
+        11240, 35, 2605, 19, 1, 429, 8, 429, 8,
+        11275, 31, 2605, 19, 1, 430, 8, 430, 8,
+        11306, 32, 381, 39, 1, 431, 8, 431, 8,
+        11338, 25, 11363, 18, 1, 432, 8, 432, 8,
+        11381, 36, 11363, 18, 1, 433, 8, 433, 8,
+        11417, 32, 11363, 18, 1, 434, 8, 434, 8,
+        11449, 33, 4909, 33, 1, 435, 8, 435, 8,
     ],
 };
 
@@ -1852,7 +1874,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_69: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11158, 25, 65535, 255, 1, 437, 8,
+        11482, 25, 65535, 255, 1, 437, 8,
     ],
 };
 
@@ -1861,8 +1883,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_70: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11183, 32, 65535, 255, 1, 440, 8,
-        11215, 33, 65535, 255, 1, 441, 8,
+        11507, 32, 65535, 255, 1, 440, 8,
+        11539, 33, 65535, 255, 1, 441, 8,
     ],
 };
 
@@ -1871,10 +1893,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_71: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11248, 25, 2605, 19, 1, 442, 8, 442, 8,
-        11273, 36, 2605, 19, 1, 443, 8, 443, 8,
-        11309, 32, 2605, 19, 1, 444, 8, 444, 8,
-        11341, 33, 381, 39, 1, 445, 8, 445, 8,
+        11572, 25, 2605, 19, 1, 442, 8, 442, 8,
+        11597, 36, 2605, 19, 1, 443, 8, 443, 8,
+        11633, 32, 2605, 19, 1, 444, 8, 444, 8,
+        11665, 33, 381, 39, 1, 445, 8, 445, 8,
     ],
 };
 
@@ -1883,10 +1905,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_72: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11374, 26, 65535, 255, 1, 446, 8,
-        11400, 37, 65535, 255, 1, 447, 8,
-        11437, 33, 65535, 255, 1, 448, 8,
-        11470, 34, 65535, 255, 1, 449, 8,
+        11698, 26, 65535, 255, 1, 446, 8,
+        11724, 37, 65535, 255, 1, 447, 8,
+        11761, 33, 65535, 255, 1, 448, 8,
+        11794, 34, 65535, 255, 1, 449, 8,
     ],
 };
 
@@ -1895,8 +1917,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_73: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11504, 25, 11529, 26, 1, 452, 8, 452, 8,
-        11555, 26, 11039, 18, 1, 453, 8, 453, 8,
+        11828, 25, 11853, 26, 1, 452, 8, 452, 8,
+        11879, 26, 11363, 18, 1, 453, 8, 453, 8,
     ],
 };
 
@@ -1905,7 +1927,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_74: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11581, 31, 65535, 65535, 1, 456, 8,
+        11905, 31, 65535, 65535, 1, 456, 8,
     ],
 };
 
@@ -1914,7 +1936,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_75: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11612, 31, 693, 36, 1, 457, 8, 457, 8,
+        11936, 31, 693, 36, 1, 457, 8, 457, 8,
     ],
 };
 
@@ -1923,11 +1945,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_76: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11643, 39, 39578, 65434, 1, 458, 8,
-        11682, 42, 30932, 65280, 1, 459, 8,
-        11724, 38, 35652, 65298, 1, 460, 8,
-        11762, 38, 49942, 65535, 1, 461, 8,
-        11800, 36, 14614, 65520, 1, 462, 8,
+        11967, 39, 39578, 65434, 1, 458, 8,
+        12006, 42, 30932, 65280, 1, 459, 8,
+        12048, 38, 35652, 65298, 1, 460, 8,
+        12086, 38, 49942, 65535, 1, 461, 8,
+        12124, 36, 14614, 65520, 1, 462, 8,
     ],
 };
 
@@ -1936,27 +1958,27 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_77: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11836, 21, 693, 36, 1, 467, 8, 467, 8,
-        11857, 32, 693, 36, 1, 468, 8, 468, 8,
-        11889, 28, 693, 36, 1, 469, 8, 469, 8,
-        11917, 29, 381, 39, 1, 470, 8, 470, 8,
-        11946, 21, 2269, 29, 1, 471, 8, 471, 8,
-        11967, 32, 2269, 29, 1, 472, 8, 472, 8,
-        11999, 28, 2269, 29, 1, 473, 8, 473, 8,
-        12027, 29, 2269, 29, 1, 474, 8, 474, 8,
-        12056, 22, 2269, 29, 1, 475, 8, 475, 8,
-        12078, 33, 2269, 29, 1, 476, 8, 476, 8,
-        12111, 29, 2269, 29, 1, 477, 8, 477, 8,
-        12140, 30, 2269, 29, 1, 478, 8, 478, 8,
-        12170, 29, 2543, 38, 1, 479, 8, 479, 8,
-        12199, 40, 4695, 41, 1, 480, 8, 480, 8,
-        12239, 36, 729, 35, 1, 482, 8, 482, 8,
-        12275, 37, 381, 39, 1, 483, 8, 483, 8,
-        12312, 27, 2269, 29, 1, 485, 8, 485, 8,
-        12339, 38, 2269, 29, 1, 486, 8, 486, 8,
-        12377, 34, 652, 41, 1, 487, 8, 487, 8,
-        12411, 35, 2269, 29, 1, 489, 8, 489, 8,
-        12446, 36, 1187, 33, 1, 490, 8, 490, 8,
+        12160, 21, 693, 36, 1, 467, 8, 467, 8,
+        12181, 32, 693, 36, 1, 468, 8, 468, 8,
+        12213, 28, 693, 36, 1, 469, 8, 469, 8,
+        12241, 29, 381, 39, 1, 470, 8, 470, 8,
+        12270, 21, 2269, 29, 1, 471, 8, 471, 8,
+        12291, 32, 2269, 29, 1, 472, 8, 472, 8,
+        12323, 28, 2269, 29, 1, 473, 8, 473, 8,
+        12351, 29, 2269, 29, 1, 474, 8, 474, 8,
+        12380, 22, 2269, 29, 1, 475, 8, 475, 8,
+        12402, 33, 2269, 29, 1, 476, 8, 476, 8,
+        12435, 29, 2269, 29, 1, 477, 8, 477, 8,
+        12464, 30, 2269, 29, 1, 478, 8, 478, 8,
+        12494, 29, 2543, 38, 1, 479, 8, 479, 8,
+        12523, 40, 4778, 41, 1, 480, 8, 480, 8,
+        12563, 36, 729, 35, 1, 482, 8, 482, 8,
+        12599, 37, 381, 39, 1, 483, 8, 483, 8,
+        12636, 27, 2269, 29, 1, 485, 8, 485, 8,
+        12663, 38, 2269, 29, 1, 486, 8, 486, 8,
+        12701, 34, 652, 41, 1, 487, 8, 487, 8,
+        12735, 35, 2269, 29, 1, 489, 8, 489, 8,
+        12770, 36, 1187, 33, 1, 490, 8, 490, 8,
     ],
 };
 
@@ -1965,8 +1987,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_78: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12482, 47, 89, 23, 1, 491, 8, 492, 24,
-        12529, 43, 141, 22, 1, 493, 8, 494, 24,
+        12806, 47, 89, 23, 1, 491, 8, 492, 24,
+        12853, 43, 141, 22, 1, 493, 8, 494, 24,
     ],
 };
 
@@ -1975,8 +1997,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_79: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12572, 44, 381, 39, 1, 495, 8, 495, 8,
-        12616, 34, 1187, 33, 1, 497, 8, 497, 8,
+        12896, 44, 381, 39, 1, 495, 8, 495, 8,
+        12940, 34, 1187, 33, 1, 497, 8, 497, 8,
     ],
 };
 
@@ -1985,8 +2007,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_80: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12650, 45, 89, 23, 1, 498, 8, 499, 24,
-        12695, 41, 141, 22, 1, 500, 8, 501, 24,
+        12974, 45, 89, 23, 1, 498, 8, 499, 24,
+        13019, 41, 141, 22, 1, 500, 8, 501, 24,
     ],
 };
 
@@ -1995,15 +2017,15 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_81: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12736, 42, 652, 41, 1, 502, 8, 502, 8,
-        12778, 25, 9504, 39, 1, 504, 8, 504, 8,
-        12803, 36, 9504, 39, 1, 505, 8, 505, 8,
-        12839, 32, 9504, 39, 1, 507, 8, 507, 8,
-        12871, 33, 9504, 39, 1, 508, 8, 508, 8,
-        12904, 27, 2269, 29, 1, 509, 8, 509, 8,
-        12931, 38, 2269, 29, 1, 510, 8, 510, 8,
-        12969, 34, 2269, 29, 1, 511, 8, 511, 8,
-        13003, 35, 2269, 29, 1, 512, 8, 512, 8,
+        13060, 42, 652, 41, 1, 502, 8, 502, 8,
+        13102, 25, 9761, 39, 1, 504, 8, 504, 8,
+        13127, 36, 9761, 39, 1, 505, 8, 505, 8,
+        13163, 32, 9761, 39, 1, 507, 8, 507, 8,
+        13195, 33, 9761, 39, 1, 508, 8, 508, 8,
+        13228, 27, 2269, 29, 1, 509, 8, 509, 8,
+        13255, 38, 2269, 29, 1, 510, 8, 510, 8,
+        13293, 34, 2269, 29, 1, 511, 8, 511, 8,
+        13327, 35, 2269, 29, 1, 512, 8, 512, 8,
     ],
 };
 
@@ -2018,11 +2040,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_83: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13038, 25, 2269, 29, 1, 518, 8, 518, 8,
-        13063, 36, 2269, 29, 1, 519, 8, 519, 8,
-        13099, 32, 2269, 29, 1, 520, 8, 520, 8,
-        13131, 33, 2269, 29, 1, 521, 8, 521, 8,
-        13164, 21, 13185, 34, 1, 522, 8, 522, 8,
+        13362, 25, 2269, 29, 1, 518, 8, 518, 8,
+        13387, 36, 2269, 29, 1, 519, 8, 519, 8,
+        13423, 32, 2269, 29, 1, 520, 8, 520, 8,
+        13455, 33, 2269, 29, 1, 521, 8, 521, 8,
+        13488, 21, 13509, 34, 1, 522, 8, 522, 8,
     ],
 };
 
@@ -2031,8 +2053,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_84: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13219, 32, 89, 23, 1, 523, 8, 523, 65,
-        13251, 28, 141, 22, 1, 524, 8, 524, 61,
+        13543, 32, 89, 23, 1, 523, 8, 523, 65,
+        13575, 28, 141, 22, 1, 524, 8, 524, 61,
     ],
 };
 
@@ -2041,46 +2063,50 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_85: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13279, 29, 13308, 44, 1, 525, 8, 525, 8,
-        13352, 15, 6861, 41, 1, 526, 8, 526, 8,
-        13367, 26, 2543, 38, 1, 527, 8, 527, 8,
-        13393, 22, 6861, 41, 1, 528, 8, 528, 8,
-        13415, 23, 13308, 44, 1, 529, 8, 529, 8,
-        13438, 20, 1187, 33, 1, 530, 8, 530, 8,
-        13458, 31, 1187, 33, 1, 531, 8, 531, 8,
-        13489, 27, 1187, 33, 1, 532, 8, 532, 8,
-        13516, 28, 13308, 44, 1, 533, 8, 533, 8,
-        13544, 17, 6861, 41, 1, 534, 8, 534, 8,
-        13561, 25, 381, 39, 1, 535, 8, 535, 8,
-        13586, 23, 6726, 35, 1, 536, 8, 536, 8,
+        13603, 29, 13632, 44, 1, 525, 8, 525, 8,
+        13676, 15, 7118, 41, 1, 526, 8, 526, 8,
+        13691, 26, 2543, 38, 1, 527, 8, 527, 8,
+        13717, 22, 7118, 41, 1, 528, 8, 528, 8,
+        13739, 23, 13632, 44, 1, 529, 8, 529, 8,
+        13762, 20, 1187, 33, 1, 530, 8, 530, 8,
+        13782, 31, 1187, 33, 1, 531, 8, 531, 8,
+        13813, 27, 1187, 33, 1, 532, 8, 532, 8,
+        13840, 28, 13632, 44, 1, 533, 8, 533, 8,
+        13868, 17, 7118, 41, 1, 534, 8, 534, 8,
+        13885, 25, 381, 39, 1, 535, 8, 535, 8,
+        13910, 23, 6983, 35, 1, 536, 8, 536, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_86: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 539, position: 56 },
-    rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 540, position: 65 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_86: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        13933, 29, 539, 56, 4, 4, 4, 4,
+        13962, 38, 540, 65, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_87: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13609, 29, 693, 36, 1, 541, 8, 541, 8,
-        13638, 36, 381, 39, 1, 542, 8, 542, 8,
-        13674, 31, 2269, 29, 1, 544, 8, 544, 8,
-        13705, 42, 2269, 29, 1, 545, 8, 545, 8,
-        13747, 38, 2269, 29, 1, 546, 8, 546, 8,
-        13785, 19, 2269, 29, 1, 547, 8, 547, 8,
-        13804, 30, 2269, 29, 1, 548, 8, 548, 8,
-        13834, 26, 1296, 40, 1, 549, 8, 549, 8,
-        13860, 27, 2269, 29, 1, 550, 8, 550, 8,
-        13887, 21, 2543, 38, 1, 551, 8, 551, 8,
-        13908, 32, 4695, 41, 1, 552, 8, 552, 8,
-        13940, 28, 693, 36, 1, 553, 8, 553, 8,
-        13968, 29, 381, 39, 1, 554, 8, 554, 8,
-        13997, 18, 1187, 33, 1, 555, 8, 555, 8,
+        14000, 29, 693, 36, 1, 541, 8, 541, 8,
+        14029, 36, 381, 39, 1, 542, 8, 542, 8,
+        14065, 31, 2269, 29, 1, 544, 8, 544, 8,
+        14096, 42, 2269, 29, 1, 545, 8, 545, 8,
+        14138, 38, 2269, 29, 1, 546, 8, 546, 8,
+        14176, 19, 2269, 29, 1, 547, 8, 547, 8,
+        14195, 30, 2269, 29, 1, 548, 8, 548, 8,
+        14225, 26, 1296, 40, 1, 549, 8, 549, 8,
+        14251, 27, 2269, 29, 1, 550, 8, 550, 8,
+        14278, 21, 2543, 38, 1, 551, 8, 551, 8,
+        14299, 32, 4778, 41, 1, 552, 8, 552, 8,
+        14331, 28, 693, 36, 1, 553, 8, 553, 8,
+        14359, 29, 381, 39, 1, 554, 8, 554, 8,
+        14388, 18, 1187, 33, 1, 555, 8, 555, 8,
     ],
 };
 
@@ -2089,8 +2115,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_88: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14015, 29, 89, 23, 1, 556, 8, 556, 62,
-        14044, 25, 141, 22, 1, 557, 8, 557, 58,
+        14406, 29, 89, 23, 1, 556, 8, 556, 62,
+        14435, 25, 141, 22, 1, 557, 8, 557, 58,
     ],
 };
 
@@ -2099,19 +2125,19 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_89: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14069, 26, 4826, 33, 1, 558, 8, 558, 8,
-        14095, 20, 729, 35, 1, 559, 8, 559, 8,
-        14115, 31, 3713, 41, 1, 560, 8, 560, 8,
-        14146, 27, 4762, 37, 1, 561, 8, 561, 8,
-        14173, 28, 381, 39, 1, 562, 8, 562, 8,
-        14201, 23, 693, 36, 1, 563, 8, 563, 8,
-        14224, 34, 729, 35, 1, 564, 8, 564, 8,
-        14258, 30, 729, 35, 1, 565, 8, 565, 8,
-        14288, 31, 381, 39, 1, 566, 8, 566, 8,
-        14319, 22, 1682, 41, 1, 567, 8, 567, 8,
-        14341, 33, 14374, 38, 1, 568, 8, 568, 8,
-        14412, 29, 1682, 41, 1, 569, 8, 569, 8,
-        14441, 30, 14471, 39, 1, 570, 8, 570, 8,
+        14460, 26, 4909, 33, 1, 558, 8, 558, 8,
+        14486, 20, 729, 35, 1, 559, 8, 559, 8,
+        14506, 31, 3796, 41, 1, 560, 8, 560, 8,
+        14537, 27, 4845, 37, 1, 561, 8, 561, 8,
+        14564, 28, 381, 39, 1, 562, 8, 562, 8,
+        14592, 23, 693, 36, 1, 563, 8, 563, 8,
+        14615, 34, 729, 35, 1, 564, 8, 564, 8,
+        14649, 30, 729, 35, 1, 565, 8, 565, 8,
+        14679, 31, 381, 39, 1, 566, 8, 566, 8,
+        14710, 22, 1682, 41, 1, 567, 8, 567, 8,
+        14732, 33, 14765, 38, 1, 568, 8, 568, 8,
+        14803, 29, 1682, 41, 1, 569, 8, 569, 8,
+        14832, 30, 14862, 39, 1, 570, 8, 570, 8,
     ],
 };
 
@@ -2120,9 +2146,9 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_90: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14510, 17, 693, 36, 1, 575, 8, 575, 8,
-        14527, 17, 14544, 43, 1, 576, 8, 576, 8,
-        14587, 18, 5188, 33, 1, 577, 8, 577, 8,
+        14901, 17, 693, 36, 1, 575, 8, 575, 8,
+        14918, 17, 14935, 43, 1, 576, 8, 576, 8,
+        14978, 18, 5271, 33, 1, 577, 8, 577, 8,
     ],
 };
 
@@ -2131,80 +2157,84 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_91: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14605, 20, 14625, 35, 1, 581, 8, 581, 8,
-        14660, 28, 4826, 33, 1, 582, 8, 582, 8,
-        14688, 27, 2543, 38, 1, 583, 8, 583, 8,
-        14715, 38, 4695, 41, 1, 584, 8, 584, 8,
-        14753, 34, 4762, 37, 1, 586, 8, 586, 8,
-        14787, 35, 4826, 33, 1, 587, 8, 587, 8,
-        14822, 26, 4139, 40, 1, 588, 8, 588, 8,
-        14848, 37, 4208, 41, 1, 589, 8, 589, 8,
-        14885, 33, 193, 35, 1, 591, 8, 591, 8,
-        14918, 34, 193, 35, 1, 592, 8, 592, 8,
-        14952, 26, 693, 36, 1, 593, 8, 593, 8,
-        14978, 37, 729, 35, 1, 594, 8, 594, 8,
-        15015, 33, 729, 35, 1, 595, 8, 595, 8,
-        15048, 34, 381, 39, 1, 596, 8, 596, 8,
-        15082, 35, 5124, 37, 1, 597, 8, 597, 8,
-        15117, 36, 5188, 33, 1, 598, 8, 598, 8,
-        15153, 35, 14625, 35, 1, 599, 8, 599, 8,
-        15188, 38, 3636, 40, 1, 600, 8, 600, 8,
-        15226, 36, 2269, 29, 1, 603, 8, 603, 8,
-        15262, 47, 3542, 34, 1, 604, 8, 604, 8,
-        15309, 43, 3472, 37, 1, 606, 8, 606, 8,
-        15352, 37, 443, 39, 1, 608, 8, 608, 8,
-        15389, 48, 546, 38, 1, 610, 8, 610, 8,
-        15437, 44, 546, 38, 1, 612, 8, 612, 8,
-        15481, 47, 3174, 38, 1, 614, 8, 614, 8,
-        15528, 43, 3174, 38, 1, 616, 8, 616, 8,
-        15571, 20, 14625, 35, 1, 620, 8, 620, 8,
-        15591, 28, 4826, 33, 1, 621, 8, 621, 8,
-        15619, 27, 2543, 38, 1, 622, 8, 622, 8,
-        15646, 38, 4695, 41, 1, 623, 8, 623, 8,
-        15684, 34, 4762, 37, 1, 625, 8, 625, 8,
-        15718, 35, 4826, 33, 1, 626, 8, 626, 8,
-        15753, 26, 4139, 40, 1, 627, 8, 627, 8,
-        15779, 37, 4208, 41, 1, 628, 8, 628, 8,
-        15816, 33, 193, 35, 1, 630, 8, 630, 8,
-        15849, 34, 193, 35, 1, 631, 8, 631, 8,
-        15883, 26, 693, 36, 1, 632, 8, 632, 8,
-        15909, 37, 729, 35, 1, 633, 8, 633, 8,
-        15946, 33, 729, 35, 1, 634, 8, 634, 8,
-        15979, 34, 381, 39, 1, 635, 8, 635, 8,
-        16013, 35, 5124, 37, 1, 636, 8, 636, 8,
-        16048, 36, 5188, 33, 1, 637, 8, 637, 8,
-        16084, 35, 14625, 35, 1, 638, 8, 638, 8,
-        16119, 38, 3636, 40, 1, 639, 8, 639, 8,
+        14996, 20, 15016, 35, 1, 581, 8, 581, 8,
+        15051, 28, 4909, 33, 1, 582, 8, 582, 8,
+        15079, 27, 2543, 38, 1, 583, 8, 583, 8,
+        15106, 38, 4778, 41, 1, 584, 8, 584, 8,
+        15144, 34, 4845, 37, 1, 586, 8, 586, 8,
+        15178, 35, 4909, 33, 1, 587, 8, 587, 8,
+        15213, 26, 4222, 40, 1, 588, 8, 588, 8,
+        15239, 37, 4291, 41, 1, 589, 8, 589, 8,
+        15276, 33, 193, 35, 1, 591, 8, 591, 8,
+        15309, 34, 193, 35, 1, 592, 8, 592, 8,
+        15343, 26, 693, 36, 1, 593, 8, 593, 8,
+        15369, 37, 729, 35, 1, 594, 8, 594, 8,
+        15406, 33, 729, 35, 1, 595, 8, 595, 8,
+        15439, 34, 381, 39, 1, 596, 8, 596, 8,
+        15473, 35, 5207, 37, 1, 597, 8, 597, 8,
+        15508, 36, 5271, 33, 1, 598, 8, 598, 8,
+        15544, 35, 15016, 35, 1, 599, 8, 599, 8,
+        15579, 38, 3719, 40, 1, 600, 8, 600, 8,
+        15617, 36, 2269, 29, 1, 603, 8, 603, 8,
+        15653, 47, 3625, 34, 1, 604, 8, 604, 8,
+        15700, 43, 3555, 37, 1, 606, 8, 606, 8,
+        15743, 37, 443, 39, 1, 608, 8, 608, 8,
+        15780, 48, 546, 38, 1, 610, 8, 610, 8,
+        15828, 44, 546, 38, 1, 612, 8, 612, 8,
+        15872, 47, 3257, 38, 1, 614, 8, 614, 8,
+        15919, 43, 3257, 38, 1, 616, 8, 616, 8,
+        15962, 20, 15016, 35, 1, 620, 8, 620, 8,
+        15982, 28, 4909, 33, 1, 621, 8, 621, 8,
+        16010, 27, 2543, 38, 1, 622, 8, 622, 8,
+        16037, 38, 4778, 41, 1, 623, 8, 623, 8,
+        16075, 34, 4845, 37, 1, 625, 8, 625, 8,
+        16109, 35, 4909, 33, 1, 626, 8, 626, 8,
+        16144, 26, 4222, 40, 1, 627, 8, 627, 8,
+        16170, 37, 4291, 41, 1, 628, 8, 628, 8,
+        16207, 33, 193, 35, 1, 630, 8, 630, 8,
+        16240, 34, 193, 35, 1, 631, 8, 631, 8,
+        16274, 26, 693, 36, 1, 632, 8, 632, 8,
+        16300, 37, 729, 35, 1, 633, 8, 633, 8,
+        16337, 33, 729, 35, 1, 634, 8, 634, 8,
+        16370, 34, 381, 39, 1, 635, 8, 635, 8,
+        16404, 35, 5207, 37, 1, 636, 8, 636, 8,
+        16439, 36, 5271, 33, 1, 637, 8, 637, 8,
+        16475, 35, 15016, 35, 1, 638, 8, 638, 8,
+        16510, 38, 3719, 40, 1, 639, 8, 639, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_92: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabItemHeaderMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 644, position: 46 },
-    rt::ValueRow { key: "TabItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 645, position: 40 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_92: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        16548, 19, 644, 46, 6, 4, 6, 4,
+        16567, 13, 645, 40, 6, 4, 6, 4,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_93: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        16157, 20, 2269, 29, 1, 647, 8, 647, 8,
-        16177, 33, 2269, 29, 1, 650, 8, 650, 8,
-        16210, 44, 546, 38, 1, 651, 8, 651, 8,
-        16254, 40, 546, 38, 1, 653, 8, 653, 8,
-        16294, 31, 546, 38, 1, 655, 8, 655, 8,
-        16325, 42, 546, 38, 1, 656, 8, 656, 8,
-        16367, 38, 546, 38, 1, 658, 8, 658, 8,
-        16405, 31, 2269, 29, 1, 660, 8, 660, 8,
-        16436, 33, 2543, 38, 1, 661, 8, 661, 8,
-        16469, 44, 5009, 44, 1, 662, 8, 662, 8,
-        16513, 40, 5009, 44, 1, 664, 8, 664, 8,
-        16553, 31, 3174, 38, 1, 666, 8, 666, 8,
-        16584, 42, 5009, 44, 1, 667, 8, 667, 8,
-        16626, 38, 5009, 44, 1, 669, 8, 669, 8,
-        16664, 31, 381, 39, 1, 671, 8, 671, 8,
-        16695, 29, 16724, 36, 1, 672, 8, 672, 8,
+        16580, 20, 2269, 29, 1, 647, 8, 647, 8,
+        16600, 33, 2269, 29, 1, 650, 8, 650, 8,
+        16633, 44, 546, 38, 1, 651, 8, 651, 8,
+        16677, 40, 546, 38, 1, 653, 8, 653, 8,
+        16717, 31, 546, 38, 1, 655, 8, 655, 8,
+        16748, 42, 546, 38, 1, 656, 8, 656, 8,
+        16790, 38, 546, 38, 1, 658, 8, 658, 8,
+        16828, 31, 2269, 29, 1, 660, 8, 660, 8,
+        16859, 33, 2543, 38, 1, 661, 8, 661, 8,
+        16892, 44, 5092, 44, 1, 662, 8, 662, 8,
+        16936, 40, 5092, 44, 1, 664, 8, 664, 8,
+        16976, 31, 3257, 38, 1, 666, 8, 666, 8,
+        17007, 42, 5092, 44, 1, 667, 8, 667, 8,
+        17049, 38, 5092, 44, 1, 669, 8, 669, 8,
+        17087, 31, 381, 39, 1, 671, 8, 671, 8,
+        17118, 29, 17147, 36, 1, 672, 8, 672, 8,
     ],
 };
 
@@ -2213,25 +2243,25 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_94: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        16760, 19, 2269, 29, 1, 676, 8, 676, 8,
-        16779, 30, 2269, 29, 1, 677, 8, 677, 8,
-        16809, 19, 2269, 29, 1, 678, 8, 678, 8,
-        16828, 20, 2269, 29, 1, 679, 8, 679, 8,
-        16848, 25, 2269, 29, 1, 680, 8, 680, 8,
-        16873, 36, 16909, 35, 1, 681, 8, 681, 8,
-        16944, 32, 16976, 38, 1, 682, 8, 682, 8,
-        17014, 33, 2269, 29, 1, 683, 8, 683, 8,
-        17047, 26, 2269, 29, 1, 684, 8, 684, 8,
-        17073, 37, 2269, 29, 1, 685, 8, 685, 8,
-        17110, 33, 2269, 29, 1, 686, 8, 686, 8,
-        17143, 34, 2269, 29, 1, 687, 8, 687, 8,
-        17177, 30, 693, 36, 1, 688, 8, 688, 8,
-        17207, 41, 693, 36, 1, 689, 8, 689, 8,
-        17248, 37, 17285, 35, 1, 691, 8, 691, 8,
-        17320, 38, 14625, 35, 1, 692, 8, 692, 8,
-        17358, 29, 652, 41, 1, 693, 8, 693, 8,
-        17387, 25, 16976, 38, 1, 694, 8, 694, 8,
-        17412, 26, 615, 37, 1, 695, 8, 695, 8,
+        17183, 19, 2269, 29, 1, 676, 8, 676, 8,
+        17202, 30, 2269, 29, 1, 677, 8, 677, 8,
+        17232, 19, 2269, 29, 1, 678, 8, 678, 8,
+        17251, 20, 2269, 29, 1, 679, 8, 679, 8,
+        17271, 25, 2269, 29, 1, 680, 8, 680, 8,
+        17296, 36, 17332, 35, 1, 681, 8, 681, 8,
+        17367, 32, 17399, 38, 1, 682, 8, 682, 8,
+        17437, 33, 2269, 29, 1, 683, 8, 683, 8,
+        17470, 26, 2269, 29, 1, 684, 8, 684, 8,
+        17496, 37, 2269, 29, 1, 685, 8, 685, 8,
+        17533, 33, 2269, 29, 1, 686, 8, 686, 8,
+        17566, 34, 2269, 29, 1, 687, 8, 687, 8,
+        17600, 30, 693, 36, 1, 688, 8, 688, 8,
+        17630, 41, 693, 36, 1, 689, 8, 689, 8,
+        17671, 37, 17708, 35, 1, 691, 8, 691, 8,
+        17743, 38, 15016, 35, 1, 692, 8, 692, 8,
+        17781, 29, 652, 41, 1, 693, 8, 693, 8,
+        17810, 25, 17399, 38, 1, 694, 8, 694, 8,
+        17835, 26, 615, 37, 1, 695, 8, 695, 8,
     ],
 };
 
@@ -2240,10 +2270,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_95: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17438, 20, 443, 39, 1, 699, 8, 699, 8,
-        17458, 31, 443, 39, 1, 700, 8, 700, 8,
-        17489, 29, 11039, 18, 1, 701, 8, 701, 8,
-        17518, 36, 17554, 28, 1, 702, 8, 702, 8,
+        17861, 20, 443, 39, 1, 699, 8, 699, 8,
+        17881, 31, 443, 39, 1, 700, 8, 700, 8,
+        17912, 29, 11363, 18, 1, 701, 8, 701, 8,
+        17941, 36, 17977, 28, 1, 702, 8, 702, 8,
     ],
 };
 
@@ -2252,7 +2282,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_96: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17518, 31, 17518, 36, 1, 703, 8, 704, 24,
+        17941, 31, 17941, 36, 1, 703, 8, 704, 24,
     ],
 };
 
@@ -2267,30 +2297,30 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_98: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17582, 22, 10569, 45, 1, 709, 8, 709, 8,
-        17604, 33, 17637, 50, 1, 710, 8, 710, 8,
-        17687, 29, 17716, 53, 1, 712, 8, 712, 8,
-        17769, 30, 2269, 29, 1, 714, 8, 714, 8,
-        17799, 30, 17829, 50, 1, 715, 8, 715, 8,
-        17879, 41, 17920, 50, 1, 717, 8, 717, 8,
-        17970, 37, 17716, 53, 1, 719, 8, 719, 8,
-        18007, 38, 381, 39, 1, 721, 8, 721, 8,
-        18045, 22, 693, 36, 1, 723, 8, 723, 8,
-        18067, 33, 3174, 38, 1, 724, 8, 724, 8,
-        18100, 29, 3174, 38, 1, 725, 8, 725, 8,
-        18129, 30, 381, 39, 1, 726, 8, 726, 8,
-        18159, 30, 3174, 38, 1, 727, 8, 727, 8,
-        18189, 41, 3174, 38, 1, 728, 8, 728, 8,
-        18230, 37, 3174, 38, 1, 730, 8, 730, 8,
-        18267, 38, 381, 39, 1, 732, 8, 732, 8,
-        18305, 23, 2269, 29, 1, 734, 8, 734, 8,
-        18328, 34, 18362, 53, 1, 735, 8, 735, 8,
-        18415, 30, 18362, 53, 1, 737, 8, 737, 8,
-        18445, 31, 2269, 29, 1, 739, 8, 739, 8,
-        18476, 31, 2269, 29, 1, 740, 8, 740, 8,
-        18507, 42, 18549, 51, 1, 741, 8, 741, 8,
-        18600, 38, 18549, 51, 1, 743, 8, 743, 8,
-        18638, 39, 2269, 29, 1, 745, 8, 745, 8,
+        18005, 22, 10826, 45, 1, 709, 8, 709, 8,
+        18027, 33, 18060, 50, 1, 710, 8, 710, 8,
+        18110, 29, 18139, 53, 1, 712, 8, 712, 8,
+        18192, 30, 2269, 29, 1, 714, 8, 714, 8,
+        18222, 30, 18252, 50, 1, 715, 8, 715, 8,
+        18302, 41, 18343, 50, 1, 717, 8, 717, 8,
+        18393, 37, 18139, 53, 1, 719, 8, 719, 8,
+        18430, 38, 381, 39, 1, 721, 8, 721, 8,
+        18468, 22, 693, 36, 1, 723, 8, 723, 8,
+        18490, 33, 3257, 38, 1, 724, 8, 724, 8,
+        18523, 29, 3257, 38, 1, 725, 8, 725, 8,
+        18552, 30, 381, 39, 1, 726, 8, 726, 8,
+        18582, 30, 3257, 38, 1, 727, 8, 727, 8,
+        18612, 41, 3257, 38, 1, 728, 8, 728, 8,
+        18653, 37, 3257, 38, 1, 730, 8, 730, 8,
+        18690, 38, 381, 39, 1, 732, 8, 732, 8,
+        18728, 23, 2269, 29, 1, 734, 8, 734, 8,
+        18751, 34, 18785, 53, 1, 735, 8, 735, 8,
+        18838, 30, 18785, 53, 1, 737, 8, 737, 8,
+        18868, 31, 2269, 29, 1, 739, 8, 739, 8,
+        18899, 31, 2269, 29, 1, 740, 8, 740, 8,
+        18930, 42, 18972, 51, 1, 741, 8, 741, 8,
+        19023, 38, 18972, 51, 1, 743, 8, 743, 8,
+        19061, 39, 2269, 29, 1, 745, 8, 745, 8,
     ],
 };
 
@@ -2299,7 +2329,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_99: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18677, 21, 193, 35, 1, 750, 8, 750, 8,
+        19100, 21, 193, 35, 1, 750, 8, 750, 8,
     ],
 };
 
@@ -2308,9 +2338,9 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_100: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18698, 28, 652, 41, 1, 753, 8, 753, 8,
-        18726, 29, 193, 35, 1, 754, 8, 754, 8,
-        18755, 28, 1187, 33, 1, 755, 8, 755, 8,
+        19121, 28, 652, 41, 1, 753, 8, 753, 8,
+        19149, 29, 193, 35, 1, 754, 8, 754, 8,
+        19178, 28, 1187, 33, 1, 755, 8, 755, 8,
     ],
 };
 
@@ -2319,8 +2349,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_101: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18783, 39, 89, 23, 1, 756, 8, 757, 24,
-        18822, 35, 141, 22, 1, 758, 8, 758, 68,
+        19206, 39, 89, 23, 1, 756, 8, 757, 24,
+        19245, 35, 141, 22, 1, 758, 8, 758, 68,
     ],
 };
 
@@ -2329,23 +2359,23 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_102: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18857, 36, 193, 35, 1, 759, 8, 759, 8,
-        18893, 21, 693, 36, 1, 760, 8, 760, 8,
-        18914, 32, 729, 35, 1, 761, 8, 761, 8,
-        18946, 28, 729, 35, 1, 762, 8, 762, 8,
-        18974, 29, 381, 39, 1, 763, 8, 763, 8,
-        19003, 28, 1682, 41, 1, 764, 8, 764, 8,
-        19031, 39, 1682, 41, 1, 765, 8, 765, 8,
-        19070, 35, 1682, 41, 1, 767, 8, 767, 8,
-        19105, 36, 381, 39, 1, 769, 8, 769, 8,
-        19141, 22, 443, 39, 1, 771, 8, 771, 8,
-        19163, 33, 443, 39, 1, 772, 8, 772, 8,
-        19196, 29, 546, 38, 1, 773, 8, 773, 8,
-        19225, 30, 615, 37, 1, 774, 8, 774, 8,
-        19255, 29, 2150, 41, 1, 775, 8, 775, 8,
-        19284, 40, 2150, 41, 1, 776, 8, 776, 8,
-        19324, 36, 2150, 41, 1, 778, 8, 778, 8,
-        19360, 37, 615, 37, 1, 780, 8, 780, 8,
+        19280, 36, 193, 35, 1, 759, 8, 759, 8,
+        19316, 21, 693, 36, 1, 760, 8, 760, 8,
+        19337, 32, 729, 35, 1, 761, 8, 761, 8,
+        19369, 28, 729, 35, 1, 762, 8, 762, 8,
+        19397, 29, 381, 39, 1, 763, 8, 763, 8,
+        19426, 28, 1682, 41, 1, 764, 8, 764, 8,
+        19454, 39, 1682, 41, 1, 765, 8, 765, 8,
+        19493, 35, 1682, 41, 1, 767, 8, 767, 8,
+        19528, 36, 381, 39, 1, 769, 8, 769, 8,
+        19564, 22, 443, 39, 1, 771, 8, 771, 8,
+        19586, 33, 443, 39, 1, 772, 8, 772, 8,
+        19619, 29, 546, 38, 1, 773, 8, 773, 8,
+        19648, 30, 615, 37, 1, 774, 8, 774, 8,
+        19678, 29, 2150, 41, 1, 775, 8, 775, 8,
+        19707, 40, 2150, 41, 1, 776, 8, 776, 8,
+        19747, 36, 2150, 41, 1, 778, 8, 778, 8,
+        19783, 37, 615, 37, 1, 780, 8, 780, 8,
     ],
 };
 
@@ -2354,24 +2384,24 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_103: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        19397, 38, 19435, 47, 1, 784, 8, 784, 8,
-        19482, 28, 693, 36, 1, 788, 8, 788, 8,
-        19510, 36, 381, 39, 1, 789, 8, 789, 8,
-        19546, 41, 4890, 42, 1, 791, 8, 791, 8,
-        19587, 49, 381, 39, 1, 793, 8, 793, 8,
-        19636, 32, 2543, 38, 1, 795, 8, 795, 8,
-        19668, 40, 381, 39, 1, 796, 8, 796, 8,
-        19708, 40, 693, 36, 1, 798, 8, 798, 8,
-        19748, 28, 4139, 40, 1, 800, 8, 800, 8,
-        19776, 39, 4208, 41, 1, 801, 8, 801, 8,
-        19815, 35, 193, 35, 1, 803, 8, 803, 8,
-        19850, 36, 193, 35, 1, 804, 8, 804, 8,
-        19886, 35, 3636, 40, 1, 805, 8, 805, 8,
-        19921, 29, 2543, 38, 1, 807, 8, 807, 8,
-        19950, 40, 4695, 41, 1, 808, 8, 808, 8,
-        19990, 36, 4762, 37, 1, 810, 8, 810, 8,
-        20026, 37, 4826, 33, 1, 811, 8, 811, 8,
-        20063, 47, 19435, 47, 1, 812, 8, 812, 8,
+        19820, 38, 19858, 47, 1, 784, 8, 784, 8,
+        19905, 28, 693, 36, 1, 788, 8, 788, 8,
+        19933, 36, 381, 39, 1, 789, 8, 789, 8,
+        19969, 41, 4973, 42, 1, 791, 8, 791, 8,
+        20010, 49, 381, 39, 1, 793, 8, 793, 8,
+        20059, 32, 2543, 38, 1, 795, 8, 795, 8,
+        20091, 40, 381, 39, 1, 796, 8, 796, 8,
+        20131, 40, 693, 36, 1, 798, 8, 798, 8,
+        20171, 28, 4222, 40, 1, 800, 8, 800, 8,
+        20199, 39, 4291, 41, 1, 801, 8, 801, 8,
+        20238, 35, 193, 35, 1, 803, 8, 803, 8,
+        20273, 36, 193, 35, 1, 804, 8, 804, 8,
+        20309, 35, 3719, 40, 1, 805, 8, 805, 8,
+        20344, 29, 2543, 38, 1, 807, 8, 807, 8,
+        20373, 40, 4778, 41, 1, 808, 8, 808, 8,
+        20413, 36, 4845, 37, 1, 810, 8, 810, 8,
+        20449, 37, 4909, 33, 1, 811, 8, 811, 8,
+        20486, 47, 19858, 47, 1, 812, 8, 812, 8,
     ],
 };
 
@@ -2380,8 +2410,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_104: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5882, 25, 14544, 43, 1, 817, 8, 817, 8,
-        20110, 22, 5188, 33, 1, 818, 8, 818, 8,
+        6139, 25, 14935, 43, 1, 817, 8, 817, 8,
+        20533, 22, 5271, 33, 1, 818, 8, 818, 8,
     ],
 };
 
@@ -2390,11 +2420,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_105: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20132, 27, 0, 65280, 1, 825, 8,
-        20159, 27, 65535, 255, 1, 826, 8,
-        20186, 23, 0, 65280, 1, 829, 8,
-        20209, 23, 58853, 65509, 1, 830, 8,
-        20232, 24, 51914, 65482, 1, 831, 8,
+        20555, 27, 0, 65280, 1, 825, 8,
+        20582, 27, 65535, 255, 1, 826, 8,
+        20609, 23, 0, 65280, 1, 829, 8,
+        20632, 23, 58853, 65509, 1, 830, 8,
+        20655, 24, 51914, 65482, 1, 831, 8,
     ],
 };
 
@@ -2403,8 +2433,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_106: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20256, 23, 6726, 35, 1, 832, 8, 832, 8,
-        20279, 40, 11039, 18, 1, 835, 8, 835, 8,
+        20679, 23, 6983, 35, 1, 832, 8, 832, 8,
+        20702, 40, 11363, 18, 1, 835, 8, 835, 8,
     ],
 };
 
@@ -2413,17 +2443,17 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_107: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20319, 30, 381, 39, 1, 840, 8, 840, 8,
-        20349, 33, 3542, 34, 1, 841, 8, 841, 8,
-        20382, 33, 3174, 38, 1, 842, 8, 842, 8,
-        20415, 29, 3472, 37, 1, 843, 8, 843, 8,
-        20444, 29, 3174, 38, 1, 844, 8, 844, 8,
-        20473, 30, 3636, 40, 1, 845, 8, 845, 8,
-        20503, 30, 3174, 38, 1, 846, 8, 846, 8,
-        20533, 41, 3795, 43, 1, 847, 8, 847, 8,
-        20574, 41, 3174, 38, 1, 848, 8, 848, 8,
-        20615, 37, 3713, 41, 1, 849, 8, 849, 8,
-        20652, 37, 3174, 38, 1, 850, 8, 850, 8,
+        20742, 30, 381, 39, 1, 840, 8, 840, 8,
+        20772, 33, 3625, 34, 1, 841, 8, 841, 8,
+        20805, 33, 3257, 38, 1, 842, 8, 842, 8,
+        20838, 29, 3555, 37, 1, 843, 8, 843, 8,
+        20867, 29, 3257, 38, 1, 844, 8, 844, 8,
+        20896, 30, 3719, 40, 1, 845, 8, 845, 8,
+        20926, 30, 3257, 38, 1, 846, 8, 846, 8,
+        20956, 41, 3878, 43, 1, 847, 8, 847, 8,
+        20997, 41, 3257, 38, 1, 848, 8, 848, 8,
+        21038, 37, 3796, 41, 1, 849, 8, 849, 8,
+        21075, 37, 3257, 38, 1, 850, 8, 850, 8,
     ],
 };
 
@@ -2997,73 +3027,81 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_155: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_156: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 983, position: 55 },
-    rt::ValueRow { key: "ComboBoxDropdownBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 984, position: 58 },
-    rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 985, position: 51 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_156: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        3123, 28, 983, 55, 0, 0, 0, 0,
+        3151, 31, 984, 58, 0, 0, 0, 0,
+        3182, 24, 985, 51, 1, 2, 1, 3,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_157: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        3123, 22, 693, 36, 1, 987, 8, 987, 8,
-        3145, 29, 3174, 38, 1, 988, 8, 988, 8,
-        3212, 33, 3174, 38, 1, 989, 8, 989, 8,
-        3245, 30, 381, 39, 1, 990, 8, 990, 8,
-        3275, 30, 3174, 38, 1, 991, 8, 991, 8,
-        3305, 37, 3174, 38, 1, 992, 8, 992, 8,
-        3342, 41, 3174, 38, 1, 994, 8, 994, 8,
-        3383, 38, 381, 39, 1, 996, 8, 996, 8,
-        3421, 22, 2269, 29, 1, 998, 8, 998, 8,
-        3443, 29, 3472, 37, 1, 999, 8, 999, 8,
-        3509, 33, 3542, 34, 1, 1000, 8, 1000, 8,
-        3576, 30, 2269, 29, 1, 1001, 8, 1001, 8,
-        3606, 30, 3636, 40, 1, 1002, 8, 1002, 8,
-        3676, 37, 3713, 41, 1, 1003, 8, 1003, 8,
-        3754, 41, 3795, 43, 1, 1005, 8, 1005, 8,
-        3838, 38, 2269, 29, 1, 1007, 8, 1007, 8,
-        3876, 30, 2269, 29, 1, 1008, 8, 1008, 8,
-        3906, 34, 2269, 29, 1, 1009, 8, 1009, 8,
-        3940, 31, 2269, 29, 1, 1010, 8, 1010, 8,
-        3971, 31, 2269, 29, 1, 1011, 8, 1011, 8,
-        4002, 38, 2269, 29, 1, 1012, 8, 1012, 8,
-        4040, 42, 2269, 29, 1, 1013, 8, 1013, 8,
-        4082, 39, 2269, 29, 1, 1014, 8, 1014, 8,
-        4121, 18, 4139, 40, 1, 1016, 8, 1016, 8,
-        4179, 29, 4208, 41, 1, 1017, 8, 1017, 8,
-        4249, 25, 4274, 38, 1, 1018, 8, 1018, 8,
-        4312, 26, 193, 35, 1, 1019, 8, 1019, 8,
-        4338, 27, 3636, 40, 1, 1020, 8, 1020, 8,
-        4365, 36, 546, 38, 1, 1021, 8, 1021, 8,
-        4401, 38, 1296, 40, 1, 1022, 8, 1022, 8,
-        4439, 18, 693, 36, 1, 1024, 8, 1024, 8,
-        4457, 26, 381, 39, 1, 1025, 8, 1025, 8,
-        4483, 25, 3174, 38, 1, 1026, 8, 1026, 8,
-        4508, 32, 3174, 38, 1, 1027, 8, 1027, 8,
-        4540, 29, 4569, 34, 1, 1028, 8, 1028, 8,
-        4603, 43, 3174, 38, 1, 1029, 8, 1029, 8,
-        4646, 19, 2543, 38, 1, 1031, 8, 1031, 8,
-        4665, 30, 4695, 41, 1, 1032, 8, 1032, 8,
-        4736, 26, 4762, 37, 1, 1033, 8, 1033, 8,
-        4799, 27, 4826, 33, 1, 1034, 8, 1034, 8,
-        4859, 31, 4890, 42, 1, 1035, 8, 1035, 8,
-        4932, 39, 381, 39, 1, 1036, 8, 1036, 8,
-        4971, 38, 5009, 44, 1, 1038, 8, 1038, 8,
-        5053, 45, 5009, 44, 1, 1040, 8, 1040, 8,
-        5098, 26, 5124, 37, 1, 1042, 8, 1042, 8,
-        5161, 27, 5188, 33, 1, 1043, 8, 1043, 8,
+        3206, 22, 693, 36, 1, 987, 8, 987, 8,
+        3228, 29, 3257, 38, 1, 988, 8, 988, 8,
+        3295, 33, 3257, 38, 1, 989, 8, 989, 8,
+        3328, 30, 381, 39, 1, 990, 8, 990, 8,
+        3358, 30, 3257, 38, 1, 991, 8, 991, 8,
+        3388, 37, 3257, 38, 1, 992, 8, 992, 8,
+        3425, 41, 3257, 38, 1, 994, 8, 994, 8,
+        3466, 38, 381, 39, 1, 996, 8, 996, 8,
+        3504, 22, 2269, 29, 1, 998, 8, 998, 8,
+        3526, 29, 3555, 37, 1, 999, 8, 999, 8,
+        3592, 33, 3625, 34, 1, 1000, 8, 1000, 8,
+        3659, 30, 2269, 29, 1, 1001, 8, 1001, 8,
+        3689, 30, 3719, 40, 1, 1002, 8, 1002, 8,
+        3759, 37, 3796, 41, 1, 1003, 8, 1003, 8,
+        3837, 41, 3878, 43, 1, 1005, 8, 1005, 8,
+        3921, 38, 2269, 29, 1, 1007, 8, 1007, 8,
+        3959, 30, 2269, 29, 1, 1008, 8, 1008, 8,
+        3989, 34, 2269, 29, 1, 1009, 8, 1009, 8,
+        4023, 31, 2269, 29, 1, 1010, 8, 1010, 8,
+        4054, 31, 2269, 29, 1, 1011, 8, 1011, 8,
+        4085, 38, 2269, 29, 1, 1012, 8, 1012, 8,
+        4123, 42, 2269, 29, 1, 1013, 8, 1013, 8,
+        4165, 39, 2269, 29, 1, 1014, 8, 1014, 8,
+        4204, 18, 4222, 40, 1, 1016, 8, 1016, 8,
+        4262, 29, 4291, 41, 1, 1017, 8, 1017, 8,
+        4332, 25, 4357, 38, 1, 1018, 8, 1018, 8,
+        4395, 26, 193, 35, 1, 1019, 8, 1019, 8,
+        4421, 27, 3719, 40, 1, 1020, 8, 1020, 8,
+        4448, 36, 546, 38, 1, 1021, 8, 1021, 8,
+        4484, 38, 1296, 40, 1, 1022, 8, 1022, 8,
+        4522, 18, 693, 36, 1, 1024, 8, 1024, 8,
+        4540, 26, 381, 39, 1, 1025, 8, 1025, 8,
+        4566, 25, 3257, 38, 1, 1026, 8, 1026, 8,
+        4591, 32, 3257, 38, 1, 1027, 8, 1027, 8,
+        4623, 29, 4652, 34, 1, 1028, 8, 1028, 8,
+        4686, 43, 3257, 38, 1, 1029, 8, 1029, 8,
+        4729, 19, 2543, 38, 1, 1031, 8, 1031, 8,
+        4748, 30, 4778, 41, 1, 1032, 8, 1032, 8,
+        4819, 26, 4845, 37, 1, 1033, 8, 1033, 8,
+        4882, 27, 4909, 33, 1, 1034, 8, 1034, 8,
+        4942, 31, 4973, 42, 1, 1035, 8, 1035, 8,
+        5015, 39, 381, 39, 1, 1036, 8, 1036, 8,
+        5054, 38, 5092, 44, 1, 1038, 8, 1038, 8,
+        5136, 45, 5092, 44, 1, 1040, 8, 1040, 8,
+        5181, 26, 5207, 37, 1, 1042, 8, 1042, 8,
+        5244, 27, 5271, 33, 1, 1043, 8, 1043, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_158: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ComboBoxDropdownBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 1044, position: 56 },
-    rt::ValueRow { key: "ComboBoxDropdownContentMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 1045, position: 56 },
-    rt::ValueRow { key: "ListBoxBorderThemeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 1048, position: 54 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_158: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        5304, 29, 1044, 56, 4, 4, 4, 4,
+        5333, 29, 1045, 56, 4, 5, 4, 5,
+        5362, 27, 1048, 54, 4, 4, 4, 4,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_159: &[rt::ValueRow<f64>] = &[
@@ -3071,35 +3109,39 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_159: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "MenuFlyoutThemeMinHeight", value: 32.0_f64, line: 1056, position: 50 },
 ];
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_160: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuFlyoutPresenterThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 1057, position: 58 },
-    rt::ValueRow { key: "MenuFlyoutItemChevronMargin", value: [12.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 1058, position: 54 },
-    rt::ValueRow { key: "MenuFlyoutSeparatorThemePadding", value: [12.0_f64, 4.0_f64, 12.0_f64, 4.0_f64], line: 1059, position: 58 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_160: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        5389, 31, 1057, 58, 4, 4, 4, 4,
+        5420, 27, 1058, 54, 6, 4, 4, 4,
+        5447, 31, 1059, 58, 6, 5, 6, 5,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_161: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5221, 24, 2269, 29, 1, 1060, 8, 1060, 8,
-        5245, 35, 3542, 34, 1, 1061, 8, 1061, 8,
-        5280, 31, 3472, 37, 1, 1062, 8, 1062, 8,
-        5311, 32, 2269, 29, 1, 1063, 8, 1063, 8,
-        5343, 24, 693, 36, 1, 1064, 8, 1064, 8,
-        5367, 35, 3174, 38, 1, 1065, 8, 1065, 8,
-        5402, 31, 3174, 38, 1, 1066, 8, 1066, 8,
-        5433, 32, 381, 39, 1, 1067, 8, 1067, 8,
-        5465, 24, 4890, 42, 1, 1068, 8, 1068, 8,
-        5489, 35, 3174, 38, 1, 1069, 8, 1069, 8,
-        5524, 31, 3174, 38, 1, 1070, 8, 1070, 8,
-        5555, 37, 3174, 38, 1, 1071, 8, 1071, 8,
-        5592, 32, 381, 39, 1, 1073, 8, 1073, 8,
-        5624, 47, 2543, 38, 1, 1074, 8, 1074, 8,
-        5671, 58, 5729, 40, 1, 1076, 8, 1076, 8,
-        5769, 54, 5729, 40, 1, 1078, 8, 1078, 8,
-        5823, 55, 381, 39, 1, 1080, 8, 1080, 8,
+        5478, 24, 2269, 29, 1, 1060, 8, 1060, 8,
+        5502, 35, 3625, 34, 1, 1061, 8, 1061, 8,
+        5537, 31, 3555, 37, 1, 1062, 8, 1062, 8,
+        5568, 32, 2269, 29, 1, 1063, 8, 1063, 8,
+        5600, 24, 693, 36, 1, 1064, 8, 1064, 8,
+        5624, 35, 3257, 38, 1, 1065, 8, 1065, 8,
+        5659, 31, 3257, 38, 1, 1066, 8, 1066, 8,
+        5690, 32, 381, 39, 1, 1067, 8, 1067, 8,
+        5722, 24, 4973, 42, 1, 1068, 8, 1068, 8,
+        5746, 35, 3257, 38, 1, 1069, 8, 1069, 8,
+        5781, 31, 3257, 38, 1, 1070, 8, 1070, 8,
+        5812, 37, 3257, 38, 1, 1071, 8, 1071, 8,
+        5849, 32, 381, 39, 1, 1073, 8, 1073, 8,
+        5881, 47, 2543, 38, 1, 1074, 8, 1074, 8,
+        5928, 58, 5986, 40, 1, 1076, 8, 1076, 8,
+        6026, 54, 5986, 40, 1, 1078, 8, 1078, 8,
+        6080, 55, 381, 39, 1, 1080, 8, 1080, 8,
     ],
 };
 
@@ -3114,8 +3156,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_163: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5878, 29, 5124, 37, 1, 1084, 8, 1084, 8,
-        5907, 30, 5188, 33, 1, 1085, 8, 1085, 8,
+        6135, 29, 5207, 37, 1, 1084, 8, 1084, 8,
+        6164, 30, 5271, 33, 1, 1085, 8, 1085, 8,
     ],
 };
 
@@ -3130,14 +3172,14 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_165: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5937, 21, 693, 36, 1, 1094, 8, 1094, 8,
-        5958, 32, 693, 36, 1, 1095, 8, 1095, 8,
-        5990, 29, 6019, 43, 1, 1096, 8, 1096, 8,
-        6062, 21, 4139, 40, 1, 1097, 8, 1097, 8,
-        6083, 32, 6115, 37, 1, 1098, 8, 1098, 8,
-        6152, 29, 193, 35, 1, 1099, 8, 1099, 8,
-        6181, 29, 1187, 33, 1, 1100, 8, 1100, 8,
-        6210, 30, 4826, 33, 1, 1101, 8, 1101, 8,
+        6194, 21, 693, 36, 1, 1094, 8, 1094, 8,
+        6215, 32, 693, 36, 1, 1095, 8, 1095, 8,
+        6247, 29, 6276, 43, 1, 1096, 8, 1096, 8,
+        6319, 21, 4222, 40, 1, 1097, 8, 1097, 8,
+        6340, 32, 6372, 37, 1, 1098, 8, 1098, 8,
+        6409, 29, 193, 35, 1, 1099, 8, 1099, 8,
+        6438, 29, 1187, 33, 1, 1100, 8, 1100, 8,
+        6467, 30, 4909, 33, 1, 1101, 8, 1101, 8,
     ],
 };
 
@@ -3146,26 +3188,26 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_166: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6240, 32, 6272, 36, 1, 1103, 8, 1103, 8,
-        6308, 43, 6272, 36, 1, 1104, 8, 1104, 8,
-        6351, 40, 6019, 43, 1, 1106, 8, 1106, 8,
-        6391, 34, 1187, 33, 1, 1108, 8, 1108, 8,
-        6425, 27, 2269, 29, 1, 1109, 8, 1109, 8,
-        6452, 38, 2269, 29, 1, 1110, 8, 1110, 8,
-        6490, 34, 1187, 33, 1, 1111, 8, 1111, 8,
-        6524, 28, 2269, 29, 1, 1112, 8, 1112, 8,
-        6552, 39, 2269, 29, 1, 1113, 8, 1113, 8,
-        6591, 35, 2269, 29, 1, 1114, 8, 1114, 8,
-        6626, 38, 1187, 33, 1, 1115, 8, 1115, 8,
-        6664, 34, 1682, 41, 1, 1116, 8, 1116, 8,
-        6698, 28, 6726, 35, 1, 1118, 8, 1118, 8,
-        6181, 22, 2543, 38, 1, 1119, 8, 1119, 8,
-        6761, 33, 4695, 41, 1, 1120, 8, 1120, 8,
-        6626, 27, 4890, 42, 1, 1121, 8, 1121, 8,
-        6794, 28, 693, 36, 1, 1122, 8, 1122, 8,
-        6822, 39, 6861, 41, 1, 1123, 8, 1123, 8,
-        6902, 40, 5124, 37, 1, 1128, 8, 1128, 8,
-        6942, 41, 5188, 33, 1, 1130, 8, 1130, 8,
+        6497, 32, 6529, 36, 1, 1103, 8, 1103, 8,
+        6565, 43, 6529, 36, 1, 1104, 8, 1104, 8,
+        6608, 40, 6276, 43, 1, 1106, 8, 1106, 8,
+        6648, 34, 1187, 33, 1, 1108, 8, 1108, 8,
+        6682, 27, 2269, 29, 1, 1109, 8, 1109, 8,
+        6709, 38, 2269, 29, 1, 1110, 8, 1110, 8,
+        6747, 34, 1187, 33, 1, 1111, 8, 1111, 8,
+        6781, 28, 2269, 29, 1, 1112, 8, 1112, 8,
+        6809, 39, 2269, 29, 1, 1113, 8, 1113, 8,
+        6848, 35, 2269, 29, 1, 1114, 8, 1114, 8,
+        6883, 38, 1187, 33, 1, 1115, 8, 1115, 8,
+        6921, 34, 1682, 41, 1, 1116, 8, 1116, 8,
+        6955, 28, 6983, 35, 1, 1118, 8, 1118, 8,
+        6438, 22, 2543, 38, 1, 1119, 8, 1119, 8,
+        7018, 33, 4778, 41, 1, 1120, 8, 1120, 8,
+        6883, 27, 4973, 42, 1, 1121, 8, 1121, 8,
+        7051, 28, 693, 36, 1, 1122, 8, 1122, 8,
+        7079, 39, 7118, 41, 1, 1123, 8, 1123, 8,
+        7159, 40, 5207, 37, 1, 1128, 8, 1128, 8,
+        7199, 41, 5271, 33, 1, 1130, 8, 1130, 8,
     ],
 };
 
@@ -3174,46 +3216,46 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_167: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        6983, 27, 693, 36, 1, 1134, 8, 1134, 8,
-        7010, 38, 693, 36, 1, 1135, 8, 1135, 8,
-        7048, 34, 693, 36, 1, 1136, 8, 1136, 8,
-        7082, 35, 381, 39, 1, 1137, 8, 1137, 8,
-        7117, 25, 693, 36, 1, 1138, 8, 1138, 8,
-        7142, 36, 693, 36, 1, 1139, 8, 1139, 8,
-        7178, 32, 693, 36, 1, 1140, 8, 1140, 8,
-        7210, 33, 381, 39, 1, 1141, 8, 1141, 8,
-        7243, 31, 693, 36, 1, 1142, 8, 1142, 8,
-        7274, 42, 693, 36, 1, 1143, 8, 1143, 8,
-        7316, 38, 693, 36, 1, 1145, 8, 1145, 8,
-        7354, 39, 381, 39, 1, 1146, 8, 1146, 8,
-        7393, 27, 2269, 29, 1, 1148, 8, 1148, 8,
-        7420, 38, 2269, 29, 1, 1149, 8, 1149, 8,
-        7458, 34, 2269, 29, 1, 1150, 8, 1150, 8,
-        7492, 35, 2269, 29, 1, 1151, 8, 1151, 8,
-        7527, 25, 2269, 29, 1, 1152, 8, 1152, 8,
-        7552, 36, 2269, 29, 1, 1153, 8, 1153, 8,
-        7588, 32, 2269, 29, 1, 1154, 8, 1154, 8,
-        7620, 33, 2269, 29, 1, 1155, 8, 1155, 8,
-        7653, 31, 2269, 29, 1, 1156, 8, 1156, 8,
-        7684, 42, 2269, 29, 1, 1157, 8, 1157, 8,
-        7726, 38, 2269, 29, 1, 1158, 8, 1158, 8,
-        7764, 39, 2269, 29, 1, 1159, 8, 1159, 8,
-        7803, 28, 2269, 29, 1, 1160, 8, 1160, 8,
-        7831, 39, 2269, 29, 1, 1161, 8, 1161, 8,
-        7870, 35, 2269, 29, 1, 1162, 8, 1162, 8,
-        7905, 36, 2269, 29, 1, 1163, 8, 1163, 8,
-        7941, 26, 2269, 29, 1, 1164, 8, 1164, 8,
-        7967, 37, 2269, 29, 1, 1165, 8, 1165, 8,
-        8004, 33, 2269, 29, 1, 1166, 8, 1166, 8,
-        8037, 34, 2269, 29, 1, 1167, 8, 1167, 8,
-        8071, 32, 2269, 29, 1, 1168, 8, 1168, 8,
-        8103, 43, 2269, 29, 1, 1169, 8, 1169, 8,
-        8146, 39, 2269, 29, 1, 1170, 8, 1170, 8,
-        8185, 40, 2269, 29, 1, 1171, 8, 1171, 8,
-        8225, 38, 2543, 38, 1, 1172, 8, 1172, 8,
-        8263, 49, 4695, 41, 1, 1174, 8, 1174, 8,
-        8312, 45, 729, 35, 1, 1176, 8, 1176, 8,
-        8357, 46, 381, 39, 1, 1178, 8, 1178, 8,
+        7240, 27, 693, 36, 1, 1134, 8, 1134, 8,
+        7267, 38, 693, 36, 1, 1135, 8, 1135, 8,
+        7305, 34, 693, 36, 1, 1136, 8, 1136, 8,
+        7339, 35, 381, 39, 1, 1137, 8, 1137, 8,
+        7374, 25, 693, 36, 1, 1138, 8, 1138, 8,
+        7399, 36, 693, 36, 1, 1139, 8, 1139, 8,
+        7435, 32, 693, 36, 1, 1140, 8, 1140, 8,
+        7467, 33, 381, 39, 1, 1141, 8, 1141, 8,
+        7500, 31, 693, 36, 1, 1142, 8, 1142, 8,
+        7531, 42, 693, 36, 1, 1143, 8, 1143, 8,
+        7573, 38, 693, 36, 1, 1145, 8, 1145, 8,
+        7611, 39, 381, 39, 1, 1146, 8, 1146, 8,
+        7650, 27, 2269, 29, 1, 1148, 8, 1148, 8,
+        7677, 38, 2269, 29, 1, 1149, 8, 1149, 8,
+        7715, 34, 2269, 29, 1, 1150, 8, 1150, 8,
+        7749, 35, 2269, 29, 1, 1151, 8, 1151, 8,
+        7784, 25, 2269, 29, 1, 1152, 8, 1152, 8,
+        7809, 36, 2269, 29, 1, 1153, 8, 1153, 8,
+        7845, 32, 2269, 29, 1, 1154, 8, 1154, 8,
+        7877, 33, 2269, 29, 1, 1155, 8, 1155, 8,
+        7910, 31, 2269, 29, 1, 1156, 8, 1156, 8,
+        7941, 42, 2269, 29, 1, 1157, 8, 1157, 8,
+        7983, 38, 2269, 29, 1, 1158, 8, 1158, 8,
+        8021, 39, 2269, 29, 1, 1159, 8, 1159, 8,
+        8060, 28, 2269, 29, 1, 1160, 8, 1160, 8,
+        8088, 39, 2269, 29, 1, 1161, 8, 1161, 8,
+        8127, 35, 2269, 29, 1, 1162, 8, 1162, 8,
+        8162, 36, 2269, 29, 1, 1163, 8, 1163, 8,
+        8198, 26, 2269, 29, 1, 1164, 8, 1164, 8,
+        8224, 37, 2269, 29, 1, 1165, 8, 1165, 8,
+        8261, 33, 2269, 29, 1, 1166, 8, 1166, 8,
+        8294, 34, 2269, 29, 1, 1167, 8, 1167, 8,
+        8328, 32, 2269, 29, 1, 1168, 8, 1168, 8,
+        8360, 43, 2269, 29, 1, 1169, 8, 1169, 8,
+        8403, 39, 2269, 29, 1, 1170, 8, 1170, 8,
+        8442, 40, 2269, 29, 1, 1171, 8, 1171, 8,
+        8482, 38, 2543, 38, 1, 1172, 8, 1172, 8,
+        8520, 49, 4778, 41, 1, 1174, 8, 1174, 8,
+        8569, 45, 729, 35, 1, 1176, 8, 1176, 8,
+        8614, 46, 381, 39, 1, 1178, 8, 1178, 8,
     ],
 };
 
@@ -3222,8 +3264,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_168: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8403, 47, 141, 22, 1, 1180, 8, 1181, 24,
-        8450, 43, 89, 23, 1, 1182, 8, 1183, 24,
+        8660, 47, 141, 22, 1, 1180, 8, 1181, 24,
+        8707, 43, 89, 23, 1, 1182, 8, 1183, 24,
     ],
 };
 
@@ -3232,8 +3274,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_169: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8493, 44, 2269, 29, 1, 1184, 8, 1184, 8,
-        8537, 42, 13185, 34, 1, 1185, 8, 1185, 8,
+        8750, 44, 2269, 29, 1, 1184, 8, 1184, 8,
+        8794, 42, 13509, 34, 1, 1185, 8, 1185, 8,
     ],
 };
 
@@ -3242,8 +3284,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_170: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8579, 53, 89, 23, 1, 1187, 8, 1188, 24,
-        8632, 49, 141, 22, 1, 1189, 8, 1190, 24,
+        8836, 53, 89, 23, 1, 1187, 8, 1188, 24,
+        8889, 49, 141, 22, 1, 1189, 8, 1190, 24,
     ],
 };
 
@@ -3252,12 +3294,12 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_171: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8681, 50, 2269, 29, 1, 1191, 8, 1191, 8,
-        8731, 36, 2269, 29, 1, 1193, 8, 1193, 8,
-        8767, 47, 2269, 29, 1, 1194, 8, 1194, 8,
-        8814, 43, 652, 41, 1, 1196, 8, 1196, 8,
-        8857, 44, 2269, 29, 1, 1198, 8, 1198, 8,
-        8901, 34, 1187, 33, 1, 1199, 8, 1199, 8,
+        8938, 50, 2269, 29, 1, 1191, 8, 1191, 8,
+        8988, 36, 2269, 29, 1, 1193, 8, 1193, 8,
+        9024, 47, 2269, 29, 1, 1194, 8, 1194, 8,
+        9071, 43, 652, 41, 1, 1196, 8, 1196, 8,
+        9114, 44, 2269, 29, 1, 1198, 8, 1198, 8,
+        9158, 34, 1187, 33, 1, 1199, 8, 1199, 8,
     ],
 };
 
@@ -3266,8 +3308,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_172: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        8935, 45, 89, 23, 1, 1200, 8, 1201, 24,
-        8980, 41, 141, 22, 1, 1202, 8, 1203, 24,
+        9192, 45, 89, 23, 1, 1200, 8, 1201, 24,
+        9237, 41, 141, 22, 1, 1202, 8, 1203, 24,
     ],
 };
 
@@ -3276,8 +3318,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_173: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9021, 42, 652, 41, 1, 1204, 8, 1204, 8,
-        9063, 40, 1187, 33, 1, 1206, 8, 1206, 8,
+        9278, 42, 652, 41, 1, 1204, 8, 1204, 8,
+        9320, 40, 1187, 33, 1, 1206, 8, 1206, 8,
     ],
 };
 
@@ -3286,8 +3328,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_174: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9103, 51, 89, 23, 1, 1207, 8, 1208, 24,
-        9154, 47, 141, 22, 1, 1209, 8, 1210, 24,
+        9360, 51, 89, 23, 1, 1207, 8, 1208, 24,
+        9411, 47, 141, 22, 1, 1209, 8, 1210, 24,
     ],
 };
 
@@ -3296,67 +3338,71 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_175: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        9201, 48, 652, 41, 1, 1211, 8, 1211, 8,
-        9249, 37, 1682, 41, 1, 1213, 8, 1213, 8,
-        9286, 48, 1682, 41, 1, 1215, 8, 1215, 8,
-        9334, 44, 1682, 41, 1, 1217, 8, 1217, 8,
-        9378, 45, 1682, 41, 1, 1219, 8, 1219, 8,
-        9423, 35, 1682, 41, 1, 1221, 8, 1221, 8,
-        9458, 46, 1682, 41, 1, 1223, 8, 1223, 8,
-        9543, 42, 1682, 41, 1, 1225, 8, 1225, 8,
-        9585, 43, 1682, 41, 1, 1227, 8, 1227, 8,
-        9628, 41, 1682, 41, 1, 1229, 8, 1229, 8,
-        9669, 52, 1682, 41, 1, 1231, 8, 1231, 8,
-        9721, 48, 1682, 41, 1, 1233, 8, 1233, 8,
-        9769, 49, 1682, 41, 1, 1235, 8, 1235, 8,
-        9818, 36, 3795, 43, 1, 1239, 8, 1239, 8,
-        9854, 38, 3713, 41, 1, 1241, 8, 1241, 8,
-        9892, 31, 1187, 33, 1, 1243, 8, 1243, 8,
-        9923, 28, 1296, 40, 1, 1244, 8, 1244, 8,
-        9951, 30, 4762, 37, 1, 1245, 8, 1245, 8,
-        9981, 27, 1682, 41, 1, 1246, 8, 1246, 8,
-        10008, 30, 381, 39, 1, 1247, 8, 1247, 8,
-        10038, 32, 10070, 35, 1, 1248, 8, 1248, 8,
-        10105, 34, 693, 36, 1, 1249, 8, 1249, 8,
-        10139, 32, 10171, 41, 1, 1250, 8, 1250, 8,
-        10212, 22, 10234, 41, 1, 1251, 8, 1251, 8,
-        10275, 22, 6726, 35, 1, 1252, 8, 1252, 8,
-        10297, 23, 10320, 40, 1, 1253, 8, 1253, 8,
-        10360, 37, 381, 39, 1, 1254, 8, 1254, 8,
-        10397, 38, 2269, 29, 1, 1256, 8, 1256, 8,
-        10435, 49, 693, 36, 1, 1257, 8, 1257, 8,
-        10484, 45, 2543, 38, 1, 1259, 8, 1259, 8,
-        10529, 40, 10569, 45, 1, 1261, 8, 1261, 8,
-        10614, 41, 10655, 41, 1, 1263, 8, 1263, 8,
-        10696, 50, 546, 38, 1, 1265, 8, 1265, 8,
-        10696, 39, 2269, 29, 1, 1267, 8, 1267, 8,
+        9458, 48, 652, 41, 1, 1211, 8, 1211, 8,
+        9506, 37, 1682, 41, 1, 1213, 8, 1213, 8,
+        9543, 48, 1682, 41, 1, 1215, 8, 1215, 8,
+        9591, 44, 1682, 41, 1, 1217, 8, 1217, 8,
+        9635, 45, 1682, 41, 1, 1219, 8, 1219, 8,
+        9680, 35, 1682, 41, 1, 1221, 8, 1221, 8,
+        9715, 46, 1682, 41, 1, 1223, 8, 1223, 8,
+        9800, 42, 1682, 41, 1, 1225, 8, 1225, 8,
+        9842, 43, 1682, 41, 1, 1227, 8, 1227, 8,
+        9885, 41, 1682, 41, 1, 1229, 8, 1229, 8,
+        9926, 52, 1682, 41, 1, 1231, 8, 1231, 8,
+        9978, 48, 1682, 41, 1, 1233, 8, 1233, 8,
+        10026, 49, 1682, 41, 1, 1235, 8, 1235, 8,
+        10075, 36, 3878, 43, 1, 1239, 8, 1239, 8,
+        10111, 38, 3796, 41, 1, 1241, 8, 1241, 8,
+        10149, 31, 1187, 33, 1, 1243, 8, 1243, 8,
+        10180, 28, 1296, 40, 1, 1244, 8, 1244, 8,
+        10208, 30, 4845, 37, 1, 1245, 8, 1245, 8,
+        10238, 27, 1682, 41, 1, 1246, 8, 1246, 8,
+        10265, 30, 381, 39, 1, 1247, 8, 1247, 8,
+        10295, 32, 10327, 35, 1, 1248, 8, 1248, 8,
+        10362, 34, 693, 36, 1, 1249, 8, 1249, 8,
+        10396, 32, 10428, 41, 1, 1250, 8, 1250, 8,
+        10469, 22, 10491, 41, 1, 1251, 8, 1251, 8,
+        10532, 22, 6983, 35, 1, 1252, 8, 1252, 8,
+        10554, 23, 10577, 40, 1, 1253, 8, 1253, 8,
+        10617, 37, 381, 39, 1, 1254, 8, 1254, 8,
+        10654, 38, 2269, 29, 1, 1256, 8, 1256, 8,
+        10692, 49, 693, 36, 1, 1257, 8, 1257, 8,
+        10741, 45, 2543, 38, 1, 1259, 8, 1259, 8,
+        10786, 40, 10826, 45, 1, 1261, 8, 1261, 8,
+        10871, 41, 10912, 41, 1, 1263, 8, 1263, 8,
+        10953, 50, 546, 38, 1, 1265, 8, 1265, 8,
+        10953, 39, 2269, 29, 1, 1267, 8, 1267, 8,
     ],
 };
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_176: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarFontSize", value: 20.0_f64, line: 1268, position: 42 },
-    rt::ValueRow { key: "CalendarDayButtonFontSize", value: 12.0_f64, line: 1269, position: 51 },
-    rt::ValueRow { key: "CalendarWeekNumberFontSize", value: 12.0_f64, line: 1270, position: 52 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_176: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        11003, 16, 1268, 42, 7,
+        11019, 25, 1269, 51, 6,
+        11044, 26, 1270, 52, 6,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_177: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        10746, 24, 10770, 24, 1, 1275, 8, 1275, 8,
-        10794, 35, 10770, 24, 1, 1276, 8, 1276, 8,
-        10829, 31, 10770, 24, 1, 1277, 8, 1277, 8,
-        10860, 32, 10770, 24, 1, 1278, 8, 1278, 8,
-        10892, 24, 2605, 19, 1, 1279, 8, 1279, 8,
-        10916, 35, 2605, 19, 1, 1280, 8, 1280, 8,
-        10951, 31, 2605, 19, 1, 1281, 8, 1281, 8,
-        10982, 32, 381, 39, 1, 1282, 8, 1282, 8,
-        11014, 25, 11039, 18, 1, 1283, 8, 1283, 8,
-        11057, 36, 11039, 18, 1, 1284, 8, 1284, 8,
-        11093, 32, 11039, 18, 1, 1285, 8, 1285, 8,
-        11125, 33, 4826, 33, 1, 1286, 8, 1286, 8,
+        11070, 24, 11094, 24, 1, 1275, 8, 1275, 8,
+        11118, 35, 11094, 24, 1, 1276, 8, 1276, 8,
+        11153, 31, 11094, 24, 1, 1277, 8, 1277, 8,
+        11184, 32, 11094, 24, 1, 1278, 8, 1278, 8,
+        11216, 24, 2605, 19, 1, 1279, 8, 1279, 8,
+        11240, 35, 2605, 19, 1, 1280, 8, 1280, 8,
+        11275, 31, 2605, 19, 1, 1281, 8, 1281, 8,
+        11306, 32, 381, 39, 1, 1282, 8, 1282, 8,
+        11338, 25, 11363, 18, 1, 1283, 8, 1283, 8,
+        11381, 36, 11363, 18, 1, 1284, 8, 1284, 8,
+        11417, 32, 11363, 18, 1, 1285, 8, 1285, 8,
+        11449, 33, 4909, 33, 1, 1286, 8, 1286, 8,
     ],
 };
 
@@ -3365,7 +3411,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_178: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11158, 25, 65535, 255, 1, 1288, 8,
+        11482, 25, 65535, 255, 1, 1288, 8,
     ],
 };
 
@@ -3374,8 +3420,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_179: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11183, 32, 65535, 255, 1, 1291, 8,
-        11215, 33, 65535, 255, 1, 1292, 8,
+        11507, 32, 65535, 255, 1, 1291, 8,
+        11539, 33, 65535, 255, 1, 1292, 8,
     ],
 };
 
@@ -3384,10 +3430,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_180: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11248, 25, 2605, 19, 1, 1293, 8, 1293, 8,
-        11273, 36, 2605, 19, 1, 1294, 8, 1294, 8,
-        11309, 32, 2605, 19, 1, 1295, 8, 1295, 8,
-        11341, 33, 381, 39, 1, 1296, 8, 1296, 8,
+        11572, 25, 2605, 19, 1, 1293, 8, 1293, 8,
+        11597, 36, 2605, 19, 1, 1294, 8, 1294, 8,
+        11633, 32, 2605, 19, 1, 1295, 8, 1295, 8,
+        11665, 33, 381, 39, 1, 1296, 8, 1296, 8,
     ],
 };
 
@@ -3396,10 +3442,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_181: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11374, 26, 65535, 255, 1, 1297, 8,
-        11400, 37, 65535, 255, 1, 1298, 8,
-        11437, 33, 65535, 255, 1, 1299, 8,
-        11470, 34, 65535, 255, 1, 1300, 8,
+        11698, 26, 65535, 255, 1, 1297, 8,
+        11724, 37, 65535, 255, 1, 1298, 8,
+        11761, 33, 65535, 255, 1, 1299, 8,
+        11794, 34, 65535, 255, 1, 1300, 8,
     ],
 };
 
@@ -3408,8 +3454,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_182: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11504, 25, 11529, 26, 1, 1303, 8, 1303, 8,
-        11555, 26, 11039, 18, 1, 1304, 8, 1304, 8,
+        11828, 25, 11853, 26, 1, 1303, 8, 1303, 8,
+        11879, 26, 11363, 18, 1, 1304, 8, 1304, 8,
     ],
 };
 
@@ -3418,7 +3464,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_183: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11581, 31, 17476, 65348, 1, 1307, 8,
+        11905, 31, 17476, 65348, 1, 1307, 8,
     ],
 };
 
@@ -3427,7 +3473,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_184: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11612, 31, 693, 36, 1, 1308, 8, 1308, 8,
+        11936, 31, 693, 36, 1, 1308, 8, 1308, 8,
     ],
 };
 
@@ -3436,7 +3482,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_185: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11643, 39, 39578, 65434, 1, 1309, 8,
+        11967, 39, 39578, 65434, 1, 1309, 8,
     ],
 };
 
@@ -3445,27 +3491,27 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_186: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        11836, 21, 693, 36, 1, 1318, 8, 1318, 8,
-        11857, 32, 693, 36, 1, 1319, 8, 1319, 8,
-        11889, 28, 693, 36, 1, 1320, 8, 1320, 8,
-        11917, 29, 381, 39, 1, 1321, 8, 1321, 8,
-        11946, 21, 2269, 29, 1, 1322, 8, 1322, 8,
-        11967, 32, 2269, 29, 1, 1323, 8, 1323, 8,
-        11999, 28, 2269, 29, 1, 1324, 8, 1324, 8,
-        12027, 29, 2269, 29, 1, 1325, 8, 1325, 8,
-        12056, 22, 2269, 29, 1, 1326, 8, 1326, 8,
-        12078, 33, 2269, 29, 1, 1327, 8, 1327, 8,
-        12111, 29, 2269, 29, 1, 1328, 8, 1328, 8,
-        12140, 30, 2269, 29, 1, 1329, 8, 1329, 8,
-        12170, 29, 2543, 38, 1, 1330, 8, 1330, 8,
-        12199, 40, 4695, 41, 1, 1331, 8, 1331, 8,
-        12239, 36, 729, 35, 1, 1333, 8, 1333, 8,
-        12275, 37, 381, 39, 1, 1334, 8, 1334, 8,
-        12312, 27, 2269, 29, 1, 1336, 8, 1336, 8,
-        12339, 38, 2269, 29, 1, 1337, 8, 1337, 8,
-        12377, 34, 652, 41, 1, 1338, 8, 1338, 8,
-        12411, 35, 2269, 29, 1, 1340, 8, 1340, 8,
-        12446, 36, 1187, 33, 1, 1341, 8, 1341, 8,
+        12160, 21, 693, 36, 1, 1318, 8, 1318, 8,
+        12181, 32, 693, 36, 1, 1319, 8, 1319, 8,
+        12213, 28, 693, 36, 1, 1320, 8, 1320, 8,
+        12241, 29, 381, 39, 1, 1321, 8, 1321, 8,
+        12270, 21, 2269, 29, 1, 1322, 8, 1322, 8,
+        12291, 32, 2269, 29, 1, 1323, 8, 1323, 8,
+        12323, 28, 2269, 29, 1, 1324, 8, 1324, 8,
+        12351, 29, 2269, 29, 1, 1325, 8, 1325, 8,
+        12380, 22, 2269, 29, 1, 1326, 8, 1326, 8,
+        12402, 33, 2269, 29, 1, 1327, 8, 1327, 8,
+        12435, 29, 2269, 29, 1, 1328, 8, 1328, 8,
+        12464, 30, 2269, 29, 1, 1329, 8, 1329, 8,
+        12494, 29, 2543, 38, 1, 1330, 8, 1330, 8,
+        12523, 40, 4778, 41, 1, 1331, 8, 1331, 8,
+        12563, 36, 729, 35, 1, 1333, 8, 1333, 8,
+        12599, 37, 381, 39, 1, 1334, 8, 1334, 8,
+        12636, 27, 2269, 29, 1, 1336, 8, 1336, 8,
+        12663, 38, 2269, 29, 1, 1337, 8, 1337, 8,
+        12701, 34, 652, 41, 1, 1338, 8, 1338, 8,
+        12735, 35, 2269, 29, 1, 1340, 8, 1340, 8,
+        12770, 36, 1187, 33, 1, 1341, 8, 1341, 8,
     ],
 };
 
@@ -3474,8 +3520,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_187: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12482, 47, 89, 23, 1, 1342, 8, 1343, 24,
-        12529, 43, 141, 22, 1, 1344, 8, 1345, 24,
+        12806, 47, 89, 23, 1, 1342, 8, 1343, 24,
+        12853, 43, 141, 22, 1, 1344, 8, 1345, 24,
     ],
 };
 
@@ -3484,8 +3530,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_188: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12572, 44, 381, 39, 1, 1346, 8, 1346, 8,
-        12616, 34, 1187, 33, 1, 1348, 8, 1348, 8,
+        12896, 44, 381, 39, 1, 1346, 8, 1346, 8,
+        12940, 34, 1187, 33, 1, 1348, 8, 1348, 8,
     ],
 };
 
@@ -3494,8 +3540,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_189: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12650, 45, 89, 23, 1, 1349, 8, 1350, 24,
-        12695, 41, 141, 22, 1, 1351, 8, 1352, 24,
+        12974, 45, 89, 23, 1, 1349, 8, 1350, 24,
+        13019, 41, 141, 22, 1, 1351, 8, 1352, 24,
     ],
 };
 
@@ -3504,15 +3550,15 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_190: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        12736, 42, 652, 41, 1, 1353, 8, 1353, 8,
-        12778, 25, 9504, 39, 1, 1355, 8, 1355, 8,
-        12803, 36, 9504, 39, 1, 1356, 8, 1356, 8,
-        12839, 32, 9504, 39, 1, 1358, 8, 1358, 8,
-        12871, 33, 9504, 39, 1, 1359, 8, 1359, 8,
-        12904, 27, 2269, 29, 1, 1360, 8, 1360, 8,
-        12931, 38, 2269, 29, 1, 1361, 8, 1361, 8,
-        12969, 34, 2269, 29, 1, 1362, 8, 1362, 8,
-        13003, 35, 2269, 29, 1, 1363, 8, 1363, 8,
+        13060, 42, 652, 41, 1, 1353, 8, 1353, 8,
+        13102, 25, 9761, 39, 1, 1355, 8, 1355, 8,
+        13127, 36, 9761, 39, 1, 1356, 8, 1356, 8,
+        13163, 32, 9761, 39, 1, 1358, 8, 1358, 8,
+        13195, 33, 9761, 39, 1, 1359, 8, 1359, 8,
+        13228, 27, 2269, 29, 1, 1360, 8, 1360, 8,
+        13255, 38, 2269, 29, 1, 1361, 8, 1361, 8,
+        13293, 34, 2269, 29, 1, 1362, 8, 1362, 8,
+        13327, 35, 2269, 29, 1, 1363, 8, 1363, 8,
     ],
 };
 
@@ -3527,11 +3573,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_192: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13038, 25, 2269, 29, 1, 1369, 8, 1369, 8,
-        13063, 36, 2269, 29, 1, 1370, 8, 1370, 8,
-        13099, 32, 2269, 29, 1, 1371, 8, 1371, 8,
-        13131, 33, 2269, 29, 1, 1372, 8, 1372, 8,
-        13164, 21, 13185, 34, 1, 1373, 8, 1373, 8,
+        13362, 25, 2269, 29, 1, 1369, 8, 1369, 8,
+        13387, 36, 2269, 29, 1, 1370, 8, 1370, 8,
+        13423, 32, 2269, 29, 1, 1371, 8, 1371, 8,
+        13455, 33, 2269, 29, 1, 1372, 8, 1372, 8,
+        13488, 21, 13509, 34, 1, 1373, 8, 1373, 8,
     ],
 };
 
@@ -3540,8 +3586,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_193: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13219, 32, 89, 23, 1, 1374, 8, 1374, 65,
-        13251, 28, 141, 22, 1, 1375, 8, 1375, 61,
+        13543, 32, 89, 23, 1, 1374, 8, 1374, 65,
+        13575, 28, 141, 22, 1, 1375, 8, 1375, 61,
     ],
 };
 
@@ -3550,46 +3596,50 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_194: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13279, 29, 13308, 44, 1, 1376, 8, 1376, 8,
-        13352, 15, 6861, 41, 1, 1377, 8, 1377, 8,
-        13367, 26, 2543, 38, 1, 1378, 8, 1378, 8,
-        13393, 22, 6861, 41, 1, 1379, 8, 1379, 8,
-        13415, 23, 13308, 44, 1, 1380, 8, 1380, 8,
-        13438, 20, 1187, 33, 1, 1381, 8, 1381, 8,
-        13458, 31, 1187, 33, 1, 1382, 8, 1382, 8,
-        13489, 27, 1187, 33, 1, 1383, 8, 1383, 8,
-        13516, 28, 13308, 44, 1, 1384, 8, 1384, 8,
-        13544, 17, 6861, 41, 1, 1385, 8, 1385, 8,
-        13561, 25, 381, 39, 1, 1386, 8, 1386, 8,
-        13586, 23, 6726, 35, 1, 1387, 8, 1387, 8,
+        13603, 29, 13632, 44, 1, 1376, 8, 1376, 8,
+        13676, 15, 7118, 41, 1, 1377, 8, 1377, 8,
+        13691, 26, 2543, 38, 1, 1378, 8, 1378, 8,
+        13717, 22, 7118, 41, 1, 1379, 8, 1379, 8,
+        13739, 23, 13632, 44, 1, 1380, 8, 1380, 8,
+        13762, 20, 1187, 33, 1, 1381, 8, 1381, 8,
+        13782, 31, 1187, 33, 1, 1382, 8, 1382, 8,
+        13813, 27, 1187, 33, 1, 1383, 8, 1383, 8,
+        13840, 28, 13632, 44, 1, 1384, 8, 1384, 8,
+        13868, 17, 7118, 41, 1, 1385, 8, 1385, 8,
+        13885, 25, 381, 39, 1, 1386, 8, 1386, 8,
+        13910, 23, 6983, 35, 1, 1387, 8, 1387, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_195: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ToggleSwitchOnStrokeThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 1390, position: 56 },
-    rt::ValueRow { key: "ToggleSwitchOuterBorderStrokeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 1391, position: 65 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_195: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        13933, 29, 1390, 56, 4, 4, 4, 4,
+        13962, 38, 1391, 65, 0, 0, 0, 0,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_196: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        13609, 29, 693, 36, 1, 1392, 8, 1392, 8,
-        13638, 36, 381, 39, 1, 1393, 8, 1393, 8,
-        13674, 31, 2269, 29, 1, 1395, 8, 1395, 8,
-        13705, 42, 2269, 29, 1, 1396, 8, 1396, 8,
-        13747, 38, 2269, 29, 1, 1397, 8, 1397, 8,
-        13785, 19, 2269, 29, 1, 1398, 8, 1398, 8,
-        13804, 30, 2269, 29, 1, 1399, 8, 1399, 8,
-        13834, 26, 1296, 40, 1, 1400, 8, 1400, 8,
-        13860, 27, 2269, 29, 1, 1401, 8, 1401, 8,
-        13887, 21, 2543, 38, 1, 1402, 8, 1402, 8,
-        13908, 32, 4695, 41, 1, 1403, 8, 1403, 8,
-        13940, 28, 693, 36, 1, 1404, 8, 1404, 8,
-        13968, 29, 381, 39, 1, 1405, 8, 1405, 8,
-        13997, 18, 1187, 33, 1, 1406, 8, 1406, 8,
+        14000, 29, 693, 36, 1, 1392, 8, 1392, 8,
+        14029, 36, 381, 39, 1, 1393, 8, 1393, 8,
+        14065, 31, 2269, 29, 1, 1395, 8, 1395, 8,
+        14096, 42, 2269, 29, 1, 1396, 8, 1396, 8,
+        14138, 38, 2269, 29, 1, 1397, 8, 1397, 8,
+        14176, 19, 2269, 29, 1, 1398, 8, 1398, 8,
+        14195, 30, 2269, 29, 1, 1399, 8, 1399, 8,
+        14225, 26, 1296, 40, 1, 1400, 8, 1400, 8,
+        14251, 27, 2269, 29, 1, 1401, 8, 1401, 8,
+        14278, 21, 2543, 38, 1, 1402, 8, 1402, 8,
+        14299, 32, 4778, 41, 1, 1403, 8, 1403, 8,
+        14331, 28, 693, 36, 1, 1404, 8, 1404, 8,
+        14359, 29, 381, 39, 1, 1405, 8, 1405, 8,
+        14388, 18, 1187, 33, 1, 1406, 8, 1406, 8,
     ],
 };
 
@@ -3598,8 +3648,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_197: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14015, 29, 89, 23, 1, 1407, 8, 1407, 62,
-        14044, 25, 141, 22, 1, 1408, 8, 1408, 58,
+        14406, 29, 89, 23, 1, 1407, 8, 1407, 62,
+        14435, 25, 141, 22, 1, 1408, 8, 1408, 58,
     ],
 };
 
@@ -3608,8 +3658,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_198: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14069, 26, 4826, 33, 1, 1409, 8, 1409, 8,
-        14095, 20, 729, 35, 1, 1410, 8, 1410, 8,
+        14460, 26, 4909, 33, 1, 1409, 8, 1409, 8,
+        14486, 20, 729, 35, 1, 1410, 8, 1410, 8,
     ],
 };
 
@@ -3618,8 +3668,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_199: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14115, 31, 89, 23, 1, 1411, 8, 1411, 64,
-        14146, 27, 141, 22, 1, 1412, 8, 1412, 60,
+        14506, 31, 89, 23, 1, 1411, 8, 1411, 64,
+        14537, 27, 141, 22, 1, 1412, 8, 1412, 60,
     ],
 };
 
@@ -3628,15 +3678,15 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_200: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14173, 28, 381, 39, 1, 1413, 8, 1413, 8,
-        14201, 23, 729, 35, 1, 1414, 8, 1414, 8,
-        14224, 34, 729, 35, 1, 1415, 8, 1415, 8,
-        14258, 30, 729, 35, 1, 1416, 8, 1416, 8,
-        14288, 31, 381, 39, 1, 1417, 8, 1417, 8,
-        14319, 22, 1682, 41, 1, 1418, 8, 1418, 8,
-        14341, 33, 14374, 38, 1, 1419, 8, 1419, 8,
-        14412, 29, 1682, 41, 1, 1420, 8, 1420, 8,
-        14441, 30, 14471, 39, 1, 1421, 8, 1421, 8,
+        14564, 28, 381, 39, 1, 1413, 8, 1413, 8,
+        14592, 23, 729, 35, 1, 1414, 8, 1414, 8,
+        14615, 34, 729, 35, 1, 1415, 8, 1415, 8,
+        14649, 30, 729, 35, 1, 1416, 8, 1416, 8,
+        14679, 31, 381, 39, 1, 1417, 8, 1417, 8,
+        14710, 22, 1682, 41, 1, 1418, 8, 1418, 8,
+        14732, 33, 14765, 38, 1, 1419, 8, 1419, 8,
+        14803, 29, 1682, 41, 1, 1420, 8, 1420, 8,
+        14832, 30, 14862, 39, 1, 1421, 8, 1421, 8,
     ],
 };
 
@@ -3645,9 +3695,9 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_201: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14510, 17, 693, 36, 1, 1426, 8, 1426, 8,
-        14527, 17, 14544, 43, 1, 1427, 8, 1427, 8,
-        14587, 18, 5188, 33, 1, 1428, 8, 1428, 8,
+        14901, 17, 693, 36, 1, 1426, 8, 1426, 8,
+        14918, 17, 14935, 43, 1, 1427, 8, 1427, 8,
+        14978, 18, 5271, 33, 1, 1428, 8, 1428, 8,
     ],
 };
 
@@ -3656,80 +3706,84 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_202: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        14605, 20, 14625, 35, 1, 1432, 8, 1432, 8,
-        14660, 28, 4826, 33, 1, 1433, 8, 1433, 8,
-        14688, 27, 2543, 38, 1, 1434, 8, 1434, 8,
-        14715, 38, 4695, 41, 1, 1435, 8, 1435, 8,
-        14753, 34, 4762, 37, 1, 1437, 8, 1437, 8,
-        14787, 35, 4826, 33, 1, 1438, 8, 1438, 8,
-        14822, 26, 4139, 40, 1, 1439, 8, 1439, 8,
-        14848, 37, 4208, 41, 1, 1440, 8, 1440, 8,
-        14885, 33, 193, 35, 1, 1442, 8, 1442, 8,
-        14918, 34, 193, 35, 1, 1443, 8, 1443, 8,
-        14952, 26, 693, 36, 1, 1444, 8, 1444, 8,
-        14978, 37, 729, 35, 1, 1445, 8, 1445, 8,
-        15015, 33, 729, 35, 1, 1446, 8, 1446, 8,
-        15048, 34, 381, 39, 1, 1447, 8, 1447, 8,
-        15082, 35, 5124, 37, 1, 1448, 8, 1448, 8,
-        15117, 36, 5188, 33, 1, 1449, 8, 1449, 8,
-        15153, 35, 14625, 35, 1, 1450, 8, 1450, 8,
-        15188, 38, 3636, 40, 1, 1451, 8, 1451, 8,
-        15226, 36, 2269, 29, 1, 1454, 8, 1454, 8,
-        15262, 47, 3542, 34, 1, 1455, 8, 1455, 8,
-        15309, 43, 3472, 37, 1, 1457, 8, 1457, 8,
-        15352, 37, 443, 39, 1, 1459, 8, 1459, 8,
-        15389, 48, 546, 38, 1, 1461, 8, 1461, 8,
-        15437, 44, 546, 38, 1, 1463, 8, 1463, 8,
-        15481, 47, 3174, 38, 1, 1465, 8, 1465, 8,
-        15528, 43, 3174, 38, 1, 1467, 8, 1467, 8,
-        15571, 20, 14625, 35, 1, 1472, 8, 1472, 8,
-        15591, 28, 4826, 33, 1, 1473, 8, 1473, 8,
-        15619, 27, 2543, 38, 1, 1474, 8, 1474, 8,
-        15646, 38, 4695, 41, 1, 1475, 8, 1475, 8,
-        15684, 34, 4762, 37, 1, 1477, 8, 1477, 8,
-        15718, 35, 4826, 33, 1, 1478, 8, 1478, 8,
-        15753, 26, 4139, 40, 1, 1479, 8, 1479, 8,
-        15779, 37, 4208, 41, 1, 1480, 8, 1480, 8,
-        15816, 33, 193, 35, 1, 1482, 8, 1482, 8,
-        15849, 34, 193, 35, 1, 1483, 8, 1483, 8,
-        15883, 26, 693, 36, 1, 1484, 8, 1484, 8,
-        15909, 37, 729, 35, 1, 1485, 8, 1485, 8,
-        15946, 33, 729, 35, 1, 1486, 8, 1486, 8,
-        15979, 34, 381, 39, 1, 1487, 8, 1487, 8,
-        16013, 35, 5124, 37, 1, 1488, 8, 1488, 8,
-        16048, 36, 5188, 33, 1, 1489, 8, 1489, 8,
-        16084, 35, 14625, 35, 1, 1490, 8, 1490, 8,
-        16119, 38, 3636, 40, 1, 1491, 8, 1491, 8,
+        14996, 20, 15016, 35, 1, 1432, 8, 1432, 8,
+        15051, 28, 4909, 33, 1, 1433, 8, 1433, 8,
+        15079, 27, 2543, 38, 1, 1434, 8, 1434, 8,
+        15106, 38, 4778, 41, 1, 1435, 8, 1435, 8,
+        15144, 34, 4845, 37, 1, 1437, 8, 1437, 8,
+        15178, 35, 4909, 33, 1, 1438, 8, 1438, 8,
+        15213, 26, 4222, 40, 1, 1439, 8, 1439, 8,
+        15239, 37, 4291, 41, 1, 1440, 8, 1440, 8,
+        15276, 33, 193, 35, 1, 1442, 8, 1442, 8,
+        15309, 34, 193, 35, 1, 1443, 8, 1443, 8,
+        15343, 26, 693, 36, 1, 1444, 8, 1444, 8,
+        15369, 37, 729, 35, 1, 1445, 8, 1445, 8,
+        15406, 33, 729, 35, 1, 1446, 8, 1446, 8,
+        15439, 34, 381, 39, 1, 1447, 8, 1447, 8,
+        15473, 35, 5207, 37, 1, 1448, 8, 1448, 8,
+        15508, 36, 5271, 33, 1, 1449, 8, 1449, 8,
+        15544, 35, 15016, 35, 1, 1450, 8, 1450, 8,
+        15579, 38, 3719, 40, 1, 1451, 8, 1451, 8,
+        15617, 36, 2269, 29, 1, 1454, 8, 1454, 8,
+        15653, 47, 3625, 34, 1, 1455, 8, 1455, 8,
+        15700, 43, 3555, 37, 1, 1457, 8, 1457, 8,
+        15743, 37, 443, 39, 1, 1459, 8, 1459, 8,
+        15780, 48, 546, 38, 1, 1461, 8, 1461, 8,
+        15828, 44, 546, 38, 1, 1463, 8, 1463, 8,
+        15872, 47, 3257, 38, 1, 1465, 8, 1465, 8,
+        15919, 43, 3257, 38, 1, 1467, 8, 1467, 8,
+        15962, 20, 15016, 35, 1, 1472, 8, 1472, 8,
+        15982, 28, 4909, 33, 1, 1473, 8, 1473, 8,
+        16010, 27, 2543, 38, 1, 1474, 8, 1474, 8,
+        16037, 38, 4778, 41, 1, 1475, 8, 1475, 8,
+        16075, 34, 4845, 37, 1, 1477, 8, 1477, 8,
+        16109, 35, 4909, 33, 1, 1478, 8, 1478, 8,
+        16144, 26, 4222, 40, 1, 1479, 8, 1479, 8,
+        16170, 37, 4291, 41, 1, 1480, 8, 1480, 8,
+        16207, 33, 193, 35, 1, 1482, 8, 1482, 8,
+        16240, 34, 193, 35, 1, 1483, 8, 1483, 8,
+        16274, 26, 693, 36, 1, 1484, 8, 1484, 8,
+        16300, 37, 729, 35, 1, 1485, 8, 1485, 8,
+        16337, 33, 729, 35, 1, 1486, 8, 1486, 8,
+        16370, 34, 381, 39, 1, 1487, 8, 1487, 8,
+        16404, 35, 5207, 37, 1, 1488, 8, 1488, 8,
+        16439, 36, 5271, 33, 1, 1489, 8, 1489, 8,
+        16475, 35, 15016, 35, 1, 1490, 8, 1490, 8,
+        16510, 38, 3719, 40, 1, 1491, 8, 1491, 8,
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_203: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabItemHeaderMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 1496, position: 46 },
-    rt::ValueRow { key: "TabItemMargin", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 1497, position: 40 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_203: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_2_NUMBERS,
+    records: &[
+        16548, 19, 1496, 46, 6, 4, 6, 4,
+        16567, 13, 1497, 40, 6, 4, 6, 4,
+    ],
+};
 
 /// The resource aliases of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).
 static POPULATE_FLUENTTHEME_XAML_ROWS_204: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        16157, 20, 2269, 29, 1, 1499, 8, 1499, 8,
-        16177, 33, 2269, 29, 1, 1502, 8, 1502, 8,
-        16210, 44, 546, 38, 1, 1503, 8, 1503, 8,
-        16254, 40, 546, 38, 1, 1505, 8, 1505, 8,
-        16294, 31, 546, 38, 1, 1507, 8, 1507, 8,
-        16325, 42, 546, 38, 1, 1508, 8, 1508, 8,
-        16367, 38, 546, 38, 1, 1510, 8, 1510, 8,
-        16405, 31, 2269, 29, 1, 1512, 8, 1512, 8,
-        16436, 33, 2543, 38, 1, 1513, 8, 1513, 8,
-        16469, 44, 5009, 44, 1, 1514, 8, 1514, 8,
-        16513, 40, 5009, 44, 1, 1516, 8, 1516, 8,
-        16553, 31, 3174, 38, 1, 1518, 8, 1518, 8,
-        16584, 42, 5009, 44, 1, 1519, 8, 1519, 8,
-        16626, 38, 5009, 44, 1, 1521, 8, 1521, 8,
-        16664, 31, 381, 39, 1, 1523, 8, 1523, 8,
-        16695, 29, 16724, 36, 1, 1524, 8, 1524, 8,
+        16580, 20, 2269, 29, 1, 1499, 8, 1499, 8,
+        16600, 33, 2269, 29, 1, 1502, 8, 1502, 8,
+        16633, 44, 546, 38, 1, 1503, 8, 1503, 8,
+        16677, 40, 546, 38, 1, 1505, 8, 1505, 8,
+        16717, 31, 546, 38, 1, 1507, 8, 1507, 8,
+        16748, 42, 546, 38, 1, 1508, 8, 1508, 8,
+        16790, 38, 546, 38, 1, 1510, 8, 1510, 8,
+        16828, 31, 2269, 29, 1, 1512, 8, 1512, 8,
+        16859, 33, 2543, 38, 1, 1513, 8, 1513, 8,
+        16892, 44, 5092, 44, 1, 1514, 8, 1514, 8,
+        16936, 40, 5092, 44, 1, 1516, 8, 1516, 8,
+        16976, 31, 3257, 38, 1, 1518, 8, 1518, 8,
+        17007, 42, 5092, 44, 1, 1519, 8, 1519, 8,
+        17049, 38, 5092, 44, 1, 1521, 8, 1521, 8,
+        17087, 31, 381, 39, 1, 1523, 8, 1523, 8,
+        17118, 29, 17147, 36, 1, 1524, 8, 1524, 8,
     ],
 };
 
@@ -3738,25 +3792,25 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_205: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        16760, 19, 2269, 29, 1, 1529, 8, 1529, 8,
-        16779, 30, 2269, 29, 1, 1530, 8, 1530, 8,
-        16809, 19, 2269, 29, 1, 1531, 8, 1531, 8,
-        16828, 20, 2269, 29, 1, 1532, 8, 1532, 8,
-        16848, 25, 2269, 29, 1, 1533, 8, 1533, 8,
-        16873, 36, 16909, 35, 1, 1534, 8, 1534, 8,
-        16944, 32, 16976, 38, 1, 1535, 8, 1535, 8,
-        17014, 33, 2269, 29, 1, 1536, 8, 1536, 8,
-        17047, 26, 2269, 29, 1, 1537, 8, 1537, 8,
-        17073, 37, 2269, 29, 1, 1538, 8, 1538, 8,
-        17110, 33, 2269, 29, 1, 1539, 8, 1539, 8,
-        17143, 34, 2269, 29, 1, 1540, 8, 1540, 8,
-        17177, 30, 693, 36, 1, 1541, 8, 1541, 8,
-        17207, 41, 693, 36, 1, 1542, 8, 1542, 8,
-        17248, 37, 17285, 35, 1, 1544, 8, 1544, 8,
-        17320, 38, 14625, 35, 1, 1545, 8, 1545, 8,
-        17358, 29, 652, 41, 1, 1546, 8, 1546, 8,
-        17387, 25, 16976, 38, 1, 1547, 8, 1547, 8,
-        17412, 26, 615, 37, 1, 1548, 8, 1548, 8,
+        17183, 19, 2269, 29, 1, 1529, 8, 1529, 8,
+        17202, 30, 2269, 29, 1, 1530, 8, 1530, 8,
+        17232, 19, 2269, 29, 1, 1531, 8, 1531, 8,
+        17251, 20, 2269, 29, 1, 1532, 8, 1532, 8,
+        17271, 25, 2269, 29, 1, 1533, 8, 1533, 8,
+        17296, 36, 17332, 35, 1, 1534, 8, 1534, 8,
+        17367, 32, 17399, 38, 1, 1535, 8, 1535, 8,
+        17437, 33, 2269, 29, 1, 1536, 8, 1536, 8,
+        17470, 26, 2269, 29, 1, 1537, 8, 1537, 8,
+        17496, 37, 2269, 29, 1, 1538, 8, 1538, 8,
+        17533, 33, 2269, 29, 1, 1539, 8, 1539, 8,
+        17566, 34, 2269, 29, 1, 1540, 8, 1540, 8,
+        17600, 30, 693, 36, 1, 1541, 8, 1541, 8,
+        17630, 41, 693, 36, 1, 1542, 8, 1542, 8,
+        17671, 37, 17708, 35, 1, 1544, 8, 1544, 8,
+        17743, 38, 15016, 35, 1, 1545, 8, 1545, 8,
+        17781, 29, 652, 41, 1, 1546, 8, 1546, 8,
+        17810, 25, 17399, 38, 1, 1547, 8, 1547, 8,
+        17835, 26, 615, 37, 1, 1548, 8, 1548, 8,
     ],
 };
 
@@ -3765,10 +3819,10 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_206: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17438, 20, 443, 39, 1, 1552, 8, 1552, 8,
-        17458, 31, 443, 39, 1, 1553, 8, 1553, 8,
-        17489, 29, 11039, 18, 1, 1554, 8, 1554, 8,
-        17518, 36, 17554, 28, 1, 1555, 8, 1555, 8,
+        17861, 20, 443, 39, 1, 1552, 8, 1552, 8,
+        17881, 31, 443, 39, 1, 1553, 8, 1553, 8,
+        17912, 29, 11363, 18, 1, 1554, 8, 1554, 8,
+        17941, 36, 17977, 28, 1, 1555, 8, 1555, 8,
     ],
 };
 
@@ -3777,7 +3831,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_207: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17518, 31, 17518, 36, 1, 1556, 8, 1557, 24,
+        17941, 31, 17941, 36, 1, 1556, 8, 1557, 24,
     ],
 };
 
@@ -3792,30 +3846,30 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_209: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        17582, 22, 10569, 45, 1, 1562, 8, 1562, 8,
-        17604, 33, 17637, 50, 1, 1563, 8, 1563, 8,
-        17687, 29, 17716, 53, 1, 1565, 8, 1565, 8,
-        17769, 30, 2269, 29, 1, 1567, 8, 1567, 8,
-        17799, 30, 17829, 50, 1, 1568, 8, 1568, 8,
-        17879, 41, 17920, 50, 1, 1570, 8, 1570, 8,
-        17970, 37, 17716, 53, 1, 1572, 8, 1572, 8,
-        18007, 38, 381, 39, 1, 1574, 8, 1574, 8,
-        18045, 22, 693, 36, 1, 1576, 8, 1576, 8,
-        18067, 33, 3174, 38, 1, 1577, 8, 1577, 8,
-        18100, 29, 3174, 38, 1, 1578, 8, 1578, 8,
-        18129, 30, 381, 39, 1, 1579, 8, 1579, 8,
-        18159, 30, 3174, 38, 1, 1580, 8, 1580, 8,
-        18189, 41, 3174, 38, 1, 1581, 8, 1581, 8,
-        18230, 37, 3174, 38, 1, 1583, 8, 1583, 8,
-        18267, 38, 381, 39, 1, 1585, 8, 1585, 8,
-        18305, 23, 2269, 29, 1, 1587, 8, 1587, 8,
-        18328, 34, 18362, 53, 1, 1588, 8, 1588, 8,
-        18415, 30, 18362, 53, 1, 1590, 8, 1590, 8,
-        18445, 31, 2269, 29, 1, 1592, 8, 1592, 8,
-        18476, 31, 2269, 29, 1, 1593, 8, 1593, 8,
-        18507, 42, 18549, 51, 1, 1594, 8, 1594, 8,
-        18600, 38, 18549, 51, 1, 1596, 8, 1596, 8,
-        18638, 39, 2269, 29, 1, 1598, 8, 1598, 8,
+        18005, 22, 10826, 45, 1, 1562, 8, 1562, 8,
+        18027, 33, 18060, 50, 1, 1563, 8, 1563, 8,
+        18110, 29, 18139, 53, 1, 1565, 8, 1565, 8,
+        18192, 30, 2269, 29, 1, 1567, 8, 1567, 8,
+        18222, 30, 18252, 50, 1, 1568, 8, 1568, 8,
+        18302, 41, 18343, 50, 1, 1570, 8, 1570, 8,
+        18393, 37, 18139, 53, 1, 1572, 8, 1572, 8,
+        18430, 38, 381, 39, 1, 1574, 8, 1574, 8,
+        18468, 22, 693, 36, 1, 1576, 8, 1576, 8,
+        18490, 33, 3257, 38, 1, 1577, 8, 1577, 8,
+        18523, 29, 3257, 38, 1, 1578, 8, 1578, 8,
+        18552, 30, 381, 39, 1, 1579, 8, 1579, 8,
+        18582, 30, 3257, 38, 1, 1580, 8, 1580, 8,
+        18612, 41, 3257, 38, 1, 1581, 8, 1581, 8,
+        18653, 37, 3257, 38, 1, 1583, 8, 1583, 8,
+        18690, 38, 381, 39, 1, 1585, 8, 1585, 8,
+        18728, 23, 2269, 29, 1, 1587, 8, 1587, 8,
+        18751, 34, 18785, 53, 1, 1588, 8, 1588, 8,
+        18838, 30, 18785, 53, 1, 1590, 8, 1590, 8,
+        18868, 31, 2269, 29, 1, 1592, 8, 1592, 8,
+        18899, 31, 2269, 29, 1, 1593, 8, 1593, 8,
+        18930, 42, 18972, 51, 1, 1594, 8, 1594, 8,
+        19023, 38, 18972, 51, 1, 1596, 8, 1596, 8,
+        19061, 39, 2269, 29, 1, 1598, 8, 1598, 8,
     ],
 };
 
@@ -3824,7 +3878,7 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_210: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18677, 21, 193, 35, 1, 1603, 8, 1603, 8,
+        19100, 21, 193, 35, 1, 1603, 8, 1603, 8,
     ],
 };
 
@@ -3833,9 +3887,9 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_211: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18698, 28, 652, 41, 1, 1606, 8, 1606, 8,
-        18726, 29, 193, 35, 1, 1607, 8, 1607, 8,
-        18755, 28, 1187, 33, 1, 1608, 8, 1608, 8,
+        19121, 28, 652, 41, 1, 1606, 8, 1606, 8,
+        19149, 29, 193, 35, 1, 1607, 8, 1607, 8,
+        19178, 28, 1187, 33, 1, 1608, 8, 1608, 8,
     ],
 };
 
@@ -3844,8 +3898,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_212: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18783, 39, 141, 22, 1, 1609, 8, 1609, 72,
-        18822, 35, 89, 23, 1, 1610, 8, 1610, 68,
+        19206, 39, 141, 22, 1, 1609, 8, 1609, 72,
+        19245, 35, 89, 23, 1, 1610, 8, 1610, 68,
     ],
 };
 
@@ -3854,23 +3908,23 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_213: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        18857, 36, 193, 35, 1, 1611, 8, 1611, 8,
-        18893, 21, 693, 36, 1, 1612, 8, 1612, 8,
-        18914, 32, 729, 35, 1, 1613, 8, 1613, 8,
-        18946, 28, 729, 35, 1, 1614, 8, 1614, 8,
-        18974, 29, 381, 39, 1, 1615, 8, 1615, 8,
-        19003, 28, 1682, 41, 1, 1616, 8, 1616, 8,
-        19031, 39, 1682, 41, 1, 1617, 8, 1617, 8,
-        19070, 35, 1682, 41, 1, 1619, 8, 1619, 8,
-        19105, 36, 381, 39, 1, 1621, 8, 1621, 8,
-        19141, 22, 443, 39, 1, 1623, 8, 1623, 8,
-        19163, 33, 443, 39, 1, 1624, 8, 1624, 8,
-        19196, 29, 546, 38, 1, 1625, 8, 1625, 8,
-        19225, 30, 615, 37, 1, 1626, 8, 1626, 8,
-        19255, 29, 2150, 41, 1, 1627, 8, 1627, 8,
-        19284, 40, 2150, 41, 1, 1628, 8, 1628, 8,
-        19324, 36, 2150, 41, 1, 1630, 8, 1630, 8,
-        19360, 37, 615, 37, 1, 1632, 8, 1632, 8,
+        19280, 36, 193, 35, 1, 1611, 8, 1611, 8,
+        19316, 21, 693, 36, 1, 1612, 8, 1612, 8,
+        19337, 32, 729, 35, 1, 1613, 8, 1613, 8,
+        19369, 28, 729, 35, 1, 1614, 8, 1614, 8,
+        19397, 29, 381, 39, 1, 1615, 8, 1615, 8,
+        19426, 28, 1682, 41, 1, 1616, 8, 1616, 8,
+        19454, 39, 1682, 41, 1, 1617, 8, 1617, 8,
+        19493, 35, 1682, 41, 1, 1619, 8, 1619, 8,
+        19528, 36, 381, 39, 1, 1621, 8, 1621, 8,
+        19564, 22, 443, 39, 1, 1623, 8, 1623, 8,
+        19586, 33, 443, 39, 1, 1624, 8, 1624, 8,
+        19619, 29, 546, 38, 1, 1625, 8, 1625, 8,
+        19648, 30, 615, 37, 1, 1626, 8, 1626, 8,
+        19678, 29, 2150, 41, 1, 1627, 8, 1627, 8,
+        19707, 40, 2150, 41, 1, 1628, 8, 1628, 8,
+        19747, 36, 2150, 41, 1, 1630, 8, 1630, 8,
+        19783, 37, 615, 37, 1, 1632, 8, 1632, 8,
     ],
 };
 
@@ -3879,24 +3933,24 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_214: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        19397, 38, 19435, 47, 1, 1636, 8, 1636, 8,
-        19482, 28, 693, 36, 1, 1640, 8, 1640, 8,
-        19510, 36, 381, 39, 1, 1641, 8, 1641, 8,
-        19546, 41, 4890, 42, 1, 1643, 8, 1643, 8,
-        19587, 49, 381, 39, 1, 1645, 8, 1645, 8,
-        19636, 32, 2543, 38, 1, 1647, 8, 1647, 8,
-        19668, 40, 381, 39, 1, 1648, 8, 1648, 8,
-        19708, 40, 693, 36, 1, 1650, 8, 1650, 8,
-        19748, 28, 4139, 40, 1, 1652, 8, 1652, 8,
-        19776, 39, 4208, 41, 1, 1653, 8, 1653, 8,
-        19815, 35, 193, 35, 1, 1655, 8, 1655, 8,
-        19850, 36, 193, 35, 1, 1656, 8, 1656, 8,
-        19886, 35, 3636, 40, 1, 1657, 8, 1657, 8,
-        19921, 29, 2543, 38, 1, 1659, 8, 1659, 8,
-        19950, 40, 4695, 41, 1, 1660, 8, 1660, 8,
-        19990, 36, 4762, 37, 1, 1662, 8, 1662, 8,
-        20026, 37, 4826, 33, 1, 1663, 8, 1663, 8,
-        20063, 47, 19435, 47, 1, 1664, 8, 1664, 8,
+        19820, 38, 19858, 47, 1, 1636, 8, 1636, 8,
+        19905, 28, 693, 36, 1, 1640, 8, 1640, 8,
+        19933, 36, 381, 39, 1, 1641, 8, 1641, 8,
+        19969, 41, 4973, 42, 1, 1643, 8, 1643, 8,
+        20010, 49, 381, 39, 1, 1645, 8, 1645, 8,
+        20059, 32, 2543, 38, 1, 1647, 8, 1647, 8,
+        20091, 40, 381, 39, 1, 1648, 8, 1648, 8,
+        20131, 40, 693, 36, 1, 1650, 8, 1650, 8,
+        20171, 28, 4222, 40, 1, 1652, 8, 1652, 8,
+        20199, 39, 4291, 41, 1, 1653, 8, 1653, 8,
+        20238, 35, 193, 35, 1, 1655, 8, 1655, 8,
+        20273, 36, 193, 35, 1, 1656, 8, 1656, 8,
+        20309, 35, 3719, 40, 1, 1657, 8, 1657, 8,
+        20344, 29, 2543, 38, 1, 1659, 8, 1659, 8,
+        20373, 40, 4778, 41, 1, 1660, 8, 1660, 8,
+        20413, 36, 4845, 37, 1, 1662, 8, 1662, 8,
+        20449, 37, 4909, 33, 1, 1663, 8, 1663, 8,
+        20486, 47, 19858, 47, 1, 1664, 8, 1664, 8,
     ],
 };
 
@@ -3905,8 +3959,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_215: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        5882, 25, 14544, 43, 1, 1669, 8, 1669, 8,
-        20110, 22, 5188, 33, 1, 1670, 8, 1670, 8,
+        6139, 25, 14935, 43, 1, 1669, 8, 1669, 8,
+        20533, 22, 5271, 33, 1, 1670, 8, 1670, 8,
     ],
 };
 
@@ -3915,11 +3969,11 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_216: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20132, 27, 65535, 65535, 1, 1677, 8,
-        20159, 27, 65535, 255, 1, 1678, 8,
-        20186, 23, 65535, 65535, 1, 1681, 8,
-        20209, 23, 5903, 65309, 1, 1682, 8,
-        20232, 24, 51914, 65482, 1, 1683, 8,
+        20555, 27, 65535, 65535, 1, 1677, 8,
+        20582, 27, 65535, 255, 1, 1678, 8,
+        20609, 23, 65535, 65535, 1, 1681, 8,
+        20632, 23, 5903, 65309, 1, 1682, 8,
+        20655, 24, 51914, 65482, 1, 1683, 8,
     ],
 };
 
@@ -3928,8 +3982,8 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_217: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20256, 23, 6726, 35, 1, 1684, 8, 1684, 8,
-        20279, 40, 11039, 18, 1, 1687, 8, 1687, 8,
+        20679, 23, 6983, 35, 1, 1684, 8, 1684, 8,
+        20702, 40, 11363, 18, 1, 1687, 8, 1687, 8,
     ],
 };
 
@@ -3938,17 +3992,17 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_218: rt::PackedRows = rt::PackedRows {
     strings: POPULATE_FLUENTTHEME_XAML_UNIT_2_STRINGS,
     namespaces: &[POPULATE_FLUENTTHEME_XAML_XML_NAMESPACES_1],
     records: &[
-        20319, 30, 381, 39, 1, 1692, 8, 1692, 8,
-        20349, 33, 3542, 34, 1, 1693, 8, 1693, 8,
-        20382, 33, 3174, 38, 1, 1694, 8, 1694, 8,
-        20415, 29, 3472, 37, 1, 1695, 8, 1695, 8,
-        20444, 29, 3174, 38, 1, 1696, 8, 1696, 8,
-        20473, 30, 3636, 40, 1, 1697, 8, 1697, 8,
-        20503, 30, 3174, 38, 1, 1698, 8, 1698, 8,
-        20533, 41, 3795, 43, 1, 1699, 8, 1699, 8,
-        20574, 41, 3174, 38, 1, 1700, 8, 1700, 8,
-        20615, 37, 3713, 41, 1, 1701, 8, 1701, 8,
-        20652, 37, 3174, 38, 1, 1702, 8, 1702, 8,
+        20742, 30, 381, 39, 1, 1692, 8, 1692, 8,
+        20772, 33, 3625, 34, 1, 1693, 8, 1693, 8,
+        20805, 33, 3257, 38, 1, 1694, 8, 1694, 8,
+        20838, 29, 3555, 37, 1, 1695, 8, 1695, 8,
+        20867, 29, 3257, 38, 1, 1696, 8, 1696, 8,
+        20896, 30, 3719, 40, 1, 1697, 8, 1697, 8,
+        20926, 30, 3257, 38, 1, 1698, 8, 1698, 8,
+        20956, 41, 3878, 43, 1, 1699, 8, 1699, 8,
+        20997, 41, 3257, 38, 1, 1700, 8, 1700, 8,
+        21038, 37, 3796, 41, 1, 1701, 8, 1701, 8,
+        21075, 37, 3257, 38, 1, 1702, 8, 1702, 8,
     ],
 };
 
@@ -3961,39 +4015,51 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_219: rt::PackedRows = rt::PackedRows {
     ],
 };
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_220: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextControlBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 11, position: 54 },
-    rt::ValueRow { key: "TextControlBorderThemeThicknessFocused", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 12, position: 61 },
-    rt::ValueRow { key: "TextControlThemePadding", value: [10.0_f64, 6.0_f64, 6.0_f64, 5.0_f64], line: 13, position: 46 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_220: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        4631, 31, 11, 54, 0, 0, 0, 0,
+        4662, 38, 12, 61, 1, 1, 1, 1,
+        4700, 23, 13, 46, 2, 3, 3, 4,
+    ],
+};
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_221: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "IconElementThemeHeight", value: 20.0_f64, line: 14, position: 46 },
-    rt::ValueRow { key: "IconElementThemeWidth", value: 20.0_f64, line: 15, position: 45 },
-    rt::ValueRow { key: "RefreshVisualizerIndicatorSize", value: 24.0_f64, line: 16, position: 54 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_221: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        4723, 22, 14, 46, 5,
+        4745, 21, 15, 45, 5,
+        4766, 30, 16, 54, 6,
+    ],
+};
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_222: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ButtonPadding", value: [8.0_f64, 5.0_f64, 8.0_f64, 6.0_f64], line: 17, position: 36 },
-    rt::ValueRow { key: "CheckBoxPadding", value: [8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 18, position: 38 },
-    rt::ValueRow { key: "RadioButtonPadding", value: [8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 19, position: 41 },
-    rt::ValueRow { key: "ButtonSpinnerPadding", value: [10.0_f64, 0.0_f64, 10.0_f64, 0.0_f64], line: 20, position: 43 },
-    rt::ValueRow { key: "LabelPadding", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 21, position: 35 },
-    rt::ValueRow { key: "HeaderedContentControlPadding", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 22, position: 52 },
-    rt::ValueRow { key: "CalendarDatePickerPadding", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 23, position: 48 },
-    rt::ValueRow { key: "CommandBarButtonPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 24, position: 46 },
-    rt::ValueRow { key: "CommandBarToggleButtonPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 25, position: 52 },
-    rt::ValueRow { key: "CommandBarSeparatorMargin", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 26, position: 48 },
-    rt::ValueRow { key: "CommandBarSeparatorOverflowMargin", value: [4.0_f64, 4.0_f64, 4.0_f64, 4.0_f64], line: 27, position: 56 },
-    rt::ValueRow { key: "CommandBarPadding", value: [4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64], line: 28, position: 40 },
-    rt::ValueRow { key: "CommandBarOverflowButtonPadding", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 29, position: 54 },
-    rt::ValueRow { key: "ManagedFileChooserQuickLinksPadding", value: [0.0_f64, 20.0_f64, 0.0_f64, 20.0_f64], line: 30, position: 58 },
-    rt::ValueRow { key: "ManagedFileChooserQuickLinksItemPadding", value: [30.0_f64, 6.0_f64, 30.0_f64, 6.0_f64], line: 31, position: 62 },
-    rt::ValueRow { key: "NavigationPageCommandBarButtonPadding", value: [8.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 32, position: 60 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_222: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        4796, 13, 17, 36, 7, 4, 7, 3,
+        4809, 15, 18, 38, 7, 8, 8, 8,
+        4824, 18, 19, 41, 7, 8, 8, 8,
+        4842, 20, 20, 43, 2, 8, 2, 8,
+        4862, 12, 21, 35, 9, 9, 9, 9,
+        4874, 29, 22, 52, 9, 9, 9, 9,
+        4903, 25, 23, 48, 10, 10, 10, 10,
+        4928, 23, 24, 46, 7, 10, 7, 10,
+        4951, 29, 25, 52, 7, 10, 7, 10,
+        4980, 25, 26, 48, 7, 10, 7, 10,
+        5005, 33, 27, 56, 10, 10, 10, 10,
+        5038, 17, 28, 40, 10, 8, 10, 8,
+        5055, 31, 29, 54, 11, 8, 11, 8,
+        5086, 35, 30, 58, 8, 5, 8, 5,
+        5121, 39, 31, 62, 12, 3, 12, 3,
+        5160, 37, 32, 60, 7, 8, 7, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_223: &[rt::ValueRow<f64>] = &[
@@ -4001,62 +4067,86 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_223: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarButtonMinHeight", value: 40.0_f64, line: 36, position: 45 },
 ];
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_224: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CalendarButtonBorderThickness", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 37, position: 52 },
-    rt::ValueRow { key: "CalendarBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 38, position: 46 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_224: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        5197, 29, 37, 52, 1, 1, 1, 1,
+        5226, 23, 38, 46, 0, 0, 0, 0,
+    ],
+};
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_225: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarDatePickerDropDownButtonWidth", value: 20.0_f64, line: 39, position: 59 },
-    rt::ValueRow { key: "CommandBarButtonWidth", value: 68.0_f64, line: 42, position: 43 },
-    rt::ValueRow { key: "CommandBarButtonCompactWidth", value: 40.0_f64, line: 43, position: 50 },
-    rt::ValueRow { key: "CommandBarButtonLabelRightMinWidth", value: 40.0_f64, line: 44, position: 56 },
-    rt::ValueRow { key: "CommandBarButtonMinHeight", value: 40.0_f64, line: 45, position: 47 },
-    rt::ValueRow { key: "CommandBarButtonIsInOverflowMinHeight", value: 36.0_f64, line: 46, position: 59 },
-    rt::ValueRow { key: "CommandBarSeparatorWidth", value: 1.0_f64, line: 47, position: 46 },
-    rt::ValueRow { key: "CommandBarSeparatorOverflowHeight", value: 1.0_f64, line: 48, position: 55 },
-    rt::ValueRow { key: "CommandBarSeparatorMinHeight", value: 24.0_f64, line: 49, position: 50 },
-    rt::ValueRow { key: "CommandBarMinHeight", value: 48.0_f64, line: 50, position: 41 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_225: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        5249, 37, 39, 59, 5,
+        5286, 21, 42, 43, 13,
+        5307, 28, 43, 50, 14,
+        5335, 34, 44, 56, 14,
+        5369, 25, 45, 47, 14,
+        5394, 37, 46, 59, 15,
+        5431, 24, 47, 46, 0,
+        5455, 33, 48, 55, 0,
+        5488, 28, 49, 50, 6,
+        5516, 19, 50, 41, 16,
+    ],
+};
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_226: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerPresenterWidth", value: 296.0_f64, line: 54, position: 46 },
-    rt::ValueRow { key: "TimePickerPresenterWidth", value: 242.0_f64, line: 55, position: 46 },
-    rt::ValueRow { key: "DateTimePickerButtonHeight", value: 22.0_f64, line: 56, position: 48 },
-    rt::ValueRow { key: "GridSplitterThickness", value: 6.0_f64, line: 59, position: 43 },
-    rt::ValueRow { key: "ManagedFileChooserOverwritePromptMinWidth", value: 270.0_f64, line: 62, position: 63 },
-    rt::ValueRow { key: "ManagedFileChooserQuickLinksWidth", value: 240.0_f64, line: 63, position: 55 },
-    rt::ValueRow { key: "ManagedFileChooserQuickLinksItemHeight", value: 32.0_f64, line: 64, position: 60 },
-    rt::ValueRow { key: "ManagedFileChooserNavBarControlHeight", value: 30.0_f64, line: 65, position: 59 },
-    rt::ValueRow { key: "ManagedFileChooserNavBarButtonWidth", value: 40.0_f64, line: 66, position: 57 },
-    rt::ValueRow { key: "NotificationCardWidth", value: 350.0_f64, line: 69, position: 43 },
-    rt::ValueRow { key: "PipsPagerNavigationButtonSize", value: 24.0_f64, line: 72, position: 51 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_226: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        5535, 24, 54, 46, 17,
+        5559, 24, 55, 46, 18,
+        5583, 26, 56, 48, 19,
+        5609, 21, 59, 43, 3,
+        5630, 41, 62, 63, 20,
+        5671, 33, 63, 55, 21,
+        5704, 38, 64, 60, 22,
+        5742, 37, 65, 59, 12,
+        5779, 35, 66, 57, 14,
+        5814, 21, 69, 43, 23,
+        5835, 29, 72, 51, 6,
+    ],
+};
 
-/// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_227: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "PipsPagerItemWidth", value: 12.0_f64, line: 74, position: 40 },
-    rt::ValueRow { key: "PipsPagerItemHeight", value: 24.0_f64, line: 75, position: 41 },
-    rt::ValueRow { key: "PipsPagerItemDotSize", value: 4.0_f64, line: 76, position: 42 },
-    rt::ValueRow { key: "PipsPagerItemDotSizeActive", value: 6.0_f64, line: 77, position: 48 },
-    rt::ValueRow { key: "TextControlInnerButtonMinWidth", value: 34.0_f64, line: 80, position: 52 },
-];
+/// The numbers of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_227: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        5864, 18, 74, 40, 11,
+        5882, 19, 75, 41, 6,
+        5901, 20, 76, 42, 10,
+        5921, 26, 77, 48, 3,
+        5947, 30, 80, 52, 24,
+    ],
+};
 
-/// The corner radii of a run of `FluentTheme.xaml`, added in order by `rt::add_corner_radius_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_228: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ControlCornerRadius", value: [3.0_f64, 3.0_f64, 3.0_f64, 3.0_f64], line: 83, position: 45 },
-    rt::ValueRow { key: "OverlayCornerRadius", value: [5.0_f64, 5.0_f64, 5.0_f64, 5.0_f64], line: 84, position: 45 },
-];
+/// The corner radii of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_corner_radius_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_228: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        5977, 19, 83, 45, 9, 9, 9, 9,
+        5996, 19, 84, 45, 4, 4, 4, 4,
+    ],
+};
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_229: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "AutoCompleteListMargin", value: [0.0_f64, 2.0_f64, 0.0_f64, 2.0_f64], line: 96, position: 45 },
-    rt::ValueRow { key: "AutoCompleteListBorderThemeThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 97, position: 59 },
-    rt::ValueRow { key: "AutoCompleteListPadding", value: [-1.0_f64, 0.0_f64, -1.0_f64, 0.0_f64], line: 98, position: 46 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_229: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        6015, 22, 96, 45, 8, 1, 8, 1,
+        6037, 36, 97, 59, 0, 0, 0, 0,
+        6073, 23, 98, 46, 25, 8, 25, 8,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_230: &[rt::ValueRow<f64>] = &[
@@ -4065,13 +4155,17 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_230: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "FlyoutThemeMaxWidth", value: 456.0_f64, line: 101, position: 41 },
 ];
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_231: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DateTimeFlyoutButtonBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 102, position: 58 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 103, position: 52 },
-    rt::ValueRow { key: "DateTimeFlyoutBorderPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 104, position: 50 },
-    rt::ValueRow { key: "FlyoutContentThemePadding", value: [12.0_f64, 11.0_f64, 12.0_f64, 12.0_f64], line: 106, position: 48 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_231: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        6096, 35, 102, 58, 8, 8, 8, 8,
+        6131, 29, 103, 52, 0, 0, 0, 0,
+        6160, 27, 104, 50, 8, 8, 8, 8,
+        6187, 25, 106, 48, 11, 26, 11, 11,
+    ],
+};
 
 /// The numbers of a run of `FluentTheme.xaml`, added in order by `rt::add_double_resources` (#568).
 static POPULATE_FLUENTTHEME_XAML_ROWS_232: &[rt::ValueRow<f64>] = &[
@@ -4080,50 +4174,58 @@ static POPULATE_FLUENTTHEME_XAML_ROWS_232: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "FlyoutThemeMaxHeight", value: 758.0_f64, line: 109, position: 42 },
 ];
 
-/// The thicknesses of a run of `FluentTheme.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_233: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "FlyoutBorderThemePadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 112, position: 47 },
-    rt::ValueRow { key: "MenuFlyoutScrollerMargin", value: [0.0_f64, 4.0_f64, 0.0_f64, 4.0_f64], line: 115, position: 47 },
-    rt::ValueRow { key: "MenuBarItemPadding", value: [12.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 118, position: 41 },
-];
+/// The thicknesses of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_233: rt::PackedValueRows = rt::PackedValueRows {
+    strings: POPULATE_FLUENTTHEME_XAML_UNIT_1_STRINGS,
+    numbers: &POPULATE_FLUENTTHEME_XAML_UNIT_1_NUMBERS,
+    records: &[
+        6212, 24, 112, 47, 8, 8, 8, 8,
+        6236, 24, 115, 47, 8, 10, 8, 10,
+        6260, 18, 118, 41, 11, 8, 11, 8,
+    ],
+};
 
-/// The texts of a run of `FluentTheme.xaml`, added in order by `rt::add_string_resources` (#568).
-static POPULATE_FLUENTTHEME_XAML_ROWS_234: &[rt::ValueRow<&'static str>] = &[
-    rt::ValueRow { key: "StringCalendarWeekNumberHeader", value: "\u{a0}", line: 5, position: 52 },
-    rt::ValueRow { key: "StringDatePickerDayText", value: "day", line: 7, position: 45 },
-    rt::ValueRow { key: "StringDatePickerMonthText", value: "month", line: 8, position: 47 },
-    rt::ValueRow { key: "StringDatePickerYearText", value: "year", line: 9, position: 46 },
-    rt::ValueRow { key: "StringTimePickerHourText", value: "hour", line: 11, position: 46 },
-    rt::ValueRow { key: "StringTimePickerMinuteText", value: "minute", line: 12, position: 48 },
-    rt::ValueRow { key: "StringTimePickerSecondText", value: "second", line: 13, position: 48 },
-    rt::ValueRow { key: "StringTextFlyoutCutText", value: "Cut", line: 15, position: 45 },
-    rt::ValueRow { key: "StringTextFlyoutCopyText", value: "Copy", line: 16, position: 46 },
-    rt::ValueRow { key: "StringTextFlyoutPasteText", value: "Paste", line: 17, position: 47 },
-    rt::ValueRow { key: "StringManagedFileChooserFileNamePlaceholder", value: "File name", line: 19, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserShowHiddenFilesText", value: "Show hidden files", line: 20, position: 65 },
-    rt::ValueRow { key: "StringManagedFileChooserOkText", value: "OK", line: 21, position: 52 },
-    rt::ValueRow { key: "StringManagedFileChooserCancelText", value: "Cancel", line: 22, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserNameColumn", value: "Name", line: 23, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserDateModifiedColumn", value: "Date Modified", line: 24, position: 64 },
-    rt::ValueRow { key: "StringManagedFileChooserTypeColumn", value: "Type", line: 25, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserSizeColumn", value: "Size", line: 26, position: 56 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", value: "{0} already exists. Do you want to replace it?", line: 27, position: 82 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptConfirmText", value: "Yes", line: 28, position: 72 },
-    rt::ValueRow { key: "StringManagedFileChooserOverwritePromptCancelText", value: "No", line: 29, position: 71 },
-    rt::ValueRow { key: "StringScrollBarScrollHere", value: "Scroll Here", line: 30, position: 47 },
-    rt::ValueRow { key: "StringScrollBarTop", value: "Top", line: 31, position: 40 },
-    rt::ValueRow { key: "StringScrollBarBottom", value: "Bottom", line: 32, position: 43 },
-    rt::ValueRow { key: "StringScrollBarPageUp", value: "Page Up", line: 33, position: 43 },
-    rt::ValueRow { key: "StringScrollBarPageDown", value: "Page Down", line: 34, position: 45 },
-    rt::ValueRow { key: "StringScrollBarScrollUp", value: "Scroll Up", line: 35, position: 45 },
-    rt::ValueRow { key: "StringScrollBarScrollDown", value: "Scroll Down", line: 36, position: 47 },
-    rt::ValueRow { key: "StringScrollBarLeftEdge", value: "Left Edge", line: 37, position: 45 },
-    rt::ValueRow { key: "StringScrollBarRightEdge", value: "Right Edge", line: 38, position: 46 },
-    rt::ValueRow { key: "StringScrollBarPageLeft", value: "Page Left", line: 39, position: 45 },
-    rt::ValueRow { key: "StringScrollBarPageRight", value: "Page Right", line: 40, position: 46 },
-    rt::ValueRow { key: "StringScrollBarScrollLeft", value: "Scroll Left", line: 41, position: 47 },
-    rt::ValueRow { key: "StringScrollBarScrollRight", value: "Scroll Right", line: 42, position: 48 },
-];
+/// The texts of a run of `FluentTheme.xaml`, packed, added in order by `rt::add_packed_string_resources` (#855).
+static POPULATE_FLUENTTHEME_XAML_ROWS_234: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "StringCalendarWeekNumberHeader\u{a0}StringDatePickerDayTextdayStringDatePickerMonthTextmonthStringDatePickerYearTextyearStringTimePickerHourTexthourStringTimePickerMinuteTextminuteStringTimePickerSecondTextsecondStringTextFlyoutCutTextStringTextFlyoutCopyTextStringTextFlyoutPasteTextStringManagedFileChooserFileNamePlaceholderFile nameStringManagedFileChooserShowHiddenFilesTextShow hidden filesStringManagedFileChooserOkTextOKStringManagedFileChooserCancelTextStringManagedFileChooserNameColumnStringManagedFileChooserDateModifiedColumnDate ModifiedStringManagedFileChooserTypeColumnStringManagedFileChooserSizeColumnStringManagedFileChooserOverwritePromptFileAlreadyExistsText{0} already exists. Do you want to replace it?StringManagedFileChooserOverwritePromptConfirmTextYesStringManagedFileChooserOverwritePromptCancelTextNoStringScrollBarScrollHereScroll HereStringScrollBarTopStringScrollBarBottomStringScrollBarPageUpPage UpStringScrollBarPageDownPage DownStringScrollBarScrollUpScroll UpStringScrollBarScrollDownScroll DownStringScrollBarLeftEdgeLeft EdgeStringScrollBarRightEdgeRight EdgeStringScrollBarPageLeftPage LeftStringScrollBarPageRightPage RightStringScrollBarScrollLeftScroll LeftStringScrollBarScrollRightScroll Right",
+    numbers: &[],
+    records: &[
+        0, 30, 5, 52, 30, 2,
+        32, 23, 7, 45, 55, 3,
+        58, 25, 8, 47, 83, 5,
+        88, 24, 9, 46, 112, 4,
+        116, 24, 11, 46, 140, 4,
+        144, 26, 12, 48, 170, 6,
+        176, 26, 13, 48, 202, 6,
+        208, 23, 15, 45, 224, 3,
+        231, 24, 16, 46, 247, 4,
+        255, 25, 17, 47, 271, 5,
+        280, 43, 19, 65, 323, 9,
+        332, 43, 20, 65, 375, 17,
+        392, 30, 21, 52, 422, 2,
+        424, 34, 22, 56, 448, 6,
+        458, 34, 23, 56, 308, 4,
+        492, 42, 24, 64, 534, 13,
+        547, 34, 25, 56, 571, 4,
+        581, 34, 26, 56, 605, 4,
+        615, 60, 27, 82, 675, 46,
+        721, 50, 28, 72, 771, 3,
+        774, 49, 29, 71, 823, 2,
+        825, 25, 30, 47, 850, 11,
+        861, 18, 31, 40, 876, 3,
+        879, 21, 32, 43, 894, 6,
+        900, 21, 33, 43, 921, 7,
+        928, 23, 34, 45, 951, 9,
+        960, 23, 35, 45, 983, 9,
+        992, 25, 36, 47, 1017, 11,
+        1028, 23, 37, 45, 1051, 9,
+        1060, 24, 38, 46, 1084, 10,
+        1094, 23, 39, 45, 1117, 9,
+        1126, 24, 40, 46, 1150, 10,
+        1160, 25, 41, 47, 1185, 11,
+        1196, 26, 42, 48, 1222, 12,
+    ],
+};
 
 /// Builds the deferred content at `FluentTheme.xaml(22,8)` (a template or a deferred resource).
 fn populate_fluenttheme_xaml_deferred_0(
@@ -4975,7 +5077,7 @@ pub fn build_controls_fluentcontrols_xaml(
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
         let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 7, 10)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 7, 10)?, count_0.wrapping_add(289_i32));
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 7, 10)?, count_0.wrapping_add(290_i32));
     }
     rt::apply_theme_unit(active_theme_units(), 4, 0, &context, &resource_dictionary_0)?;
     rt::apply_theme_unit(active_theme_units(), 6, 0, &context, &resource_dictionary_0)?;
@@ -5608,7 +5710,7 @@ fn build_controls_fluentcontrols_xaml_unit_35(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(4,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0)?;
     // Controls/FluentControls.xaml(8,4) Content (resource)
     let deferred_36 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_75, 8, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::AdornerLayer as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_36) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 8, 4)?;
@@ -5707,7 +5809,7 @@ fn build_controls_fluentcontrols_xaml_unit_39(
     // Controls/FluentControls.xaml(41,61) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 41, 61)?, rt::string_object("TabbedPageTabItemHeaderCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64))), 41, 61)?;
     // Controls/FluentControls.xaml(42,53) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_10)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_10)?;
     // Controls/FluentControls.xaml(46,53) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_11)?;
     // Controls/FluentControls.xaml(51,4) Content (resource)
@@ -5719,7 +5821,7 @@ fn build_controls_fluentcontrols_xaml_unit_39(
     // Controls/FluentControls.xaml(54,4) Content (resource)
     rt::add_packed_literal_brushes(&resource_dictionary_0, &context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13)?;
     // Controls/FluentControls.xaml(55,47) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14)?;
     // Controls/FluentControls.xaml(59,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "TabbedPageTabControlTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_110, 59, 4)?;
     // Controls/FluentControls.xaml(105,4) Content (resource)
@@ -5759,11 +5861,11 @@ fn build_controls_fluentcontrols_xaml_unit_41(
     // Controls/FluentControls.xaml(53,69) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 69)?, rt::string_object("ExpanderHeaderVerticalContentAlignment"), rt::to_object(::ferroui_base::layout::VerticalAlignment::Center)), 53, 69)?;
     // Controls/FluentControls.xaml(54,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_15)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_15)?;
     // Controls/FluentControls.xaml(58,47) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 58, 47)?, rt::string_object("ExpanderChevronButtonSize"), rt::to_object(32.0_f64)), 58, 47)?;
     // Controls/FluentControls.xaml(61,45) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_16)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_16)?;
     // Controls/FluentControls.xaml(67,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentExpanderToggleButtonTheme", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_122, 67, 4)?;
     // Controls/FluentControls.xaml(191,4) Content (resource)
@@ -5956,7 +6058,7 @@ fn build_controls_fluentcontrols_xaml_unit_52(
     // Controls/FluentControls.xaml(53,60) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 53, 60)?, rt::string_object("MenuFlyoutSubItemPopupHorizontalOffset"), rt::to_object(-4.0_f64)), 53, 60)?;
     // Controls/FluentControls.xaml(54,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18)?;
     // Controls/FluentControls.xaml(56,51) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "MenuItemChevronPathData", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_167, 56, 51)?;
     // Controls/FluentControls.xaml(58,4) Content (resource)
@@ -6080,7 +6182,7 @@ fn build_controls_fluentcontrols_xaml_unit_59(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(34,50) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22)?;
     // Controls/FluentControls.xaml(39,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "PrimaryButtonBorderMultiplier", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_285, 39, 4)?;
     // Controls/FluentControls.xaml(40,4) Content (resource)
@@ -6416,9 +6518,9 @@ fn build_controls_fluentcontrols_xaml_unit_77(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(31,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_30)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_30)?;
     // Controls/FluentControls.xaml(36,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_31)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_31)?;
     // Controls/FluentControls.xaml(40,48) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 40, 48)?, rt::string_object("DatePickerSpacerThemeWidth"), rt::to_object(1.0_f64)), 40, 48)?;
     // Controls/FluentControls.xaml(42,4) Content (resource)
@@ -6444,9 +6546,9 @@ fn build_controls_fluentcontrols_xaml_unit_78(
     // Controls/FluentControls.xaml(33,53) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 33, 53)?, rt::string_object("TimePickerBorderThemeThickness"), rt::to_object(::ferroui_base::Thickness::__markup_new_3(1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64))), 33, 53)?;
     // Controls/FluentControls.xaml(34,62) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_33)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_33)?;
     // Controls/FluentControls.xaml(38,59) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_34)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_34)?;
     // Controls/FluentControls.xaml(41,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentTimePickerFlyoutButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_369, 41, 4)?;
     // Controls/FluentControls.xaml(73,4) Content (resource)
@@ -6491,7 +6593,7 @@ fn build_controls_fluentcontrols_xaml_unit_80(
     // Controls/FluentControls.xaml(42,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 42, 49)?, rt::string_object("SliderThumbCornerRadius"), rt::to_object(::ferroui_base::CornerRadius::__markup_new_3(10.0_f64, 10.0_f64, 10.0_f64, 10.0_f64))), 42, 49)?;
     // Controls/FluentControls.xaml(43,48) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_36)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_36)?;
     // Controls/FluentControls.xaml(48,4) Content (resource)
     rt::add_deferred_resource(&resource_dictionary_0, "FluentSliderHorizontalRepeatButton", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_377, 48, 4)?;
     // Controls/FluentControls.xaml(63,4) Content (resource)
@@ -6511,15 +6613,17 @@ fn build_controls_fluentcontrols_xaml_unit_81(
 ) -> ::core::result::Result<(), ::ferroui_markup_xaml::XamlLoadError> {
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
-    // Controls/FluentControls.xaml(7,61) Content (resource)
-    let value_9 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("inset -6 0 3 -3 #20000000")), 7, 61)?;
-    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 7, 61)?, rt::string_object("ManagedFileChooserQuickLinksBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_9))), 7, 61)?;
-    // Controls/FluentControls.xaml(15,4) Content (resource)
-    let deferred_249 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_386, 15, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_249) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 15, 4)?;
-    // Controls/FluentControls.xaml(350,4) Content (resource)
-    let deferred_250 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_397, 350, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_250) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 350, 4)?;
+    // Controls/FluentControls.xaml(7,4) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "ManagedStorageFallback", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_386, 7, 4)?;
+    // Controls/FluentControls.xaml(8,61) Content (resource)
+    let value_9 = rt::invoked(::ferroui_base::media::BoxShadows::__markup_parse(::std::string::String::from("inset -6 0 3 -3 #20000000")), 8, 61)?;
+    rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 8, 61)?, rt::string_object("ManagedFileChooserQuickLinksBoxShadow"), rt::to_object(::core::clone::Clone::clone(&value_9))), 8, 61)?;
+    // Controls/FluentControls.xaml(16,4) Content (resource)
+    let deferred_250 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_387, 16, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_250) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 16, 4)?;
+    // Controls/FluentControls.xaml(351,4) Content (resource)
+    let deferred_251 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_398, 351, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_251) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 351, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6531,10 +6635,10 @@ fn build_controls_fluentcontrols_xaml_unit_82(
     let context = ::core::clone::Clone::clone(context);
     let resource_dictionary_0 = ::core::clone::Clone::clone(dictionary);
     // Controls/FluentControls.xaml(8,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "SelectableTextBlockContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_399, 8, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "SelectableTextBlockContextFlyout", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_400, 8, 4)?;
     // Controls/FluentControls.xaml(13,4) Content (resource)
-    let deferred_252 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_400, 13, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_252) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
+    let deferred_253 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_401, 13, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_253) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 13, 4)?;
     ::core::result::Result::Ok(())
 }
 
@@ -6548,25 +6652,29 @@ fn build_controls_fluentcontrols_xaml_unit_83(
     // Controls/FluentControls.xaml(16,42) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 42)?, rt::string_object("TextSelectHandleSize"), rt::to_object(32.0_f64)), 16, 42)?;
     // Controls/FluentControls.xaml(18,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_401, 18, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_402, 18, 4)?;
     // Controls/FluentControls.xaml(30,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_402, 30, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandleDrawing", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_403, 30, 4)?;
     // Controls/FluentControls.xaml(42,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_403, 42, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextSelectionHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_404, 42, 4)?;
     // Controls/FluentControls.xaml(55,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_404, 55, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "TextCaretHandlePath", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_405, 55, 4)?;
     // Controls/FluentControls.xaml(74,4) Content (resource)
-    let deferred_257 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_405, 74, 4)?;
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_257) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
+    let deferred_258 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_406, 74, 4)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_258) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 74, 4)?;
     ::core::result::Result::Ok(())
 }
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "SystemControlFocusVisualMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 4, position: 53 },
-    rt::ValueRow { key: "SystemControlFocusVisualPrimaryThickness", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 5, position: 63 },
-    rt::ValueRow { key: "SystemControlFocusVisualSecondaryThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 6, position: 65 },
-];
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SystemControlFocusVisualMarginSystemControlFocusVisualPrimaryThicknessSystemControlFocusVisualSecondaryThickness",
+    numbers: &[0.0_f64, 2.0_f64, 1.0_f64],
+    records: &[
+        0, 30, 4, 53, 0, 0, 0, 0,
+        30, 40, 5, 63, 1, 1, 1, 1,
+        70, 42, 6, 65, 2, 2, 2, 2,
+    ],
+};
 
 /// The brushes bound to a dynamic resource of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_dynamic_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_1: rt::PackedRows = rt::PackedRows {
@@ -6588,7 +6696,10 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_2: rt::PackedRows = rt::PackedRow
 };
 
 /// The keys and targets of the packed tables of the unit 10 of `Controls/FluentControls.xaml`, each once (#855).
-const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverSystemListLowColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedSystemListMediumColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedSystemBaseMediumColorTabbedPageTabItemHeaderForegroundSelectedSystemAccentColorTabbedPageTabItemHeaderForegroundDisabledSystemBaseLowColorTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrush";
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS: &str = "TabbedPageTabItemHeaderBackgroundUnselectedTabbedPageTabItemHeaderBackgroundSelectedTabbedPageTabItemHeaderBackgroundUnselectedPointerOverSystemListLowColorTabbedPageTabItemHeaderBackgroundSelectedPointerOverTabbedPageTabItemHeaderBackgroundUnselectedPressedSystemListMediumColorTabbedPageTabItemHeaderBackgroundSelectedPressedTabbedPageTabItemHeaderBackgroundDisabledTabbedPageTabItemHeaderForegroundUnselectedSystemBaseMediumColorTabbedPageTabItemHeaderForegroundSelectedSystemAccentColorTabbedPageTabItemHeaderForegroundDisabledSystemBaseLowColorTabbedPageTabItemHeaderPaddingTabbedPageTabItemHeaderMarginTabbedPageTabStripBackgroundTabbedPageTabStripBorderBrushTabbedPageTabStripMarginTabbedPageTabStripPadding";
+
+/// The numbers of the packed tables of the unit 10 of `Controls/FluentControls.xaml`, each once (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_NUMBERS: [f64; 3] = [8.0_f64, 4.0_f64, 0.0_f64];
 
 /// The brushes with a literal colour of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_literal_brushes` (#855).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_3: rt::PackedRows = rt::PackedRows {
@@ -6654,11 +6765,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_9: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabbedPageTabItemHeaderVerticalPipeHeight", value: 18.0_f64, line: 34, position: 63 },
 ];
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_10: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabItemHeaderPadding", value: [8.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 42, position: 53 },
-    rt::ValueRow { key: "TabbedPageTabItemHeaderMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 43, position: 52 },
-];
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_10: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_NUMBERS,
+    records: &[
+        549, 30, 42, 53, 0, 1, 0, 1,
+        579, 29, 43, 52, 2, 2, 2, 2,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_11: &[rt::ValueRow<f64>] = &[
@@ -6672,7 +6787,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_12: rt::PackedRows = rt::PackedRo
     strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        549, 28, 65535, 255, 0, 51, 4,
+        608, 28, 65535, 255, 0, 51, 4,
     ],
 };
 
@@ -6681,32 +6796,50 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_13: rt::PackedRows = rt::PackedRo
     strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
     namespaces: &[],
     records: &[
-        577, 29, 65535, 255, 0, 54, 4,
+        636, 29, 65535, 255, 0, 54, 4,
     ],
 };
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabbedPageTabStripMargin", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 47 },
-    rt::ValueRow { key: "TabbedPageTabStripPadding", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 56, position: 48 },
-];
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_14: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_10_NUMBERS,
+    records: &[
+        665, 24, 55, 47, 2, 2, 2, 2,
+        689, 25, 56, 48, 2, 2, 2, 2,
+    ],
+};
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_15: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ExpanderHeaderPadding", value: [16.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 54, position: 44 },
-    rt::ValueRow { key: "ExpanderHeaderBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 55, position: 52 },
-    rt::ValueRow { key: "ExpanderChevronBorderThickness", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 56, position: 53 },
-    rt::ValueRow { key: "ExpanderChevronMargin", value: [20.0_f64, 0.0_f64, 8.0_f64, 0.0_f64], line: 57, position: 44 },
-];
+/// The keys and targets of the packed tables of the unit 12 of `Controls/FluentControls.xaml`, each once (#855).
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_STRINGS: &str = "ExpanderHeaderPaddingExpanderHeaderBorderThicknessExpanderChevronBorderThicknessExpanderChevronMarginExpanderContentPaddingExpanderContentLeftBorderThicknessExpanderContentUpBorderThicknessExpanderContentRightBorderThicknessExpanderContentDownBorderThickness";
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_16: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "ExpanderContentPadding", value: [16.0_f64, 16.0_f64, 16.0_f64, 16.0_f64], line: 61, position: 45 },
-    rt::ValueRow { key: "ExpanderContentLeftBorderThickness", value: [1.0_f64, 1.0_f64, 0.0_f64, 1.0_f64], line: 62, position: 57 },
-    rt::ValueRow { key: "ExpanderContentUpBorderThickness", value: [1.0_f64, 1.0_f64, 1.0_f64, 0.0_f64], line: 63, position: 55 },
-    rt::ValueRow { key: "ExpanderContentRightBorderThickness", value: [0.0_f64, 1.0_f64, 1.0_f64, 1.0_f64], line: 64, position: 58 },
-    rt::ValueRow { key: "ExpanderContentDownBorderThickness", value: [1.0_f64, 0.0_f64, 1.0_f64, 1.0_f64], line: 65, position: 57 },
-];
+/// The numbers of the packed tables of the unit 12 of `Controls/FluentControls.xaml`, each once (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_NUMBERS: [f64; 5] = [16.0_f64, 0.0_f64, 1.0_f64, 20.0_f64, 8.0_f64];
+
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_15: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_NUMBERS,
+    records: &[
+        0, 21, 54, 44, 0, 1, 1, 1,
+        21, 29, 55, 52, 2, 2, 2, 2,
+        50, 30, 56, 53, 1, 1, 1, 1,
+        80, 21, 57, 44, 3, 1, 4, 1,
+    ],
+};
+
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_16: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_12_NUMBERS,
+    records: &[
+        101, 22, 61, 45, 0, 0, 0, 0,
+        123, 34, 62, 57, 2, 2, 1, 2,
+        157, 32, 63, 55, 2, 2, 2, 1,
+        189, 35, 64, 58, 1, 2, 2, 2,
+        224, 34, 65, 57, 2, 1, 2, 2,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_17: &[rt::ValueRow<f64>] = &[
@@ -6714,11 +6847,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_17: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "CalendarDatePickerMinHeight", value: 32.0_f64, line: 12, position: 49 },
 ];
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "MenuIconPresenterMargin", value: [0.0_f64, 0.0_f64, 12.0_f64, 0.0_f64], line: 54, position: 46 },
-    rt::ValueRow { key: "MenuInputGestureTextMargin", value: [24.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 55, position: 49 },
-];
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_18: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "MenuIconPresenterMarginMenuInputGestureTextMargin",
+    numbers: &[0.0_f64, 12.0_f64, 24.0_f64],
+    records: &[
+        0, 23, 54, 46, 0, 0, 1, 0,
+        23, 26, 55, 49, 2, 0, 0, 0,
+    ],
+};
 
 /// The keys and targets of the packed tables of the unit 43 of `Controls/FluentControls.xaml`, each once (#855).
 const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_43_STRINGS: &str = "PipsPagerSelectionIndicatorBackgroundPipsPagerSelectionIndicatorBackgroundPointerOverPipsPagerSelectionIndicatorBackgroundPressedPipsPagerSelectionIndicatorBackgroundSelectedPipsPagerSelectionIndicatorBackgroundDisabledPipsPagerSelectionIndicatorBorderBrushPipsPagerSelectionIndicatorBorderBrushPointerOverPipsPagerSelectionIndicatorBorderBrushPressedPipsPagerSelectionIndicatorBorderBrushSelectedPipsPagerSelectionIndicatorBorderBrushDisabledPipsPagerSelectionIndicatorForegroundPipsPagerSelectionIndicatorForegroundPointerOverPipsPagerSelectionIndicatorForegroundPressedPipsPagerSelectionIndicatorForegroundSelectedPipsPagerSelectionIndicatorForegroundDisabledPipsPagerNavigationButtonBackgroundPipsPagerNavigationButtonBackgroundPointerOverPipsPagerNavigationButtonBackgroundPressedPipsPagerNavigationButtonBackgroundDisabledPipsPagerNavigationButtonBorderBrushPipsPagerNavigationButtonBorderBrushPointerOverPipsPagerNavigationButtonBorderBrushPressedPipsPagerNavigationButtonBorderBrushDisabledPipsPagerNavigationButtonForegroundPipsPagerNavigationButtonForegroundPointerOverPipsPagerNavigationButtonForegroundPressedPipsPagerNavigationButtonForegroundDisabled";
@@ -6828,13 +6965,17 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_21: rt::PackedRows = rt::PackedRo
     ],
 };
 
-/// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "SplitButtonPrimaryButtonSize", value: 32.0_f64, line: 34, position: 50 },
-    rt::ValueRow { key: "SplitButtonSecondaryButtonSize", value: 32.0_f64, line: 35, position: 52 },
-    rt::ValueRow { key: "SplitButtonSeparatorWidth", value: 1.0_f64, line: 36, position: 47 },
-    rt::ValueRow { key: "SplitButtonMinHeight", value: 32.0_f64, line: 37, position: 42 },
-];
+/// The numbers of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_22: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SplitButtonPrimaryButtonSizeSplitButtonSecondaryButtonSizeSplitButtonSeparatorWidthSplitButtonMinHeight",
+    numbers: &[32.0_f64, 1.0_f64],
+    records: &[
+        0, 28, 34, 50, 0,
+        28, 30, 35, 52, 0,
+        58, 25, 36, 47, 1,
+        83, 20, 37, 42, 0,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_23: &[rt::ValueRow<f64>] = &[
@@ -6883,22 +7024,36 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_29: &[rt::ValueRow<[f64; 4]>] = &
     rt::ValueRow { key: "ComboBoxEditableTextPadding", value: [11.0_f64, 5.0_f64, 32.0_f64, 6.0_f64], line: 58, position: 50 },
 ];
 
-/// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_30: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 31, position: 62 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemHeight", value: 40.0_f64, line: 32, position: 57 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 33, position: 74 },
-    rt::ValueRow { key: "DatePickerThemeMinWidth", value: 296.0_f64, line: 34, position: 45 },
-    rt::ValueRow { key: "DatePickerThemeMaxWidth", value: 456.0_f64, line: 35, position: 45 },
-];
+/// The keys and targets of the packed tables of the unit 72 of `Controls/FluentControls.xaml`, each once (#855).
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_STRINGS: &str = "DatePickerFlyoutPresenterHighlightHeightDatePickerFlyoutPresenterItemHeightDatePickerFlyoutPresenterAcceptDismissHostGridHeightDatePickerThemeMinWidthDatePickerThemeMaxWidthDatePickerFlyoutPresenterItemPaddingDatePickerFlyoutPresenterMonthPaddingDatePickerHostPaddingDatePickerHostMonthPadding";
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_31: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "DatePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 36, position: 59 },
-    rt::ValueRow { key: "DatePickerFlyoutPresenterMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 37, position: 60 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 38, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 39, position: 49 },
-];
+/// The numbers of the packed tables of the unit 72 of `Controls/FluentControls.xaml`, each once (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_NUMBERS: [f64; 8] = [40.0_f64, 41.0_f64, 296.0_f64, 456.0_f64, 0.0_f64, 3.0_f64, 6.0_f64, 9.0_f64];
+
+/// The numbers of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_30: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_NUMBERS,
+    records: &[
+        0, 40, 31, 62, 0,
+        40, 35, 32, 57, 0,
+        75, 52, 33, 74, 1,
+        127, 23, 34, 45, 2,
+        150, 23, 35, 45, 3,
+    ],
+};
+
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_31: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_72_NUMBERS,
+    records: &[
+        173, 36, 36, 59, 4, 5, 4, 6,
+        209, 37, 37, 60, 7, 5, 4, 6,
+        246, 21, 38, 44, 4, 5, 4, 6,
+        267, 26, 39, 49, 7, 5, 4, 6,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_32: &[rt::ValueRow<f64>] = &[
@@ -6906,19 +7061,33 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_32: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TimePickerSpacerThemeWidth", value: 1.0_f64, line: 32, position: 48 },
 ];
 
-/// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_33: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterHighlightHeight", value: 40.0_f64, line: 34, position: 62 },
-    rt::ValueRow { key: "TimePickerFlyoutPresenterAcceptDismissHostGridHeight", value: 41.0_f64, line: 35, position: 74 },
-    rt::ValueRow { key: "TimePickerThemeMinWidth", value: 242.0_f64, line: 36, position: 45 },
-    rt::ValueRow { key: "TimePickerThemeMaxWidth", value: 456.0_f64, line: 37, position: 45 },
-];
+/// The keys and targets of the packed tables of the unit 73 of `Controls/FluentControls.xaml`, each once (#855).
+const BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_STRINGS: &str = "TimePickerFlyoutPresenterHighlightHeightTimePickerFlyoutPresenterAcceptDismissHostGridHeightTimePickerThemeMinWidthTimePickerThemeMaxWidthTimePickerFlyoutPresenterItemPaddingTimePickerHostPadding";
 
-/// The thicknesses of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_34: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerFlyoutPresenterItemPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 38, position: 59 },
-    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 3.0_f64, 0.0_f64, 6.0_f64], line: 39, position: 44 },
-];
+/// The numbers of the packed tables of the unit 73 of `Controls/FluentControls.xaml`, each once (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_NUMBERS: [f64; 7] = [40.0_f64, 41.0_f64, 242.0_f64, 456.0_f64, 0.0_f64, 3.0_f64, 6.0_f64];
+
+/// The numbers of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_33: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_NUMBERS,
+    records: &[
+        0, 40, 34, 62, 0,
+        40, 52, 35, 74, 1,
+        92, 23, 36, 45, 2,
+        115, 23, 37, 45, 3,
+    ],
+};
+
+/// The thicknesses of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_34: rt::PackedValueRows = rt::PackedValueRows {
+    strings: BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_STRINGS,
+    numbers: &BUILD_CONTROLS_FLUENTCONTROLS_XAML_UNIT_73_NUMBERS,
+    records: &[
+        138, 36, 38, 59, 4, 5, 4, 6,
+        174, 21, 39, 44, 4, 5, 4, 6,
+    ],
+};
 
 /// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_35: &[rt::ValueRow<f64>] = &[
@@ -6926,13 +7095,17 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_35: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "SliderVerticalWidth", value: 32.0_f64, line: 41, position: 41 },
 ];
 
-/// The numbers of a run of `Controls/FluentControls.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_36: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "SliderHorizontalThumbWidth", value: 20.0_f64, line: 43, position: 48 },
-    rt::ValueRow { key: "SliderHorizontalThumbHeight", value: 20.0_f64, line: 44, position: 49 },
-    rt::ValueRow { key: "SliderVerticalThumbWidth", value: 20.0_f64, line: 45, position: 46 },
-    rt::ValueRow { key: "SliderVerticalThumbHeight", value: 20.0_f64, line: 46, position: 47 },
-];
+/// The numbers of a run of `Controls/FluentControls.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_ROWS_36: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SliderHorizontalThumbWidthSliderHorizontalThumbHeightSliderVerticalThumbWidthSliderVerticalThumbHeight",
+    numbers: &[20.0_f64],
+    records: &[
+        0, 26, 43, 48, 0,
+        26, 27, 44, 49, 0,
+        53, 24, 45, 46, 0,
+        77, 25, 46, 47, 0,
+    ],
+};
 
 /// A property definition of the tables of `Controls/FluentControls.xaml` (#568).
 fn build_controls_fluentcontrols_xaml_property_0() -> &'static ::ferroui_base::FerroProperty {
@@ -21154,56 +21327,56 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_383_THEME: rt::ControlThemeTa
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_233: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 143, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 144, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 145, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 146, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 147, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 144, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 145, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 146, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 147, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 148, position: 17 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_234: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 288, position: 101 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 288, position: 143 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 288, position: 187 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 289, position: 101 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 289, position: 143 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 289, position: 187 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_235: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_63, source: build_controls_fluentcontrols_xaml_property_63, line: 289, position: 52 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_64, source: build_controls_fluentcontrols_xaml_property_64, line: 289, position: 147 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_63, source: build_controls_fluentcontrols_xaml_property_63, line: 290, position: 52 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_64, source: build_controls_fluentcontrols_xaml_property_64, line: 290, position: 147 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_236: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_58, source: build_controls_fluentcontrols_xaml_property_28, line: 291, position: 31 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 292, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_58, source: build_controls_fluentcontrols_xaml_property_28, line: 292, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_52, source: build_controls_fluentcontrols_xaml_property_11, line: 293, position: 31 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_237: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_10, source: build_controls_fluentcontrols_xaml_property_11, line: 312, position: 31 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 313, position: 31 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_13, line: 314, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_10, source: build_controls_fluentcontrols_xaml_property_11, line: 313, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_14, source: build_controls_fluentcontrols_xaml_property_15, line: 314, position: 31 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_12, source: build_controls_fluentcontrols_xaml_property_13, line: 315, position: 31 },
 ];
 
 /// The template bindings of a run of `Controls/FluentControls.xaml`, bound in order by `rt::bind_template_bindings` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_238: &[rt::TemplateBindingRow] = &[
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 355, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 356, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 357, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 358, position: 17 },
-    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 359, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_46, source: build_controls_fluentcontrols_xaml_property_1, line: 356, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_45, source: build_controls_fluentcontrols_xaml_property_3, line: 357, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_44, source: build_controls_fluentcontrols_xaml_property_5, line: 358, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_47, source: build_controls_fluentcontrols_xaml_property_7, line: 359, position: 17 },
+    rt::TemplateBindingRow { target: build_controls_fluentcontrols_xaml_property_43, source: build_controls_fluentcontrols_xaml_property_11, line: 360, position: 17 },
 ];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_397`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_397_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_398`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_398_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_54, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("ManagedFileChooserOverwritePromptMinWidth") }),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_160, form: rt::SetterForm::Plain, value: rt::ThemeValue::Double(400.0_f64) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_398, parent: true, line: 355, position: 10 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_399, parent: true, line: 356, position: 10 }) }),
     ],
 };
 
@@ -21215,8 +21388,8 @@ fn build_controls_fluentcontrols_xaml_property_287() -> &'static ::ferroui_base:
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_323: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::PropertyEquals { property: build_controls_fluentcontrols_xaml_property_161, value: build_controls_fluentcontrols_xaml_selector_value_0 }];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_400`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_401`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_401_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::SelectableTextBlock as ::ferroui_base::StaticType>::TYPE),
@@ -21227,15 +21400,15 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME: rt::ControlThemeTa
             line: 16,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_400_value_0) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_190, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_401_value_0) }),
                 rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_209, form: rt::SetterForm::Parented, value: rt::ThemeValue::Static { key: "SelectableTextBlockContextFlyout", line: 18, position: 40 } }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_400` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_400_value_0(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_401` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_401_value_0(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let value_0 = rt::invoked(::ferroui_base::input::Cursor::__markup_parse(::std::string::String::from("IBeam")), 17, 33)?;
@@ -21290,14 +21463,14 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_327: &[rt::SelectorStep] = &[
 /// A selector chain of `Controls/FluentControls.xaml`, built by `rt::build_selector` (#568).
 static BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_328: &[rt::SelectorStep] = &[rt::SelectorStep::Nesting, rt::SelectorStep::Class(":start"), rt::SelectorStep::Template, rt::SelectorStep::OfType(<::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY), rt::SelectorStep::Name("PART_Indicator")];
 
-/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_405`, interpreted by `rt::build_control_theme` (#568).
-static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
+/// The control theme built by `build_controls_fluentcontrols_xaml_deferred_406`, interpreted by `rt::build_control_theme` (#568).
+static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_406_THEME: rt::ControlThemeTable = rt::ControlThemeTable {
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_controls::primitives::TextSelectionHandle as ::ferroui_base::StaticType>::TYPE),
         rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_1, form: rt::SetterForm::Plain, value: rt::ThemeValue::Dynamic("TextControlSelectionHighlightColor") }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_0) }),
-        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_406, parent: true, line: 83, position: 12 }) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_0) }),
+        rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_21, form: rt::SetterForm::Parented, value: rt::ThemeValue::Template(rt::ThemeTemplate { target_type: ::core::option::Option::None, content_type: <::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE, build: build_controls_fluentcontrols_xaml_deferred_407, parent: true, line: 83, position: 12 }) }),
         rt::StyleMember::Style {
             parent: true,
             selector: ::core::option::Option::Some(BUILD_CONTROLS_FLUENTCONTROLS_XAML_SELECTOR_324),
@@ -21313,7 +21486,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 104,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_405_value_1) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_19, form: rt::SetterForm::Created, value: rt::ThemeValue::Computed(build_controls_fluentcontrols_xaml_deferred_406_value_1) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21322,7 +21495,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 109,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_2) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_2) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21331,7 +21504,7 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 112,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_3) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_3) }),
             ],
         },
         rt::StyleMember::Style {
@@ -21340,19 +21513,19 @@ static BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME: rt::ControlThemeTa
             line: 115,
             position: 6,
             members: &[
-                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_405_value_4) }),
+                rt::StyleMember::Setter(rt::ThemeSetter { property: build_controls_fluentcontrols_xaml_property_17, form: rt::SetterForm::Plain, value: rt::ThemeValue::Expression(build_controls_fluentcontrols_xaml_deferred_406_value_4) }),
             ],
         },
     ],
 };
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_0() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_0() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_1(
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_1(
     _context: &::std::rc::Rc<::ferroui_markup_xaml::xaml_il::runtime::XamlIlContext>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let scale_transform_0 = ::ferroui_base::media::ScaleTransform::new();
@@ -21363,18 +21536,18 @@ fn build_controls_fluentcontrols_xaml_deferred_405_value_1(
     ::core::result::Result::Ok(rt::to_object(::core::clone::Clone::clone(&scale_transform_0)))
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_2() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_2() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_3() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_3() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Left)
 }
 
-/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_405` (#568).
-fn build_controls_fluentcontrols_xaml_deferred_405_value_4() -> ::ferroui_base::metadata::MarkupValue {
+/// A setter value of the control theme built by `build_controls_fluentcontrols_xaml_deferred_406` (#568).
+fn build_controls_fluentcontrols_xaml_deferred_406_value_4() -> ::ferroui_base::metadata::MarkupValue {
     rt::to_object(::ferroui_base::layout::HorizontalAlignment::Right)
 }
 
@@ -39539,144 +39712,153 @@ fn build_controls_fluentcontrols_xaml_deferred_385(
     ::core::result::Result::Ok(rt::to_value(data_validation_errors_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(15,4)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(7,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_386(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
+    let managed_storage_fallback_0 = ::ferroui_dialogs::internal::ManagedStorageFallback::__markup_new_0();
+    ::core::result::Result::Ok(rt::to_value(managed_storage_fallback_0))
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(16,4)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_387(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(15,4) ControlTheme
+    // Controls/FluentControls.xaml(16,4) ControlTheme
     let control_theme_0 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_0.clone()));
-    // Controls/FluentControls.xaml(15,4) TargetType
+    // Controls/FluentControls.xaml(16,4) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_0, ::core::option::Option::Some(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE));
-    // Controls/FluentControls.xaml(17,8) Resources
-    // Controls/FluentControls.xaml(17,8) ResourceDictionary
+    // Controls/FluentControls.xaml(18,8) Resources
+    // Controls/FluentControls.xaml(18,8) ResourceDictionary
     let resource_dictionary_0 = ::ferroui_base::controls::ResourceDictionary::new();
     let resources_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(resource_dictionary_0.clone());
     if rt::is_instance(&resources_0, rt::class_handle(<::ferroui_base::controls::ResourceDictionary as ::ferroui_base::StaticType>::TYPE)) {
-        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 17, 8)?);
-        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 17, 8)?, count_0.wrapping_add(4_i32));
+        let count_0: i32 = ::ferroui_base::controls::ResourceDictionary::__markup_get_Count(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.get_Count", 0, 18, 8)?);
+        ::ferroui_base::controls::ResourceDictionary::__markup_EnsureCapacity_3(&rt::exact(resources_0.clone(), "FerroUI.Controls.ResourceDictionary.EnsureCapacity", 0, 18, 8)?, count_0.wrapping_add(4_i32));
     }
-    // Controls/FluentControls.xaml(18,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderBackGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_387, 18, 10)?;
-    // Controls/FluentControls.xaml(20,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderFrontGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_388, 20, 10)?;
-    // Controls/FluentControls.xaml(24,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_389, 24, 10)?;
-    // Controls/FluentControls.xaml(31,10) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_390, 31, 10)?;
-    rt::invoked(::ferroui_base::styling::StyleBase::__markup_set_Resources(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(resource_dictionary_0.clone(), 17, 8)?), 17, 8)?;
-    // Controls/FluentControls.xaml(139,6) Content
-    // Controls/FluentControls.xaml(139,35) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemRegionBrush");
+    // Controls/FluentControls.xaml(19,10) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderBackGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_388, 19, 10)?;
+    // Controls/FluentControls.xaml(21,10) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "IconRes.FolderFrontGradientStops", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_389, 21, 10)?;
+    // Controls/FluentControls.xaml(25,10) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "LevelUp", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_390, 25, 10)?;
+    // Controls/FluentControls.xaml(32,10) Content (resource)
+    rt::add_deferred_resource(&resource_dictionary_0, "Icons", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_fluentcontrols_xaml_deferred_391, 32, 10)?;
+    rt::invoked(::ferroui_base::styling::StyleBase::__markup_set_Resources(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(resource_dictionary_0.clone(), 18, 8)?), 18, 8)?;
     // Controls/FluentControls.xaml(140,6) Content
+    // Controls/FluentControls.xaml(140,35) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemRegionBrush");
+    // Controls/FluentControls.xaml(141,6) Content
     let setter_1 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/FluentControls.xaml(142,8) Value
+    // Controls/FluentControls.xaml(143,8) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_0.clone()));
-    // Controls/FluentControls.xaml(143,10) Content
-    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_391, 143, 10)?;
+    // Controls/FluentControls.xaml(144,10) Content
+    let deferred_4 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_392, 144, 10)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_4)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
-    // Controls/FluentControls.xaml(280,6) Content
-    // Controls/FluentControls.xaml(280,6) Style
+    // Controls/FluentControls.xaml(281,6) Content
+    // Controls/FluentControls.xaml(281,6) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
-    // Controls/FluentControls.xaml(280,6) Selector
+    // Controls/FluentControls.xaml(281,6) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_1 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_0));
     let selector_2 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_1), <::ferroui_controls::ListBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_3 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_2), "QuickLinks");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_3.clone()));
-    // Controls/FluentControls.xaml(281,8) Content
-    rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
     // Controls/FluentControls.xaml(282,8) Content
-    // Controls/FluentControls.xaml(282,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemControlBackgroundChromeMediumBrush");
+    rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
     // Controls/FluentControls.xaml(283,8) Content
-    rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
+    // Controls/FluentControls.xaml(283,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemControlBackgroundChromeMediumBrush");
     // Controls/FluentControls.xaml(284,8) Content
-    // Controls/FluentControls.xaml(284,32) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), "ManagedFileChooserQuickLinksWidth");
+    rt::add_setter(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
     // Controls/FluentControls.xaml(285,8) Content
-    // Controls/FluentControls.xaml(285,34) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), "ManagedFileChooserQuickLinksPadding");
+    // Controls/FluentControls.xaml(285,32) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), "ManagedFileChooserQuickLinksWidth");
     // Controls/FluentControls.xaml(286,8) Content
+    // Controls/FluentControls.xaml(286,34) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), "ManagedFileChooserQuickLinksPadding");
+    // Controls/FluentControls.xaml(287,8) Content
     let setter_7 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/FluentControls.xaml(287,10) Value
+    // Controls/FluentControls.xaml(288,10) Value
     let control_template_1 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_1.clone()));
-    // Controls/FluentControls.xaml(288,12) Content
-    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_395, 288, 12)?;
+    // Controls/FluentControls.xaml(289,12) Content
+    let deferred_5 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_396, 289, 12)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_5)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_7, rt::to_object(::core::clone::Clone::clone(&control_template_1)));
-    // Controls/FluentControls.xaml(297,8) Content
+    // Controls/FluentControls.xaml(298,8) Content
     let setter_8 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::ItemsControl::item_container_theme_property()));
-    // Controls/FluentControls.xaml(298,10) Value
-    // Controls/FluentControls.xaml(298,10) ControlTheme
+    // Controls/FluentControls.xaml(299,10) Value
+    // Controls/FluentControls.xaml(299,10) ControlTheme
     let control_theme_1 = ::ferroui_base::styling::ControlTheme::new();
     context.push_parent(rt::to_value(control_theme_1.clone()));
-    // Controls/FluentControls.xaml(298,10) TargetType
+    // Controls/FluentControls.xaml(299,10) TargetType
     ::ferroui_base::styling::ControlTheme::__markup_set_TargetType(&control_theme_1, ::core::option::Option::Some(<::ferroui_controls::ListBoxItem as ::ferroui_base::StaticType>::TYPE));
-    // Controls/FluentControls.xaml(299,12) Content
-    // Controls/FluentControls.xaml(299,37) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::height_property()), "ManagedFileChooserQuickLinksItemHeight");
     // Controls/FluentControls.xaml(300,12) Content
-    // Controls/FluentControls.xaml(300,38) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), "ManagedFileChooserQuickLinksItemPadding");
+    // Controls/FluentControls.xaml(300,37) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::height_property()), "ManagedFileChooserQuickLinksItemHeight");
     // Controls/FluentControls.xaml(301,12) Content
+    // Controls/FluentControls.xaml(301,38) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), "ManagedFileChooserQuickLinksItemPadding");
+    // Controls/FluentControls.xaml(302,12) Content
     let setter_11 = rt::new_setter_with_parent(&context, rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/FluentControls.xaml(302,14) Value
+    // Controls/FluentControls.xaml(303,14) Value
     let control_template_2 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
     context.push_parent(rt::to_value(control_template_2.clone()));
-    // Controls/FluentControls.xaml(303,16) Content
-    let deferred_6 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_396, 303, 16)?;
+    // Controls/FluentControls.xaml(304,16) Content
+    let deferred_6 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_397, 304, 16)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_2, rt::to_object(::core::clone::Clone::clone(&deferred_6)));
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_11, rt::to_object(::core::clone::Clone::clone(&control_template_2)));
-    // Controls/FluentControls.xaml(321,12) Content
-    // Controls/FluentControls.xaml(321,12) Style
+    // Controls/FluentControls.xaml(322,12) Content
+    // Controls/FluentControls.xaml(322,12) Style
     let style_1 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_1.clone()));
-    // Controls/FluentControls.xaml(321,12) Selector
+    // Controls/FluentControls.xaml(322,12) Selector
     let selector_4 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_5 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_4), ":pointerover");
     let selector_6 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_5));
     let selector_7 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_6), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_8 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_7), "LayoutRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_1, ::core::option::Option::Some(selector_8.clone()));
-    // Controls/FluentControls.xaml(322,14) Content
-    // Controls/FluentControls.xaml(322,43) Value
+    // Controls/FluentControls.xaml(323,14) Content
+    // Controls/FluentControls.xaml(323,43) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "SystemControlBackgroundAltMediumBrush");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 321, 12)?);
-    // Controls/FluentControls.xaml(324,12) Content
-    // Controls/FluentControls.xaml(324,12) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_1.clone(), 322, 12)?);
+    // Controls/FluentControls.xaml(325,12) Content
+    // Controls/FluentControls.xaml(325,12) Style
     let style_2 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_2.clone()));
-    // Controls/FluentControls.xaml(324,12) Selector
+    // Controls/FluentControls.xaml(325,12) Selector
     let selector_9 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_10 = ::ferroui_base::styling::Selectors::class(::core::option::Option::Some(selector_9), ":selected");
     let selector_11 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_10));
     let selector_12 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_11), <::ferroui_controls::Border as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_13 = ::ferroui_base::styling::Selectors::name(::core::option::Option::Some(selector_12), "LayoutRoot");
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_2, ::core::option::Option::Some(selector_13.clone()));
-    // Controls/FluentControls.xaml(325,14) Content
-    // Controls/FluentControls.xaml(325,43) Value
+    // Controls/FluentControls.xaml(326,14) Content
+    // Controls/FluentControls.xaml(326,43) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_2.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::Border::background_property()), "SystemControlBackgroundAltMediumHighBrush");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 324, 12)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_1.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_2.clone(), 325, 12)?);
     context.pop_parent();
     rt::add_setter_value_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_8, rt::to_object(::core::clone::Clone::clone(&control_theme_1)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 280, 6)?);
-    // Controls/FluentControls.xaml(331,6) Content
-    // Controls/FluentControls.xaml(331,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_0.clone(), 281, 6)?);
+    // Controls/FluentControls.xaml(332,6) Content
+    // Controls/FluentControls.xaml(332,6) Style
     let style_3 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_3.clone()));
-    // Controls/FluentControls.xaml(331,6) Selector
+    // Controls/FluentControls.xaml(332,6) Selector
     let selector_14 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_15 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_14));
     let selector_16 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_15), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
@@ -39691,16 +39873,16 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let selector_25 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_24), <::ferroui_controls::TextBox as ::ferroui_base::ObjectType>::IDENTITY);
     let selector_26 = ::ferroui_base::styling::Selectors::or([selector_19, selector_25]);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_3, ::core::option::Option::Some(selector_26.clone()));
-    // Controls/FluentControls.xaml(332,8) Content
-    // Controls/FluentControls.xaml(332,33) Value
+    // Controls/FluentControls.xaml(333,8) Content
+    // Controls/FluentControls.xaml(333,33) Value
     rt::add_dynamic_resource_setter_with_parent(&context, style_3.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::height_property()), "ManagedFileChooserNavBarControlHeight");
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 331, 6)?);
-    // Controls/FluentControls.xaml(334,6) Content
-    // Controls/FluentControls.xaml(334,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_3.clone(), 332, 6)?);
+    // Controls/FluentControls.xaml(335,6) Content
+    // Controls/FluentControls.xaml(335,6) Style
     let style_4 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_4.clone()));
-    // Controls/FluentControls.xaml(334,6) Selector
+    // Controls/FluentControls.xaml(335,6) Selector
     let selector_27 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_28 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_27));
     let selector_29 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_28), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
@@ -39708,19 +39890,19 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let selector_31 = ::ferroui_base::styling::Selectors::descendant(::core::option::Option::Some(selector_30));
     let selector_32 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_31), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_4, ::core::option::Option::Some(selector_32.clone()));
-    // Controls/FluentControls.xaml(335,8) Content
-    rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch));
     // Controls/FluentControls.xaml(336,8) Content
-    // Controls/FluentControls.xaml(336,32) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), "ManagedFileChooserNavBarButtonWidth");
+    rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::vertical_alignment_property()), rt::to_object(::ferroui_base::layout::VerticalAlignment::Stretch));
     // Controls/FluentControls.xaml(337,8) Content
+    // Controls/FluentControls.xaml(337,32) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::width_property()), "ManagedFileChooserNavBarButtonWidth");
+    // Controls/FluentControls.xaml(338,8) Content
     rt::add_setter(style_4.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::border_thickness_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
     context.pop_parent();
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 334, 6)?);
-    // Controls/FluentControls.xaml(339,6) Content
-    // Controls/FluentControls.xaml(339,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_4.clone(), 335, 6)?);
+    // Controls/FluentControls.xaml(340,6) Content
+    // Controls/FluentControls.xaml(340,6) Style
     let style_5 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(339,6) Selector
+    // Controls/FluentControls.xaml(340,6) Selector
     let selector_33 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_34 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_33));
     let selector_35 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_34), <::ferroui_controls::DockPanel as ::ferroui_base::ObjectType>::IDENTITY);
@@ -39732,13 +39914,13 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let selector_41 = ::ferroui_base::styling::Selectors::class(::core::option::Option::None, ":pressed");
     let selector_42 = ::ferroui_base::styling::Selectors::not(::core::option::Option::Some(selector_40), selector_41);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_5, ::core::option::Option::Some(selector_42.clone()));
-    // Controls/FluentControls.xaml(340,8) Content
+    // Controls/FluentControls.xaml(341,8) Content
     rt::add_setter(style_5.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), rt::to_object(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 339, 6)?);
-    // Controls/FluentControls.xaml(343,6) Content
-    // Controls/FluentControls.xaml(343,6) Style
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_5.clone(), 340, 6)?);
+    // Controls/FluentControls.xaml(344,6) Content
+    // Controls/FluentControls.xaml(344,6) Style
     let style_6 = ::ferroui_base::styling::Style::new();
-    // Controls/FluentControls.xaml(343,6) Selector
+    // Controls/FluentControls.xaml(344,6) Selector
     let selector_43 = ::ferroui_base::styling::Selectors::nesting(::core::option::Option::None);
     let selector_44 = ::ferroui_base::styling::Selectors::template(::core::option::Option::Some(selector_43));
     let selector_45 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_44), <::ferroui_controls::primitives::UniformGrid as ::ferroui_base::ObjectType>::IDENTITY);
@@ -39746,19 +39928,19 @@ fn build_controls_fluentcontrols_xaml_deferred_386(
     let selector_47 = ::ferroui_base::styling::Selectors::child(::core::option::Option::Some(selector_46));
     let selector_48 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::Some(selector_47), <::ferroui_controls::Button as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_6, ::core::option::Option::Some(selector_48.clone()));
-    // Controls/FluentControls.xaml(344,8) Content
-    rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
     // Controls/FluentControls.xaml(345,8) Content
-    rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch));
+    rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::ContentControl::horizontal_content_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Center));
     // Controls/FluentControls.xaml(346,8) Content
+    rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::horizontal_alignment_property()), rt::to_object(::ferroui_base::layout::HorizontalAlignment::Stretch));
+    // Controls/FluentControls.xaml(347,8) Content
     rt::add_setter(style_6.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_base::layout::Layoutable::margin_property()), rt::to_object(::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64)));
-    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 343, 6)?);
+    ::ferroui_base::styling::StyleBase::__markup_Add_1(control_theme_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::cast(style_6.clone(), 344, 6)?);
     context.pop_parent();
     ::core::result::Result::Ok(rt::to_value(control_theme_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(18,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_387(
+/// Builds the deferred content at `Controls/FluentControls.xaml(19,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_388(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
@@ -39766,859 +39948,859 @@ fn build_controls_fluentcontrols_xaml_deferred_387(
     ::core::result::Result::Ok(rt::to_value(gradient_stops_0))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(20,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_388(
+/// Builds the deferred content at `Controls/FluentControls.xaml(21,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_389(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
     let gradient_stops_0 = ::ferroui_base::media::GradientStops::__markup_new_0();
-    // Controls/FluentControls.xaml(21,12) Content
-    // Controls/FluentControls.xaml(21,12) GradientStop
+    // Controls/FluentControls.xaml(22,12) Content
+    // Controls/FluentControls.xaml(22,12) GradientStop
     let gradient_stop_0 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(21,12) Offset
+    // Controls/FluentControls.xaml(22,12) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(21,12) Color
+    // Controls/FluentControls.xaml(22,12) Color
     let value_0 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294957679_u32);
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_0));
     ::ferroui_base::media::GradientStops::__markup_Add_0(&gradient_stops_0, ::core::clone::Clone::clone(&gradient_stop_0));
-    // Controls/FluentControls.xaml(22,12) Content
-    // Controls/FluentControls.xaml(22,12) GradientStop
+    // Controls/FluentControls.xaml(23,12) Content
+    // Controls/FluentControls.xaml(23,12) GradientStop
     let gradient_stop_1 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(22,12) Offset
+    // Controls/FluentControls.xaml(23,12) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(22,12) Color
+    // Controls/FluentControls.xaml(23,12) Color
     let value_1 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294886182_u32);
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_1));
     ::ferroui_base::media::GradientStops::__markup_Add_0(&gradient_stops_0, ::core::clone::Clone::clone(&gradient_stop_1));
     ::core::result::Result::Ok(rt::to_value(gradient_stops_0))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(24,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_389(
+/// Builds the deferred content at `Controls/FluentControls.xaml(25,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_390(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(24,10) DrawingGroup
+    // Controls/FluentControls.xaml(25,10) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
-    // Controls/FluentControls.xaml(25,12) Children
+    // Controls/FluentControls.xaml(26,12) Children
     let children_collection_0 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(25,12) GeometryDrawing
+    // Controls/FluentControls.xaml(26,12) GeometryDrawing
     let geometry_drawing_0 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(25,12) Brush
+    // Controls/FluentControls.xaml(26,12) Brush
     geometry_drawing_0.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
-    // Controls/FluentControls.xaml(25,12) Geometry
+    // Controls/FluentControls.xaml(26,12) Geometry
     let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(16.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_0.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&geometry_drawing_0).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(26,12) Children
+    // Controls/FluentControls.xaml(27,12) Children
     let children_collection_1 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(26,12) GeometryDrawing
+    // Controls/FluentControls.xaml(27,12) GeometryDrawing
     let geometry_drawing_1 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(26,12) Brush
+    // Controls/FluentControls.xaml(27,12) Brush
     geometry_drawing_1.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294375158_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
-    // Controls/FluentControls.xaml(26,12) Geometry
+    // Controls/FluentControls.xaml(27,12) Geometry
     let value_1 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(14.5_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.39_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(5.39_f64, 2.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.504_f64, 2.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(1.677_f64, 2.0_f64), ::ferroui_base::Point::new(1.0_f64, 2.673_f64), ::ferroui_base::Point::new(1.0_f64, 3.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1.0_f64, 10.582_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1.0_f64, 10.586_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1.0_f64, 15.414_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(3.0_f64, 13.414_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(3.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 13.414_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 15.414_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.5_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.327_f64, 13.0_f64), ::ferroui_base::Point::new(16.0_f64, 12.327_f64), ::ferroui_base::Point::new(16.0_f64, 11.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 1.5_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(16.0_f64, 0.673_f64), ::ferroui_base::Point::new(15.327_f64, 0.0_f64), ::ferroui_base::Point::new(14.5_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_1.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_1)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&geometry_drawing_1).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(27,12) Children
+    // Controls/FluentControls.xaml(28,12) Children
     let children_collection_2 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(27,12) GeometryDrawing
+    // Controls/FluentControls.xaml(28,12) GeometryDrawing
     let geometry_drawing_2 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(27,12) Brush
+    // Controls/FluentControls.xaml(28,12) Brush
     geometry_drawing_2.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4292654713_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
-    // Controls/FluentControls.xaml(27,12) Geometry
+    // Controls/FluentControls.xaml(28,12) Geometry
     let value_2 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(14.0_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.508_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.008_f64, 2.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.012_f64, 2.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 2.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(14.5_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.008_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.008_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.504_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(2.227_f64, 3.0_f64), ::ferroui_base::Point::new(2.0_f64, 3.224_f64), ::ferroui_base::Point::new(2.0_f64, 3.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 9.582_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(4.998_f64, 6.586_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 10.586_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.5_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(14.775_f64, 12.0_f64), ::ferroui_base::Point::new(15.0_f64, 11.776_f64), ::ferroui_base::Point::new(15.0_f64, 11.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(15.0_f64, 1.5_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.0_f64, 1.224_f64), ::ferroui_base::Point::new(14.775_f64, 1.0_f64), ::ferroui_base::Point::new(14.5_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_2.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_2)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&geometry_drawing_2).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(28,12) Children
+    // Controls/FluentControls.xaml(29,12) Children
     let children_collection_3 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(28,12) GeometryDrawing
+    // Controls/FluentControls.xaml(29,12) GeometryDrawing
     let geometry_drawing_3 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(28,12) Brush
+    // Controls/FluentControls.xaml(29,12) Brush
     geometry_drawing_3.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4278211228_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
-    // Controls/FluentControls.xaml(28,12) Geometry
+    // Controls/FluentControls.xaml(29,12) Geometry
     let value_3 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(8.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(5.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(4.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(4.0_f64, 15.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.0_f64, 15.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_3.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_3)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&geometry_drawing_3).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(29,12) Children
+    // Controls/FluentControls.xaml(30,12) Children
     let children_collection_4 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(29,12) GeometryDrawing
+    // Controls/FluentControls.xaml(30,12) GeometryDrawing
     let geometry_drawing_4 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(29,12) Brush
+    // Controls/FluentControls.xaml(30,12) Brush
     geometry_drawing_4.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4293980145_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
-    // Controls/FluentControls.xaml(29,12) Geometry
+    // Controls/FluentControls.xaml(30,12) Geometry
     let value_4 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::SetFillRule(::ferroui_base::media::FillRule::NonZero), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(8.0001_f64, 1.9996_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.5001_f64, 3.0006_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0001_f64, 3.0006_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0001_f64, 1.9996_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_4.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_4)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&geometry_drawing_4).upcast::<::ferroui_base::media::Drawing>());
     ::core::result::Result::Ok(rt::to_value(drawing_group_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(31,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_390(
+/// Builds the deferred content at `Controls/FluentControls.xaml(32,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_391(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(31,10) ResourceSelectorConverter
+    // Controls/FluentControls.xaml(32,10) ResourceSelectorConverter
     let resource_selector_converter_0 = ::ferroui_dialogs::internal::ResourceSelectorConverter::new();
-    // Controls/FluentControls.xaml(32,12) Content
-    // Controls/FluentControls.xaml(32,12) DrawingGroup
+    // Controls/FluentControls.xaml(33,12) Content
+    // Controls/FluentControls.xaml(33,12) DrawingGroup
     let drawing_group_0 = ::ferroui_base::media::DrawingGroup::new();
-    // Controls/FluentControls.xaml(33,14) Children
+    // Controls/FluentControls.xaml(34,14) Children
     let children_collection_0 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(33,14) GeometryDrawing
+    // Controls/FluentControls.xaml(34,14) GeometryDrawing
     let geometry_drawing_0 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(33,14) Geometry
+    // Controls/FluentControls.xaml(34,14) Geometry
     let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_0.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&geometry_drawing_0).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(34,14) Children
+    // Controls/FluentControls.xaml(35,14) Children
     let children_collection_1 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(34,14) GeometryDrawing
+    // Controls/FluentControls.xaml(35,14) GeometryDrawing
     let geometry_drawing_1 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(34,14) Geometry
+    // Controls/FluentControls.xaml(35,14) Geometry
     let value_1 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 1.0_f64), ::ferroui_base::Point::new(0.0_f64, 1.0_f64), ::ferroui_base::Point::new(2.0_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(5.0_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(5.5_f64, 1.0_f64), ::ferroui_base::Point::new(6.0_f64, 1.0_f64), ::ferroui_base::Point::new(6.5_f64, 1.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 3.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(16.0_f64, 3.0_f64), ::ferroui_base::Point::new(16.0_f64, 3.0_f64), ::ferroui_base::Point::new(16.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(16.0_f64, 14.0_f64), ::ferroui_base::Point::new(16.0_f64, 14.0_f64), ::ferroui_base::Point::new(14.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 14.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 14.0_f64), ::ferroui_base::Point::new(0.0_f64, 14.0_f64), ::ferroui_base::Point::new(0.0_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_1.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_1)));
-    // Controls/FluentControls.xaml(38,18) Brush
-    // Controls/FluentControls.xaml(38,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(39,18) Brush
+    // Controls/FluentControls.xaml(39,18) LinearGradientBrush
     let linear_gradient_brush_0 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(38,18) StartPoint
+    // Controls/FluentControls.xaml(39,18) StartPoint
     linear_gradient_brush_0.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(1.0_f64, 4.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(38,18) EndPoint
+    // Controls/FluentControls.xaml(39,18) EndPoint
     linear_gradient_brush_0.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(23.0_f64, 20.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(39,20) GradientStops
+    // Controls/FluentControls.xaml(40,20) GradientStops
     let gradient_stops_collection_0 = linear_gradient_brush_0.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(39,20) GradientStop
+    // Controls/FluentControls.xaml(40,20) GradientStop
     let gradient_stop_0 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(39,20) Offset
+    // Controls/FluentControls.xaml(40,20) Offset
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(39,20) Color
+    // Controls/FluentControls.xaml(40,20) Color
     let value_2 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294950936_u32);
     gradient_stop_0.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_2));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 39, 20)?, ::core::clone::Clone::clone(&gradient_stop_0));
-    // Controls/FluentControls.xaml(40,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_0, "FerroUI.Media.GradientStops.Add", 40, 20)?, ::core::clone::Clone::clone(&gradient_stop_0));
+    // Controls/FluentControls.xaml(41,20) GradientStops
     let gradient_stops_collection_1 = linear_gradient_brush_0.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(40,20) GradientStop
+    // Controls/FluentControls.xaml(41,20) GradientStop
     let gradient_stop_1 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(40,20) Offset
+    // Controls/FluentControls.xaml(41,20) Offset
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(40,20) Color
+    // Controls/FluentControls.xaml(41,20) Color
     let value_3 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4292846381_u32);
     gradient_stop_1.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_3));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 40, 20)?, ::core::clone::Clone::clone(&gradient_stop_1));
-    geometry_drawing_1.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_0.clone(), 40, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_1, "FerroUI.Media.GradientStops.Add", 41, 20)?, ::core::clone::Clone::clone(&gradient_stop_1));
+    geometry_drawing_1.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_0.clone(), 41, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&geometry_drawing_1).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(44,14) Children
+    // Controls/FluentControls.xaml(45,14) Children
     let children_collection_2 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(44,14) GeometryDrawing
+    // Controls/FluentControls.xaml(45,14) GeometryDrawing
     let geometry_drawing_2 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(44,14) Geometry
+    // Controls/FluentControls.xaml(45,14) Geometry
     let value_4 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 4.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 4.5_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(0.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_2.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_4)));
-    // Controls/FluentControls.xaml(46,18) Brush
-    // Controls/FluentControls.xaml(46,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(47,18) Brush
+    // Controls/FluentControls.xaml(47,18) LinearGradientBrush
     let linear_gradient_brush_1 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(46,18) StartPoint
+    // Controls/FluentControls.xaml(47,18) StartPoint
     linear_gradient_brush_1.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 4.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(46,18) EndPoint
+    // Controls/FluentControls.xaml(47,18) EndPoint
     linear_gradient_brush_1.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 5.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(47,20) GradientStops
+    // Controls/FluentControls.xaml(48,20) GradientStops
     let gradient_stops_collection_2 = linear_gradient_brush_1.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(47,20) GradientStop
+    // Controls/FluentControls.xaml(48,20) GradientStop
     let gradient_stop_2 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(47,20) Offset
+    // Controls/FluentControls.xaml(48,20) Offset
     gradient_stop_2.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(47,20) Color
+    // Controls/FluentControls.xaml(48,20) Color
     let value_5 = ::ferroui_base::media::Color::__markup_FromUInt32_2(14131224_u32);
     gradient_stop_2.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_5));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_2, "FerroUI.Media.GradientStops.Add", 47, 20)?, ::core::clone::Clone::clone(&gradient_stop_2));
-    // Controls/FluentControls.xaml(48,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_2, "FerroUI.Media.GradientStops.Add", 48, 20)?, ::core::clone::Clone::clone(&gradient_stop_2));
+    // Controls/FluentControls.xaml(49,20) GradientStops
     let gradient_stops_collection_3 = linear_gradient_brush_1.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(48,20) GradientStop
+    // Controls/FluentControls.xaml(49,20) GradientStop
     let gradient_stop_3 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(48,20) Offset
+    // Controls/FluentControls.xaml(49,20) Offset
     gradient_stop_3.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(48,20) Color
+    // Controls/FluentControls.xaml(49,20) Color
     let value_6 = ::ferroui_base::media::Color::__markup_FromUInt32_2(2144837656_u32);
     gradient_stop_3.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_6));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_3, "FerroUI.Media.GradientStops.Add", 48, 20)?, ::core::clone::Clone::clone(&gradient_stop_3));
-    geometry_drawing_2.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_1.clone(), 48, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_3, "FerroUI.Media.GradientStops.Add", 49, 20)?, ::core::clone::Clone::clone(&gradient_stop_3));
+    geometry_drawing_2.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_1.clone(), 49, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&geometry_drawing_2).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(52,14) Children
+    // Controls/FluentControls.xaml(53,14) Children
     let children_collection_3 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(52,14) GeometryDrawing
+    // Controls/FluentControls.xaml(53,14) GeometryDrawing
     let geometry_drawing_3 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(52,14) Geometry
+    // Controls/FluentControls.xaml(53,14) Geometry
     let value_7 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 5.0_f64), ::ferroui_base::Point::new(0.0_f64, 5.0_f64), ::ferroui_base::Point::new(2.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(5.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(5.5_f64, 5.0_f64), ::ferroui_base::Point::new(6.0_f64, 5.0_f64), ::ferroui_base::Point::new(6.5_f64, 4.75_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(16.0_f64, 4.0_f64), ::ferroui_base::Point::new(16.0_f64, 4.0_f64), ::ferroui_base::Point::new(16.0_f64, 6.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(16.0_f64, 13.0_f64), ::ferroui_base::Point::new(16.0_f64, 13.0_f64), ::ferroui_base::Point::new(14.0_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 13.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 13.0_f64), ::ferroui_base::Point::new(0.0_f64, 13.0_f64), ::ferroui_base::Point::new(0.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_3.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_7)));
-    // Controls/FluentControls.xaml(56,18) Brush
-    // Controls/FluentControls.xaml(56,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(57,18) Brush
+    // Controls/FluentControls.xaml(57,18) LinearGradientBrush
     let linear_gradient_brush_2 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(56,18) StartPoint
+    // Controls/FluentControls.xaml(57,18) StartPoint
     linear_gradient_brush_2.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(1.0_f64, 6.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(56,18) EndPoint
+    // Controls/FluentControls.xaml(57,18) EndPoint
     linear_gradient_brush_2.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(23.0_f64, 19.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(57,20) GradientStops
+    // Controls/FluentControls.xaml(58,20) GradientStops
     let gradient_stops_collection_4 = linear_gradient_brush_2.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(57,20) GradientStop
+    // Controls/FluentControls.xaml(58,20) GradientStop
     let gradient_stop_4 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(57,20) Offset
+    // Controls/FluentControls.xaml(58,20) Offset
     gradient_stop_4.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(57,20) Color
+    // Controls/FluentControls.xaml(58,20) Color
     let value_8 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294960797_u32);
     gradient_stop_4.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_8));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_4, "FerroUI.Media.GradientStops.Add", 57, 20)?, ::core::clone::Clone::clone(&gradient_stop_4));
-    // Controls/FluentControls.xaml(58,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_4, "FerroUI.Media.GradientStops.Add", 58, 20)?, ::core::clone::Clone::clone(&gradient_stop_4));
+    // Controls/FluentControls.xaml(59,20) GradientStops
     let gradient_stops_collection_5 = linear_gradient_brush_2.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(58,20) GradientStop
+    // Controls/FluentControls.xaml(59,20) GradientStop
     let gradient_stop_5 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(58,20) Offset
+    // Controls/FluentControls.xaml(59,20) Offset
     gradient_stop_5.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(58,20) Color
+    // Controls/FluentControls.xaml(59,20) Color
     let value_9 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4294953271_u32);
     gradient_stop_5.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_9));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_5, "FerroUI.Media.GradientStops.Add", 58, 20)?, ::core::clone::Clone::clone(&gradient_stop_5));
-    geometry_drawing_3.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_2.clone(), 58, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_5, "FerroUI.Media.GradientStops.Add", 59, 20)?, ::core::clone::Clone::clone(&gradient_stop_5));
+    geometry_drawing_3.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_2.clone(), 59, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&geometry_drawing_3).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(62,14) Children
+    // Controls/FluentControls.xaml(63,14) Children
     let children_collection_4 = drawing_group_0.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(62,14) GeometryDrawing
+    // Controls/FluentControls.xaml(63,14) GeometryDrawing
     let geometry_drawing_4 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(62,14) Geometry
+    // Controls/FluentControls.xaml(63,14) Geometry
     let value_10 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 5.0_f64), ::ferroui_base::Point::new(0.0_f64, 5.0_f64), ::ferroui_base::Point::new(2.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(5.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(5.5_f64, 5.0_f64), ::ferroui_base::Point::new(6.0_f64, 5.0_f64), ::ferroui_base::Point::new(6.5_f64, 4.75_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(8.0_f64, 4.25_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(6.0_f64, 5.25_f64), ::ferroui_base::Point::new(5.5_f64, 5.25_f64), ::ferroui_base::Point::new(5.125_f64, 5.25_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 5.25_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(0.0_f64, 5.25_f64), ::ferroui_base::Point::new(0.0_f64, 5.25_f64), ::ferroui_base::Point::new(0.0_f64, 9.25_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_4.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_10)));
-    // Controls/FluentControls.xaml(62,14) Brush
+    // Controls/FluentControls.xaml(63,14) Brush
     geometry_drawing_4.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(2147483647_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&geometry_drawing_4).upcast::<::ferroui_base::media::Drawing>());
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_Folder"), rt::to_object(::core::clone::Clone::clone(&drawing_group_0))), 32, 12)?;
-    // Controls/FluentControls.xaml(65,12) Content
-    // Controls/FluentControls.xaml(65,12) DrawingGroup
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_Folder"), rt::to_object(::core::clone::Clone::clone(&drawing_group_0))), 33, 12)?;
+    // Controls/FluentControls.xaml(66,12) Content
+    // Controls/FluentControls.xaml(66,12) DrawingGroup
     let drawing_group_1 = ::ferroui_base::media::DrawingGroup::new();
-    // Controls/FluentControls.xaml(66,14) Children
+    // Controls/FluentControls.xaml(67,14) Children
     let children_collection_5 = drawing_group_1.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(66,14) GeometryDrawing
+    // Controls/FluentControls.xaml(67,14) GeometryDrawing
     let geometry_drawing_5 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(66,14) Geometry
+    // Controls/FluentControls.xaml(67,14) Geometry
     let value_11 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_5.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_11)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&geometry_drawing_5).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(67,14) Children
+    // Controls/FluentControls.xaml(68,14) Children
     let children_collection_6 = drawing_group_1.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(67,14) GeometryDrawing
+    // Controls/FluentControls.xaml(68,14) GeometryDrawing
     let geometry_drawing_6 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(67,14) Geometry
+    // Controls/FluentControls.xaml(68,14) Geometry
     let value_12 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(2.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_6.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_12)));
-    // Controls/FluentControls.xaml(67,14) Brush
+    // Controls/FluentControls.xaml(68,14) Brush
     geometry_drawing_6.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4286150516_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&geometry_drawing_6).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(68,14) Children
+    // Controls/FluentControls.xaml(69,14) Children
     let children_collection_7 = drawing_group_1.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(68,14) GeometryDrawing
+    // Controls/FluentControls.xaml(69,14) GeometryDrawing
     let geometry_drawing_7 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(68,14) Geometry
+    // Controls/FluentControls.xaml(69,14) Geometry
     let value_13 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(3.0_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.7_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(13.0_f64, 4.3_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(13.0_f64, 15.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(3.0_f64, 15.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_7.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_13)));
-    // Controls/FluentControls.xaml(68,14) Brush
+    // Controls/FluentControls.xaml(69,14) Brush
     geometry_drawing_7.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4294638330_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&geometry_drawing_7).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(69,14) Children
+    // Controls/FluentControls.xaml(70,14) Children
     let children_collection_8 = drawing_group_1.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(69,14) GeometryDrawing
+    // Controls/FluentControls.xaml(70,14) GeometryDrawing
     let geometry_drawing_8 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(69,14) Geometry
+    // Controls/FluentControls.xaml(70,14) Geometry
     let value_14 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(9.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 4.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 1.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_8.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_14)));
-    // Controls/FluentControls.xaml(69,14) Brush
+    // Controls/FluentControls.xaml(70,14) Brush
     geometry_drawing_8.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4286150516_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&geometry_drawing_8).upcast::<::ferroui_base::media::Drawing>());
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_File"), rt::to_object(::core::clone::Clone::clone(&drawing_group_1))), 65, 12)?;
-    // Controls/FluentControls.xaml(71,12) Content
-    // Controls/FluentControls.xaml(71,12) DrawingGroup
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_File"), rt::to_object(::core::clone::Clone::clone(&drawing_group_1))), 66, 12)?;
+    // Controls/FluentControls.xaml(72,12) Content
+    // Controls/FluentControls.xaml(72,12) DrawingGroup
     let drawing_group_2 = ::ferroui_base::media::DrawingGroup::new();
-    // Controls/FluentControls.xaml(72,14) Children
+    // Controls/FluentControls.xaml(73,14) Children
     let children_collection_9 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(72,14) GeometryDrawing
+    // Controls/FluentControls.xaml(73,14) GeometryDrawing
     let geometry_drawing_9 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(72,14) Geometry
+    // Controls/FluentControls.xaml(73,14) Geometry
     let value_15 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_9.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_15)));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&geometry_drawing_9).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(73,14) Children
+    // Controls/FluentControls.xaml(74,14) Children
     let children_collection_10 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(73,14) GeometryDrawing
+    // Controls/FluentControls.xaml(74,14) GeometryDrawing
     let geometry_drawing_10 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(73,14) Geometry
+    // Controls/FluentControls.xaml(74,14) Geometry
     let value_16 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(4.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(12.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.5_f64, 7.5_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(1.5_f64, 7.5_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_10.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_16)));
-    // Controls/FluentControls.xaml(73,14) Brush
+    // Controls/FluentControls.xaml(74,14) Brush
     geometry_drawing_10.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4292994022_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&geometry_drawing_10).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(74,14) Children
+    // Controls/FluentControls.xaml(75,14) Children
     let children_collection_11 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(74,14) GeometryDrawing
+    // Controls/FluentControls.xaml(75,14) GeometryDrawing
     let geometry_drawing_11 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(74,14) Geometry
+    // Controls/FluentControls.xaml(75,14) Geometry
     let value_17 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(12.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.5_f64, 7.5_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(10.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_11.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_17)));
-    // Controls/FluentControls.xaml(76,18) Brush
-    // Controls/FluentControls.xaml(76,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(77,18) Brush
+    // Controls/FluentControls.xaml(77,18) LinearGradientBrush
     let linear_gradient_brush_3 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(76,18) StartPoint
+    // Controls/FluentControls.xaml(77,18) StartPoint
     linear_gradient_brush_3.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(12.0_f64, 5.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(76,18) EndPoint
+    // Controls/FluentControls.xaml(77,18) EndPoint
     linear_gradient_brush_3.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(11.5_f64, 5.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(77,20) GradientStops
+    // Controls/FluentControls.xaml(78,20) GradientStops
     let gradient_stops_collection_6 = linear_gradient_brush_3.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(77,20) GradientStop
+    // Controls/FluentControls.xaml(78,20) GradientStop
     let gradient_stop_6 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(77,20) Offset
+    // Controls/FluentControls.xaml(78,20) Offset
     gradient_stop_6.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(77,20) Color
+    // Controls/FluentControls.xaml(78,20) Color
     let value_18 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291678161_u32);
     gradient_stop_6.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_18));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_6, "FerroUI.Media.GradientStops.Add", 77, 20)?, ::core::clone::Clone::clone(&gradient_stop_6));
-    // Controls/FluentControls.xaml(78,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_6, "FerroUI.Media.GradientStops.Add", 78, 20)?, ::core::clone::Clone::clone(&gradient_stop_6));
+    // Controls/FluentControls.xaml(79,20) GradientStops
     let gradient_stops_collection_7 = linear_gradient_brush_3.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(78,20) GradientStop
+    // Controls/FluentControls.xaml(79,20) GradientStop
     let gradient_stop_7 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(78,20) Offset
+    // Controls/FluentControls.xaml(79,20) Offset
     gradient_stop_7.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(78,20) Color
+    // Controls/FluentControls.xaml(79,20) Color
     let value_19 = ::ferroui_base::media::Color::__markup_FromUInt32_2(13488081_u32);
     gradient_stop_7.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_19));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_7, "FerroUI.Media.GradientStops.Add", 78, 20)?, ::core::clone::Clone::clone(&gradient_stop_7));
-    geometry_drawing_11.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_3.clone(), 78, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_7, "FerroUI.Media.GradientStops.Add", 79, 20)?, ::core::clone::Clone::clone(&gradient_stop_7));
+    geometry_drawing_11.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_3.clone(), 79, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&geometry_drawing_11).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(82,14) Children
+    // Controls/FluentControls.xaml(83,14) Children
     let children_collection_12 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(82,14) GeometryDrawing
+    // Controls/FluentControls.xaml(83,14) GeometryDrawing
     let geometry_drawing_12 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(82,14) Geometry
+    // Controls/FluentControls.xaml(83,14) Geometry
     let value_20 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(4.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(1.5_f64, 7.5_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(1.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(4.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(6.0_f64, 5.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_12.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_20)));
-    // Controls/FluentControls.xaml(84,18) Brush
-    // Controls/FluentControls.xaml(84,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(85,18) Brush
+    // Controls/FluentControls.xaml(85,18) LinearGradientBrush
     let linear_gradient_brush_4 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(84,18) StartPoint
+    // Controls/FluentControls.xaml(85,18) StartPoint
     linear_gradient_brush_4.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(4.0_f64, 5.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(84,18) EndPoint
+    // Controls/FluentControls.xaml(85,18) EndPoint
     linear_gradient_brush_4.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(4.5_f64, 5.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(85,20) GradientStops
+    // Controls/FluentControls.xaml(86,20) GradientStops
     let gradient_stops_collection_8 = linear_gradient_brush_4.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(85,20) GradientStop
+    // Controls/FluentControls.xaml(86,20) GradientStop
     let gradient_stop_8 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(85,20) Offset
+    // Controls/FluentControls.xaml(86,20) Offset
     gradient_stop_8.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(85,20) Color
+    // Controls/FluentControls.xaml(86,20) Color
     let value_21 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4291678161_u32);
     gradient_stop_8.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_21));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_8, "FerroUI.Media.GradientStops.Add", 85, 20)?, ::core::clone::Clone::clone(&gradient_stop_8));
-    // Controls/FluentControls.xaml(86,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_8, "FerroUI.Media.GradientStops.Add", 86, 20)?, ::core::clone::Clone::clone(&gradient_stop_8));
+    // Controls/FluentControls.xaml(87,20) GradientStops
     let gradient_stops_collection_9 = linear_gradient_brush_4.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(86,20) GradientStop
+    // Controls/FluentControls.xaml(87,20) GradientStop
     let gradient_stop_9 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(86,20) Offset
+    // Controls/FluentControls.xaml(87,20) Offset
     gradient_stop_9.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(86,20) Color
+    // Controls/FluentControls.xaml(87,20) Color
     let value_22 = ::ferroui_base::media::Color::__markup_FromUInt32_2(13488081_u32);
     gradient_stop_9.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_22));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_9, "FerroUI.Media.GradientStops.Add", 86, 20)?, ::core::clone::Clone::clone(&gradient_stop_9));
-    geometry_drawing_12.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_4.clone(), 86, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_9, "FerroUI.Media.GradientStops.Add", 87, 20)?, ::core::clone::Clone::clone(&gradient_stop_9));
+    geometry_drawing_12.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_4.clone(), 87, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&geometry_drawing_12).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(90,14) Children
+    // Controls/FluentControls.xaml(91,14) Children
     let children_collection_13 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(90,14) GeometryDrawing
+    // Controls/FluentControls.xaml(91,14) GeometryDrawing
     let geometry_drawing_13 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(90,14) Geometry
+    // Controls/FluentControls.xaml(91,14) Geometry
     let value_23 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(1.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(1.0_f64, 8.0_f64), ::ferroui_base::Point::new(2.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 8.0_f64), ::ferroui_base::Point::new(15.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(15.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(15.0_f64, 12.0_f64), ::ferroui_base::Point::new(15.0_f64, 12.0_f64), ::ferroui_base::Point::new(14.0_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(2.0_f64, 12.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(1.0_f64, 12.0_f64), ::ferroui_base::Point::new(1.0_f64, 12.0_f64), ::ferroui_base::Point::new(1.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_13.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_23)));
-    // Controls/FluentControls.xaml(95,18) Brush
-    // Controls/FluentControls.xaml(95,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(96,18) Brush
+    // Controls/FluentControls.xaml(96,18) LinearGradientBrush
     let linear_gradient_brush_5 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(95,18) StartPoint
+    // Controls/FluentControls.xaml(96,18) StartPoint
     linear_gradient_brush_5.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 8.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(95,18) EndPoint
+    // Controls/FluentControls.xaml(96,18) EndPoint
     linear_gradient_brush_5.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 12.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(96,20) GradientStops
+    // Controls/FluentControls.xaml(97,20) GradientStops
     let gradient_stops_collection_10 = linear_gradient_brush_5.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(96,20) GradientStop
+    // Controls/FluentControls.xaml(97,20) GradientStop
     let gradient_stop_10 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(96,20) Offset
+    // Controls/FluentControls.xaml(97,20) Offset
     gradient_stop_10.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(96,20) Color
+    // Controls/FluentControls.xaml(97,20) Color
     let value_24 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4285756276_u32);
     gradient_stop_10.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_24));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_10, "FerroUI.Media.GradientStops.Add", 96, 20)?, ::core::clone::Clone::clone(&gradient_stop_10));
-    // Controls/FluentControls.xaml(97,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_10, "FerroUI.Media.GradientStops.Add", 97, 20)?, ::core::clone::Clone::clone(&gradient_stop_10));
+    // Controls/FluentControls.xaml(98,20) GradientStops
     let gradient_stops_collection_11 = linear_gradient_brush_5.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(97,20) GradientStop
+    // Controls/FluentControls.xaml(98,20) GradientStop
     let gradient_stop_11 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(97,20) Offset
+    // Controls/FluentControls.xaml(98,20) Offset
     gradient_stop_11.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(97,20) Color
+    // Controls/FluentControls.xaml(98,20) Color
     let value_25 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4289243304_u32);
     gradient_stop_11.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_25));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_11, "FerroUI.Media.GradientStops.Add", 97, 20)?, ::core::clone::Clone::clone(&gradient_stop_11));
-    geometry_drawing_13.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_5.clone(), 97, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_11, "FerroUI.Media.GradientStops.Add", 98, 20)?, ::core::clone::Clone::clone(&gradient_stop_11));
+    geometry_drawing_13.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_5.clone(), 98, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&geometry_drawing_13).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(101,14) Children
+    // Controls/FluentControls.xaml(102,14) Children
     let children_collection_14 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(101,14) GeometryDrawing
+    // Controls/FluentControls.xaml(102,14) GeometryDrawing
     let geometry_drawing_14 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(101,14) Geometry
+    // Controls/FluentControls.xaml(102,14) Geometry
     let value_26 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(2.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(2.0_f64, 8.0_f64), ::ferroui_base::Point::new(2.0_f64, 8.0_f64), ::ferroui_base::Point::new(3.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(13.0_f64, 8.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(14.0_f64, 8.0_f64), ::ferroui_base::Point::new(14.0_f64, 8.0_f64), ::ferroui_base::Point::new(14.0_f64, 9.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 10.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(14.0_f64, 11.0_f64), ::ferroui_base::Point::new(14.0_f64, 11.0_f64), ::ferroui_base::Point::new(13.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(3.0_f64, 11.0_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(2.0_f64, 11.0_f64), ::ferroui_base::Point::new(2.0_f64, 11.0_f64), ::ferroui_base::Point::new(2.0_f64, 10.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_14.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_26)));
-    // Controls/FluentControls.xaml(106,18) Brush
-    // Controls/FluentControls.xaml(106,18) LinearGradientBrush
+    // Controls/FluentControls.xaml(107,18) Brush
+    // Controls/FluentControls.xaml(107,18) LinearGradientBrush
     let linear_gradient_brush_6 = ::ferroui_base::media::LinearGradientBrush::new();
-    // Controls/FluentControls.xaml(106,18) StartPoint
+    // Controls/FluentControls.xaml(107,18) StartPoint
     linear_gradient_brush_6.set_value(::ferroui_base::media::LinearGradientBrush::start_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 8.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(106,18) EndPoint
+    // Controls/FluentControls.xaml(107,18) EndPoint
     linear_gradient_brush_6.set_value(::ferroui_base::media::LinearGradientBrush::end_point_property(), ::ferroui_base::RelativePoint::__markup_new_1(0.0_f64, 11.0_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(107,20) GradientStops
+    // Controls/FluentControls.xaml(108,20) GradientStops
     let gradient_stops_collection_12 = linear_gradient_brush_6.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(107,20) GradientStop
+    // Controls/FluentControls.xaml(108,20) GradientStop
     let gradient_stop_12 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(107,20) Offset
+    // Controls/FluentControls.xaml(108,20) Offset
     gradient_stop_12.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(107,20) Color
+    // Controls/FluentControls.xaml(108,20) Color
     let value_27 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4281545523_u32);
     gradient_stop_12.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_27));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_12, "FerroUI.Media.GradientStops.Add", 107, 20)?, ::core::clone::Clone::clone(&gradient_stop_12));
-    // Controls/FluentControls.xaml(108,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_12, "FerroUI.Media.GradientStops.Add", 108, 20)?, ::core::clone::Clone::clone(&gradient_stop_12));
+    // Controls/FluentControls.xaml(109,20) GradientStops
     let gradient_stops_collection_13 = linear_gradient_brush_6.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(108,20) GradientStop
+    // Controls/FluentControls.xaml(109,20) GradientStop
     let gradient_stop_13 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(108,20) Offset
+    // Controls/FluentControls.xaml(109,20) Offset
     gradient_stop_13.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(108,20) Color
+    // Controls/FluentControls.xaml(109,20) Color
     let value_28 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4284111450_u32);
     gradient_stop_13.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_28));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_13, "FerroUI.Media.GradientStops.Add", 108, 20)?, ::core::clone::Clone::clone(&gradient_stop_13));
-    geometry_drawing_14.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_6.clone(), 108, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_13, "FerroUI.Media.GradientStops.Add", 109, 20)?, ::core::clone::Clone::clone(&gradient_stop_13));
+    geometry_drawing_14.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(linear_gradient_brush_6.clone(), 109, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&geometry_drawing_14).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(112,14) Children
+    // Controls/FluentControls.xaml(113,14) Children
     let children_collection_15 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(112,14) GeometryDrawing
+    // Controls/FluentControls.xaml(113,14) GeometryDrawing
     let geometry_drawing_15 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(114,18) Geometry
-    // Controls/FluentControls.xaml(114,18) EllipseGeometry
+    // Controls/FluentControls.xaml(115,18) Geometry
+    // Controls/FluentControls.xaml(115,18) EllipseGeometry
     let ellipse_geometry_0 = ::ferroui_base::media::EllipseGeometry::new();
-    // Controls/FluentControls.xaml(114,18) Rect
-    let value_29 = rt::invoked(::ferroui_base::Rect::__markup_parse(::std::string::String::from("2.5,8.5,2,2")), 114, 34)?;
+    // Controls/FluentControls.xaml(115,18) Rect
+    let value_29 = rt::invoked(::ferroui_base::Rect::__markup_parse(::std::string::String::from("2.5,8.5,2,2")), 115, 34)?;
     ellipse_geometry_0.set_value(::ferroui_base::media::EllipseGeometry::rect_property(), ::core::clone::Clone::clone(&value_29));
     geometry_drawing_15.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&ellipse_geometry_0).upcast::<::ferroui_base::media::Geometry>()));
-    // Controls/FluentControls.xaml(117,18) Brush
-    // Controls/FluentControls.xaml(117,18) RadialGradientBrush
+    // Controls/FluentControls.xaml(118,18) Brush
+    // Controls/FluentControls.xaml(118,18) RadialGradientBrush
     let radial_gradient_brush_0 = ::ferroui_base::media::RadialGradientBrush::new();
-    // Controls/FluentControls.xaml(117,18) GradientOrigin
+    // Controls/FluentControls.xaml(118,18) GradientOrigin
     radial_gradient_brush_0.set_value(::ferroui_base::media::RadialGradientBrush::gradient_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(3.5_f64, 9.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(117,18) Center
+    // Controls/FluentControls.xaml(118,18) Center
     radial_gradient_brush_0.set_value(::ferroui_base::media::RadialGradientBrush::center_property(), ::ferroui_base::RelativePoint::__markup_new_1(3.5_f64, 9.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(118,20) GradientStops
+    // Controls/FluentControls.xaml(119,20) GradientStops
     let gradient_stops_collection_14 = radial_gradient_brush_0.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(118,20) GradientStop
+    // Controls/FluentControls.xaml(119,20) GradientStop
     let gradient_stop_14 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(118,20) Offset
+    // Controls/FluentControls.xaml(119,20) Offset
     gradient_stop_14.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.8_f64);
-    // Controls/FluentControls.xaml(118,20) Color
+    // Controls/FluentControls.xaml(119,20) Color
     let value_30 = ::ferroui_base::media::Color::__markup_FromUInt32_2(1073872641_u32);
     gradient_stop_14.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_30));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_14, "FerroUI.Media.GradientStops.Add", 118, 20)?, ::core::clone::Clone::clone(&gradient_stop_14));
-    // Controls/FluentControls.xaml(119,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_14, "FerroUI.Media.GradientStops.Add", 119, 20)?, ::core::clone::Clone::clone(&gradient_stop_14));
+    // Controls/FluentControls.xaml(120,20) GradientStops
     let gradient_stops_collection_15 = radial_gradient_brush_0.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(119,20) GradientStop
+    // Controls/FluentControls.xaml(120,20) GradientStop
     let gradient_stop_15 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(119,20) Offset
+    // Controls/FluentControls.xaml(120,20) Offset
     gradient_stop_15.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(119,20) Color
+    // Controls/FluentControls.xaml(120,20) Color
     let value_31 = ::ferroui_base::media::Color::__markup_FromUInt32_2(130817_u32);
     gradient_stop_15.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_31));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_15, "FerroUI.Media.GradientStops.Add", 119, 20)?, ::core::clone::Clone::clone(&gradient_stop_15));
-    geometry_drawing_15.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(radial_gradient_brush_0.clone(), 119, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_15, "FerroUI.Media.GradientStops.Add", 120, 20)?, ::core::clone::Clone::clone(&gradient_stop_15));
+    geometry_drawing_15.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(radial_gradient_brush_0.clone(), 120, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_15, ::core::clone::Clone::clone(&geometry_drawing_15).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(123,14) Children
+    // Controls/FluentControls.xaml(124,14) Children
     let children_collection_16 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(123,14) GeometryDrawing
+    // Controls/FluentControls.xaml(124,14) GeometryDrawing
     let geometry_drawing_16 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(125,18) Geometry
-    // Controls/FluentControls.xaml(125,18) EllipseGeometry
+    // Controls/FluentControls.xaml(126,18) Geometry
+    // Controls/FluentControls.xaml(126,18) EllipseGeometry
     let ellipse_geometry_1 = ::ferroui_base::media::EllipseGeometry::new();
-    // Controls/FluentControls.xaml(125,18) Rect
-    let value_32 = rt::invoked(::ferroui_base::Rect::__markup_parse(::std::string::String::from("3,9,1,1")), 125, 34)?;
+    // Controls/FluentControls.xaml(126,18) Rect
+    let value_32 = rt::invoked(::ferroui_base::Rect::__markup_parse(::std::string::String::from("3,9,1,1")), 126, 34)?;
     ellipse_geometry_1.set_value(::ferroui_base::media::EllipseGeometry::rect_property(), ::core::clone::Clone::clone(&value_32));
     geometry_drawing_16.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&ellipse_geometry_1).upcast::<::ferroui_base::media::Geometry>()));
-    // Controls/FluentControls.xaml(128,18) Brush
-    // Controls/FluentControls.xaml(128,18) RadialGradientBrush
+    // Controls/FluentControls.xaml(129,18) Brush
+    // Controls/FluentControls.xaml(129,18) RadialGradientBrush
     let radial_gradient_brush_1 = ::ferroui_base::media::RadialGradientBrush::new();
-    // Controls/FluentControls.xaml(128,18) GradientOrigin
+    // Controls/FluentControls.xaml(129,18) GradientOrigin
     radial_gradient_brush_1.set_value(::ferroui_base::media::RadialGradientBrush::gradient_origin_property(), ::ferroui_base::RelativePoint::__markup_new_1(3.5_f64, 9.5_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(128,18) Center
+    // Controls/FluentControls.xaml(129,18) Center
     radial_gradient_brush_1.set_value(::ferroui_base::media::RadialGradientBrush::center_property(), ::ferroui_base::RelativePoint::__markup_new_1(3.25_f64, 9.75_f64, ::ferroui_base::RelativeUnit::Absolute));
-    // Controls/FluentControls.xaml(129,20) GradientStops
+    // Controls/FluentControls.xaml(130,20) GradientStops
     let gradient_stops_collection_16 = radial_gradient_brush_1.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(129,20) GradientStop
+    // Controls/FluentControls.xaml(130,20) GradientStop
     let gradient_stop_16 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(129,20) Offset
+    // Controls/FluentControls.xaml(130,20) Offset
     gradient_stop_16.set_value(::ferroui_base::media::GradientStop::offset_property(), 0.0_f64);
-    // Controls/FluentControls.xaml(129,20) Color
+    // Controls/FluentControls.xaml(130,20) Color
     let value_33 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4290183094_u32);
     gradient_stop_16.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_33));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_16, "FerroUI.Media.GradientStops.Add", 129, 20)?, ::core::clone::Clone::clone(&gradient_stop_16));
-    // Controls/FluentControls.xaml(130,20) GradientStops
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_16, "FerroUI.Media.GradientStops.Add", 130, 20)?, ::core::clone::Clone::clone(&gradient_stop_16));
+    // Controls/FluentControls.xaml(131,20) GradientStops
     let gradient_stops_collection_17 = radial_gradient_brush_1.get_value(::ferroui_base::media::GradientBrush::gradient_stops_property());
-    // Controls/FluentControls.xaml(130,20) GradientStop
+    // Controls/FluentControls.xaml(131,20) GradientStop
     let gradient_stop_17 = ::ferroui_base::media::GradientStop::new();
-    // Controls/FluentControls.xaml(130,20) Offset
+    // Controls/FluentControls.xaml(131,20) Offset
     gradient_stop_17.set_value(::ferroui_base::media::GradientStop::offset_property(), 1.0_f64);
-    // Controls/FluentControls.xaml(130,20) Color
+    // Controls/FluentControls.xaml(131,20) Color
     let value_34 = ::ferroui_base::media::Color::__markup_FromUInt32_2(4278320897_u32);
     gradient_stop_17.set_value(::ferroui_base::media::GradientStop::color_property(), ::core::clone::Clone::clone(&value_34));
-    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_17, "FerroUI.Media.GradientStops.Add", 130, 20)?, ::core::clone::Clone::clone(&gradient_stop_17));
-    geometry_drawing_16.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(radial_gradient_brush_1.clone(), 130, 20)?);
+    ::ferroui_base::media::GradientStops::__markup_Add_0(rt::instance(&gradient_stops_collection_17, "FerroUI.Media.GradientStops.Add", 131, 20)?, ::core::clone::Clone::clone(&gradient_stop_17));
+    geometry_drawing_16.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), rt::cast(radial_gradient_brush_1.clone(), 131, 20)?);
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_16, ::core::clone::Clone::clone(&geometry_drawing_16).upcast::<::ferroui_base::media::Drawing>());
-    // Controls/FluentControls.xaml(134,14) Children
+    // Controls/FluentControls.xaml(135,14) Children
     let children_collection_17 = drawing_group_2.get_direct_value(::ferroui_base::media::DrawingGroup::children_property());
-    // Controls/FluentControls.xaml(134,14) GeometryDrawing
+    // Controls/FluentControls.xaml(135,14) GeometryDrawing
     let geometry_drawing_17 = ::ferroui_base::media::GeometryDrawing::new();
-    // Controls/FluentControls.xaml(134,14) Geometry
+    // Controls/FluentControls.xaml(135,14) Geometry
     let value_35 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(3.23483495705_f64, 9.76516504295_f64), true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(3.76516504295_f64, 9.23483495705_f64), ::ferroui_base::Size::new(0.375_f64, 0.375_f64), 180.0_f64, true, ::ferroui_base::media::SweepDirection::CounterClockwise, true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(3.23483495705_f64, 9.76516504295_f64), ::ferroui_base::Size::new(0.4375_f64, 0.4375_f64), 135.0_f64, false, ::ferroui_base::media::SweepDirection::Clockwise, true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     geometry_drawing_17.set_value(::ferroui_base::media::GeometryDrawing::geometry_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_35)));
-    // Controls/FluentControls.xaml(134,14) Brush
+    // Controls/FluentControls.xaml(135,14) Brush
     geometry_drawing_17.set_value(::ferroui_base::media::GeometryDrawing::brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(4278235904_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>));
     ::ferroui_base::media::DrawingCollection::__markup_Add_0(&children_collection_17, ::core::clone::Clone::clone(&geometry_drawing_17).upcast::<::ferroui_base::media::Drawing>());
-    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_Volume"), rt::to_object(::core::clone::Clone::clone(&drawing_group_2))), 71, 12)?;
+    rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_Add_0(resource_selector_converter_0.upcast_ref::<::ferroui_base::controls::ResourceDictionary>(), rt::string_object("Icon_Volume"), rt::to_object(::core::clone::Clone::clone(&drawing_group_2))), 72, 12)?;
     ::core::result::Result::Ok(rt::to_value(resource_selector_converter_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(143,10)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_391(
+/// Builds the deferred content at `Controls/FluentControls.xaml(144,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_392(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
     let name_scope = context.name_scope_field();
-    // Controls/FluentControls.xaml(143,10) Border
+    // Controls/FluentControls.xaml(144,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
     rt::push_parent(&context, &border_0);
-    // Controls/FluentControls.xaml(143,17) Background
+    // Controls/FluentControls.xaml(144,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_233)?;
-    // Controls/FluentControls.xaml(148,12) Child
-    // Controls/FluentControls.xaml(148,12) DockPanel
+    // Controls/FluentControls.xaml(149,12) Child
+    // Controls/FluentControls.xaml(149,12) DockPanel
     let dock_panel_0 = ::ferroui_controls::DockPanel::new();
     dock_panel_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&dock_panel_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &dock_panel_0);
-    // Controls/FluentControls.xaml(149,14) Children
+    // Controls/FluentControls.xaml(150,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(149,14) ListBox
+    // Controls/FluentControls.xaml(150,14) ListBox
     let list_box_0 = ::ferroui_controls::ListBox::new();
     list_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&list_box_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &list_box_0);
-    // Controls/FluentControls.xaml(149,22) Name
-    rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_QuickLinks", 149, 22)?;
-    // Controls/FluentControls.xaml(149,14) Dock
+    // Controls/FluentControls.xaml(150,22) Name
+    rt::name_element(name_scope.as_ref(), &list_box_0, &list_box_0, "PART_QuickLinks", 150, 22)?;
+    // Controls/FluentControls.xaml(150,14) Dock
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_0);
-    // Controls/FluentControls.xaml(149,69) ItemsSource
+    // Controls/FluentControls.xaml(150,69) ItemsSource
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "QuickLinks", false, rt::declared_property_type(<::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "QuickLinks", false), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_0.clone(), 149, 69)?;
-    // Controls/FluentControls.xaml(149,104) SelectedIndex
+    rt::bind_compiled_binding(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_0.clone(), 150, 69)?;
+    // Controls/FluentControls.xaml(150,104) SelectedIndex
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "QuickLinksSelectedIndex", false, ::ferroui_base::data::core::ValueType::of::<i32>(), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_index_property(), path_1.clone(), 149, 104)?;
-    // Controls/FluentControls.xaml(149,14) Focusable
+    rt::bind_compiled_binding(&context, list_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_index_property(), path_1.clone(), 150, 104)?;
+    // Controls/FluentControls.xaml(150,14) Focusable
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_base::input::InputElement::focusable_property(), ::core::clone::Clone::clone(&false), priority_1);
-    // Controls/FluentControls.xaml(149,14) MaxWidth
+    // Controls/FluentControls.xaml(150,14) MaxWidth
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_base::layout::Layoutable::max_width_property(), 200.0_f64, priority_2);
-    // Controls/FluentControls.xaml(152,18) ItemTemplate
+    // Controls/FluentControls.xaml(153,18) ItemTemplate
     let data_template_0 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_0.clone()));
-    // Controls/FluentControls.xaml(152,18) DataType
+    // Controls/FluentControls.xaml(153,18) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_0, ::core::option::Option::Some(rt::markup_handle(<::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
-    // Controls/FluentControls.xaml(153,20) Content
-    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_392, 153, 20)?;
+    // Controls/FluentControls.xaml(154,20) Content
+    let deferred_0 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_393, 154, 20)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_0)));
     context.pop_parent();
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     list_box_0.set_value_with_priority(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_0) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>), priority_3);
-    rt::pop_parent_end_init(&context, &list_box_0, 149, 14)?;
-    // Controls/FluentControls.xaml(164,14) Children
+    rt::pop_parent_end_init(&context, &list_box_0, 150, 14)?;
+    // Controls/FluentControls.xaml(165,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(164,14) DockPanel
+    // Controls/FluentControls.xaml(165,14) DockPanel
     let dock_panel_1 = ::ferroui_controls::DockPanel::new();
     dock_panel_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&dock_panel_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_1);
-    // Controls/FluentControls.xaml(164,24) Name
-    rt::name_element(name_scope.as_ref(), &dock_panel_1, &dock_panel_1, "NavBar", 164, 24)?;
-    // Controls/FluentControls.xaml(164,14) Dock
+    // Controls/FluentControls.xaml(165,24) Name
+    rt::name_element(name_scope.as_ref(), &dock_panel_1, &dock_panel_1, "NavBar", 165, 24)?;
+    // Controls/FluentControls.xaml(165,14) Dock
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_4);
-    // Controls/FluentControls.xaml(164,14) Margin
+    // Controls/FluentControls.xaml(165,14) Margin
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 5.0_f64, 8.0_f64, 0.0_f64), priority_5);
-    // Controls/FluentControls.xaml(164,14) VerticalAlignment
+    // Controls/FluentControls.xaml(165,14) VerticalAlignment
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_6);
-    // Controls/FluentControls.xaml(165,16) Children
+    // Controls/FluentControls.xaml(166,16) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(165,16) Rectangle
+    // Controls/FluentControls.xaml(166,16) Rectangle
     let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
     rectangle_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &rectangle_0);
-    // Controls/FluentControls.xaml(165,26) Fill
-    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlHighlightAltBaseMediumLowBrush", 165, 26)?;
-    // Controls/FluentControls.xaml(165,16) Height
+    // Controls/FluentControls.xaml(166,26) Fill
+    rt::bind_dynamic_resource(&context, rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlHighlightAltBaseMediumLowBrush", 166, 26)?;
+    // Controls/FluentControls.xaml(166,16) Height
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 1.0_f64, priority_7);
-    // Controls/FluentControls.xaml(165,16) Margin
+    // Controls/FluentControls.xaml(166,16) Margin
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), priority_8);
-    // Controls/FluentControls.xaml(165,16) Dock
+    // Controls/FluentControls.xaml(166,16) Dock
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_9);
-    rt::pop_parent_end_init(&context, &rectangle_0, 165, 16)?;
-    // Controls/FluentControls.xaml(166,16) Children
+    rt::pop_parent_end_init(&context, &rectangle_0, 166, 16)?;
+    // Controls/FluentControls.xaml(167,16) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(166,16) DockPanel
+    // Controls/FluentControls.xaml(167,16) DockPanel
     let dock_panel_2 = ::ferroui_controls::DockPanel::new();
     dock_panel_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&dock_panel_2).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_2);
-    // Controls/FluentControls.xaml(166,16) Margin
+    // Controls/FluentControls.xaml(167,16) Margin
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_2.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), priority_10);
-    // Controls/FluentControls.xaml(167,18) Children
+    // Controls/FluentControls.xaml(168,18) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_2.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(167,18) Button
+    // Controls/FluentControls.xaml(168,18) Button
     let button_0 = ::ferroui_controls::Button::new();
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_0);
-    // Controls/FluentControls.xaml(167,25) Command
+    // Controls/FluentControls.xaml(168,25) Command
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_command(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "GoUp", false, false, |this, _arguments| { ::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_GoUp_2(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_2.clone(), 167, 25)?;
-    // Controls/FluentControls.xaml(167,18) Dock
+    rt::bind_compiled_binding(&context, button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_2.clone(), 168, 25)?;
+    // Controls/FluentControls.xaml(168,18) Dock
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_11);
-    // Controls/FluentControls.xaml(167,18) Margin
+    // Controls/FluentControls.xaml(168,18) Margin
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 8.0_f64, 0.0_f64), priority_12);
-    // Controls/FluentControls.xaml(168,20) Content
-    // Controls/FluentControls.xaml(168,20) Path
+    // Controls/FluentControls.xaml(169,20) Content
+    // Controls/FluentControls.xaml(169,20) Path
     let path_3 = ::ferroui_controls::shapes::Path::new();
     path_3.begin_init();
     button_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&path_3)));
     rt::push_parent(&context, &path_3);
-    // Controls/FluentControls.xaml(168,20) Data
+    // Controls/FluentControls.xaml(169,20) Data
     let value_0 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(0.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(14.0_f64, 7.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false), ::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(7.0_f64, 0.0_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(7.0_f64, 16.0_f64), true), ::ferroui_base::media::PathCommand::EndFigure(false)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     let priority_13 = ::ferroui_base::data::BindingPriority::Template;
     path_3.set_value_with_priority(::ferroui_controls::shapes::Path::data_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_0)), priority_13);
-    // Controls/FluentControls.xaml(168,64) Stroke
+    // Controls/FluentControls.xaml(169,64) Stroke
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), 0);
         let builder = builder.ferro_property(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
         builder.build()
     };
-    rt::bind_compiled_binding(&context, path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::stroke_property(), path_4.clone(), 168, 64)?;
-    // Controls/FluentControls.xaml(168,20) StrokeThickness
+    rt::bind_compiled_binding(&context, path_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::stroke_property(), path_4.clone(), 169, 64)?;
+    // Controls/FluentControls.xaml(169,20) StrokeThickness
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     path_3.set_value_with_priority(::ferroui_controls::shapes::Shape::stroke_thickness_property(), 1.0_f64, priority_14);
-    // Controls/FluentControls.xaml(168,20) HorizontalAlignment
+    // Controls/FluentControls.xaml(169,20) HorizontalAlignment
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     path_3.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_15);
-    // Controls/FluentControls.xaml(168,20) VerticalAlignment
+    // Controls/FluentControls.xaml(169,20) VerticalAlignment
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     path_3.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_16);
-    // Controls/FluentControls.xaml(168,20) Margin
+    // Controls/FluentControls.xaml(169,20) Margin
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     path_3.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 1.0_f64, 0.0_f64, -1.0_f64), priority_17);
-    rt::pop_parent_end_init(&context, &path_3, 168, 20)?;
-    rt::pop_parent_end_init(&context, &button_0, 167, 18)?;
-    // Controls/FluentControls.xaml(170,18) Children
+    rt::pop_parent_end_init(&context, &path_3, 169, 20)?;
+    rt::pop_parent_end_init(&context, &button_0, 168, 18)?;
+    // Controls/FluentControls.xaml(171,18) Children
     let children_collection_5 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_2.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(170,18) Button
+    // Controls/FluentControls.xaml(171,18) Button
     let button_1 = ::ferroui_controls::Button::new();
     button_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_5, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_1);
-    // Controls/FluentControls.xaml(170,25) Command
+    // Controls/FluentControls.xaml(171,25) Command
     let path_5 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_command(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Refresh", false, false, |this, _arguments| { ::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_Refresh_1(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_5.clone(), 170, 25)?;
-    // Controls/FluentControls.xaml(170,18) Dock
+    rt::bind_compiled_binding(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_5.clone(), 171, 25)?;
+    // Controls/FluentControls.xaml(171,18) Dock
     let priority_18 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right, priority_18);
-    // Controls/FluentControls.xaml(170,18) Margin
+    // Controls/FluentControls.xaml(171,18) Margin
     let priority_19 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_19);
-    // Controls/FluentControls.xaml(171,20) Content
-    // Controls/FluentControls.xaml(171,20) Path
+    // Controls/FluentControls.xaml(172,20) Content
+    // Controls/FluentControls.xaml(172,20) Path
     let path_6 = ::ferroui_controls::shapes::Path::new();
     path_6.begin_init();
     button_1.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&path_6)));
     rt::push_parent(&context, &path_6);
-    // Controls/FluentControls.xaml(171,20) Data
+    // Controls/FluentControls.xaml(172,20) Data
     let value_1 = { const COMMANDS: &[::ferroui_base::media::PathCommand] = &[::ferroui_base::media::PathCommand::BeginFigure(::ferroui_base::Point::new(18.62_f64, 3.32_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(19.01_f64, 3.32_f64), ::ferroui_base::Point::new(19.32_f64, 3.61_f64), ::ferroui_base::Point::new(19.380000000000003_f64, 3.98_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(19.380000000000003_f64, 6.98_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(19.380000000000003_f64, 7.37_f64), ::ferroui_base::Point::new(19.1_f64, 7.680000000000001_f64), ::ferroui_base::Point::new(18.720000000000002_f64, 7.74_f64), true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(15.720000000000002_f64, 7.74_f64), true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(15.620000000000003_f64, 6.220000000000001_f64), ::ferroui_base::Size::new(0.77_f64, 0.77_f64), 0.0_f64, false, ::ferroui_base::media::SweepDirection::Clockwise, true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(16.700000000000003_f64, 6.220000000000001_f64), true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(19.35_f64, 10.59_f64), ::ferroui_base::Size::new(7.42_f64, 7.42_f64), 0.0_f64, true, ::ferroui_base::media::SweepDirection::CounterClockwise, true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(20.85_f64, 10.29_f64), ::ferroui_base::Size::new(0.77_f64, 0.77_f64), 0.0_f64, true, ::ferroui_base::media::SweepDirection::Clockwise, true), ::ferroui_base::media::PathCommand::ArcTo(::ferroui_base::Point::new(17.85_f64, 5.169999999999999_f64), ::ferroui_base::Size::new(8.94_f64, 8.94_f64), 0.0_f64, true, ::ferroui_base::media::SweepDirection::Clockwise, true), ::ferroui_base::media::PathCommand::LineTo(::ferroui_base::Point::new(17.85_f64, 4.09_f64), true), ::ferroui_base::media::PathCommand::CubicBezierTo(::ferroui_base::Point::new(17.85_f64, 3.6599999999999997_f64), ::ferroui_base::Point::new(18.200000000000003_f64, 3.32_f64), ::ferroui_base::Point::new(18.62_f64, 3.32_f64), true), ::ferroui_base::media::PathCommand::EndFigure(true)]; ::ferroui_base::media::Geometry::from_commands(COMMANDS) };
     let priority_20 = ::ferroui_base::data::BindingPriority::Template;
     path_6.set_value_with_priority(::ferroui_controls::shapes::Path::data_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&value_1)), priority_20);
-    // Controls/FluentControls.xaml(172,25) Fill
+    // Controls/FluentControls.xaml(173,25) Fill
     let path_7 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.ancestor(::core::option::Option::Some(<::ferroui_controls::Button as ::ferroui_base::StaticType>::TYPE), 0);
         let builder = builder.ferro_property(rt::property(::ferroui_controls::primitives::TemplatedControl::foreground_property()));
         builder.build()
     };
-    rt::bind_compiled_binding(&context, path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), path_7.clone(), 172, 25)?;
-    // Controls/FluentControls.xaml(171,20) HorizontalAlignment
+    rt::bind_compiled_binding(&context, path_6.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), path_7.clone(), 173, 25)?;
+    // Controls/FluentControls.xaml(172,20) HorizontalAlignment
     let priority_21 = ::ferroui_base::data::BindingPriority::Template;
     path_6.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_21);
-    // Controls/FluentControls.xaml(171,20) VerticalAlignment
+    // Controls/FluentControls.xaml(172,20) VerticalAlignment
     let priority_22 = ::ferroui_base::data::BindingPriority::Template;
     path_6.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Center, priority_22);
-    // Controls/FluentControls.xaml(171,20) Margin
+    // Controls/FluentControls.xaml(172,20) Margin
     let priority_23 = ::ferroui_base::data::BindingPriority::Template;
     path_6.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(-2.0_f64, -4.0_f64, 0.0_f64, 0.0_f64), priority_23);
-    rt::pop_parent_end_init(&context, &path_6, 171, 20)?;
-    rt::pop_parent_end_init(&context, &button_1, 170, 18)?;
-    // Controls/FluentControls.xaml(174,18) Children
+    rt::pop_parent_end_init(&context, &path_6, 172, 20)?;
+    rt::pop_parent_end_init(&context, &button_1, 171, 18)?;
+    // Controls/FluentControls.xaml(175,18) Children
     let children_collection_6 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_2.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(174,18) TextBox
+    // Controls/FluentControls.xaml(175,18) TextBox
     let text_box_0 = ::ferroui_controls::TextBox::new();
     text_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_6, ::core::clone::Clone::clone(&text_box_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_box_0);
-    // Controls/FluentControls.xaml(174,26) Name
-    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "Location", 174, 26)?;
-    // Controls/FluentControls.xaml(174,44) Text
+    // Controls/FluentControls.xaml(175,26) Name
+    rt::name_element(name_scope.as_ref(), &text_box_0, &text_box_0, "Location", 175, 26)?;
+    // Controls/FluentControls.xaml(175,44) Text
     let path_8 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Location", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), path_8.clone(), 174, 44)?;
-    // Controls/FluentControls.xaml(176,22) KeyBindings
+    rt::bind_compiled_binding(&context, text_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), path_8.clone(), 175, 44)?;
+    // Controls/FluentControls.xaml(177,22) KeyBindings
     let key_bindings_collection_0 = ::ferroui_base::input::InputElement::__markup_get_KeyBindings(text_box_0.upcast_ref::<::ferroui_base::input::InputElement>());
-    // Controls/FluentControls.xaml(176,22) KeyBinding
+    // Controls/FluentControls.xaml(177,22) KeyBinding
     let key_binding_0 = ::ferroui_base::input::KeyBinding::new();
     context.push_parent(rt::to_value(key_binding_0.clone()));
-    // Controls/FluentControls.xaml(176,33) Command
+    // Controls/FluentControls.xaml(177,33) Command
     let path_9 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_command(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "EnterPressed", false, false, |this, _arguments| { ::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_EnterPressed_0(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, key_binding_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::KeyBinding::command_property(), path_9.clone(), 176, 33)?;
-    // Controls/FluentControls.xaml(176,22) Gesture
-    let value_2 = rt::invoked(::ferroui_base::input::KeyGesture::__markup_parse(::std::string::String::from("Enter")), 176, 66)?;
+    rt::bind_compiled_binding(&context, key_binding_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::input::KeyBinding::command_property(), path_9.clone(), 177, 33)?;
+    // Controls/FluentControls.xaml(177,22) Gesture
+    let value_2 = rt::invoked(::ferroui_base::input::KeyGesture::__markup_parse(::std::string::String::from("Enter")), 177, 66)?;
     let priority_24 = ::ferroui_base::data::BindingPriority::Template;
-    key_binding_0.set_value_with_priority(::ferroui_base::input::KeyBinding::gesture_property(), rt::cast(::core::clone::Clone::clone(&value_2), 176, 66)?, priority_24);
+    key_binding_0.set_value_with_priority(::ferroui_base::input::KeyBinding::gesture_property(), rt::cast(::core::clone::Clone::clone(&value_2), 177, 66)?, priority_24);
     context.pop_parent();
     <::ferroui_base::collections::FerroList<::ferroui_base::Ref<::ferroui_base::input::KeyBinding>>>::__markup_Add_0(&key_bindings_collection_0, ::core::clone::Clone::clone(&key_binding_0));
-    rt::pop_parent_end_init(&context, &text_box_0, 174, 18)?;
-    rt::pop_parent_end_init(&context, &dock_panel_2, 166, 16)?;
-    rt::pop_parent_end_init(&context, &dock_panel_1, 164, 14)?;
-    // Controls/FluentControls.xaml(181,14) Children
+    rt::pop_parent_end_init(&context, &text_box_0, 175, 18)?;
+    rt::pop_parent_end_init(&context, &dock_panel_2, 167, 16)?;
+    rt::pop_parent_end_init(&context, &dock_panel_1, 165, 14)?;
+    // Controls/FluentControls.xaml(182,14) Children
     let children_collection_7 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(181,14) DockPanel
+    // Controls/FluentControls.xaml(182,14) DockPanel
     let dock_panel_3 = ::ferroui_controls::DockPanel::new();
     dock_panel_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_7, ::core::clone::Clone::clone(&dock_panel_3).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_3);
-    // Controls/FluentControls.xaml(181,14) Margin
+    // Controls/FluentControls.xaml(182,14) Margin
     let priority_25 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_3.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(8.0_f64, 0.0_f64, 8.0_f64, 5.0_f64), priority_25);
-    // Controls/FluentControls.xaml(181,14) Dock
+    // Controls/FluentControls.xaml(182,14) Dock
     let priority_26 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_3.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Bottom, priority_26);
-    // Controls/FluentControls.xaml(182,16) Children
+    // Controls/FluentControls.xaml(183,16) Children
     let children_collection_8 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_3.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(182,16) Rectangle
+    // Controls/FluentControls.xaml(183,16) Rectangle
     let rectangle_1 = ::ferroui_controls::shapes::Rectangle::new();
     rectangle_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_8, ::core::clone::Clone::clone(&rectangle_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &rectangle_1);
-    // Controls/FluentControls.xaml(182,26) Fill
-    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlHighlightAltBaseMediumLowBrush", 182, 26)?;
-    // Controls/FluentControls.xaml(182,16) Height
+    // Controls/FluentControls.xaml(183,26) Fill
+    rt::bind_dynamic_resource(&context, rectangle_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), "SystemControlHighlightAltBaseMediumLowBrush", 183, 26)?;
+    // Controls/FluentControls.xaml(183,16) Height
     let priority_27 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 1.0_f64, priority_27);
-    // Controls/FluentControls.xaml(182,16) Margin
+    // Controls/FluentControls.xaml(183,16) Margin
     let priority_28 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 5.0_f64), priority_28);
-    // Controls/FluentControls.xaml(182,16) Dock
+    // Controls/FluentControls.xaml(183,16) Dock
     let priority_29 = ::ferroui_base::data::BindingPriority::Template;
     rectangle_1.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_29);
-    rt::pop_parent_end_init(&context, &rectangle_1, 182, 16)?;
-    // Controls/FluentControls.xaml(183,16) Children
+    rt::pop_parent_end_init(&context, &rectangle_1, 183, 16)?;
+    // Controls/FluentControls.xaml(184,16) Children
     let children_collection_9 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_3.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(183,16) DockPanel
+    // Controls/FluentControls.xaml(184,16) DockPanel
     let dock_panel_4 = ::ferroui_controls::DockPanel::new();
     dock_panel_4.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_9, ::core::clone::Clone::clone(&dock_panel_4).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_4);
-    // Controls/FluentControls.xaml(183,16) Margin
+    // Controls/FluentControls.xaml(184,16) Margin
     let priority_30 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_4.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(4.0_f64, 0.0_f64, 4.0_f64, 0.0_f64), priority_30);
-    // Controls/FluentControls.xaml(184,18) Children
+    // Controls/FluentControls.xaml(185,18) Children
     let children_collection_10 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_4.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(184,18) DockPanel
+    // Controls/FluentControls.xaml(185,18) DockPanel
     let dock_panel_5 = ::ferroui_controls::DockPanel::new();
     dock_panel_5.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_10, ::core::clone::Clone::clone(&dock_panel_5).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_5);
-    // Controls/FluentControls.xaml(184,18) Dock
+    // Controls/FluentControls.xaml(185,18) Dock
     let priority_31 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_5.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_31);
-    // Controls/FluentControls.xaml(184,18) Margin
+    // Controls/FluentControls.xaml(185,18) Margin
     let priority_32 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_5.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 4.0_f64), priority_32);
-    // Controls/FluentControls.xaml(185,20) Children
+    // Controls/FluentControls.xaml(186,20) Children
     let children_collection_11 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_5.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(185,20) ComboBox
+    // Controls/FluentControls.xaml(186,20) ComboBox
     let combo_box_0 = ::ferroui_controls::ComboBox::new();
     combo_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_11, ::core::clone::Clone::clone(&combo_box_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &combo_box_0);
-    // Controls/FluentControls.xaml(185,20) Dock
+    // Controls/FluentControls.xaml(186,20) Dock
     let priority_33 = ::ferroui_base::data::BindingPriority::Template;
     combo_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Right, priority_33);
-    // Controls/FluentControls.xaml(186,23) IsVisible
+    // Controls/FluentControls.xaml(187,23) IsVisible
     let path_10 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ShowFilters", false, ::ferroui_base::data::core::ValueType::of::<bool>(), true, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), path_10.clone(), 186, 23)?;
-    // Controls/FluentControls.xaml(187,23) ItemsSource
+    rt::bind_compiled_binding(&context, combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), path_10.clone(), 187, 23)?;
+    // Controls/FluentControls.xaml(188,23) ItemsSource
     let path_11 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Filters", false, rt::declared_property_type(<::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Filters", false), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_11.clone(), 187, 23)?;
-    // Controls/FluentControls.xaml(188,23) SelectedItem (setter chosen at run time)
+    rt::bind_compiled_binding(&context, combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_11.clone(), 188, 23)?;
+    // Controls/FluentControls.xaml(189,23) SelectedItem (setter chosen at run time)
     let path_12 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "SelectedFilter", false, rt::markup_handle(<::ferroui_dialogs::internal::ManagedFileChooserFilterViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false, false, true);
@@ -40630,650 +40812,472 @@ fn build_controls_fluentcontrols_xaml_deferred_391(
     context.set_target_property(::core::option::Option::None);
     let value_3: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_17);
     if value_3.is_some() {
-        rt::bind(combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), value_3.clone(), 188, 23)?;
+        rt::bind(combo_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), value_3.clone(), 189, 23)?;
     } else {
-        combo_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), rt::exact(value_3.clone(), "FerroUI.Controls.Primitives.SelectingItemsControl.set_SelectedItem", 0, 188, 23)?);
+        combo_box_0.set_direct_value(::ferroui_controls::primitives::SelectingItemsControl::selected_item_property(), rt::exact(value_3.clone(), "FerroUI.Controls.Primitives.SelectingItemsControl.set_SelectedItem", 0, 189, 23)?);
     }
-    rt::pop_parent_end_init(&context, &combo_box_0, 185, 20)?;
-    // Controls/FluentControls.xaml(189,20) Children
+    rt::pop_parent_end_init(&context, &combo_box_0, 186, 20)?;
+    // Controls/FluentControls.xaml(190,20) Children
     let children_collection_12 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_5.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(189,20) TextBox
+    // Controls/FluentControls.xaml(190,20) TextBox
     let text_box_1 = ::ferroui_controls::TextBox::new();
     text_box_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_12, ::core::clone::Clone::clone(&text_box_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_box_1);
-    // Controls/FluentControls.xaml(189,28) Text
+    // Controls/FluentControls.xaml(190,28) Text
     let path_13 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "FileName", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), path_13.clone(), 189, 28)?;
-    // Controls/FluentControls.xaml(189,54) PlaceholderText
-    rt::bind_dynamic_resource(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::placeholder_text_property(), "StringManagedFileChooserFileNamePlaceholder", 189, 54)?;
-    // Controls/FluentControls.xaml(189,134) IsVisible
+    rt::bind_compiled_binding(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::text_property(), path_13.clone(), 190, 28)?;
+    // Controls/FluentControls.xaml(190,54) PlaceholderText
+    rt::bind_dynamic_resource(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBox::placeholder_text_property(), "StringManagedFileChooserFileNamePlaceholder", 190, 54)?;
+    // Controls/FluentControls.xaml(190,134) IsVisible
     let path_14 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.not();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "SelectingFolder", false, ::ferroui_base::data::core::ValueType::of::<bool>(), true, false, false);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), path_14.clone(), 189, 134)?;
-    rt::pop_parent_end_init(&context, &text_box_1, 189, 20)?;
-    rt::pop_parent_end_init(&context, &dock_panel_5, 184, 18)?;
-    // Controls/FluentControls.xaml(191,18) Children
+    rt::bind_compiled_binding(&context, text_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), path_14.clone(), 190, 134)?;
+    rt::pop_parent_end_init(&context, &text_box_1, 190, 20)?;
+    rt::pop_parent_end_init(&context, &dock_panel_5, 185, 18)?;
+    // Controls/FluentControls.xaml(192,18) Children
     let children_collection_13 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_4.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(191,18) CheckBox
+    // Controls/FluentControls.xaml(192,18) CheckBox
     let check_box_0 = ::ferroui_controls::CheckBox::new();
     check_box_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_13, ::core::clone::Clone::clone(&check_box_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &check_box_0);
-    // Controls/FluentControls.xaml(191,27) IsChecked
+    // Controls/FluentControls.xaml(192,27) IsChecked
     let path_15 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "ShowHiddenFiles", false, ::ferroui_base::data::core::ValueType::of::<bool>(), true, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, check_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), path_15.clone(), 191, 27)?;
-    // Controls/FluentControls.xaml(191,65) Content (setter chosen at run time)
+    rt::bind_compiled_binding(&context, check_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::ToggleButton::is_checked_property(), path_15.clone(), 192, 27)?;
+    // Controls/FluentControls.xaml(192,65) Content (setter chosen at run time)
     let priority_34 = ::ferroui_base::data::BindingPriority::Template;
     let dynamic_resource_extension_3 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserShowHiddenFilesText"));
     let provided_22 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ContentControl::content_property()), &dynamic_resource_extension_3, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_4: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_22);
     if value_4.is_some() {
-        rt::bind(check_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_4.clone(), 191, 65)?;
+        rt::bind(check_box_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_4.clone(), 192, 65)?;
     } else {
-        check_box_0.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 191, 65)?, priority_34);
+        check_box_0.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_4.clone(), "ContentControl.Content", 1, 192, 65)?, priority_34);
     }
-    // Controls/FluentControls.xaml(191,18) Dock
+    // Controls/FluentControls.xaml(192,18) Dock
     let priority_35 = ::ferroui_base::data::BindingPriority::Template;
     check_box_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Left, priority_35);
-    rt::pop_parent_end_init(&context, &check_box_0, 191, 18)?;
-    // Controls/FluentControls.xaml(192,18) Children
+    rt::pop_parent_end_init(&context, &check_box_0, 192, 18)?;
+    // Controls/FluentControls.xaml(193,18) Children
     let children_collection_14 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_4.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(192,18) UniformGrid
+    // Controls/FluentControls.xaml(193,18) UniformGrid
     let uniform_grid_0 = ::ferroui_controls::primitives::UniformGrid::new();
     uniform_grid_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_14, ::core::clone::Clone::clone(&uniform_grid_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &uniform_grid_0);
-    // Controls/FluentControls.xaml(192,30) Name
-    rt::name_element(name_scope.as_ref(), &uniform_grid_0, &uniform_grid_0, "Finalize", 192, 30)?;
-    // Controls/FluentControls.xaml(192,18) HorizontalAlignment
+    // Controls/FluentControls.xaml(193,30) Name
+    rt::name_element(name_scope.as_ref(), &uniform_grid_0, &uniform_grid_0, "Finalize", 193, 30)?;
+    // Controls/FluentControls.xaml(193,18) HorizontalAlignment
     let priority_36 = ::ferroui_base::data::BindingPriority::Template;
     uniform_grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_36);
-    // Controls/FluentControls.xaml(192,18) Rows
+    // Controls/FluentControls.xaml(193,18) Rows
     let priority_37 = ::ferroui_base::data::BindingPriority::Template;
     uniform_grid_0.set_value_with_priority(::ferroui_controls::primitives::UniformGrid::rows_property(), 1_i32, priority_37);
-    // Controls/FluentControls.xaml(193,20) Children
+    // Controls/FluentControls.xaml(194,20) Children
     let children_collection_15 = ::ferroui_controls::Panel::__markup_get_Children(uniform_grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(193,20) Button
+    // Controls/FluentControls.xaml(194,20) Button
     let button_2 = ::ferroui_controls::Button::new();
     button_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_15, ::core::clone::Clone::clone(&button_2).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_2);
-    // Controls/FluentControls.xaml(193,27) Command
+    // Controls/FluentControls.xaml(194,27) Command
     let path_16 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_command_with_can_execute(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Ok", false, false, |this, _arguments| { ::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_Ok_5(this); ::core::result::Result::Ok(::core::option::Option::None) }, |this, arguments| ::core::result::Result::Ok(rt::delegate_result(::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_CanOk_4(this, arguments.next()?))), &["FileName", "Location", "SelectedItems"]);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_16.clone(), 193, 27)?;
-    // Controls/FluentControls.xaml(193,20) MinWidth
+    rt::bind_compiled_binding(&context, button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_16.clone(), 194, 27)?;
+    // Controls/FluentControls.xaml(194,20) MinWidth
     let priority_38 = ::ferroui_base::data::BindingPriority::Template;
     button_2.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 80.0_f64, priority_38);
-    // Controls/FluentControls.xaml(193,64) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(194,64) Content (setter chosen at run time)
     let priority_39 = ::ferroui_base::data::BindingPriority::Template;
     let dynamic_resource_extension_4 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOkText"));
     let provided_24 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ContentControl::content_property()), &dynamic_resource_extension_4, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_5: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_24);
     if value_5.is_some() {
-        rt::bind(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_5.clone(), 193, 64)?;
+        rt::bind(button_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_5.clone(), 194, 64)?;
     } else {
-        button_2.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 193, 64)?, priority_39);
+        button_2.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_5.clone(), "ContentControl.Content", 1, 194, 64)?, priority_39);
     }
-    rt::pop_parent_end_init(&context, &button_2, 193, 20)?;
-    // Controls/FluentControls.xaml(194,20) Children
+    rt::pop_parent_end_init(&context, &button_2, 194, 20)?;
+    // Controls/FluentControls.xaml(195,20) Children
     let children_collection_16 = ::ferroui_controls::Panel::__markup_get_Children(uniform_grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(194,20) Button
+    // Controls/FluentControls.xaml(195,20) Button
     let button_3 = ::ferroui_controls::Button::new();
     button_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_16, ::core::clone::Clone::clone(&button_3).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_3);
-    // Controls/FluentControls.xaml(194,27) Command
+    // Controls/FluentControls.xaml(195,27) Command
     let path_17 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_command(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Cancel", false, false, |this, _arguments| { ::ferroui_dialogs::internal::ManagedFileChooserViewModel::__markup_Cancel_3(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_17.clone(), 194, 27)?;
-    // Controls/FluentControls.xaml(194,20) MinWidth
+    rt::bind_compiled_binding(&context, button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_17.clone(), 195, 27)?;
+    // Controls/FluentControls.xaml(195,20) MinWidth
     let priority_40 = ::ferroui_base::data::BindingPriority::Template;
     button_3.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 80.0_f64, priority_40);
-    // Controls/FluentControls.xaml(194,68) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(195,68) Content (setter chosen at run time)
     let priority_41 = ::ferroui_base::data::BindingPriority::Template;
     let dynamic_resource_extension_5 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserCancelText"));
     let provided_26 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ContentControl::content_property()), &dynamic_resource_extension_5, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_6: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_26);
     if value_6.is_some() {
-        rt::bind(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_6.clone(), 194, 68)?;
+        rt::bind(button_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_6.clone(), 195, 68)?;
     } else {
-        button_3.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 194, 68)?, priority_41);
+        button_3.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_6.clone(), "ContentControl.Content", 1, 195, 68)?, priority_41);
     }
-    rt::pop_parent_end_init(&context, &button_3, 194, 20)?;
-    rt::pop_parent_end_init(&context, &uniform_grid_0, 192, 18)?;
-    rt::pop_parent_end_init(&context, &dock_panel_4, 183, 16)?;
-    rt::pop_parent_end_init(&context, &dock_panel_3, 181, 14)?;
-    // Controls/FluentControls.xaml(199,14) Children
+    rt::pop_parent_end_init(&context, &button_3, 195, 20)?;
+    rt::pop_parent_end_init(&context, &uniform_grid_0, 193, 18)?;
+    rt::pop_parent_end_init(&context, &dock_panel_4, 184, 16)?;
+    rt::pop_parent_end_init(&context, &dock_panel_3, 182, 14)?;
+    // Controls/FluentControls.xaml(200,14) Children
     let children_collection_17 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(199,14) DockPanel
+    // Controls/FluentControls.xaml(200,14) DockPanel
     let dock_panel_6 = ::ferroui_controls::DockPanel::new();
     dock_panel_6.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_17, ::core::clone::Clone::clone(&dock_panel_6).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &dock_panel_6);
-    // Controls/FluentControls.xaml(199,14) IsSharedSizeScope
+    // Controls/FluentControls.xaml(200,14) IsSharedSizeScope
     let priority_42 = ::ferroui_base::data::BindingPriority::Template;
     dock_panel_6.set_value_with_priority(::ferroui_controls::Grid::is_shared_size_scope_property(), ::core::clone::Clone::clone(&true), priority_42);
-    // Controls/FluentControls.xaml(200,16) Children
+    // Controls/FluentControls.xaml(201,16) Children
     let children_collection_18 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_6.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(200,16) Grid
+    // Controls/FluentControls.xaml(201,16) Grid
     let grid_0 = ::ferroui_controls::Grid::new();
     grid_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_18, ::core::clone::Clone::clone(&grid_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &grid_0);
-    // Controls/FluentControls.xaml(200,16) Dock
+    // Controls/FluentControls.xaml(201,16) Dock
     let priority_43 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_controls::DockPanel::dock_property(), ::ferroui_controls::Dock::Top, priority_43);
-    // Controls/FluentControls.xaml(200,16) Margin
+    // Controls/FluentControls.xaml(201,16) Margin
     let priority_44 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(15.0_f64, 5.0_f64, 0.0_f64, 0.0_f64), priority_44);
-    // Controls/FluentControls.xaml(200,16) HorizontalAlignment
+    // Controls/FluentControls.xaml(201,16) HorizontalAlignment
     let priority_45 = ::ferroui_base::data::BindingPriority::Template;
     grid_0.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Stretch, priority_45);
-    // Controls/FluentControls.xaml(202,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(203,20) ColumnDefinitions
     let column_definitions_collection_0 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(202,20) ColumnDefinition
+    // Controls/FluentControls.xaml(203,20) ColumnDefinition
     let column_definition_0 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(202,20) Width
+    // Controls/FluentControls.xaml(203,20) Width
     let priority_46 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_0.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(20.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_46);
-    // Controls/FluentControls.xaml(202,48) SharedSizeGroup
+    // Controls/FluentControls.xaml(203,48) SharedSizeGroup
     let priority_47 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_0.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Icon")), priority_47);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, ::core::clone::Clone::clone(&column_definition_0));
-    // Controls/FluentControls.xaml(203,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(204,20) ColumnDefinitions
     let column_definitions_collection_1 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(203,20) ColumnDefinition
+    // Controls/FluentControls.xaml(204,20) ColumnDefinition
     let column_definition_1 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(203,20) Width
+    // Controls/FluentControls.xaml(204,20) Width
     let priority_48 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_1.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(275.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_48);
-    // Controls/FluentControls.xaml(203,49) SharedSizeGroup
+    // Controls/FluentControls.xaml(204,49) SharedSizeGroup
     let priority_49 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_1.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Name")), priority_49);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, ::core::clone::Clone::clone(&column_definition_1));
-    // Controls/FluentControls.xaml(204,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(205,20) ColumnDefinitions
     let column_definitions_collection_2 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(204,20) ColumnDefinition
+    // Controls/FluentControls.xaml(205,20) ColumnDefinition
     let column_definition_2 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(204,20) Width
+    // Controls/FluentControls.xaml(205,20) Width
     let priority_50 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_2.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(16.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_50);
-    // Controls/FluentControls.xaml(204,48) SharedSizeGroup
+    // Controls/FluentControls.xaml(205,48) SharedSizeGroup
     let priority_51 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_2.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_51);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, ::core::clone::Clone::clone(&column_definition_2));
-    // Controls/FluentControls.xaml(205,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(206,20) ColumnDefinitions
     let column_definitions_collection_3 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(205,20) ColumnDefinition
+    // Controls/FluentControls.xaml(206,20) ColumnDefinition
     let column_definition_3 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(205,20) Width
+    // Controls/FluentControls.xaml(206,20) Width
     let priority_52 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_3.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(200.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_52);
-    // Controls/FluentControls.xaml(205,49) SharedSizeGroup
+    // Controls/FluentControls.xaml(206,49) SharedSizeGroup
     let priority_53 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_3.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Modified")), priority_53);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, ::core::clone::Clone::clone(&column_definition_3));
-    // Controls/FluentControls.xaml(206,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(207,20) ColumnDefinitions
     let column_definitions_collection_4 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(206,20) ColumnDefinition
+    // Controls/FluentControls.xaml(207,20) ColumnDefinition
     let column_definition_4 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(206,20) Width
+    // Controls/FluentControls.xaml(207,20) Width
     let priority_54 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_4.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(16.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_54);
-    // Controls/FluentControls.xaml(206,48) SharedSizeGroup
+    // Controls/FluentControls.xaml(207,48) SharedSizeGroup
     let priority_55 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_4.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_55);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, ::core::clone::Clone::clone(&column_definition_4));
-    // Controls/FluentControls.xaml(207,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(208,20) ColumnDefinitions
     let column_definitions_collection_5 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(207,20) ColumnDefinition
+    // Controls/FluentControls.xaml(208,20) ColumnDefinition
     let column_definition_5 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(207,20) Width
+    // Controls/FluentControls.xaml(208,20) Width
     let priority_56 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_5.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(150.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_56);
-    // Controls/FluentControls.xaml(207,49) SharedSizeGroup
+    // Controls/FluentControls.xaml(208,49) SharedSizeGroup
     let priority_57 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_5.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Type")), priority_57);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, ::core::clone::Clone::clone(&column_definition_5));
-    // Controls/FluentControls.xaml(208,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(209,20) ColumnDefinitions
     let column_definitions_collection_6 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(208,20) ColumnDefinition
+    // Controls/FluentControls.xaml(209,20) ColumnDefinition
     let column_definition_6 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(208,20) Width
+    // Controls/FluentControls.xaml(209,20) Width
     let priority_58 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_6.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(16.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_58);
-    // Controls/FluentControls.xaml(208,48) SharedSizeGroup
+    // Controls/FluentControls.xaml(209,48) SharedSizeGroup
     let priority_59 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_6.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_59);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, ::core::clone::Clone::clone(&column_definition_6));
-    // Controls/FluentControls.xaml(209,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(210,20) ColumnDefinitions
     let column_definitions_collection_7 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(209,20) ColumnDefinition
+    // Controls/FluentControls.xaml(210,20) ColumnDefinition
     let column_definition_7 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(209,20) Width
+    // Controls/FluentControls.xaml(210,20) Width
     let priority_60 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_7.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(200.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_60);
-    // Controls/FluentControls.xaml(209,49) SharedSizeGroup
+    // Controls/FluentControls.xaml(210,49) SharedSizeGroup
     let priority_61 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_7.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Size")), priority_61);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, ::core::clone::Clone::clone(&column_definition_7));
-    // Controls/FluentControls.xaml(210,20) ColumnDefinitions
+    // Controls/FluentControls.xaml(211,20) ColumnDefinitions
     let column_definitions_collection_8 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(210,20) ColumnDefinition
+    // Controls/FluentControls.xaml(211,20) ColumnDefinition
     let column_definition_8 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(210,20) Width
+    // Controls/FluentControls.xaml(211,20) Width
     let priority_62 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_8.set_value_with_priority(::ferroui_controls::ColumnDefinition::width_property(), ::ferroui_controls::GridLength::__markup_new_2(16.0_f64, ::ferroui_controls::GridUnitType::Pixel), priority_62);
-    // Controls/FluentControls.xaml(210,48) SharedSizeGroup
+    // Controls/FluentControls.xaml(211,48) SharedSizeGroup
     let priority_63 = ::ferroui_base::data::BindingPriority::Template;
     column_definition_8.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_63);
     ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, ::core::clone::Clone::clone(&column_definition_8));
-    // Controls/FluentControls.xaml(213,20) Styles
+    // Controls/FluentControls.xaml(214,20) Styles
     let styles_collection_0 = ::ferroui_base::StyledElement::__markup_get_Styles(grid_0.upcast_ref::<::ferroui_base::StyledElement>());
-    // Controls/FluentControls.xaml(213,20) Style
+    // Controls/FluentControls.xaml(214,20) Style
     let style_0 = ::ferroui_base::styling::Style::new();
     context.push_parent(rt::to_value(style_0.clone()));
-    // Controls/FluentControls.xaml(213,20) Selector
+    // Controls/FluentControls.xaml(214,20) Selector
     let selector_0 = ::ferroui_base::styling::Selectors::of_type_identity(::core::option::Option::None, <::ferroui_controls::GridSplitter as ::ferroui_base::ObjectType>::IDENTITY);
     ::ferroui_base::styling::Style::__markup_set_Selector(&style_0, ::core::option::Option::Some(selector_0.clone()));
-    // Controls/FluentControls.xaml(214,22) Content
-    // Controls/FluentControls.xaml(214,51) Value
-    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemControlHighlightAltBaseMediumLowBrush");
     // Controls/FluentControls.xaml(215,22) Content
+    // Controls/FluentControls.xaml(215,51) Value
+    rt::add_dynamic_resource_setter_with_parent(&context, style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), "SystemControlHighlightAltBaseMediumLowBrush");
+    // Controls/FluentControls.xaml(216,22) Content
     let setter_1 = rt::new_setter(rt::property(::ferroui_controls::primitives::TemplatedControl::template_property()));
-    // Controls/FluentControls.xaml(216,24) Value
+    // Controls/FluentControls.xaml(217,24) Value
     let control_template_0 = ::ferroui_markup_xaml::templates::ControlTemplate::__markup_new_0();
-    // Controls/FluentControls.xaml(217,26) Content
-    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_393, 217, 26)?;
+    // Controls/FluentControls.xaml(218,26) Content
+    let deferred_1 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_394, 218, 26)?;
     ::ferroui_markup_xaml::templates::ControlTemplate::__markup_set_Content(&control_template_0, rt::to_object(::core::clone::Clone::clone(&deferred_1)));
     rt::add_setter_value(style_0.upcast_ref::<::ferroui_base::styling::StyleBase>(), &setter_1, rt::to_object(::core::clone::Clone::clone(&control_template_0)));
     context.pop_parent();
-    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 213, 20)?), 213, 20)?;
-    // Controls/FluentControls.xaml(224,18) Children
+    rt::invoked(::ferroui_base::styling::Styles::__markup_Add_0(&styles_collection_0, rt::cast(style_0.clone(), 214, 20)?), 214, 20)?;
+    // Controls/FluentControls.xaml(225,18) Children
     let children_collection_19 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(224,18) TextBlock
+    // Controls/FluentControls.xaml(225,18) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_19, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_0);
-    // Controls/FluentControls.xaml(224,18) Column
+    // Controls/FluentControls.xaml(225,18) Column
     let priority_64 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_64);
-    // Controls/FluentControls.xaml(224,44) Text
-    rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserNameColumn", 224, 44)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 224, 18)?;
-    // Controls/FluentControls.xaml(225,18) Children
+    // Controls/FluentControls.xaml(225,44) Text
+    rt::bind_dynamic_resource(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserNameColumn", 225, 44)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 225, 18)?;
+    // Controls/FluentControls.xaml(226,18) Children
     let children_collection_20 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(225,18) GridSplitter
+    // Controls/FluentControls.xaml(226,18) GridSplitter
     let grid_splitter_0 = ::ferroui_controls::GridSplitter::new();
     grid_splitter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_20, ::core::clone::Clone::clone(&grid_splitter_0).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(225,18) Column
+    // Controls/FluentControls.xaml(226,18) Column
     let priority_65 = ::ferroui_base::data::BindingPriority::Template;
     grid_splitter_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 2_i32, priority_65);
-    rt::end_init(&grid_splitter_0, 225, 18)?;
-    // Controls/FluentControls.xaml(226,18) Children
+    rt::end_init(&grid_splitter_0, 226, 18)?;
+    // Controls/FluentControls.xaml(227,18) Children
     let children_collection_21 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(226,18) TextBlock
+    // Controls/FluentControls.xaml(227,18) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_21, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_1);
-    // Controls/FluentControls.xaml(226,18) Column
+    // Controls/FluentControls.xaml(227,18) Column
     let priority_66 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_66);
-    // Controls/FluentControls.xaml(226,44) Text
-    rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserDateModifiedColumn", 226, 44)?;
-    rt::pop_parent_end_init(&context, &text_block_1, 226, 18)?;
-    // Controls/FluentControls.xaml(227,18) Children
+    // Controls/FluentControls.xaml(227,44) Text
+    rt::bind_dynamic_resource(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserDateModifiedColumn", 227, 44)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 227, 18)?;
+    // Controls/FluentControls.xaml(228,18) Children
     let children_collection_22 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(227,18) GridSplitter
+    // Controls/FluentControls.xaml(228,18) GridSplitter
     let grid_splitter_1 = ::ferroui_controls::GridSplitter::new();
     grid_splitter_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_22, ::core::clone::Clone::clone(&grid_splitter_1).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(227,18) Column
+    // Controls/FluentControls.xaml(228,18) Column
     let priority_67 = ::ferroui_base::data::BindingPriority::Template;
     grid_splitter_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 4_i32, priority_67);
-    rt::end_init(&grid_splitter_1, 227, 18)?;
-    // Controls/FluentControls.xaml(228,18) Children
+    rt::end_init(&grid_splitter_1, 228, 18)?;
+    // Controls/FluentControls.xaml(229,18) Children
     let children_collection_23 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(228,18) TextBlock
+    // Controls/FluentControls.xaml(229,18) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_23, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_2);
-    // Controls/FluentControls.xaml(228,18) Column
+    // Controls/FluentControls.xaml(229,18) Column
     let priority_68 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_68);
-    // Controls/FluentControls.xaml(228,44) Text
-    rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserTypeColumn", 228, 44)?;
-    rt::pop_parent_end_init(&context, &text_block_2, 228, 18)?;
-    // Controls/FluentControls.xaml(229,18) Children
+    // Controls/FluentControls.xaml(229,44) Text
+    rt::bind_dynamic_resource(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserTypeColumn", 229, 44)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 229, 18)?;
+    // Controls/FluentControls.xaml(230,18) Children
     let children_collection_24 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(229,18) GridSplitter
+    // Controls/FluentControls.xaml(230,18) GridSplitter
     let grid_splitter_2 = ::ferroui_controls::GridSplitter::new();
     grid_splitter_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_24, ::core::clone::Clone::clone(&grid_splitter_2).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(229,18) Column
+    // Controls/FluentControls.xaml(230,18) Column
     let priority_69 = ::ferroui_base::data::BindingPriority::Template;
     grid_splitter_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 6_i32, priority_69);
-    rt::end_init(&grid_splitter_2, 229, 18)?;
-    // Controls/FluentControls.xaml(230,18) Children
+    rt::end_init(&grid_splitter_2, 230, 18)?;
+    // Controls/FluentControls.xaml(231,18) Children
     let children_collection_25 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(230,18) TextBlock
+    // Controls/FluentControls.xaml(231,18) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_25, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_3);
-    // Controls/FluentControls.xaml(230,18) Column
+    // Controls/FluentControls.xaml(231,18) Column
     let priority_70 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 7_i32, priority_70);
-    // Controls/FluentControls.xaml(230,44) Text
-    rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserSizeColumn", 230, 44)?;
-    rt::pop_parent_end_init(&context, &text_block_3, 230, 18)?;
-    // Controls/FluentControls.xaml(231,18) Children
+    // Controls/FluentControls.xaml(231,44) Text
+    rt::bind_dynamic_resource(&context, text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), "StringManagedFileChooserSizeColumn", 231, 44)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 231, 18)?;
+    // Controls/FluentControls.xaml(232,18) Children
     let children_collection_26 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(231,18) GridSplitter
+    // Controls/FluentControls.xaml(232,18) GridSplitter
     let grid_splitter_3 = ::ferroui_controls::GridSplitter::new();
     grid_splitter_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_26, ::core::clone::Clone::clone(&grid_splitter_3).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(231,18) Column
+    // Controls/FluentControls.xaml(232,18) Column
     let priority_71 = ::ferroui_base::data::BindingPriority::Template;
     grid_splitter_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 8_i32, priority_71);
-    rt::end_init(&grid_splitter_3, 231, 18)?;
-    rt::pop_parent_end_init(&context, &grid_0, 200, 16)?;
-    // Controls/FluentControls.xaml(233,16) Children
+    rt::end_init(&grid_splitter_3, 232, 18)?;
+    rt::pop_parent_end_init(&context, &grid_0, 201, 16)?;
+    // Controls/FluentControls.xaml(234,16) Children
     let children_collection_27 = ::ferroui_controls::Panel::__markup_get_Children(dock_panel_6.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(233,16) ListBox
+    // Controls/FluentControls.xaml(234,16) ListBox
     let list_box_1 = ::ferroui_controls::ListBox::new();
     list_box_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_27, ::core::clone::Clone::clone(&list_box_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &list_box_1);
-    // Controls/FluentControls.xaml(233,24) Name
-    rt::name_element(name_scope.as_ref(), &list_box_1, &list_box_1, "PART_Files", 233, 24)?;
-    // Controls/FluentControls.xaml(234,19) ItemsSource
+    // Controls/FluentControls.xaml(234,24) Name
+    rt::name_element(name_scope.as_ref(), &list_box_1, &list_box_1, "PART_Files", 234, 24)?;
+    // Controls/FluentControls.xaml(235,19) ItemsSource
     let path_18 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Items", false, rt::declared_property_type(<::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Items", false), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_18.clone(), 234, 19)?;
-    // Controls/FluentControls.xaml(233,16) Margin
+    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ItemsControl::items_source_property(), path_18.clone(), 235, 19)?;
+    // Controls/FluentControls.xaml(234,16) Margin
     let priority_72 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 5.0_f64, 0.0_f64, 5.0_f64), priority_72);
-    // Controls/FluentControls.xaml(236,19) SelectionMode
+    // Controls/FluentControls.xaml(237,19) SelectionMode
     let path_19 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "SelectionMode", false, rt::markup_handle(<::ferroui_controls::SelectionMode as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selection_mode_property(), path_19.clone(), 236, 19)?;
-    // Controls/FluentControls.xaml(237,19) SelectedItems
+    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selection_mode_property(), path_19.clone(), 237, 19)?;
+    // Controls/FluentControls.xaml(238,19) SelectedItems
     let path_20 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "SelectedItems", false, rt::declared_property_type(<::ferroui_dialogs::internal::ManagedFileChooserViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "SelectedItems", false), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_items_property(), path_20.clone(), 237, 19)?;
-    // Controls/FluentControls.xaml(233,16) Background
+    rt::bind_compiled_binding(&context, list_box_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::primitives::SelectingItemsControl::selected_items_property(), path_20.clone(), 238, 19)?;
+    // Controls/FluentControls.xaml(234,16) Background
     let priority_73 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_controls::primitives::TemplatedControl::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_73);
-    // Controls/FluentControls.xaml(233,16) HorizontalScrollBarVisibility
+    // Controls/FluentControls.xaml(234,16) HorizontalScrollBarVisibility
     let priority_74 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_controls::ScrollViewer::horizontal_scroll_bar_visibility_property(), ::ferroui_controls::primitives::ScrollBarVisibility::Disabled, priority_74);
-    // Controls/FluentControls.xaml(241,20) ItemTemplate
+    // Controls/FluentControls.xaml(242,20) ItemTemplate
     let data_template_1 = ::ferroui_markup_xaml::templates::DataTemplate::__markup_new_0();
     context.push_parent(rt::to_value(data_template_1.clone()));
-    // Controls/FluentControls.xaml(241,20) DataType
+    // Controls/FluentControls.xaml(242,20) DataType
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_DataType(&data_template_1, ::core::option::Option::Some(rt::markup_handle(<::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP)));
-    // Controls/FluentControls.xaml(242,22) Content
-    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_394, 242, 22)?;
+    // Controls/FluentControls.xaml(243,22) Content
+    let deferred_2 = rt::defer(rt::class_handle(<::ferroui_controls::Control as ::ferroui_base::StaticType>::TYPE), &context, build_controls_fluentcontrols_xaml_deferred_395, 243, 22)?;
     ::ferroui_markup_xaml::templates::DataTemplate::__markup_set_Content(&data_template_1, rt::to_object(::core::clone::Clone::clone(&deferred_2)));
     context.pop_parent();
     let priority_75 = ::ferroui_base::data::BindingPriority::Template;
     list_box_1.set_value_with_priority(::ferroui_controls::ItemsControl::item_template_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&data_template_1) as ::std::rc::Rc<dyn ::ferroui_controls::templates::IDataTemplate>), priority_75);
-    rt::pop_parent_end_init(&context, &list_box_1, 233, 16)?;
-    rt::pop_parent_end_init(&context, &dock_panel_6, 199, 14)?;
-    rt::pop_parent_end_init(&context, &dock_panel_0, 148, 12)?;
-    rt::pop_parent_end_init(&context, &border_0, 143, 10)?;
+    rt::pop_parent_end_init(&context, &list_box_1, 234, 16)?;
+    rt::pop_parent_end_init(&context, &dock_panel_6, 200, 14)?;
+    rt::pop_parent_end_init(&context, &dock_panel_0, 149, 12)?;
+    rt::pop_parent_end_init(&context, &border_0, 144, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(153,20)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_392(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(153,20) StackPanel
-    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
-    rt::set_intermediate_root(&context, &stack_panel_0);
-    stack_panel_0.begin_init();
-    rt::push_parent(&context, &stack_panel_0);
-    // Controls/FluentControls.xaml(153,20) Spacing
-    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64, priority_0);
-    // Controls/FluentControls.xaml(153,20) Orientation
-    let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_1);
-    // Controls/FluentControls.xaml(153,20) Background
-    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    stack_panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
-    // Controls/FluentControls.xaml(154,22) Children
-    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(154,22) Image
-    let image_0 = ::ferroui_controls::Image::new();
-    image_0.begin_init();
-    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&image_0).upcast::<::ferroui_controls::Control>());
-    rt::push_parent(&context, &image_0);
-    // Controls/FluentControls.xaml(154,22) Width
-    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_3);
-    // Controls/FluentControls.xaml(154,22) Height
-    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_4);
-    // Controls/FluentControls.xaml(156,26) Source
-    // Controls/FluentControls.xaml(156,26) DrawingImage
-    let drawing_image_0 = ::ferroui_base::media::DrawingImage::new();
-    context.push_parent(rt::to_value(drawing_image_0.clone()));
-    // Controls/FluentControls.xaml(156,39) Drawing
-    let path_0 = {
-        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
-        let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "IconKey", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
-        builder.build()
-    };
-    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
-    context.push_parent(rt::to_value(compiled_binding_extension_0.clone()));
-    // Controls/FluentControls.xaml(156,39) Converter
-    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Icons"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 156, 39)?;
-    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 156, 39)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 156, 39)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 156, 39)?);
-    context.pop_parent();
-    context.set_target_property(rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()));
-    let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
-    context.set_target_property(::core::option::Option::None);
-    rt::bind(drawing_image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), provided_1, 156, 39)?;
-    context.pop_parent();
-    let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_0.clone(), 156, 39)?, priority_5);
-    rt::pop_parent_end_init(&context, &image_0, 154, 22)?;
-    // Controls/FluentControls.xaml(159,22) Children
-    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(159,22) TextBlock
-    let text_block_0 = ::ferroui_controls::TextBlock::new();
-    text_block_0.begin_init();
-    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
-    rt::push_parent(&context, &text_block_0);
-    // Controls/FluentControls.xaml(159,32) Text
-    let path_1 = {
-        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
-        let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "DisplayName", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
-        builder.build()
-    };
-    rt::bind_compiled_binding(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_1.clone(), 159, 32)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 159, 22)?;
-    rt::pop_parent_end_init(&context, &stack_panel_0, 153, 20)?;
-    ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(217,26)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(154,20)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_393(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(217,26) Border
-    let border_0 = ::ferroui_controls::Border::new();
-    rt::set_intermediate_root(&context, &border_0);
-    border_0.begin_init();
-    // Controls/FluentControls.xaml(217,26) VerticalAlignment
+    // Controls/FluentControls.xaml(154,20) StackPanel
+    let stack_panel_0 = ::ferroui_controls::StackPanel::new();
+    rt::set_intermediate_root(&context, &stack_panel_0);
+    stack_panel_0.begin_init();
+    rt::push_parent(&context, &stack_panel_0);
+    // Controls/FluentControls.xaml(154,20) Spacing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_0);
-    // Controls/FluentControls.xaml(217,26) BorderThickness
+    stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 4.0_f64, priority_0);
+    // Controls/FluentControls.xaml(154,20) Orientation
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    border_0.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_1);
-    // Controls/FluentControls.xaml(217,26) Background
+    stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_1);
+    // Controls/FluentControls.xaml(154,20) Background
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777216_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
-    // Controls/FluentControls.xaml(218,28) Child
-    // Controls/FluentControls.xaml(218,28) Rectangle
-    let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
-    rectangle_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>()));
-    // Controls/FluentControls.xaml(218,28) Width
-    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 1.0_f64, priority_3);
-    // Controls/FluentControls.xaml(218,28) VerticalAlignment
-    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_4);
-    // Controls/FluentControls.xaml(218,76) Fill
-    rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 218, 76)?;
-    rt::end_init(&rectangle_0, 218, 28)?;
-    rt::end_init(&border_0, 217, 26)?;
-    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(242,22)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_394(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(242,22) Grid
-    let grid_0 = ::ferroui_controls::Grid::new();
-    rt::set_intermediate_root(&context, &grid_0);
-    grid_0.begin_init();
-    rt::push_parent(&context, &grid_0);
-    // Controls/FluentControls.xaml(242,22) Background
-    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
-    grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
-    // Controls/FluentControls.xaml(244,26) ColumnDefinitions
-    let column_definitions_collection_0 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(244,26) ColumnDefinition
-    let column_definition_0 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(244,43) SharedSizeGroup
-    let priority_1 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_0.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Icon")), priority_1);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, ::core::clone::Clone::clone(&column_definition_0));
-    // Controls/FluentControls.xaml(245,26) ColumnDefinitions
-    let column_definitions_collection_1 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(245,26) ColumnDefinition
-    let column_definition_1 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(245,43) SharedSizeGroup
-    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_1.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Name")), priority_2);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, ::core::clone::Clone::clone(&column_definition_1));
-    // Controls/FluentControls.xaml(246,26) ColumnDefinitions
-    let column_definitions_collection_2 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(246,26) ColumnDefinition
-    let column_definition_2 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(246,43) SharedSizeGroup
-    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_2.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_3);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, ::core::clone::Clone::clone(&column_definition_2));
-    // Controls/FluentControls.xaml(247,26) ColumnDefinitions
-    let column_definitions_collection_3 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(247,26) ColumnDefinition
-    let column_definition_3 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(247,43) SharedSizeGroup
-    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_3.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Modified")), priority_4);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, ::core::clone::Clone::clone(&column_definition_3));
-    // Controls/FluentControls.xaml(248,26) ColumnDefinitions
-    let column_definitions_collection_4 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(248,26) ColumnDefinition
-    let column_definition_4 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(248,43) SharedSizeGroup
-    let priority_5 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_4.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_5);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, ::core::clone::Clone::clone(&column_definition_4));
-    // Controls/FluentControls.xaml(249,26) ColumnDefinitions
-    let column_definitions_collection_5 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(249,26) ColumnDefinition
-    let column_definition_5 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(249,43) SharedSizeGroup
-    let priority_6 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_5.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Type")), priority_6);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, ::core::clone::Clone::clone(&column_definition_5));
-    // Controls/FluentControls.xaml(250,26) ColumnDefinitions
-    let column_definitions_collection_6 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(250,26) ColumnDefinition
-    let column_definition_6 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(250,43) SharedSizeGroup
-    let priority_7 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_6.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_7);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, ::core::clone::Clone::clone(&column_definition_6));
-    // Controls/FluentControls.xaml(251,26) ColumnDefinitions
-    let column_definitions_collection_7 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(251,26) ColumnDefinition
-    let column_definition_7 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(251,43) SharedSizeGroup
-    let priority_8 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_7.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Size")), priority_8);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, ::core::clone::Clone::clone(&column_definition_7));
-    // Controls/FluentControls.xaml(252,26) ColumnDefinitions
-    let column_definitions_collection_8 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
-    // Controls/FluentControls.xaml(252,26) ColumnDefinition
-    let column_definition_8 = ::ferroui_controls::ColumnDefinition::new();
-    // Controls/FluentControls.xaml(252,43) SharedSizeGroup
-    let priority_9 = ::ferroui_base::data::BindingPriority::Template;
-    column_definition_8.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_9);
-    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, ::core::clone::Clone::clone(&column_definition_8));
-    // Controls/FluentControls.xaml(254,24) Children
-    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(254,24) Image
+    stack_panel_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
+    // Controls/FluentControls.xaml(155,22) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // Controls/FluentControls.xaml(155,22) Image
     let image_0 = ::ferroui_controls::Image::new();
     image_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&image_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &image_0);
-    // Controls/FluentControls.xaml(254,24) Width
-    let priority_10 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_10);
-    // Controls/FluentControls.xaml(254,24) Height
-    let priority_11 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_11);
-    // Controls/FluentControls.xaml(256,28) Source
-    // Controls/FluentControls.xaml(256,28) DrawingImage
+    // Controls/FluentControls.xaml(155,22) Width
+    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_3);
+    // Controls/FluentControls.xaml(155,22) Height
+    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_4);
+    // Controls/FluentControls.xaml(157,26) Source
+    // Controls/FluentControls.xaml(157,26) DrawingImage
     let drawing_image_0 = ::ferroui_base::media::DrawingImage::new();
     context.push_parent(rt::to_value(drawing_image_0.clone()));
-    // Controls/FluentControls.xaml(256,41) Drawing
+    // Controls/FluentControls.xaml(157,39) Drawing
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "IconKey", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
@@ -41281,404 +41285,582 @@ fn build_controls_fluentcontrols_xaml_deferred_394(
     };
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
     context.push_parent(rt::to_value(compiled_binding_extension_0.clone()));
-    // Controls/FluentControls.xaml(256,41) Converter
+    // Controls/FluentControls.xaml(157,39) Converter
     let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Icons"));
-    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 256, 41)?;
-    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 256, 41)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 256, 41)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 256, 41)?);
+    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 157, 39)?;
+    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 157, 39)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 157, 39)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 157, 39)?);
     context.pop_parent();
     context.set_target_property(rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()));
     let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(drawing_image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), provided_1, 256, 41)?;
+    rt::bind(drawing_image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), provided_1, 157, 39)?;
     context.pop_parent();
-    let priority_12 = ::ferroui_base::data::BindingPriority::Template;
-    image_0.set_value_with_priority(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_0.clone(), 256, 41)?, priority_12);
-    rt::pop_parent_end_init(&context, &image_0, 254, 24)?;
-    // Controls/FluentControls.xaml(259,24) Children
-    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(259,24) TextBlock
+    let priority_5 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_0.clone(), 157, 39)?, priority_5);
+    rt::pop_parent_end_init(&context, &image_0, 155, 22)?;
+    // Controls/FluentControls.xaml(160,22) Children
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
+    // Controls/FluentControls.xaml(160,22) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_0);
-    // Controls/FluentControls.xaml(259,24) Column
-    let priority_13 = ::ferroui_base::data::BindingPriority::Template;
-    text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
-    // Controls/FluentControls.xaml(259,50) Text
+    // Controls/FluentControls.xaml(160,32) Text
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "DisplayName", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_1.clone(), 259, 50)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 259, 24)?;
+    rt::bind_compiled_binding(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_1.clone(), 160, 32)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 160, 22)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 154, 20)?;
+    ::core::result::Result::Ok(rt::to_value(stack_panel_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(218,26)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_394(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
+    // Controls/FluentControls.xaml(218,26) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    rt::set_intermediate_root(&context, &border_0);
+    border_0.begin_init();
+    // Controls/FluentControls.xaml(218,26) VerticalAlignment
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_0);
+    // Controls/FluentControls.xaml(218,26) BorderThickness
+    let priority_1 = ::ferroui_base::data::BindingPriority::Template;
+    border_0.set_value_with_priority(::ferroui_controls::Border::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_1);
+    // Controls/FluentControls.xaml(218,26) Background
+    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
+    border_0.set_value_with_priority(::ferroui_controls::Border::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777216_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_2);
+    // Controls/FluentControls.xaml(219,28) Child
+    // Controls/FluentControls.xaml(219,28) Rectangle
+    let rectangle_0 = ::ferroui_controls::shapes::Rectangle::new();
+    rectangle_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&rectangle_0).upcast::<::ferroui_controls::Control>()));
+    // Controls/FluentControls.xaml(219,28) Width
+    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
+    rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 1.0_f64, priority_3);
+    // Controls/FluentControls.xaml(219,28) VerticalAlignment
+    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
+    rectangle_0.set_value_with_priority(::ferroui_base::layout::Layoutable::vertical_alignment_property(), ::ferroui_base::layout::VerticalAlignment::Stretch, priority_4);
+    // Controls/FluentControls.xaml(219,76) Fill
+    rt::bind_template_binding(rectangle_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::shapes::Shape::fill_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::background_property()), 219, 76)?;
+    rt::end_init(&rectangle_0, 219, 28)?;
+    rt::end_init(&border_0, 218, 26)?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(243,22)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_395(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
+    // Controls/FluentControls.xaml(243,22) Grid
+    let grid_0 = ::ferroui_controls::Grid::new();
+    rt::set_intermediate_root(&context, &grid_0);
+    grid_0.begin_init();
+    rt::push_parent(&context, &grid_0);
+    // Controls/FluentControls.xaml(243,22) Background
+    let priority_0 = ::ferroui_base::data::BindingPriority::Template;
+    grid_0.set_value_with_priority(::ferroui_controls::Panel::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_0);
+    // Controls/FluentControls.xaml(245,26) ColumnDefinitions
+    let column_definitions_collection_0 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(245,26) ColumnDefinition
+    let column_definition_0 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(245,43) SharedSizeGroup
+    let priority_1 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_0.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Icon")), priority_1);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_0, ::core::clone::Clone::clone(&column_definition_0));
+    // Controls/FluentControls.xaml(246,26) ColumnDefinitions
+    let column_definitions_collection_1 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(246,26) ColumnDefinition
+    let column_definition_1 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(246,43) SharedSizeGroup
+    let priority_2 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_1.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Name")), priority_2);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_1, ::core::clone::Clone::clone(&column_definition_1));
+    // Controls/FluentControls.xaml(247,26) ColumnDefinitions
+    let column_definitions_collection_2 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(247,26) ColumnDefinition
+    let column_definition_2 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(247,43) SharedSizeGroup
+    let priority_3 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_2.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_3);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_2, ::core::clone::Clone::clone(&column_definition_2));
+    // Controls/FluentControls.xaml(248,26) ColumnDefinitions
+    let column_definitions_collection_3 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(248,26) ColumnDefinition
+    let column_definition_3 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(248,43) SharedSizeGroup
+    let priority_4 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_3.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Modified")), priority_4);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_3, ::core::clone::Clone::clone(&column_definition_3));
+    // Controls/FluentControls.xaml(249,26) ColumnDefinitions
+    let column_definitions_collection_4 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(249,26) ColumnDefinition
+    let column_definition_4 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(249,43) SharedSizeGroup
+    let priority_5 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_4.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_5);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_4, ::core::clone::Clone::clone(&column_definition_4));
+    // Controls/FluentControls.xaml(250,26) ColumnDefinitions
+    let column_definitions_collection_5 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(250,26) ColumnDefinition
+    let column_definition_5 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(250,43) SharedSizeGroup
+    let priority_6 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_5.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Type")), priority_6);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_5, ::core::clone::Clone::clone(&column_definition_5));
+    // Controls/FluentControls.xaml(251,26) ColumnDefinitions
+    let column_definitions_collection_6 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(251,26) ColumnDefinition
+    let column_definition_6 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(251,43) SharedSizeGroup
+    let priority_7 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_6.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_7);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_6, ::core::clone::Clone::clone(&column_definition_6));
+    // Controls/FluentControls.xaml(252,26) ColumnDefinitions
+    let column_definitions_collection_7 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(252,26) ColumnDefinition
+    let column_definition_7 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(252,43) SharedSizeGroup
+    let priority_8 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_7.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Size")), priority_8);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_7, ::core::clone::Clone::clone(&column_definition_7));
+    // Controls/FluentControls.xaml(253,26) ColumnDefinitions
+    let column_definitions_collection_8 = ::ferroui_controls::Grid::__markup_get_ColumnDefinitions(&grid_0);
+    // Controls/FluentControls.xaml(253,26) ColumnDefinition
+    let column_definition_8 = ::ferroui_controls::ColumnDefinition::new();
+    // Controls/FluentControls.xaml(253,43) SharedSizeGroup
+    let priority_9 = ::ferroui_base::data::BindingPriority::Template;
+    column_definition_8.set_value_with_priority(::ferroui_controls::DefinitionBase::shared_size_group_property(), ::core::option::Option::Some(::std::string::String::from("Splitter")), priority_9);
+    ::ferroui_controls::ColumnDefinitions::__markup_Add_0(&column_definitions_collection_8, ::core::clone::Clone::clone(&column_definition_8));
+    // Controls/FluentControls.xaml(255,24) Children
+    let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
+    // Controls/FluentControls.xaml(255,24) Image
+    let image_0 = ::ferroui_controls::Image::new();
+    image_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&image_0).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &image_0);
+    // Controls/FluentControls.xaml(255,24) Width
+    let priority_10 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 16.0_f64, priority_10);
+    // Controls/FluentControls.xaml(255,24) Height
+    let priority_11 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_base::layout::Layoutable::height_property(), 16.0_f64, priority_11);
+    // Controls/FluentControls.xaml(257,28) Source
+    // Controls/FluentControls.xaml(257,28) DrawingImage
+    let drawing_image_0 = ::ferroui_base::media::DrawingImage::new();
+    context.push_parent(rt::to_value(drawing_image_0.clone()));
+    // Controls/FluentControls.xaml(257,41) Drawing
+    let path_0 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "IconKey", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
+        builder.build()
+    };
+    let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_1(path_0.clone());
+    context.push_parent(rt::to_value(compiled_binding_extension_0.clone()));
+    // Controls/FluentControls.xaml(257,41) Converter
+    let static_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_new_1(rt::string_object("Icons"));
+    let provided_0 = rt::provide_value_invoked(&context, rt::compiled_binding_converter_property(), &static_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::StaticResourceExtension::__markup_ProvideValue_0, 257, 41)?;
+    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 257, 41)?, rt::exact(rt::cast_checked(provided_0, rt::markup_handle(<dyn ::ferroui_base::data::converters::IValueConverter as ::ferroui_base::metadata::MarkupTyped>::MARKUP), "FerroUI.Data.Converters.IValueConverter", 257, 41)?, "FerroUI.Data.CompiledBinding.set_Converter", 0, 257, 41)?);
+    context.pop_parent();
+    context.set_target_property(rt::property_value(::ferroui_base::media::DrawingImage::drawing_property()));
+    let provided_1 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
+    context.set_target_property(::core::option::Option::None);
+    rt::bind(drawing_image_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::media::DrawingImage::drawing_property(), provided_1, 257, 41)?;
+    context.pop_parent();
+    let priority_12 = ::ferroui_base::data::BindingPriority::Template;
+    image_0.set_value_with_priority(::ferroui_controls::Image::source_property(), rt::cast(drawing_image_0.clone(), 257, 41)?, priority_12);
+    rt::pop_parent_end_init(&context, &image_0, 255, 24)?;
     // Controls/FluentControls.xaml(260,24) Children
-    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
+    let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
     // Controls/FluentControls.xaml(260,24) TextBlock
+    let text_block_0 = ::ferroui_controls::TextBlock::new();
+    text_block_0.begin_init();
+    ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
+    rt::push_parent(&context, &text_block_0);
+    // Controls/FluentControls.xaml(260,24) Column
+    let priority_13 = ::ferroui_base::data::BindingPriority::Template;
+    text_block_0.set_value_with_priority(::ferroui_controls::Grid::column_property(), 1_i32, priority_13);
+    // Controls/FluentControls.xaml(260,50) Text
+    let path_1 = {
+        let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
+        let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "DisplayName", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
+        builder.build()
+    };
+    rt::bind_compiled_binding(&context, text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_1.clone(), 260, 50)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 260, 24)?;
+    // Controls/FluentControls.xaml(261,24) Children
+    let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
+    // Controls/FluentControls.xaml(261,24) TextBlock
     let text_block_1 = ::ferroui_controls::TextBlock::new();
     text_block_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&text_block_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_1);
-    // Controls/FluentControls.xaml(260,24) Column
+    // Controls/FluentControls.xaml(261,24) Column
     let priority_14 = ::ferroui_base::data::BindingPriority::Template;
     text_block_1.set_value_with_priority(::ferroui_controls::Grid::column_property(), 3_i32, priority_14);
-    // Controls/FluentControls.xaml(260,50) Text
+    // Controls/FluentControls.xaml(261,50) Text
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Modified", false, rt::markup_handle(<::ferroui_base::utilities::DateTime as ::ferroui_base::metadata::MarkupTyped>::MARKUP), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_2.clone(), 260, 50)?;
-    rt::pop_parent_end_init(&context, &text_block_1, 260, 24)?;
-    // Controls/FluentControls.xaml(261,24) Children
+    rt::bind_compiled_binding(&context, text_block_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_2.clone(), 261, 50)?;
+    rt::pop_parent_end_init(&context, &text_block_1, 261, 24)?;
+    // Controls/FluentControls.xaml(262,24) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(261,24) TextBlock
+    // Controls/FluentControls.xaml(262,24) TextBlock
     let text_block_2 = ::ferroui_controls::TextBlock::new();
     text_block_2.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&text_block_2).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_2);
-    // Controls/FluentControls.xaml(261,24) Column
+    // Controls/FluentControls.xaml(262,24) Column
     let priority_15 = ::ferroui_base::data::BindingPriority::Template;
     text_block_2.set_value_with_priority(::ferroui_controls::Grid::column_property(), 5_i32, priority_15);
-    // Controls/FluentControls.xaml(261,50) Text
+    // Controls/FluentControls.xaml(262,50) Text
     let path_3 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Type", false, ::ferroui_base::data::core::ValueType::of::<::std::string::String>(), false, false, true);
         builder.build()
     };
-    rt::bind_compiled_binding(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_3.clone(), 261, 50)?;
-    rt::pop_parent_end_init(&context, &text_block_2, 261, 24)?;
-    // Controls/FluentControls.xaml(262,24) Children
+    rt::bind_compiled_binding(&context, text_block_2.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), path_3.clone(), 262, 50)?;
+    rt::pop_parent_end_init(&context, &text_block_2, 262, 24)?;
+    // Controls/FluentControls.xaml(263,24) Children
     let children_collection_4 = ::ferroui_controls::Panel::__markup_get_Children(grid_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(262,24) TextBlock
+    // Controls/FluentControls.xaml(263,24) TextBlock
     let text_block_3 = ::ferroui_controls::TextBlock::new();
     text_block_3.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_4, ::core::clone::Clone::clone(&text_block_3).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_3);
-    // Controls/FluentControls.xaml(262,24) Column
+    // Controls/FluentControls.xaml(263,24) Column
     let priority_16 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_controls::Grid::column_property(), 7_i32, priority_16);
-    // Controls/FluentControls.xaml(262,24) HorizontalAlignment
+    // Controls/FluentControls.xaml(263,24) HorizontalAlignment
     let priority_17 = ::ferroui_base::data::BindingPriority::Template;
     text_block_3.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_17);
-    // Controls/FluentControls.xaml(264,28) Text
+    // Controls/FluentControls.xaml(265,28) Text
     let compiled_binding_extension_4 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
-    // Controls/FluentControls.xaml(264,36) Path
+    // Controls/FluentControls.xaml(265,36) Path
     let path_4 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = rt::path_property(&builder, <::ferroui_dialogs::internal::ManagedFileChooserItemViewModel as ::ferroui_base::metadata::MarkupTyped>::MARKUP, "Size", false, ::ferroui_base::data::core::ValueType::of::<i64>(), false, false, true);
         builder.build()
     };
-    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_4), 264, 36)?, rt::cast(path_4.clone(), 264, 36)?);
-    // Controls/FluentControls.xaml(266,32) Converter
+    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_4), 265, 36)?, rt::cast(path_4.clone(), 265, 36)?);
+    // Controls/FluentControls.xaml(267,32) Converter
     let file_size_string_converter_0 = ::ferroui_dialogs::internal::FileSizeStringConverter::__markup_new_0();
-    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_4), 266, 32)?, ::core::option::Option::Some(::core::clone::Clone::clone(&file_size_string_converter_0) as ::std::rc::Rc<dyn ::ferroui_base::data::converters::IValueConverter>));
+    ::ferroui_base::data::CompiledBinding::__markup_set_Converter(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_4), 267, 32)?, ::core::option::Option::Some(::core::clone::Clone::clone(&file_size_string_converter_0) as ::std::rc::Rc<dyn ::ferroui_base::data::converters::IValueConverter>));
     context.set_target_property(rt::property_value(::ferroui_controls::TextBlock::text_property()));
     let provided_5 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_4, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
-    rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_5, 264, 28)?;
-    rt::pop_parent_end_init(&context, &text_block_3, 262, 24)?;
-    rt::pop_parent_end_init(&context, &grid_0, 242, 22)?;
+    rt::bind(text_block_3.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), provided_5, 265, 28)?;
+    rt::pop_parent_end_init(&context, &text_block_3, 263, 24)?;
+    rt::pop_parent_end_init(&context, &grid_0, 243, 22)?;
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(288,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_395(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    let name_scope = context.name_scope_field();
-    // Controls/FluentControls.xaml(288,12) Border
-    let border_0 = ::ferroui_controls::Border::new();
-    rt::set_intermediate_root(&context, &border_0);
-    border_0.begin_init();
-    rt::push_parent(&context, &border_0);
-    // Controls/FluentControls.xaml(288,19) Name
-    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "border", 288, 19)?;
-    // Controls/FluentControls.xaml(288,33) BoxShadow
-    rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ManagedFileChooserQuickLinksBoxShadow", 288, 33)?;
-    // Controls/FluentControls.xaml(288,101) Background
-    rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_234)?;
-    // Controls/FluentControls.xaml(289,14) Child
-    // Controls/FluentControls.xaml(289,14) ScrollViewer
-    let scroll_viewer_0 = ::ferroui_controls::ScrollViewer::new();
-    scroll_viewer_0.begin_init();
-    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
-    // Controls/FluentControls.xaml(289,27) Name
-    rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "PART_ScrollViewer", 289, 27)?;
-    // Controls/FluentControls.xaml(289,52) HorizontalScrollBarVisibility
-    rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_235)?;
-    // Controls/FluentControls.xaml(290,16) Content
-    // Controls/FluentControls.xaml(290,16) ItemsPresenter
-    let items_presenter_0 = ::ferroui_controls::presenters::ItemsPresenter::new();
-    items_presenter_0.begin_init();
-    scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
-    // Controls/FluentControls.xaml(290,31) Name
-    rt::name_element(name_scope.as_ref(), &items_presenter_0, &items_presenter_0, "PART_ItemsPresenter", 290, 31)?;
-    // Controls/FluentControls.xaml(291,31) ItemsPanel
-    rt::bind_template_bindings(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_236)?;
-    rt::end_init(&items_presenter_0, 290, 16)?;
-    rt::end_init(&scroll_viewer_0, 289, 14)?;
-    rt::pop_parent_end_init(&context, &border_0, 288, 12)?;
-    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(303,16)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(289,12)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_396(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
     let name_scope = context.name_scope_field();
-    // Controls/FluentControls.xaml(303,16) Border
+    // Controls/FluentControls.xaml(289,12) Border
     let border_0 = ::ferroui_controls::Border::new();
     rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
     rt::push_parent(&context, &border_0);
-    // Controls/FluentControls.xaml(303,23) Name
-    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "LayoutRoot", 303, 23)?;
-    // Controls/FluentControls.xaml(303,16) CornerRadius
+    // Controls/FluentControls.xaml(289,19) Name
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "border", 289, 19)?;
+    // Controls/FluentControls.xaml(289,33) BoxShadow
+    rt::bind_dynamic_resource(&context, border_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::box_shadow_property(), "ManagedFileChooserQuickLinksBoxShadow", 289, 33)?;
+    // Controls/FluentControls.xaml(289,101) Background
+    rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_234)?;
+    // Controls/FluentControls.xaml(290,14) Child
+    // Controls/FluentControls.xaml(290,14) ScrollViewer
+    let scroll_viewer_0 = ::ferroui_controls::ScrollViewer::new();
+    scroll_viewer_0.begin_init();
+    border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_viewer_0).upcast::<::ferroui_controls::Control>()));
+    // Controls/FluentControls.xaml(290,27) Name
+    rt::name_element(name_scope.as_ref(), &scroll_viewer_0, &scroll_viewer_0, "PART_ScrollViewer", 290, 27)?;
+    // Controls/FluentControls.xaml(290,52) HorizontalScrollBarVisibility
+    rt::bind_template_bindings(scroll_viewer_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_235)?;
+    // Controls/FluentControls.xaml(291,16) Content
+    // Controls/FluentControls.xaml(291,16) ItemsPresenter
+    let items_presenter_0 = ::ferroui_controls::presenters::ItemsPresenter::new();
+    items_presenter_0.begin_init();
+    scroll_viewer_0.set_value(::ferroui_controls::ContentControl::content_property(), rt::to_object(::core::clone::Clone::clone(&items_presenter_0)));
+    // Controls/FluentControls.xaml(291,31) Name
+    rt::name_element(name_scope.as_ref(), &items_presenter_0, &items_presenter_0, "PART_ItemsPresenter", 291, 31)?;
+    // Controls/FluentControls.xaml(292,31) ItemsPanel
+    rt::bind_template_bindings(items_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_236)?;
+    rt::end_init(&items_presenter_0, 291, 16)?;
+    rt::end_init(&scroll_viewer_0, 290, 14)?;
+    rt::pop_parent_end_init(&context, &border_0, 289, 12)?;
+    ::core::result::Result::Ok(rt::to_value(border_0.clone()))
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(304,16)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_397(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
+    let name_scope = context.name_scope_field();
+    // Controls/FluentControls.xaml(304,16) Border
+    let border_0 = ::ferroui_controls::Border::new();
+    rt::set_intermediate_root(&context, &border_0);
+    border_0.begin_init();
+    rt::push_parent(&context, &border_0);
+    // Controls/FluentControls.xaml(304,23) Name
+    rt::name_element(name_scope.as_ref(), &border_0, &border_0, "LayoutRoot", 304, 23)?;
+    // Controls/FluentControls.xaml(304,16) CornerRadius
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64), priority_0);
-    // Controls/FluentControls.xaml(303,16) Margin
+    // Controls/FluentControls.xaml(304,16) Margin
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     border_0.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(10.0_f64, 0.0_f64, 10.0_f64, 0.0_f64), priority_1);
-    // Controls/FluentControls.xaml(304,18) Child
-    // Controls/FluentControls.xaml(304,18) Panel
+    // Controls/FluentControls.xaml(305,18) Child
+    // Controls/FluentControls.xaml(305,18) Panel
     let panel_0 = ::ferroui_controls::Panel::new();
     panel_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&panel_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &panel_0);
-    // Controls/FluentControls.xaml(305,20) Children
+    // Controls/FluentControls.xaml(306,20) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(305,20) Border
+    // Controls/FluentControls.xaml(306,20) Border
     let border_1 = ::ferroui_controls::Border::new();
     border_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&border_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &border_1);
-    // Controls/FluentControls.xaml(305,27) Name
-    rt::name_element(name_scope.as_ref(), &border_1, &border_1, "SelectedLine", 305, 27)?;
-    // Controls/FluentControls.xaml(305,20) HorizontalAlignment
+    // Controls/FluentControls.xaml(306,27) Name
+    rt::name_element(name_scope.as_ref(), &border_1, &border_1, "SelectedLine", 306, 27)?;
+    // Controls/FluentControls.xaml(306,20) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Left, priority_2);
-    // Controls/FluentControls.xaml(305,20) Margin
+    // Controls/FluentControls.xaml(306,20) Margin
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::margin_property(), ::ferroui_base::Thickness::__markup_new_3(2.0_f64, 6.0_f64, 2.0_f64, 6.0_f64), priority_3);
-    // Controls/FluentControls.xaml(305,20) CornerRadius
+    // Controls/FluentControls.xaml(306,20) CornerRadius
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_controls::Border::corner_radius_property(), ::ferroui_base::CornerRadius::__markup_new_3(0.5_f64, 0.5_f64, 0.5_f64, 0.5_f64), priority_4);
-    // Controls/FluentControls.xaml(305,20) Width
+    // Controls/FluentControls.xaml(306,20) Width
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     border_1.set_value_with_priority(::ferroui_base::layout::Layoutable::width_property(), 3.0_f64, priority_5);
-    // Controls/FluentControls.xaml(305,118) Background
-    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "SystemControlHighlightAccentBrush", 305, 118)?;
-    // Controls/FluentControls.xaml(305,183) IsVisible
-    rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::ListBoxItem::is_selected_property()), 305, 183)?;
-    rt::pop_parent_end_init(&context, &border_1, 305, 20)?;
-    // Controls/FluentControls.xaml(306,20) Children
+    // Controls/FluentControls.xaml(306,118) Background
+    rt::bind_dynamic_resource(&context, border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Border::background_property(), "SystemControlHighlightAccentBrush", 306, 118)?;
+    // Controls/FluentControls.xaml(306,183) IsVisible
+    rt::bind_template_binding(border_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::Visual::is_visible_property(), rt::property(::ferroui_controls::ListBoxItem::is_selected_property()), 306, 183)?;
+    rt::pop_parent_end_init(&context, &border_1, 306, 20)?;
+    // Controls/FluentControls.xaml(307,20) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(&panel_0);
-    // Controls/FluentControls.xaml(306,20) ContentPresenter
+    // Controls/FluentControls.xaml(307,20) ContentPresenter
     let content_presenter_0 = ::ferroui_controls::presenters::ContentPresenter::new();
     content_presenter_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_controls::Control>());
-    // Controls/FluentControls.xaml(306,37) Name
-    rt::name_element(name_scope.as_ref(), &content_presenter_0, &content_presenter_0, "PART_ContentPresenter", 306, 37)?;
-    // Controls/FluentControls.xaml(306,20) Background
+    // Controls/FluentControls.xaml(307,37) Name
+    rt::name_element(name_scope.as_ref(), &content_presenter_0, &content_presenter_0, "PART_ContentPresenter", 307, 37)?;
+    // Controls/FluentControls.xaml(307,20) Background
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::background_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_6);
-    // Controls/FluentControls.xaml(306,20) BorderBrush
+    // Controls/FluentControls.xaml(307,20) BorderBrush
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::border_brush_property(), ::core::option::Option::Some(::ferroui_base::media::immutable::ImmutableSolidColorBrush::__markup_new_0(16777215_u32) as ::std::rc::Rc<dyn ::ferroui_base::media::IBrush>), priority_7);
-    // Controls/FluentControls.xaml(306,20) BorderThickness
+    // Controls/FluentControls.xaml(307,20) BorderThickness
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::border_thickness_property(), ::ferroui_base::Thickness::__markup_new_3(0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64), priority_8);
-    // Controls/FluentControls.xaml(310,31) ContentTemplate
-    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 310, 31)?;
-    // Controls/FluentControls.xaml(311,31) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(311,31) ContentTemplate
+    rt::bind_template_binding(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_template_property(), rt::property(::ferroui_controls::ContentControl::content_template_property()), 311, 31)?;
+    // Controls/FluentControls.xaml(312,31) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let template_binding_2 = ::ferroui_base::data::TemplateBinding::__markup_new_1(rt::property(::ferroui_controls::ContentControl::content_property()));
     let provided_3 = ::ferroui_base::data::TemplateBinding::__markup_ProvideValue_0(&template_binding_2);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_3);
     if value_0.is_some() {
-        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 311, 31)?;
+        rt::bind(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::presenters::ContentPresenter::content_property(), value_0.clone(), 312, 31)?;
     } else {
-        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 311, 31)?, priority_9);
+        content_presenter_0.set_value_with_priority(::ferroui_controls::presenters::ContentPresenter::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 312, 31)?, priority_9);
     }
-    // Controls/FluentControls.xaml(312,31) Padding
+    // Controls/FluentControls.xaml(313,31) Padding
     rt::bind_template_bindings(content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_237)?;
-    rt::end_init(&content_presenter_0, 306, 20)?;
-    rt::pop_parent_end_init(&context, &panel_0, 304, 18)?;
-    rt::pop_parent_end_init(&context, &border_0, 303, 16)?;
+    rt::end_init(&content_presenter_0, 307, 20)?;
+    rt::pop_parent_end_init(&context, &panel_0, 305, 18)?;
+    rt::pop_parent_end_init(&context, &border_0, 304, 16)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
-/// Builds the deferred content at `Controls/FluentControls.xaml(350,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_397(
-    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
-) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
-    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(350,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_397_THEME)
-}
-
-/// Builds the deferred content at `Controls/FluentControls.xaml(355,10)` (a template or a deferred resource).
+/// Builds the deferred content at `Controls/FluentControls.xaml(351,4)` (a template or a deferred resource).
 fn build_controls_fluentcontrols_xaml_deferred_398(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
-    // Controls/FluentControls.xaml(355,10) Border
+    // Controls/FluentControls.xaml(351,4) ControlTheme
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_398_THEME)
+}
+
+/// Builds the deferred content at `Controls/FluentControls.xaml(356,10)` (a template or a deferred resource).
+fn build_controls_fluentcontrols_xaml_deferred_399(
+    service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
+) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
+    let context = rt::deferred_context(service_provider, &rt::DocumentInfo { base_uri: BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT.base_uri, namespaces: BUILD_CONTROLS_FLUENTCONTROLS_XAML_XML_NAMESPACES_8 });
+    // Controls/FluentControls.xaml(356,10) Border
     let border_0 = ::ferroui_controls::Border::new();
     rt::set_intermediate_root(&context, &border_0);
     border_0.begin_init();
     rt::push_parent(&context, &border_0);
-    // Controls/FluentControls.xaml(355,17) Background
+    // Controls/FluentControls.xaml(356,17) Background
     rt::bind_template_bindings(border_0.upcast_ref::<::ferroui_base::FerroObject>(), BUILD_CONTROLS_FLUENTCONTROLS_XAML_BINDINGS_238)?;
-    // Controls/FluentControls.xaml(360,12) Child
-    // Controls/FluentControls.xaml(360,12) StackPanel
+    // Controls/FluentControls.xaml(361,12) Child
+    // Controls/FluentControls.xaml(361,12) StackPanel
     let stack_panel_0 = ::ferroui_controls::StackPanel::new();
     stack_panel_0.begin_init();
     border_0.set_value(::ferroui_controls::Decorator::child_property(), ::core::option::Option::Some(::core::clone::Clone::clone(&stack_panel_0).upcast::<::ferroui_controls::Control>()));
     rt::push_parent(&context, &stack_panel_0);
-    // Controls/FluentControls.xaml(360,12) Spacing
+    // Controls/FluentControls.xaml(361,12) Spacing
     let priority_0 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_0.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 10.0_f64, priority_0);
-    // Controls/FluentControls.xaml(361,14) Children
+    // Controls/FluentControls.xaml(362,14) Children
     let children_collection_0 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(361,14) TextBlock
+    // Controls/FluentControls.xaml(362,14) TextBlock
     let text_block_0 = ::ferroui_controls::TextBlock::new();
     text_block_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_0, ::core::clone::Clone::clone(&text_block_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &text_block_0);
-    // Controls/FluentControls.xaml(361,14) TextWrapping
+    // Controls/FluentControls.xaml(362,14) TextWrapping
     let priority_1 = ::ferroui_base::data::BindingPriority::Template;
     text_block_0.set_value_with_priority(::ferroui_controls::TextBlock::text_wrapping_property(), ::ferroui_base::media::TextWrapping::Wrap, priority_1);
-    // Controls/FluentControls.xaml(363,18) Text
+    // Controls/FluentControls.xaml(364,18) Text
     let multi_binding_0 = ::ferroui_base::data::MultiBinding::__markup_new_0();
     context.push_parent(rt::to_value(multi_binding_0.clone()));
-    // Controls/FluentControls.xaml(365,22) Converter
+    // Controls/FluentControls.xaml(366,22) Converter
     let string_format_converter_0 = ::ferroui_controls::converters::StringFormatConverter::__markup_new_0();
     ::ferroui_base::data::MultiBinding::__markup_set_Converter(&multi_binding_0, ::core::option::Option::Some(::core::clone::Clone::clone(&string_format_converter_0) as ::std::rc::Rc<dyn ::ferroui_base::data::converters::IMultiValueConverter>));
-    // Controls/FluentControls.xaml(367,20) Bindings
+    // Controls/FluentControls.xaml(368,20) Bindings
     let bindings_collection_0 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let dynamic_resource_extension_0 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_0();
-    // Controls/FluentControls.xaml(367,36) ResourceKey
+    // Controls/FluentControls.xaml(368,36) ResourceKey
     ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_set_ResourceKey(&dynamic_resource_extension_0, rt::string_object("StringManagedFileChooserOverwritePromptFileAlreadyExistsText"));
     let provided_5 = rt::provide_value(&context, rt::multi_binding_bindings_property(), &dynamic_resource_extension_0, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_0, ::core::clone::Clone::clone(&provided_5) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
-    // Controls/FluentControls.xaml(368,20) Bindings
+    // Controls/FluentControls.xaml(369,20) Bindings
     let bindings_collection_1 = ::ferroui_base::data::MultiBinding::__markup_get_Bindings(&multi_binding_0);
     let compiled_binding_extension_0 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_new_0();
-    // Controls/FluentControls.xaml(368,28) Path
+    // Controls/FluentControls.xaml(369,28) Path
     let path_0 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.templated_parent();
         let builder = builder.ferro_property(rt::property(::ferroui_dialogs::ManagedFileChooserOverwritePrompt::file_name_property()));
         builder.build()
     };
-    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 368, 28)?, rt::cast(path_0.clone(), 368, 28)?);
+    ::ferroui_base::data::CompiledBinding::__markup_set_Path(&rt::cast(::core::clone::Clone::clone(&compiled_binding_extension_0), 369, 28)?, rt::cast(path_0.clone(), 369, 28)?);
     context.set_target_property(rt::multi_binding_bindings_property());
     let provided_6 = ::ferroui_markup_xaml::markup_extensions::CompiledBindingExtension::__markup_ProvideValue_0(&compiled_binding_extension_0, ::core::option::Option::Some(rt::service_provider(&context)));
     context.set_target_property(::core::option::Option::None);
     <::ferroui_base::collections::FerroList<::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>>>::__markup_Add_0(&bindings_collection_1, ::core::clone::Clone::clone(&provided_6) as ::std::rc::Rc<dyn ::ferroui_base::data::BindingBase>);
     context.pop_parent();
-    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), multi_binding_0, 363, 18)?;
-    rt::pop_parent_end_init(&context, &text_block_0, 361, 14)?;
-    // Controls/FluentControls.xaml(372,14) Children
+    rt::bind(text_block_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::TextBlock::text_property(), multi_binding_0, 364, 18)?;
+    rt::pop_parent_end_init(&context, &text_block_0, 362, 14)?;
+    // Controls/FluentControls.xaml(373,14) Children
     let children_collection_1 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_0.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(372,14) StackPanel
+    // Controls/FluentControls.xaml(373,14) StackPanel
     let stack_panel_1 = ::ferroui_controls::StackPanel::new();
     stack_panel_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_1, ::core::clone::Clone::clone(&stack_panel_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &stack_panel_1);
-    // Controls/FluentControls.xaml(372,14) HorizontalAlignment
+    // Controls/FluentControls.xaml(373,14) HorizontalAlignment
     let priority_2 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_base::layout::Layoutable::horizontal_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Right, priority_2);
-    // Controls/FluentControls.xaml(372,14) Spacing
+    // Controls/FluentControls.xaml(373,14) Spacing
     let priority_3 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::spacing_property(), 10.0_f64, priority_3);
-    // Controls/FluentControls.xaml(372,14) Orientation
+    // Controls/FluentControls.xaml(373,14) Orientation
     let priority_4 = ::ferroui_base::data::BindingPriority::Template;
     stack_panel_1.set_value_with_priority(::ferroui_controls::StackPanel::orientation_property(), ::ferroui_base::layout::Orientation::Horizontal, priority_4);
-    // Controls/FluentControls.xaml(375,16) Children
+    // Controls/FluentControls.xaml(376,16) Children
     let children_collection_2 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(375,16) Button
+    // Controls/FluentControls.xaml(376,16) Button
     let button_0 = ::ferroui_controls::Button::new();
     button_0.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_2, ::core::clone::Clone::clone(&button_0).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_0);
-    // Controls/FluentControls.xaml(375,16) Classes
+    // Controls/FluentControls.xaml(376,16) Classes
     let classes_collection_0 = ::ferroui_base::StyledElement::__markup_get_Classes(button_0.upcast_ref::<::ferroui_base::StyledElement>());
     ::ferroui_base::controls::Classes::__markup_Add_0(&classes_collection_0, ::std::string::String::from("accent"));
-    // Controls/FluentControls.xaml(375,40) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(376,40) Content (setter chosen at run time)
     let priority_5 = ::ferroui_base::data::BindingPriority::Template;
     let dynamic_resource_extension_1 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOverwritePromptConfirmText"));
     let provided_7 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ContentControl::content_property()), &dynamic_resource_extension_1, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_0: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_7);
     if value_0.is_some() {
-        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_0.clone(), 375, 40)?;
+        rt::bind(button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_0.clone(), 376, 40)?;
     } else {
-        button_0.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 375, 40)?, priority_5);
+        button_0.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_0.clone(), "ContentControl.Content", 1, 376, 40)?, priority_5);
     }
-    // Controls/FluentControls.xaml(375,16) MinWidth
+    // Controls/FluentControls.xaml(376,16) MinWidth
     let priority_6 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 80.0_f64, priority_6);
-    // Controls/FluentControls.xaml(375,16) HorizontalContentAlignment
+    // Controls/FluentControls.xaml(376,16) HorizontalContentAlignment
     let priority_7 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::ContentControl::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_7);
-    // Controls/FluentControls.xaml(375,16) IsDefault
+    // Controls/FluentControls.xaml(376,16) IsDefault
     let priority_8 = ::ferroui_base::data::BindingPriority::Template;
     button_0.set_value_with_priority(::ferroui_controls::Button::is_default_property(), ::core::clone::Clone::clone(&true), priority_8);
-    // Controls/FluentControls.xaml(379,23) Command
+    // Controls/FluentControls.xaml(380,23) Command
     let path_1 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.templated_parent();
         let builder = rt::path_command(&builder, rt::class_markup(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), "Confirm", false, false, |this, _arguments| { ::ferroui_dialogs::ManagedFileChooserOverwritePrompt::__markup_Confirm_0(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_1.clone(), 379, 23)?;
-    rt::pop_parent_end_init(&context, &button_0, 375, 16)?;
-    // Controls/FluentControls.xaml(380,16) Children
+    rt::bind_compiled_binding(&context, button_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_1.clone(), 380, 23)?;
+    rt::pop_parent_end_init(&context, &button_0, 376, 16)?;
+    // Controls/FluentControls.xaml(381,16) Children
     let children_collection_3 = ::ferroui_controls::Panel::__markup_get_Children(stack_panel_1.upcast_ref::<::ferroui_controls::Panel>());
-    // Controls/FluentControls.xaml(380,16) Button
+    // Controls/FluentControls.xaml(381,16) Button
     let button_1 = ::ferroui_controls::Button::new();
     button_1.begin_init();
     ::ferroui_controls::Controls::__markup_Add_0(&children_collection_3, ::core::clone::Clone::clone(&button_1).upcast::<::ferroui_controls::Control>());
     rt::push_parent(&context, &button_1);
-    // Controls/FluentControls.xaml(380,23) Content (setter chosen at run time)
+    // Controls/FluentControls.xaml(381,23) Content (setter chosen at run time)
     let priority_9 = ::ferroui_base::data::BindingPriority::Template;
     let dynamic_resource_extension_2 = ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_new_1(rt::string_object("StringManagedFileChooserOverwritePromptCancelText"));
     let provided_9 = rt::provide_value(&context, rt::property_value(::ferroui_controls::ContentControl::content_property()), &dynamic_resource_extension_2, ::ferroui_markup_xaml::markup_extensions::DynamicResourceExtension::__markup_ProvideValue_0);
     let value_1: ::ferroui_base::metadata::MarkupValue = rt::to_value(provided_9);
     if value_1.is_some() {
-        rt::bind(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_1.clone(), 380, 23)?;
+        rt::bind(button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::ContentControl::content_property(), value_1.clone(), 381, 23)?;
     } else {
-        button_1.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 380, 23)?, priority_9);
+        button_1.set_value_with_priority(::ferroui_controls::ContentControl::content_property(), rt::exact(value_1.clone(), "ContentControl.Content", 1, 381, 23)?, priority_9);
     }
-    // Controls/FluentControls.xaml(380,16) MinWidth
+    // Controls/FluentControls.xaml(381,16) MinWidth
     let priority_10 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_base::layout::Layoutable::min_width_property(), 80.0_f64, priority_10);
-    // Controls/FluentControls.xaml(380,16) IsCancel
+    // Controls/FluentControls.xaml(381,16) IsCancel
     let priority_11 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::Button::is_cancel_property(), ::core::clone::Clone::clone(&true), priority_11);
-    // Controls/FluentControls.xaml(380,16) HorizontalContentAlignment
+    // Controls/FluentControls.xaml(381,16) HorizontalContentAlignment
     let priority_12 = ::ferroui_base::data::BindingPriority::Template;
     button_1.set_value_with_priority(::ferroui_controls::ContentControl::horizontal_content_alignment_property(), ::ferroui_base::layout::HorizontalAlignment::Center, priority_12);
-    // Controls/FluentControls.xaml(384,23) Command
+    // Controls/FluentControls.xaml(385,23) Command
     let path_2 = {
         let builder = ::ferroui_base::data::CompiledBindingPathBuilder::new();
         let builder = builder.templated_parent();
         let builder = rt::path_command(&builder, rt::class_markup(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), "Cancel", false, false, |this, _arguments| { ::ferroui_dialogs::ManagedFileChooserOverwritePrompt::__markup_Cancel_1(this); ::core::result::Result::Ok(::core::option::Option::None) });
         builder.build()
     };
-    rt::bind_compiled_binding(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_2.clone(), 384, 23)?;
-    rt::pop_parent_end_init(&context, &button_1, 380, 16)?;
-    rt::pop_parent_end_init(&context, &stack_panel_1, 372, 14)?;
-    rt::pop_parent_end_init(&context, &stack_panel_0, 360, 12)?;
-    rt::pop_parent_end_init(&context, &border_0, 355, 10)?;
+    rt::bind_compiled_binding(&context, button_1.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Button::command_property(), path_2.clone(), 385, 23)?;
+    rt::pop_parent_end_init(&context, &button_1, 381, 16)?;
+    rt::pop_parent_end_init(&context, &stack_panel_1, 373, 14)?;
+    rt::pop_parent_end_init(&context, &stack_panel_0, 361, 12)?;
+    rt::pop_parent_end_init(&context, &border_0, 356, 10)?;
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(8,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_399(
+fn build_controls_fluentcontrols_xaml_deferred_400(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41728,16 +41910,16 @@ fn build_controls_fluentcontrols_xaml_deferred_399(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(13,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_400(
+fn build_controls_fluentcontrols_xaml_deferred_401(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(13,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_400_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_401_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(18,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_401(
+fn build_controls_fluentcontrols_xaml_deferred_402(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41769,7 +41951,7 @@ fn build_controls_fluentcontrols_xaml_deferred_401(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(30,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_402(
+fn build_controls_fluentcontrols_xaml_deferred_403(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41801,7 +41983,7 @@ fn build_controls_fluentcontrols_xaml_deferred_402(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(42,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_403(
+fn build_controls_fluentcontrols_xaml_deferred_404(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41833,7 +42015,7 @@ fn build_controls_fluentcontrols_xaml_deferred_403(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(55,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_404(
+fn build_controls_fluentcontrols_xaml_deferred_405(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let _context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41878,16 +42060,16 @@ fn build_controls_fluentcontrols_xaml_deferred_404(
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(74,4)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_405(
+fn build_controls_fluentcontrols_xaml_deferred_406(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
     // Controls/FluentControls.xaml(74,4) ControlTheme
-    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_405_THEME)
+    rt::build_control_theme(&context, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DEFERRED_406_THEME)
 }
 
 /// Builds the deferred content at `Controls/FluentControls.xaml(83,12)` (a template or a deferred resource).
-fn build_controls_fluentcontrols_xaml_deferred_406(
+fn build_controls_fluentcontrols_xaml_deferred_407(
     service_provider: &::std::rc::Rc<dyn ::ferroui_base::metadata::IServiceProvider>,
 ) -> ::core::result::Result<::ferroui_base::metadata::MarkupValue, ::ferroui_markup_xaml::XamlLoadError> {
     let context = rt::deferred_context(service_provider, &BUILD_CONTROLS_FLUENTCONTROLS_XAML_DOCUMENT);
@@ -41984,7 +42166,7 @@ pub fn build_accents_basecolorspalette_xaml(
     let value_1 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Default();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_1.clone(), 6, 6)?, rt::cast(::core::clone::Clone::clone(&value_1), 6, 6)?);
     // Accents/BaseColorsPalette.xaml(7,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_1, BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_0)?;
+    rt::add_packed_color_resources(&resource_dictionary_1, &BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_0)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_0, ::core::clone::Clone::clone(&value_0), rt::cast(resource_dictionary_1.clone(), 6, 6)?), 6, 6)?;
     // Accents/BaseColorsPalette.xaml(37,6) ThemeDictionaries
     let theme_dictionaries_collection_1 = ::ferroui_base::controls::ResourceDictionary::__markup_get_ThemeDictionaries(&resource_dictionary_0);
@@ -42000,77 +42182,85 @@ pub fn build_accents_basecolorspalette_xaml(
     let value_32 = ::ferroui_base::styling::ThemeVariant::__markup_static_get_Dark();
     <dyn ::ferroui_base::controls::IThemeVariantProvider>::__markup_set_Key(&rt::cast(resource_dictionary_2.clone(), 37, 6)?, rt::cast(::core::clone::Clone::clone(&value_32), 37, 6)?);
     // Accents/BaseColorsPalette.xaml(38,41) Content (resource)
-    rt::add_color_resources(&resource_dictionary_2, BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_1)?;
+    rt::add_packed_color_resources(&resource_dictionary_2, &BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_1)?;
     rt::invoked(<::ferroui_base::collections::FerroDictionary<::ferroui_base::styling::ThemeVariant,::std::rc::Rc<dyn ::ferroui_base::controls::IThemeVariantProvider>>>::__markup_Add_0(&theme_dictionaries_collection_1, ::core::clone::Clone::clone(&value_31), rt::cast(resource_dictionary_2.clone(), 37, 6)?), 37, 6)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
 
-/// The colours of a run of `Accents/BaseColorsPalette.xaml`, added in order by `rt::add_color_resources` (#568).
-static BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_0: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemAltHighColor", value: 4294967295_u32, line: 7, position: 41 },
-    rt::ValueRow { key: "SystemAltLowColor", value: 872415231_u32, line: 8, position: 40 },
-    rt::ValueRow { key: "SystemAltMediumColor", value: 2583691263_u32, line: 9, position: 43 },
-    rt::ValueRow { key: "SystemAltMediumHighColor", value: 3439329279_u32, line: 10, position: 47 },
-    rt::ValueRow { key: "SystemAltMediumLowColor", value: 1728053247_u32, line: 11, position: 46 },
-    rt::ValueRow { key: "SystemBaseHighColor", value: 4278190080_u32, line: 12, position: 42 },
-    rt::ValueRow { key: "SystemBaseLowColor", value: 855638016_u32, line: 13, position: 41 },
-    rt::ValueRow { key: "SystemBaseMediumColor", value: 2566914048_u32, line: 14, position: 44 },
-    rt::ValueRow { key: "SystemBaseMediumHighColor", value: 3422552064_u32, line: 15, position: 48 },
-    rt::ValueRow { key: "SystemBaseMediumLowColor", value: 1711276032_u32, line: 16, position: 47 },
-    rt::ValueRow { key: "SystemChromeAltLowColor", value: 4279703319_u32, line: 17, position: 46 },
-    rt::ValueRow { key: "SystemChromeBlackHighColor", value: 4278190080_u32, line: 18, position: 49 },
-    rt::ValueRow { key: "SystemChromeBlackLowColor", value: 855638016_u32, line: 19, position: 48 },
-    rt::ValueRow { key: "SystemChromeBlackMediumLowColor", value: 1711276032_u32, line: 20, position: 54 },
-    rt::ValueRow { key: "SystemChromeBlackMediumColor", value: 3422552064_u32, line: 21, position: 51 },
-    rt::ValueRow { key: "SystemChromeDisabledHighColor", value: 4291611852_u32, line: 22, position: 52 },
-    rt::ValueRow { key: "SystemChromeDisabledLowColor", value: 4286216826_u32, line: 23, position: 51 },
-    rt::ValueRow { key: "SystemChromeHighColor", value: 4291611852_u32, line: 24, position: 44 },
-    rt::ValueRow { key: "SystemChromeLowColor", value: 4294111986_u32, line: 25, position: 43 },
-    rt::ValueRow { key: "SystemChromeMediumColor", value: 4293322470_u32, line: 26, position: 46 },
-    rt::ValueRow { key: "SystemChromeMediumLowColor", value: 4294111986_u32, line: 27, position: 49 },
-    rt::ValueRow { key: "SystemChromeWhiteColor", value: 4294967295_u32, line: 28, position: 45 },
-    rt::ValueRow { key: "SystemChromeGrayColor", value: 4285953654_u32, line: 29, position: 44 },
-    rt::ValueRow { key: "SystemListLowColor", value: 419430400_u32, line: 30, position: 41 },
-    rt::ValueRow { key: "SystemListMediumColor", value: 855638016_u32, line: 31, position: 44 },
-    rt::ValueRow { key: "SystemErrorTextColor", value: 4291101952_u32, line: 32, position: 43 },
-    rt::ValueRow { key: "SystemRegionColor", value: 4294967295_u32, line: 33, position: 40 },
-    rt::ValueRow { key: "SystemRevealListLowColor", value: 385875968_u32, line: 34, position: 47 },
-    rt::ValueRow { key: "SystemRevealListMediumColor", value: 771751936_u32, line: 35, position: 50 },
-];
+/// The colours of a run of `Accents/BaseColorsPalette.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_0: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SystemAltHighColorSystemAltLowColorSystemAltMediumColorSystemAltMediumHighColorSystemAltMediumLowColorSystemBaseHighColorSystemBaseLowColorSystemBaseMediumColorSystemBaseMediumHighColorSystemBaseMediumLowColorSystemChromeAltLowColorSystemChromeBlackHighColorSystemChromeBlackLowColorSystemChromeBlackMediumLowColorSystemChromeBlackMediumColorSystemChromeDisabledHighColorSystemChromeDisabledLowColorSystemChromeHighColorSystemChromeLowColorSystemChromeMediumColorSystemChromeMediumLowColorSystemChromeWhiteColorSystemChromeGrayColorSystemListLowColorSystemListMediumColorSystemErrorTextColorSystemRegionColorSystemRevealListLowColorSystemRevealListMediumColor",
+    numbers: &[],
+    records: &[
+        0, 18, 7, 41, 65535, 65535,
+        18, 17, 8, 40, 65535, 13311,
+        35, 20, 9, 43, 65535, 39423,
+        55, 24, 10, 47, 65535, 52479,
+        79, 23, 11, 46, 65535, 26367,
+        102, 19, 12, 42, 0, 65280,
+        121, 18, 13, 41, 0, 13056,
+        139, 21, 14, 44, 0, 39168,
+        160, 25, 15, 48, 0, 52224,
+        185, 24, 16, 47, 0, 26112,
+        209, 23, 17, 46, 5911, 65303,
+        232, 26, 18, 49, 0, 65280,
+        258, 25, 19, 48, 0, 13056,
+        283, 31, 20, 54, 0, 26112,
+        314, 28, 21, 51, 0, 52224,
+        342, 29, 22, 52, 52428, 65484,
+        371, 28, 23, 51, 31354, 65402,
+        399, 21, 24, 44, 52428, 65484,
+        420, 20, 25, 43, 62194, 65522,
+        440, 23, 26, 46, 59110, 65510,
+        463, 26, 27, 49, 62194, 65522,
+        489, 22, 28, 45, 65535, 65535,
+        511, 21, 29, 44, 30326, 65398,
+        532, 18, 30, 41, 0, 6400,
+        550, 21, 31, 44, 0, 13056,
+        571, 20, 32, 43, 1280, 65477,
+        591, 17, 33, 40, 65535, 65535,
+        608, 24, 34, 47, 0, 5888,
+        632, 27, 35, 50, 0, 11776,
+    ],
+};
 
-/// The colours of a run of `Accents/BaseColorsPalette.xaml`, added in order by `rt::add_color_resources` (#568).
-static BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_1: &[rt::ValueRow<u32>] = &[
-    rt::ValueRow { key: "SystemAltHighColor", value: 4278190080_u32, line: 38, position: 41 },
-    rt::ValueRow { key: "SystemAltLowColor", value: 855638016_u32, line: 39, position: 40 },
-    rt::ValueRow { key: "SystemAltMediumColor", value: 2566914048_u32, line: 40, position: 43 },
-    rt::ValueRow { key: "SystemAltMediumHighColor", value: 3422552064_u32, line: 41, position: 47 },
-    rt::ValueRow { key: "SystemAltMediumLowColor", value: 1711276032_u32, line: 42, position: 46 },
-    rt::ValueRow { key: "SystemBaseHighColor", value: 4294967295_u32, line: 43, position: 42 },
-    rt::ValueRow { key: "SystemBaseLowColor", value: 872415231_u32, line: 44, position: 41 },
-    rt::ValueRow { key: "SystemBaseMediumColor", value: 2583691263_u32, line: 45, position: 44 },
-    rt::ValueRow { key: "SystemBaseMediumHighColor", value: 3439329279_u32, line: 46, position: 48 },
-    rt::ValueRow { key: "SystemBaseMediumLowColor", value: 1728053247_u32, line: 47, position: 47 },
-    rt::ValueRow { key: "SystemChromeAltLowColor", value: 4294111986_u32, line: 48, position: 46 },
-    rt::ValueRow { key: "SystemChromeBlackHighColor", value: 4278190080_u32, line: 49, position: 49 },
-    rt::ValueRow { key: "SystemChromeBlackLowColor", value: 855638016_u32, line: 50, position: 48 },
-    rt::ValueRow { key: "SystemChromeBlackMediumLowColor", value: 1711276032_u32, line: 51, position: 54 },
-    rt::ValueRow { key: "SystemChromeBlackMediumColor", value: 3422552064_u32, line: 52, position: 51 },
-    rt::ValueRow { key: "SystemChromeDisabledHighColor", value: 4281545523_u32, line: 53, position: 52 },
-    rt::ValueRow { key: "SystemChromeDisabledLowColor", value: 4286940549_u32, line: 54, position: 51 },
-    rt::ValueRow { key: "SystemChromeHighColor", value: 4285953654_u32, line: 55, position: 44 },
-    rt::ValueRow { key: "SystemChromeLowColor", value: 4279703319_u32, line: 56, position: 43 },
-    rt::ValueRow { key: "SystemChromeMediumColor", value: 4280229663_u32, line: 57, position: 46 },
-    rt::ValueRow { key: "SystemChromeMediumLowColor", value: 4281019179_u32, line: 58, position: 49 },
-    rt::ValueRow { key: "SystemChromeWhiteColor", value: 4294967295_u32, line: 59, position: 45 },
-    rt::ValueRow { key: "SystemChromeGrayColor", value: 4285953654_u32, line: 60, position: 44 },
-    rt::ValueRow { key: "SystemListLowColor", value: 436207615_u32, line: 61, position: 41 },
-    rt::ValueRow { key: "SystemListMediumColor", value: 872415231_u32, line: 62, position: 44 },
-    rt::ValueRow { key: "SystemErrorTextColor", value: 4294963200_u32, line: 63, position: 43 },
-    rt::ValueRow { key: "SystemRegionColor", value: 4278190080_u32, line: 64, position: 40 },
-    rt::ValueRow { key: "SystemRevealListLowColor", value: 419430399_u32, line: 65, position: 47 },
-    rt::ValueRow { key: "SystemRevealListMediumColor", value: 822083583_u32, line: 66, position: 50 },
-];
+/// The colours of a run of `Accents/BaseColorsPalette.xaml`, packed, added in order by `rt::add_packed_color_resources` (#855).
+static BUILD_ACCENTS_BASECOLORSPALETTE_XAML_ROWS_1: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "SystemAltHighColorSystemAltLowColorSystemAltMediumColorSystemAltMediumHighColorSystemAltMediumLowColorSystemBaseHighColorSystemBaseLowColorSystemBaseMediumColorSystemBaseMediumHighColorSystemBaseMediumLowColorSystemChromeAltLowColorSystemChromeBlackHighColorSystemChromeBlackLowColorSystemChromeBlackMediumLowColorSystemChromeBlackMediumColorSystemChromeDisabledHighColorSystemChromeDisabledLowColorSystemChromeHighColorSystemChromeLowColorSystemChromeMediumColorSystemChromeMediumLowColorSystemChromeWhiteColorSystemChromeGrayColorSystemListLowColorSystemListMediumColorSystemErrorTextColorSystemRegionColorSystemRevealListLowColorSystemRevealListMediumColor",
+    numbers: &[],
+    records: &[
+        0, 18, 38, 41, 0, 65280,
+        18, 17, 39, 40, 0, 13056,
+        35, 20, 40, 43, 0, 39168,
+        55, 24, 41, 47, 0, 52224,
+        79, 23, 42, 46, 0, 26112,
+        102, 19, 43, 42, 65535, 65535,
+        121, 18, 44, 41, 65535, 13311,
+        139, 21, 45, 44, 65535, 39423,
+        160, 25, 46, 48, 65535, 52479,
+        185, 24, 47, 47, 65535, 26367,
+        209, 23, 48, 46, 62194, 65522,
+        232, 26, 49, 49, 0, 65280,
+        258, 25, 50, 48, 0, 13056,
+        283, 31, 51, 54, 0, 26112,
+        314, 28, 52, 51, 0, 52224,
+        342, 29, 53, 52, 13107, 65331,
+        371, 28, 54, 51, 34181, 65413,
+        399, 21, 55, 44, 30326, 65398,
+        420, 20, 56, 43, 5911, 65303,
+        440, 23, 57, 46, 7967, 65311,
+        463, 26, 58, 49, 11051, 65323,
+        489, 22, 59, 45, 65535, 65535,
+        511, 21, 60, 44, 30326, 65398,
+        532, 18, 61, 41, 65535, 6655,
+        550, 21, 62, 44, 65535, 13311,
+        571, 20, 63, 43, 61440, 65535,
+        591, 17, 64, 40, 0, 65280,
+        608, 24, 65, 47, 65535, 6399,
+        632, 27, 66, 50, 65535, 12543,
+    ],
+};
 
 /// The base URI and the XML namespaces of `DensityStyles/Compact.xaml`.
 static BUILD_DENSITYSTYLES_COMPACT_XAML_DOCUMENT: rt::DocumentInfo = rt::DocumentInfo { base_uri: ::core::option::Option::Some("ferres://ferroui.themes.fluent/DensityStyles/Compact.xaml"), namespaces: XML_NAMESPACES_1 };
@@ -42091,15 +42281,15 @@ pub fn build_densitystyles_compact_xaml(
     // DensityStyles/Compact.xaml(4,49) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0)?;
     // DensityStyles/Compact.xaml(7,46) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1)?;
     // DensityStyles/Compact.xaml(11,49) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 11, 49)?, rt::string_object("TableViewColumnResizerWidth"), rt::to_object(4.0_f64)), 11, 49)?;
     // DensityStyles/Compact.xaml(12,51) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2)?;
     // DensityStyles/Compact.xaml(16,43) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 16, 43)?, rt::string_object("TreeViewItemMinHeight"), rt::to_object(24.0_f64)), 16, 43)?;
     // DensityStyles/Compact.xaml(17,44) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3)?;
     // DensityStyles/Compact.xaml(21,39) Content (resource)
     rt::invoked(<dyn ::ferroui_base::controls::IResourceDictionary>::__markup_Add_0(&rt::cast(resource_dictionary_0.clone(), 21, 39)?, rt::string_object("ComboBoxMinHeight"), rt::to_object(24.0_f64)), 21, 39)?;
     // DensityStyles/Compact.xaml(22,38) Content (resource)
@@ -42107,13 +42297,13 @@ pub fn build_densitystyles_compact_xaml(
     // DensityStyles/Compact.xaml(23,55) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4)?;
     // DensityStyles/Compact.xaml(25,42) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5)?;
     // DensityStyles/Compact.xaml(27,39) Content (resource)
     rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_6)?;
     // DensityStyles/Compact.xaml(29,38) Content (resource)
-    rt::add_thickness_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_7)?;
+    rt::add_packed_thickness_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_7)?;
     // DensityStyles/Compact.xaml(35,44) Content (resource)
-    rt::add_double_resources(&resource_dictionary_0, BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8)?;
+    rt::add_packed_double_resources(&resource_dictionary_0, &BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8)?;
     rt::complete_root_name_scope(::core::option::Option::None, name_scope.as_ref(), 1, 3)?;
     ::core::result::Result::Ok(resource_dictionary_0)
 }
@@ -42125,29 +42315,41 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_0: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TextControlThemeMinWidth", value: 32.0_f64, line: 6, position: 46 },
 ];
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TextControlThemePadding", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 7, position: 46 },
-    rt::ValueRow { key: "ListBoxItemPadding", value: [4.0_f64, 2.0_f64, 4.0_f64, 2.0_f64], line: 8, position: 41 },
-    rt::ValueRow { key: "TableViewRowPadding", value: [2.0_f64, 2.0_f64, 2.0_f64, 2.0_f64], line: 9, position: 42 },
-    rt::ValueRow { key: "TableViewCellPadding", value: [2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64], line: 10, position: 43 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_1: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "TextControlThemePaddingListBoxItemPaddingTableViewRowPaddingTableViewCellPadding",
+    numbers: &[4.0_f64, 2.0_f64, 0.0_f64],
+    records: &[
+        0, 23, 7, 46, 0, 1, 0, 1,
+        23, 18, 8, 41, 0, 1, 0, 1,
+        41, 19, 9, 42, 1, 1, 1, 1,
+        60, 20, 10, 43, 1, 2, 1, 2,
+    ],
+};
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TableViewColumnResizerMargin", value: [0.0_f64, -2.0_f64, -2.0_f64, -2.0_f64], line: 12, position: 51 },
-    rt::ValueRow { key: "ComboBoxItemThemePadding", value: [11.0_f64, 5.0_f64, 11.0_f64, 7.0_f64], line: 13, position: 47 },
-    rt::ValueRow { key: "MenuFlyoutItemThemePaddingNarrow", value: [4.0_f64, 4.0_f64, 8.0_f64, 4.0_f64], line: 14, position: 55 },
-    rt::ValueRow { key: "MenuBarItemPadding", value: [5.0_f64, 2.0_f64, 5.0_f64, 2.0_f64], line: 15, position: 41 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_2: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "TableViewColumnResizerMarginComboBoxItemThemePaddingMenuFlyoutItemThemePaddingNarrowMenuBarItemPadding",
+    numbers: &[0.0_f64, -2.0_f64, 11.0_f64, 5.0_f64, 7.0_f64, 4.0_f64, 8.0_f64, 2.0_f64],
+    records: &[
+        0, 28, 12, 51, 0, 1, 1, 1,
+        28, 24, 13, 47, 2, 3, 2, 4,
+        52, 32, 14, 55, 5, 5, 6, 5,
+        84, 18, 15, 41, 3, 7, 3, 7,
+    ],
+};
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TimePickerHostPadding", value: [0.0_f64, 1.0_f64, 0.0_f64, 2.0_f64], line: 17, position: 44 },
-    rt::ValueRow { key: "DatePickerHostPadding", value: [0.0_f64, 1.0_f64, 0.0_f64, 2.0_f64], line: 18, position: 44 },
-    rt::ValueRow { key: "DatePickerHostMonthPadding", value: [9.0_f64, 0.0_f64, 0.0_f64, 1.0_f64], line: 19, position: 49 },
-    rt::ValueRow { key: "ComboBoxEditableTextPadding", value: [10.0_f64, 0.0_f64, 30.0_f64, 0.0_f64], line: 20, position: 50 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_3: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "TimePickerHostPaddingDatePickerHostPaddingDatePickerHostMonthPaddingComboBoxEditableTextPadding",
+    numbers: &[0.0_f64, 1.0_f64, 2.0_f64, 9.0_f64, 10.0_f64, 30.0_f64],
+    records: &[
+        0, 21, 17, 44, 0, 1, 0, 2,
+        21, 21, 18, 44, 0, 1, 0, 2,
+        42, 26, 19, 49, 3, 0, 0, 1,
+        68, 27, 20, 50, 4, 0, 5, 0,
+    ],
+};
 
 /// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
@@ -42155,11 +42357,15 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_4: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "TabItemMinHeight", value: 28.0_f64, line: 24, position: 38 },
 ];
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "TabItemHeaderMargin", value: [6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64], line: 25, position: 42 },
-    rt::ValueRow { key: "ButtonPadding", value: [6.0_f64, 4.0_f64, 6.0_f64, 4.0_f64], line: 26, position: 36 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_5: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "TabItemHeaderMarginButtonPadding",
+    numbers: &[6.0_f64, 0.0_f64, 4.0_f64],
+    records: &[
+        0, 19, 25, 42, 0, 1, 0, 1,
+        19, 13, 26, 36, 0, 2, 0, 2,
+    ],
+};
 
 /// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
 static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
@@ -42167,27 +42373,35 @@ static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_6: &[rt::ValueRow<f64>] = &[
     rt::ValueRow { key: "RadioButtonMinHeight", value: 24.0_f64, line: 28, position: 42 },
 ];
 
-/// The thicknesses of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_thickness_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_7: &[rt::ValueRow<[f64; 4]>] = &[
-    rt::ValueRow { key: "CheckBoxPadding", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 29, position: 38 },
-    rt::ValueRow { key: "RadioButtonPadding", value: [4.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 30, position: 41 },
-    rt::ValueRow { key: "ButtonSpinnerPadding", value: [6.0_f64, 0.0_f64, 6.0_f64, 0.0_f64], line: 31, position: 43 },
-    rt::ValueRow { key: "CommandBarButtonPadding", value: [6.0_f64, 2.0_f64, 6.0_f64, 2.0_f64], line: 32, position: 46 },
-    rt::ValueRow { key: "CommandBarToggleButtonPadding", value: [6.0_f64, 2.0_f64, 6.0_f64, 2.0_f64], line: 33, position: 52 },
-    rt::ValueRow { key: "CommandBarPadding", value: [2.0_f64, 0.0_f64, 2.0_f64, 0.0_f64], line: 34, position: 40 },
-];
+/// The thicknesses of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_thickness_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_7: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "CheckBoxPaddingRadioButtonPaddingButtonSpinnerPaddingCommandBarButtonPaddingCommandBarToggleButtonPaddingCommandBarPadding",
+    numbers: &[4.0_f64, 0.0_f64, 6.0_f64, 2.0_f64],
+    records: &[
+        0, 15, 29, 38, 0, 1, 1, 1,
+        15, 18, 30, 41, 0, 1, 1, 1,
+        33, 20, 31, 43, 2, 1, 2, 1,
+        53, 23, 32, 46, 2, 3, 2, 3,
+        76, 29, 33, 52, 2, 3, 2, 3,
+        105, 17, 34, 40, 3, 1, 3, 1,
+    ],
+};
 
-/// The numbers of a run of `DensityStyles/Compact.xaml`, added in order by `rt::add_double_resources` (#568).
-static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: &[rt::ValueRow<f64>] = &[
-    rt::ValueRow { key: "CalendarButtonMinWidth", value: 32.0_f64, line: 35, position: 44 },
-    rt::ValueRow { key: "CalendarButtonMinHeight", value: 32.0_f64, line: 36, position: 45 },
-    rt::ValueRow { key: "CommandBarButtonWidth", value: 52.0_f64, line: 37, position: 43 },
-    rt::ValueRow { key: "CommandBarButtonMinHeight", value: 32.0_f64, line: 38, position: 47 },
-    rt::ValueRow { key: "CommandBarButtonIsInOverflowMinHeight", value: 28.0_f64, line: 39, position: 59 },
-    rt::ValueRow { key: "CommandBarSeparatorMinHeight", value: 20.0_f64, line: 40, position: 50 },
-    rt::ValueRow { key: "CommandBarMinHeight", value: 40.0_f64, line: 41, position: 41 },
-    rt::ValueRow { key: "PipsPagerNavigationButtonSize", value: 20.0_f64, line: 42, position: 51 },
-];
+/// The numbers of a run of `DensityStyles/Compact.xaml`, packed, added in order by `rt::add_packed_double_resources` (#855).
+static BUILD_DENSITYSTYLES_COMPACT_XAML_ROWS_8: rt::PackedValueRows = rt::PackedValueRows {
+    strings: "CalendarButtonMinWidthCalendarButtonMinHeightCommandBarButtonWidthCommandBarButtonMinHeightCommandBarButtonIsInOverflowMinHeightCommandBarSeparatorMinHeightCommandBarMinHeightPipsPagerNavigationButtonSize",
+    numbers: &[32.0_f64, 52.0_f64, 28.0_f64, 20.0_f64, 40.0_f64],
+    records: &[
+        0, 22, 35, 44, 0,
+        22, 23, 36, 45, 0,
+        45, 21, 37, 43, 1,
+        66, 25, 38, 47, 0,
+        91, 37, 39, 59, 2,
+        128, 28, 40, 50, 3,
+        156, 19, 41, 41, 4,
+        175, 29, 42, 51, 3,
+    ],
+};
 
 /// The unit `ambient` of the theme (#568): its runs, in the order the builds apply them.
 pub static THEME_UNIT_0: rt::ThemeUnit = rt::ThemeUnit { name: "ambient", index: 0, runs: &[build_controls_fluentcontrols_xaml_unit_29, build_controls_fluentcontrols_xaml_unit_31, build_controls_fluentcontrols_xaml_unit_33, build_controls_fluentcontrols_xaml_unit_35] };
