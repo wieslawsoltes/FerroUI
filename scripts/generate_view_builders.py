@@ -19,7 +19,8 @@ the colour picker, the dialogs and the ReactiveUI controls. Their classes
 derive from the classes of FerroUI.Controls, so their elements also have the
 setters of their bases.
 
-Everything comes from the Rust sources, so a property ported later gets its
+Everything comes from the Rust sources (the walk is `ferroui_metadata.py`, which
+the API model of the bindings shares), so a property ported later gets its
 setter by running the script again:
 
     class and base       `ferro_class! { Name: Base, ... }`
@@ -29,6 +30,8 @@ setter by running the script again:
                          in the `impl` of the owner
     routed events        `pub fn x_event() -> RoutedEvent<Args>`
     paths of types       the `rust_paths.rs` of the two crates
+    pseudo-classes       `PC_X` constants, `PseudoClasses(..)`, `pseudo_classes().set(":x", ..)`,
+                         written to `generated/pseudo_classes.rs` as methods of a selector
 
 Two public types with the same simple name in one crate (the upstream
 `ferroui_controls::NavigationEventArgs` of the pages and WinUI's
@@ -54,25 +57,15 @@ import os
 import re
 import sys
 
-import rust_paths
+from ferroui_metadata import (  # noqa: F401 (the tests of the script use these names)
+    CRATES, EXTERNAL_TYPES, PRELUDE_TYPES, ROOT, RUST_KEYWORDS, SCOPED_PATHS, STD_TYPES, Model,
+    ancestors, class_path, generic_argument, ident, matching, owner_at, qualify_scoped_names, read,
+    read_classes, read_members, read_paths, resolve, rust_files, snake, split_top_level,
+    strip_comments,
+)
 
-ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 OUTPUT = os.path.join(ROOT, "src", "FerroUI.View", "generated", "builders.rs")
-
-# Public types whose simple name another public type of the crate has: the name the script's
-# model gives each (its builders' re-export is named after it). A source that declares or imports
-# the path names the type by this name; the generated signatures use the public path. The entry
-# has no effect while the path does not exist (`navigation` lands with Frame,
-# docs/porting/winui-controls.md).
-SCOPED_PATHS = {
-    "ferroui_controls::navigation::NavigationEventArgs": "FrameNavigationEventArgs",
-}
-
-# The crates whose classes get builders: (source directory, crate name in paths).
-CRATES = [
-    ("src/FerroUI.Base", "ferroui_base"),
-    ("src/FerroUI.Controls", "ferroui_controls"),
-]
+PSEUDO_CLASSES_OUTPUT = os.path.join(ROOT, "src", "FerroUI.View", "generated", "pseudo_classes.rs")
 
 # The other crates of controls: (feature of ferroui-view, output file, the
 # crates read for the group). Each file has the classes of its crates only;
@@ -109,25 +102,6 @@ GROUPS = [
     }),
 ]
 
-# Types every value type may name without a path.
-PRELUDE_TYPES = {
-    "bool", "char", "f32", "f64", "i8", "i16", "i32", "i64", "i128", "isize",
-    "u8", "u16", "u32", "u64", "u128", "usize", "str", "String", "Option", "Vec", "Box",
-}
-STD_TYPES = {
-    "Rc": "std::rc::Rc",
-    "Arc": "std::sync::Arc",
-    "Duration": "std::time::Duration",
-}
-
-# Types of the chosen crates of the workspace, and the Rust handles of markup types,
-# that a property can hold and that no `rust_paths.rs` lists (they have no markup type
-# of their own: `UriRef` is a handle of `System.Uri`), by the path FerroUI re-exports
-# them by (C5 of #423, docs/idiomatic-rust-signatures.md).
-EXTERNAL_TYPES = {
-    "Locale": "ferroui_base::utilities::Locale",
-    "UriRef": "ferroui_base::utilities::UriRef",
-}
 
 # Methods of the element that a generated setter must not hide; the element's
 # own method does what the property would (or the property is set with
@@ -138,254 +112,30 @@ ELEMENT_METHODS = {
     "content_element", "dyn_children", "items_dyn",
 }
 
-RUST_KEYWORDS = {
-    "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn", "for",
-    "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref", "return",
-    "self", "static", "struct", "super", "trait", "true", "type", "unsafe", "use", "where",
-    "while", "async", "await", "dyn", "abstract", "become", "box", "do", "final", "macro",
-    "override", "priv", "typeof", "unsized", "virtual", "yield", "try",
+# What the documentation of a setter says it takes, by the value type of the property: the short
+# typed forms first (docs/declarative-ui.md, section 4.3).
+SETTER_HINTS = {
+    "Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>":
+        "Takes a color (`rgb(0x1E293B)`, `Colors::RED`), a gradient (`linear_gradient(..)`), or color text.",
+    "ferroui_base::media::Color": "Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.",
+    "Option<ferroui_base::media::Color>": "Takes `rgb(0x1E293B)`, `argb(0x801E293B)` or `Colors::RED`.",
+    "ferroui_base::Thickness": "Takes `8.0`, `(8.0, 4.0)` or `(left, top, right, bottom)`.",
+    "ferroui_base::CornerRadius": "Takes `8.0`.",
+    "ferroui_controls::GridLength": "Takes `auto()`, `star(1.0)` or `px(40.0)`.",
+    "Option<ferroui_base::input::KeyGesture>": "Takes `ctrl(KeyCode::S)`, `ctrl(KeyCode::S).shift()` or a `KeyCode`.",
+    "Option<std::rc::Rc<dyn ferroui_base::media::ITransform>>":
+        "Takes `translate(x, y)`, `rotate(degrees)`, `scale(x, y)` or `skew(x, y)`, chained.",
+    "ferroui_base::media::BoxShadows": "Takes `shadow(x, y, blur, color)`, or an array of them.",
+    "Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>": "Takes `blur(radius)` or `drop_shadow(x, y, radius, color)`.",
+    "Option<ferroui_base::Ref<ferroui_base::media::Geometry>>":
+        "Takes `path!(\"M0 0L10 10z\")`, checked when compiled, or `path_data()`.",
 }
 
 
-def snake(name):
-    name = re.sub(r"([A-Z]+)([A-Z][a-z])", r"\1_\2", name)
-    name = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", name)
-    return name.lower()
-
-
-def ident(name):
-    return f"r#{name}" if name in RUST_KEYWORDS else name
-
-
-def read(path):
-    with open(path, encoding="utf-8") as f:
-        return f.read()
-
-
-def rust_files(directory):
-    for root, dirs, files in os.walk(directory):
-        dirs[:] = sorted(d for d in dirs if d not in ("tests", "target") and not d.endswith("_tests"))
-        for name in sorted(files):
-            if name.endswith(".rs") and not name.endswith("_tests.rs") and name != "tests.rs":
-                yield os.path.join(root, name)
-
-
-def strip_comments(text):
-    """Blanks out line comments (keeping offsets), so that patterns do not
-    match inside documentation."""
-    return re.sub(r"//[^\n]*", lambda m: " " * len(m.group(0)), text)
-
-
-def matching(text, start, open_char, close_char):
-    """The index of the character that closes the one at `start`."""
-    depth = 0
-    for index in range(start, len(text)):
-        char = text[index]
-        if char == open_char:
-            depth += 1
-        elif char == close_char:
-            depth -= 1
-            if depth == 0:
-                return index
-    return len(text)
-
-
-def split_top_level(text, separator=","):
-    parts, depth, current = [], 0, ""
-    for char in text:
-        if char in "<([{":
-            depth += 1
-        elif char in ">)]}":
-            depth -= 1
-        if char == separator and depth == 0:
-            parts.append(current.strip())
-            current = ""
-        else:
-            current += char
-    if current.strip():
-        parts.append(current.strip())
-    return parts
-
-
-def generic_argument(text, start):
-    """The text between the `<` at `start` and its `>`."""
-    end = matching(text, start, "<", ">")
-    return text[start + 1:end]
-
-
-class Model:
-    def __init__(self):
-        self.paths = {}            # type name -> public path ("ferroui_controls::Button")
-        self.ambiguous = set()
-        self.bases = {}            # class -> base class
-        self.crate_of = {}         # class -> crate
-        self.creatable = set()
-        self.properties = {}       # owner -> [(kind, snake, type, target, accessor)]
-        self.events = {}           # owner -> [(snake, args)]
-        self.left_out = []
-
-    def add_path(self, name, path):
-        if name in self.paths and self.paths[name] != path:
-            self.ambiguous.add(name)
-        self.paths[name] = path
-
-
-def read_paths(model, directory, crate):
-    text = read(os.path.join(ROOT, directory, "rust_paths.rs"))
-    for match in re.finditer(r"crate::([A-Za-z0-9_:]+)", text):
-        path = match.group(1)
-        if path.startswith("ferro_rust_paths"):
-            continue
-        name = path.split("::")[-1]
-        public_path = f"{crate}::{path}"
-        model.add_path(SCOPED_PATHS.get(public_path, name), public_path)
-
-
-def qualify_scoped_names(text, crate, relative_path):
-    """Keep same-name contracts separate using their declaration/import scope."""
-    module = relative_path.replace(os.sep, "/").removesuffix(".rs").split("/")
-    if module[-1] in ("lib", "mod"):
-        module.pop()
-    aliases = {}
-    for public_path, alias in SCOPED_PATHS.items():
-        segments = public_path.split("::")
-        if segments[:-1] == [crate] + module:
-            aliases[segments[-1]] = alias
-
-    for statement in rust_paths.top_level_statements(rust_paths.strip_comments(text)):
-        _, statement = rust_paths.split_attributes(statement)
-        imported = re.match(r"(?:pub(?:\([^)]*\))?\s+)?use\s+(.+);$", statement, re.S)
-        if not imported:
-            continue
-        for segments, local in rust_paths.parse_use_tree(imported.group(1)):
-            if not segments:
-                continue
-            if segments[0] == "crate":
-                segments = [crate] + segments[1:]
-            elif segments[0] in ("self", "super"):
-                current = [crate] + module
-                while segments and segments[0] in ("self", "super"):
-                    if segments.pop(0) == "super":
-                        current.pop()
-                segments = current + segments
-            imported_path = "::".join(segments)
-            if local == "*":
-                for public_path, alias in SCOPED_PATHS.items():
-                    if public_path.rsplit("::", 1)[0] == imported_path:
-                        aliases[public_path.rsplit("::", 1)[1]] = alias
-            elif imported_path in SCOPED_PATHS:
-                aliases[local] = SCOPED_PATHS[imported_path]
-
-    for public_path, alias in SCOPED_PATHS.items():
-        paths = [public_path]
-        if public_path.startswith(crate + "::"):
-            paths.append("crate::" + public_path[len(crate) + 2:])
-        for path in paths:
-            text = re.sub(r"\b" + re.escape(path) + r"\b", alias, text)
-    return re.sub(r"\b[A-Z]\w*\b", lambda match: aliases.get(match.group(0), match.group(0)), text)
-
-
-def read_classes(model, directory, crate):
-    for path in rust_files(os.path.join(ROOT, directory)):
-        text = strip_comments(read(path))
-        relative_path = os.path.relpath(path, os.path.join(ROOT, directory))
-        text = qualify_scoped_names(text, crate, relative_path)
-        for match in re.finditer(r"ferro_class!\s*[({]\s*([A-Z]\w*)\s*:\s*([A-Z]\w*)", text):
-            model.bases[match.group(1)] = match.group(2)
-            model.crate_of[match.group(1)] = crate
-        for match in re.finditer(r"ferro_class_info!\s*\(\s*([A-Z]\w*)\s*\{\s*new\s*:", text):
-            model.creatable.add(match.group(1))
-        read_members(model, text, crate, path)
-
-
-IMPL = re.compile(r"\bimpl\s+([A-Z]\w*)\s*(?:,\s*also\s*\[[^\]]*\]\s*)?\{")
-PROPERTY = re.compile(r"pub fn (\w+)_property\(\)\s*->\s*(StyledProperty|DirectProperty|AttachedProperty)\s*<")
-EVENT = re.compile(r"pub fn (\w+)_event\(\)\s*->\s*RoutedEvent\s*<")
-
-
-def owner_at(text, position):
-    """The class a declaration at `position` belongs to and the type whose
-    `impl` holds its accessor: the same class, but for
-    `ferro_property!(for X; ...)` in the `impl` of another type, which
-    registers the property on `X`."""
-    impls = [m for m in IMPL.finditer(text, 0, position)]
-    holder = impls[-1].group(1) if impls else None
-    start = text.rfind("ferro_property!(", 0, position)
-    if start != -1:
-        declared = re.match(r"ferro_property!\(\s*for\s+([A-Z]\w*)\s*;", text[start:position])
-        if declared:
-            return declared.group(1), holder
-    return holder, holder
-
-
-def read_members(model, text, crate, path):
-    for match in PROPERTY.finditer(text):
-        owner, holder = owner_at(text, match.start())
-        if owner is None or holder is None:
-            continue
-        kind = match.group(2)
-        arguments = generic_argument(text, match.end() - 1)
-        body_start = text.find("{", match.end())
-        body = text[body_start:matching(text, body_start, "{", "}") + 1]
-        value_type = arguments
-        if kind == "DirectProperty":
-            parts = split_top_level(arguments)
-            if len(parts) != 2:
-                continue
-            value_type = parts[1]
-            direct = re.search(r"register_direct(?:_with)?::<[^(]*>\s*\(", body)
-            if direct:
-                call = body[direct.end() - 1:matching(body, direct.end() - 1, "(", ")") + 1]
-                args = split_top_level(call[1:-1])
-                if len(args) >= 3 and args[2].strip() == "None":
-                    model.left_out.append(f"{owner}.{match.group(1)}: a direct property without a setter")
-                    continue
-        target = None
-        if kind == "AttachedProperty":
-            attached = re.search(r"register_attached(?:_with)?::<\s*(\w+)\s*,\s*(\w+)", body)
-            target = attached.group(2) if attached else "Control"
-        model.properties.setdefault(owner, []).append((kind, match.group(1), value_type, target, holder))
-    for match in EVENT.finditer(text):
-        owner, holder = owner_at(text, match.start())
-        if owner is None:
-            continue
-        args = generic_argument(text, match.end() - 1)
-        model.events.setdefault(owner, []).append((match.group(1), args))
-
-
-def resolve(model, type_text):
-    """The type with public paths, or None when a name has none."""
-    out, position = "", 0
-    for match in re.finditer(r"\b[A-Za-z_]\w*\b", type_text):
-        name = match.group(0)
-        out += type_text[position:match.start()]
-        position = match.end()
-        if name in PRELUDE_TYPES or name == "dyn":
-            out += name
-        elif name in STD_TYPES:
-            out += STD_TYPES[name]
-        elif name in EXTERNAL_TYPES:
-            out += EXTERNAL_TYPES[name]
-        elif name in model.paths and name not in model.ambiguous:
-            out += model.paths[name]
-        else:
-            return None
-    return out + type_text[position:]
-
-
-def ancestors(model, name):
-    chain = []
-    current = model.bases.get(name)
-    while current is not None:
-        chain.append(current)
-        current = model.bases.get(current)
-    return chain
-
-
-def class_path(model, name):
-    if name in model.paths and name not in model.ambiguous:
-        return model.paths[name]
-    return None
+def setter_hint(resolved):
+    """The line of the documentation of a setter about its typed forms, if it has some."""
+    hint = SETTER_HINTS.get(resolved)
+    return f"    ///\n    /// {hint}\n" if hint else ""
 
 
 def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", attached_trait="AttachedProps"):
@@ -459,6 +209,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
                 continue
             members.append(
                 f"    /// Sets [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"{setter_hint(resolved)}"
                 f"    fn {ident(prop)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )
@@ -499,6 +250,7 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
             method = f"{snake(owner)}_{prop}"
             attached.append(
                 f"    /// Sets the attached [`{holder}::{prop}_property`]({holder_path}::{prop}_property).\n"
+                f"{setter_hint(resolved)}"
                 f"    fn {ident(method)}<M>(self, value: impl IntoProp<{resolved}, M>) -> Self {{\n"
                 f"        self.prop(<{holder_path}>::{prop}_property(), value)\n    }}\n"
             )
@@ -510,6 +262,108 @@ def generate(model, crates=None, title="FerroUI.Base and FerroUI.Controls", atta
         lines.append("\n".join(attached) + "}")
         lines.append(f"impl<T: ObjectType> {attached_trait} for El<T> {{}}")
     lines.append("")
+    return "\n".join(lines)
+
+
+# The pseudo-classes whose text runs its words together: text -> method.
+PSEUDO_CLASS_WORDS = {
+    "badgeimage": "badge_image", "bottomcenter": "bottom_center", "bottomleft": "bottom_left",
+    "bottomright": "bottom_right", "btnfocused": "button_focused", "calendardisabled": "calendar_disabled",
+    "combobox": "combo_box", "compactinline": "compact_inline", "compactoverlay": "compact_overlay",
+    "dayfocused": "day_focused", "downspinbuttondisabled": "down_spin_button_disabled",
+    "dropdownopen": "drop_down_open", "firstcollapsed": "first_collapsed", "firstdisabled": "first_disabled",
+    "firsthidden": "first_hidden", "hasnodate": "has_no_date", "hasnotime": "has_no_time",
+    "hasweeknumbers": "has_week_numbers", "lastcollapsed": "last_collapsed", "lastdisabled": "last_disabled",
+    "lasthidden": "last_hidden", "nextcollapsed": "next_collapsed", "nextdisabled": "next_disabled",
+    "nexthidden": "next_hidden", "nophotoorinitials": "no_photo_or_initials", "numberbox": "number_box",
+    "numberpanel": "number_panel", "pointerover": "pointer_over",
+    "pointeroverplaceholder": "pointer_over_placeholder", "pointeroverset": "pointer_over_set",
+    "pointeroverunselected": "pointer_over_unselected", "previouscollapsed": "previous_collapsed",
+    "previousdisabled": "previous_disabled", "previoushidden": "previous_hidden", "singleitem": "single_item",
+    "spinbuttonspopup": "spin_buttons_popup", "spinbuttonsvisible": "spin_buttons_visible",
+    "topcenter": "top_center", "topleft": "top_left", "topright": "top_right",
+    "upspinbuttondisabled": "up_spin_button_disabled",
+}
+
+# The methods of `Selector`, which a method of a pseudo-class would not reach.
+SELECTOR_METHODS = {
+    "child", "class", "descendant", "is", "is_type", "is_type_info", "name", "nesting", "not", "not_with",
+    "nth_child", "nth_last_child", "of", "of_type", "of_type_info", "property_equals",
+    "property_equals_untyped", "target_type", "template", "with_class", "with_pseudo_class", "clone",
+}
+
+
+def read_pseudo_classes(directories):
+    """The pseudo-classes the classes of `directories` declare or set, with their colon."""
+    found = set()
+    for directory in directories:
+        for path in rust_files(os.path.join(ROOT, directory)):
+            text = strip_comments(read(path))
+            found.update(re.findall(r"""const\s+PC_\w+\s*:\s*&(?:'static\s+)?str\s*=\s*"(:[^"]+)\"""", text))
+            for declared in re.findall(r"PseudoClasses\(([^)]*)\)", text):
+                found.update(re.findall(r'"(:[^"]+)"', declared))
+            for declared in re.findall(r"PseudoClassesAttribute::new\(&\[([^\]]*)\]", text):
+                found.update(re.findall(r'"(:[^"]+)"', declared))
+            found.update(re.findall(r'pseudo_classes(?:\(\))?\s*\.\s*(?:set|add|add_pseudo)\(\s*"(:[^"]+)"', text))
+    return found
+
+
+def pseudo_class_method(pseudo_class):
+    """The method of a pseudo-class: `:focus-within` is `focus_within`."""
+    text = pseudo_class[1:]
+    if text in PSEUDO_CLASS_WORDS:
+        return PSEUDO_CLASS_WORDS[text]
+    return re.sub(r"(?<=[a-z0-9])([A-Z])", r"_\1", text).replace("-", "_").lower()
+
+
+def generate_pseudo_classes(pseudo_classes):
+    """The trait with a method per pseudo-class."""
+    methods = {}
+    for pseudo_class in sorted(pseudo_classes):
+        method = pseudo_class_method(pseudo_class)
+        if method in SELECTOR_METHODS:
+            raise SystemExit(f"{pseudo_class}: `{method}` is a method of Selector; add it to PSEUDO_CLASS_WORDS")
+        if method in methods:
+            raise SystemExit(f"{pseudo_class} and {methods[method]} both become `{method}`")
+        methods[method] = pseudo_class
+    lines = [
+        "// @generated by scripts/generate_view_builders.py — do not edit",
+        "//! The pseudo-classes that the classes of the framework declare, as methods of a",
+        "//! selector, so that a misspelled one does not compile. See",
+        "//! `scripts/generate_view_builders.py`.",
+        "",
+        "use ferroui_base::styling::Selector;",
+        "",
+        "/// A method per pseudo-class that a class of the framework declares:",
+        "/// `of::<Button>().pressed()` is the selector `Button:pressed`.",
+        "///",
+        "/// A method leaves other handles of the selector as they were, so one prefix can start",
+        "/// several selectors.",
+        "pub trait PseudoClassSelectors: Sized {",
+        "    /// Adds the pseudo-class `name`, with its colon.",
+        "    #[doc(hidden)]",
+        "    fn with_pseudo_class(self, name: &'static str) -> Selector;",
+    ]
+    for method, pseudo_class in sorted(methods.items()):
+        lines += [
+            "",
+            f"    /// The pseudo-class `{pseudo_class}`.",
+            "    #[inline]",
+            f"    fn {ident(method)}(self) -> Selector {{",
+            f'        self.with_pseudo_class("{pseudo_class}")',
+            "    }",
+        ]
+    lines += [
+        "}",
+        "",
+        "impl PseudoClassSelectors for Selector {",
+        "    #[inline]",
+        "    fn with_pseudo_class(self, name: &'static str) -> Selector {",
+        "        self.with_class(name)",
+        "    }",
+        "}",
+        "",
+    ]
     return "\n".join(lines)
 
 
@@ -542,6 +396,10 @@ def main():
         trait = "".join(part.capitalize() for part in feature.split("-")) + "AttachedProps"
         text = generate(group_model, crates, title, trait)
         outputs.append((os.path.join(os.path.dirname(OUTPUT), file_name), text, group_model))
+
+    directories = [directory for directory, _ in CRATES]
+    directories += [directory for _, _, group, _ in GROUPS for directory, _ in group]
+    outputs.append((PSEUDO_CLASSES_OUTPUT, generate_pseudo_classes(read_pseudo_classes(directories)), model))
 
     if options.report:
         lines = sorted({line for _, _, m in outputs for line in m.left_out})

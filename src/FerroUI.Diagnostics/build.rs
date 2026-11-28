@@ -71,7 +71,10 @@ fn main() {
         let has_class = text.contains("x:Class=");
         let group = XamlGroup::new(&module_name(path));
         let group = if includes { group.documents(&all) } else { group.documents(&[(*path, *text)]) };
-        let group = if has_class { group.class_document(path) } else { group };
+        // The crate constructs its classes itself (`DevTools` opens the main window, its view
+        // locator makes the pages): what their documents name roots the themes of every
+        // application that links the crate (#1002).
+        let group = if has_class { group.class_document(path).constructed_by_its_crate() } else { group };
         build = build.compile_group(group);
     }
     build.run();

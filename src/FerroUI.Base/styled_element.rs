@@ -148,6 +148,21 @@ crate::ferro_class_info!(StyledElement {
 });
 
 crate::ferro_overrides! { impl FerroObjectImpl for StyledElement {
+    // The handler leaves where the property is not one it named (`reacts_to`); the theme
+    // variant it only passes on to the listeners of the element.
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        if property == ThemeVariant::actual_theme_variant_property().as_property() {
+            crate::InheritedReaction::While(|object| {
+                // SAFETY: the question of the class is only asked for its objects
+                // (`InheritedReaction::While`), which have a `StyledElement` at offset zero.
+                let element = unsafe { crate::cast_this::<FerroObject, StyledElement>(object) };
+                !element.actual_theme_variant_changed.is_empty()
+            })
+        } else {
+            property.has_change_handler(PropertyChangeHandler::StyledElement).into()
+        }
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         if this.is_logical_root() {
@@ -820,8 +835,15 @@ impl StyledElement {
     ///
     /// You should not usually need to call this method: it is called when an
     /// element is added to or removed from a logical children collection.
+    #[inline]
     pub fn set_parent(&self, parent: impl Into<Nullable<StyledElement>>) {
-        let parent = parent.into().0;
+        self.set_parent_core(parent.into().0);
+    }
+
+    // One body for every argument type of `set_parent`, compiled in this crate. A copy per argument
+    // type, made in the crate that calls it, can lose the inlined thread-local access of
+    // `ResourcesChangedEventArgs::create`, which this path runs for every child added to a parent.
+    fn set_parent_core(&self, parent: Option<Ref<StyledElement>>) {
         let old = self.parent();
         if parent == old {
             return;
@@ -1046,7 +1068,12 @@ impl StyledElement {
             self.apply_control_theme_core(&based_on, type_)?;
         }
 
-        theme.try_attach_checked(self, type_)?;
+        // The setters of a theme are for the control it is applied to. An element of its template
+        // takes the nested styles only: when the target type is a base class of that element,
+        // the setters (a `Template` above all) would replace the element's own theme.
+        if type_ == FrameType::Theme {
+            theme.try_attach_checked(self, type_)?;
+        }
 
         if theme.has_children() {
             match theme.candidates(self) {

@@ -27,7 +27,7 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::task::{Poll, Waker};
-use zbus::zvariant::{ObjectPath, OwnedObjectPath, Structure, Value};
+use zbus::{ObjectPath, OwnedObjectPath, Structure, Variant};
 
 const IBUS_NAME: &str = "org.freedesktop.portal.IBus";
 const IBUS_CONTEXT_PATH: &str = "/org/freedesktop/IBus/InputContext_1";
@@ -40,13 +40,13 @@ const FCITX5_CONTEXT_PATH: &str = "/org/freedesktop/portal/inputcontext/3";
 const KEY_A: u32 = 0x61;
 const KEY_FAILS: u32 = 0x7a;
 
-fn ibus_text(text: &str) -> Value<'static> {
-    let attachments: HashMap<String, Value<'static>> = HashMap::new();
-    Value::Structure(Structure::from((
+fn ibus_text(text: &str) -> Variant<'static> {
+    let attachments: HashMap<String, Variant<'static>> = HashMap::new();
+    Variant::Structure(Structure::from((
         "IBusText".to_string(),
         attachments,
         text.to_string(),
-        Value::from(0u32),
+        Variant::from(0u32),
     )))
 }
 
@@ -348,12 +348,12 @@ impl TestBus {
             let calls = ibus_calls.clone();
             move |builder: ServiceBuilder| {
                 builder
-                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone(), calls: calls.clone() })?
-                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone(), calls })?
-                    .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })?
-                    .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })?
-                    .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })?
-                    .serve_at("/inputmethod", Fcitx5Method { log: log.clone() })?
+                    .serve_at("/org/freedesktop/IBus", IBusPortal { log: log.clone(), calls: calls.clone() })
+                    .serve_at(IBUS_CONTEXT_PATH, IBusContext { log: log.clone(), calls })
+                    .serve_at(IBUS_CONTEXT_PATH, IBusService { log: log.clone() })
+                    .serve_at("/inputmethod", Fcitx4Method { log: log.clone() })
+                    .serve_at(FCITX4_CONTEXT_PATH, Fcitx4Context { log: log.clone() })
+                    .serve_at("/inputmethod", Fcitx5Method { log: log.clone() })
                     .serve_at(FCITX5_CONTEXT_PATH, Fcitx5Context { log: log.clone() })
             }
         };

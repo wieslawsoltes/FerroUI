@@ -52,6 +52,8 @@ static FERRO_OBJECT_IDENTITY: TypeIdentity = TypeIdentity::new("FerroObject");
 
 static FERRO_OBJECT_TYPE: TypeInfo = TypeInfo::new("FerroObject", None)
     .with_identity(&FERRO_OBJECT_IDENTITY)
+    // The handlers of the root class do nothing of their own with a change.
+    .with_change_handler_layer(crate::type_system::ChangeHandlerLayer::Absent)
     .with_module_path(module_path!())
     .with_class_init(<FerroObject as ObjectType>::register_class)
     .with_handles(|| [std::any::TypeId::of::<Ref<FerroObject>>(), std::any::TypeId::of::<Option<Ref<FerroObject>>>()])
@@ -112,6 +114,11 @@ pub trait FerroObjectImpl: ObjectType {
     /// table of the class is built from it.
     #[doc(hidden)]
     const __OVERRIDES: Option<&'static [&'static str]> = None;
+
+    /// What the change handlers of this implementation react to among inherited values, where
+    /// it states it. Set by [`ferro_overrides!`](crate::ferro_overrides), never by hand.
+    #[doc(hidden)]
+    const __INHERITED_REACTIONS: Option<crate::InheritedReactions> = None;
 
     /// Called once, right after the object has been allocated. This is where
     /// constructor logic that needs a reference to the object runs. Overrides
@@ -543,7 +550,7 @@ impl FerroObject {
 
     /// Gets a property value.
     #[inline]
-    pub fn get_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> T {
+    pub fn get_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) -> T {
         self.values.get_value(self, property)
     }
 
@@ -551,7 +558,7 @@ impl FerroObject {
     /// may read other properties, but must not change this property's effective
     /// value while it is borrowed. Returning a reference to the value is not
     /// permitted by the callback's lifetime.
-    pub fn with_value<T: PropertyValue, R>(
+    pub fn with_value<T: crate::StyledValue, R>(
         &self,
         property: &'static StyledProperty<T>,
         read: impl FnOnce(&T) -> R,
@@ -561,7 +568,7 @@ impl FerroObject {
 
     /// Gets a property's base value: the value excluding animated values.
     /// Returns `None` if the value comes from inheritance or the default.
-    pub fn get_base_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
+    pub fn get_base_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>) -> Option<T> {
         self.values.get_base_value(property)
     }
 
@@ -586,7 +593,7 @@ impl FerroObject {
 
     /// Sets a property value with local value priority.
     #[inline]
-    pub fn set_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>, value: T) {
         match value_marker(&value) {
             Some(ValueMarker::Unset) => self.clear_value(property),
             Some(ValueMarker::DoNothing) => {}
@@ -598,7 +605,7 @@ impl FerroObject {
 
     /// Sets a property value with the given priority. For priorities other
     /// than local value, disposing the returned handle removes the value.
-    pub fn set_value_with_priority<T: PropertyValue>(
+    pub fn set_value_with_priority<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         value: T,
@@ -624,7 +631,7 @@ impl FerroObject {
     /// use of the property: the effective value changes, but existing
     /// bindings and styles continue to work. The new value has the
     /// property's current priority.
-    pub fn set_current_value<T: PropertyValue>(&self, property: &'static StyledProperty<T>, value: T) {
+    pub fn set_current_value<T: crate::StyledValue>(&self, property: &'static StyledProperty<T>, value: T) {
         match value_marker(&value) {
             Some(ValueMarker::Unset) => self.clear_value(property),
             Some(ValueMarker::DoNothing) => {}
@@ -705,7 +712,7 @@ impl FerroObject {
     }
 
     /// Binds a property to an observable.
-    pub fn bind<T: PropertyValue>(
+    pub fn bind<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         source: Rc<dyn IObservable<T>>,
@@ -718,7 +725,7 @@ impl FerroObject {
     }
 
     /// Binds a property to an observable of binding values.
-    pub fn bind_value<T: PropertyValue>(
+    pub fn bind_value<T: crate::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         source: Rc<dyn IObservable<BindingValue<T>>>,
@@ -774,18 +781,22 @@ impl FerroObject {
     ) {
         let state = value.value_type();
         let error = value.error().cloned();
-        match state {
-            BindingValueType::UNSET_VALUE | BindingValueType::BINDING_ERROR => {
-                let fallback =
-                    if value.has_value() { value } else { value.with_value(property.get_unset_value_for(self)) };
-                property.invoke_setter(self, fallback);
+        // The value the setter is called with: one call of the setter for every state that sets.
+        let value = match state {
+            BindingValueType::UNSET_VALUE | BindingValueType::BINDING_ERROR if !value.has_value() => {
+                Some(value.with_value(property.get_unset_value_for(self)))
             }
-            BindingValueType::VALUE
+            BindingValueType::UNSET_VALUE
+            | BindingValueType::BINDING_ERROR
+            | BindingValueType::VALUE
             | BindingValueType::BINDING_ERROR_WITH_FALLBACK
             | BindingValueType::DATA_VALIDATION_ERROR
-            | BindingValueType::DATA_VALIDATION_ERROR_WITH_FALLBACK => property.invoke_setter(self, value),
+            | BindingValueType::DATA_VALIDATION_ERROR_WITH_FALLBACK => Some(value),
             // Do nothing, and the flag combinations that no binding value has.
-            _ => {}
+            _ => None,
+        };
+        if let Some(value) = value {
+            property.invoke_setter(self, value);
         }
         if property.get_metadata_for(self).enable_data_validation() == Some(true) {
             self.on_update_data_validation(property, state, error);
@@ -827,7 +838,9 @@ impl FerroObject {
         property: &'static DirectPropertyBase<T>,
     ) -> &'static DirectPropertyBase<T> {
         let property = FerroPropertyRegistry::instance().get_registered_direct_for(self, property);
-        assert!(!property.is_read_only(), "The property {} is readonly.", property.name());
+        if property.is_read_only() {
+            crate::direct_property::read_only(property);
+        }
         property
     }
 
@@ -867,19 +880,52 @@ impl FerroObject {
     // --- untyped access ---------------------------------------------------
 
     /// Gets a property value as an untyped value.
+    #[inline]
     pub fn get_value_untyped(&self, property: &'static FerroProperty) -> BoxedValue {
-        property.routes().route_get_value(self)
+        // A styled property is read by its codec directly: one call, as the typed route of its
+        // value type was (#997).
+        match property.styled_codec_if_any() {
+            Some(codec) => codec.get_value_boxed(self),
+            None => property.routes().route_get_value(self),
+        }
     }
 
     /// Sets a property from an untyped value, which must hold exactly the
     /// property's value type or the unset marker.
+    #[inline]
     pub fn set_value_untyped(
         &self,
         property: &'static FerroProperty,
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        property.routes().route_set_value(self, value, priority)
+        // A styled property is written by its codec directly: one call, as the typed route of its
+        // value type was (#997).
+        match property.styled_codec_if_any() {
+            Some(codec) => codec.set_value(self, value, priority),
+            None => property.routes().route_set_value(self, value, priority),
+        }
+    }
+
+    /// Sets a property whose value type is `T` with local value priority, from the value
+    /// itself: a styled (or attached) property takes it as [`set_value`](Self::set_value)
+    /// does, a direct property as [`set_direct_value`](Self::set_direct_value), with no
+    /// untyped value and no copy of it. The value is given back when `T` is not the value type
+    /// of the property; [`set_value_untyped`](Self::set_value_untyped) converts it then.
+    ///
+    /// Inlined into its caller: the declarative layer has one call for a value type and runs it
+    /// for every value it writes, and a call of its own costs more than the choice it makes.
+    #[inline(always)]
+    pub fn try_set_value_typed<T: crate::StyledValue>(&self, property: &'static FerroProperty, value: T) -> Result<(), T> {
+        if let Some(styled) = property.as_styled::<T>() {
+            self.set_value(styled, value);
+            Ok(())
+        } else if let Some(direct) = property.as_direct::<T>() {
+            self.set_direct_value(direct, value);
+            Ok(())
+        } else {
+            Err(value)
+        }
     }
 
     /// [`set_current_value`](Self::set_current_value) with an untyped value.
@@ -965,6 +1011,15 @@ impl FerroObject {
         self.notify_property_changed(&e);
     }
 
+    /// Whether a change of the inherited `property` that reaches this object from an ancestor
+    /// is heard here: by a listener of the object, by a handler of the property for its class
+    /// or by a change handler of its class. Where it is not, the change is not raised on the
+    /// object (FerroUI deviation, desktop-performance.md section 9.101).
+    #[inline]
+    pub(crate) fn hears_inherited(&self, property: &'static FerroProperty) -> bool {
+        property.changed().hears_inherited(self, property) || !self.property_changed.is_empty()
+    }
+
     pub(crate) fn raise_inherited_property_changed(
         &self,
         property: &'static FerroProperty,
@@ -1004,7 +1059,7 @@ impl FerroObject {
         self.raise_property_changed(property, Some(old_value), new_value, BindingPriority::LocalValue, true);
     }
 
-    fn validate_priority(priority: BindingPriority) {
+    pub(crate) fn validate_priority(priority: BindingPriority) {
         if priority < BindingPriority::Animation || priority >= BindingPriority::Inherited {
             panic!("Invalid priority {priority:?}");
         }

@@ -243,6 +243,12 @@ impl FerroObjectImpl for TextBox {
             if property == Self::password_char_property().as_property() {
                 this.update_password_input_privacy();
                 ferroui_base::input::text_input::TextInputMethodClient::request_reset(&*this.im_client);
+                // What the input method holds was the real text, or is now out of date.
+                if change.get_old_value::<char>().is_some_and(|old| old != '\0') != (this.password_char() != '\0') {
+                    ferroui_base::input::text_input::TextInputMethodClient::raise_surrounding_text_changed(
+                        &*this.im_client,
+                    );
+                }
             }
             this.update_command_states();
         } else if property == Self::caret_index_property().as_property() {
@@ -1055,7 +1061,9 @@ impl InputElementImpl for TextBox {
             }
         } else if e.initial_press_mouse_button() == MouseButton::Left {
             let selection = this.get_selection_range();
-            if !this.is_password_box()
+            // Deviation (DEVIATIONS.md, Input): any process can read the primary selection, and
+            // selecting is no request to copy, so a revealed password is not published either.
+            if this.password_char() == '\0'
                 && selection.0 != selection.1
                 && selection != this.selection_at_pointer_press.get()
             {
@@ -1546,6 +1554,7 @@ impl TextBox {
     );
 
     fn static_constructor() {
+        crate::visual_state::state_mappers::register::<TextBox>(crate::visual_state::state_mappers::text_box);
         InputElement::focusable_property().override_default_value::<TextBox>(true);
         // Not ported: the `Auto` default of `PlatformFeedback.FeedbackType` (waits for `PlatformFeedback`).
         InputElement::text_input_method_client_requested_event().add_class_handler::<TextBox>(|tb, e| {
@@ -2374,7 +2383,8 @@ impl TextBox {
     pub fn cut(&self) {
         let text = self.get_selection();
 
-        if text.is_empty() {
+        // Deviation (DEVIATIONS.md, Input): upstream checks `CanCut` only in its key handler.
+        if text.is_empty() || self.is_password_box() {
             return;
         }
 
@@ -2415,7 +2425,8 @@ impl TextBox {
     pub fn copy(&self) {
         let text = self.get_selection();
 
-        if text.is_empty() {
+        // Deviation (DEVIATIONS.md, Input): upstream checks `CanCopy` only in its key handler.
+        if text.is_empty() || self.is_password_box() {
             return;
         }
 

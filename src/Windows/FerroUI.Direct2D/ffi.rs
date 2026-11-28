@@ -46,6 +46,7 @@ extern "C" {
         feature_starts: *const u32,
         feature_ends: *const u32,
         features: usize,
+        owner_analysis: Ptr,
         info: Ptr,
         emit: extern "C" fn(Ptr, Glyph),
     ) -> i32;
@@ -84,13 +85,21 @@ extern "C" {
         -> Ptr;
     pub fn d2_font_family_faces(family: *const i8) -> Ptr;
     pub fn d2_path_intercepts(path: Ptr, lower: f64, upper: f64) -> Ptr;
-    pub fn d2_font_data(data: *const u8, n: usize) -> Ptr;
+    /// A font over bytes it does not copy. `release` is called with `context` when the font is
+    /// done with them, and also when this fails.
+    pub fn d2_font_data(
+        data: *const u8,
+        n: usize,
+        context: *mut std::ffi::c_void,
+        release: extern "C" fn(*mut std::ffi::c_void),
+    ) -> Ptr;
     pub fn d2_font_name(font: Ptr, out: *mut u8, n: usize);
     pub fn d2_font_table(font: Ptr, tag: u32) -> Ptr;
     pub fn d2_font_names() -> Ptr;
     pub fn d2_font_match(font: Ptr, text: *const u16, n: usize, locale: *const i8) -> Ptr;
     pub fn d2_data_len(data: Ptr) -> usize;
     pub fn d2_data_bytes(data: Ptr) -> *const u8;
+    pub fn d2_analyze_shape_owner(text: *const u16, n: usize, language: *const i8, rtl: i32) -> Ptr;
     pub fn d2_shape(
         font: Ptr,
         text: *const u16,
@@ -105,6 +114,7 @@ extern "C" {
         feature_starts: *const u32,
         feature_ends: *const u32,
         features: usize,
+        owner_analysis: Ptr,
         info: Ptr,
         emit: extern "C" fn(Ptr, Glyph),
     ) -> i32;

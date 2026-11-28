@@ -323,3 +323,69 @@ fn a_shape_with_a_geometry_of_its_own_does_not_take_the_update_of_its_base_class
     assert_eq!(second.cast::<RectangleGeometry>().expect("a rectangle").rect(), Rect::new(5.0, 5.0, 130.0, 30.0));
 }
 
+
+/// #805: an arc or a sector whose angle changes, or that is resized, writes the stream geometry
+/// it has again; a full turn is an ellipse, and a change between the two makes another geometry.
+#[test]
+fn an_arc_or_a_sector_whose_angle_changes_keeps_its_stream_geometry() {
+    use super::{Arc as ArcShape, Sector};
+    use ferroui_base::media::{EllipseGeometry, StreamGeometry};
+    use ferroui_base::Size;
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+    let arranged = |shape: &Shape, size: Size| {
+        shape.measure(Size::INFINITY);
+        shape.arrange(Rect::from_size(size));
+    };
+
+    let arc = ArcShape::new();
+    arc.set_start_angle(-90.0);
+    arc.set_sweep_angle(90.0);
+    let sector = Sector::new();
+    sector.set_start_angle(-90.0);
+    sector.set_sweep_angle(90.0);
+    let shapes: [(&str, Ref<Shape>, fn(&Ref<Shape>, f64)); 2] = [
+        ("arc", arc.upcast(), |shape, sweep| shape.cast::<ArcShape>().expect("an arc").set_sweep_angle(sweep)),
+        ("sector", sector.upcast(), |shape, sweep| shape.cast::<Sector>().expect("a sector").set_sweep_angle(sweep)),
+    ];
+
+    for (name, shape, set_sweep) in shapes {
+        arranged(&shape, Size::new(40.0, 40.0));
+        let geometry = shape.defining_geometry().expect("a geometry");
+        assert!(geometry.cast::<StreamGeometry>().is_some(), "{name}: a stream geometry");
+        let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+        let counted = changes.clone();
+        geometry.changed(move || counted.set(counted.get() + 1)).detach();
+        let quarter = geometry.bounds();
+
+        // Another angle: the same geometry, written again.
+        set_sweep(&shape, 180.0);
+        assert!(!shape.is_measure_valid(), "{name}: measured again");
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: the same geometry");
+        assert!(changes.get() >= 1, "{name}: the geometry says it changed");
+        assert_ne!(kept.bounds(), quarter, "{name}: the figure of the new angle");
+
+        // Another size.
+        let half = kept.bounds();
+        arranged(&shape, Size::new(80.0, 80.0));
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: kept when resized");
+        assert_ne!(kept.bounds(), half, "{name}: the figure of the new size");
+
+        // No sweep: an empty figure in the same geometry.
+        set_sweep(&shape, 0.0);
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&geometry), "{name}: kept without a sweep");
+
+        // A full turn is an ellipse: another geometry, which is kept in turn.
+        set_sweep(&shape, 360.0);
+        let full = shape.defining_geometry().expect("a geometry");
+        assert!(!full.ptr_eq(&geometry), "{name}: a full turn is another geometry");
+        assert!(full.cast::<EllipseGeometry>().is_some(), "{name}: an ellipse");
+        arranged(&shape, Size::new(60.0, 60.0));
+        let kept = shape.defining_geometry().expect("a geometry");
+        assert!(kept.ptr_eq(&full), "{name}: the ellipse is kept when resized");
+    }
+}

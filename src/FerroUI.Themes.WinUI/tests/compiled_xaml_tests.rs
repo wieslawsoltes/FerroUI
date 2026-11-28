@@ -118,8 +118,13 @@ fn the_whole_theme_applies_every_unit() {
     let names: Vec<&str> = graph.units.iter().map(|unit| unit.name.as_str()).collect();
     assert_eq!(names, units.iter().map(|unit| unit.name).collect::<Vec<_>>());
     let ambient = &graph.units[0];
-    for host in ["Controls/Window.xaml", "Controls/PopupRoot.xaml", "Controls/OverlayPopupHost.xaml", "Controls/AdornerLayer.xaml"] {
+    for host in ["Controls/Window.xaml", "Controls/AdornerLayer.xaml"] {
         assert!(ambient.documents.iter().any(|document| document == host), "{host} is ambient: {:?}", ambient.documents);
+    }
+    // The hosts of popups are units of their own, kept where a popup is live (#994).
+    for (host, type_key) in [("Controls/PopupRoot.xaml", "PopupRoot"), ("Controls/OverlayPopupHost.xaml", "OverlayPopupHost")] {
+        let unit = graph.units.iter().find(|unit| unit.name == host).unwrap_or_else(|| panic!("a unit of {host}"));
+        assert_eq!(unit.type_keys, [type_key], "{unit:?}");
     }
     let button = graph.units.iter().find(|unit| unit.name == "Controls/Button.xaml").expect("a unit of the button");
     assert!(button.type_keys.iter().any(|type_key| type_key == "Button"), "{button:?}");

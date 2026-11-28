@@ -489,3 +489,105 @@ fn an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it() 
     assert_eq!((subscriber_count(&level), children(&panel).len()), (0, 0));
     owner.dispose();
 }
+
+#[test]
+fn an_element_mounted_once_keeps_only_what_its_values_started() {
+    use crate::{mounted_trees, InstanceKind, InstanceNode};
+    let owner = Owner::new_root();
+    let (level, wall) = owner.with(|| {
+        let level = signal(1.0_f64);
+        let wall = stack_panel()
+            .children(
+                (0..10)
+                    .map(|i| {
+                        let text = text_block().text(format!("tile {i}")).opacity(level);
+                        border().width(8.0).height(4.0).child(text)
+                    })
+                    .collect::<Vec<_>>(),
+            )
+            .into_element()
+            .mount();
+        (level, wall)
+    });
+    // Ten borders of two values and ten texts of a value and one that follows `level`: the
+    // thirty plain values are listed, none of them kept.
+    assert_eq!(crate::mount::kept_descriptions(), (0, 40));
+    level.set(0.5);
+    let text = |row: &Ref<Control>| row.cast::<Border>().and_then(|border| border.child()).expect("a text");
+    assert!(children(&wall).iter().all(|row| text(row).opacity() == 0.5));
+
+    // The inspector reads the values from the controls.
+    fn find<'a>(node: &'a InstanceNode, test: &dyn Fn(&InstanceNode) -> bool) -> Option<&'a InstanceNode> {
+        if test(node) {
+            return Some(node);
+        }
+        node.children.iter().find_map(|child| find(child, test))
+    }
+    let trees = mounted_trees();
+    let block = trees
+        .iter()
+        .flat_map(|tree| tree.roots.iter())
+        .find_map(|root| {
+            find(root, &|node| matches!(&node.kind, InstanceKind::Control { class, .. } if class == "TextBlock"))
+        })
+        .expect("a text");
+    let InstanceKind::Control { properties, .. } = &block.kind else { unreachable!() };
+    let shown: Vec<(&str, &str, &str)> =
+        properties.iter().map(|p| (p.name.as_str(), p.value.as_str(), p.source)).collect();
+    assert_eq!(shown, vec![("Text", "\"tile 0\"", "value"), ("Opacity", "0.5", "follows state")]);
+    owner.dispose();
+    assert_eq!(crate::mount::kept_descriptions(), (0, 0));
+
+    // What a component that runs again rendered keeps its description for the next run, and a
+    // patch compares with it.
+    let owner = Owner::new_root();
+    let width = owner.with(|| {
+        let width = signal(8.0_f64);
+        let _ = rerender(move || border().width(width.get()).height(4.0)).into_element().mount();
+        width
+    });
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    width.set(10.0);
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    owner.dispose();
+}
+
+#[test]
+fn the_items_of_a_dynamic_list_are_patched_only_where_the_list_is() {
+    let owner = Owner::new_root();
+    let (shown, panel) = owner.with(|| {
+        let shown = signal(vec![1, 2]);
+        let panel = stack_panel()
+            .child(for_each(move || shown.get(), |id| *id, |id| text_block().key(id).text(format!("row {id}"))))
+            .into_element()
+            .mount();
+        (shown, panel)
+    });
+    // A list mounted once is never given a new closure: its items are made and taken out, never
+    // patched, and keep no description.
+    assert_eq!(crate::mount::kept_descriptions(), (0, 2));
+    shown.set(vec![2, 3]);
+    assert_eq!(texts(&panel), vec![String::from("row 2"), String::from("row 3")]);
+    assert_eq!(crate::mount::kept_descriptions(), (0, 2));
+    owner.dispose();
+
+    // In a component that runs again the list is given a new closure on each run, and its items
+    // are patched.
+    let owner = Owner::new_root();
+    let (version, panel) = owner.with(|| {
+        let version = signal(0);
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let version = version.get();
+                let row = move |id: i32| text_block().key(id).text(format!("row {id} at {version}"));
+                for_each(move || vec![1, 2], |id| *id, row)
+            }))
+            .into_element()
+            .mount();
+        (version, panel)
+    });
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    version.set(1);
+    assert_eq!(texts(&panel), vec![String::from("row 1 at 1"), String::from("row 2 at 1")]);
+    owner.dispose();
+}

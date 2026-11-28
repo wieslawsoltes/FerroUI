@@ -3,10 +3,7 @@
 
 use super::unsafe_native_methods::poll_two;
 use crate::server::wayland_worker::WaylandWorkerState;
-use crate::ferro_wayland_exception::{
-    FerroWaylandError, FerroWaylandFlushException, FerroWaylandPollException, FerroWaylandProtocolErrorException,
-    FerroWaylandReadException,
-};
+use crate::ferro_wayland_exception::FerroWaylandError;
 use std::ffi::c_void;
 use std::io;
 use std::os::fd::{BorrowedFd, FromRawFd, OwnedFd};
@@ -172,20 +169,20 @@ impl WaylandConnection {
     fn dispatch_error(error: &DispatchError) -> FerroWaylandError {
         match error {
             DispatchError::Backend(WaylandError::Protocol(protocol)) => {
-                FerroWaylandProtocolErrorException::with_code(protocol.code, protocol.to_string())
+                FerroWaylandError::protocol_error_with_code(protocol.code, protocol.to_string())
             }
-            other => FerroWaylandReadException::new(other.to_string()),
+            other => FerroWaylandError::read(other.to_string()),
         }
     }
 
     fn flush_error(error: WaylandError) -> FerroWaylandError {
         match error {
             WaylandError::Io(error) => match error.raw_os_error() {
-                Some(errno) => FerroWaylandFlushException::from_errno(errno),
-                None => FerroWaylandFlushException::new(format!("wl_display_flush failed: {error}")),
+                Some(errno) => FerroWaylandError::flush_errno(errno),
+                None => FerroWaylandError::flush(format!("wl_display_flush failed: {error}")),
             },
             WaylandError::Protocol(protocol) => {
-                FerroWaylandProtocolErrorException::with_code(protocol.code, protocol.to_string())
+                FerroWaylandError::protocol_error_with_code(protocol.code, protocol.to_string())
             }
         }
     }
@@ -243,7 +240,7 @@ impl WaylandConnection {
                 // Release the display read lock
                 drop(read_guard);
                 // This is quite likely a non-recoverable error
-                return Err(FerroWaylandPollException::new());
+                return Err(FerroWaylandError::poll());
             }
         };
 
@@ -263,12 +260,12 @@ impl WaylandConnection {
             }
             Err(WaylandError::Io(error)) => {
                 return Err(match error.raw_os_error() {
-                    Some(errno) => FerroWaylandReadException::from_errno(errno),
-                    None => FerroWaylandReadException::new(format!("wl_display_read_events failed: {error}")),
+                    Some(errno) => FerroWaylandError::read_errno(errno),
+                    None => FerroWaylandError::read(format!("wl_display_read_events failed: {error}")),
                 });
             }
             Err(WaylandError::Protocol(protocol)) => {
-                return Err(FerroWaylandProtocolErrorException::with_code(protocol.code, protocol.to_string()));
+                return Err(FerroWaylandError::protocol_error_with_code(protocol.code, protocol.to_string()));
             }
         }
 

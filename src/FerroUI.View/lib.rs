@@ -28,6 +28,25 @@
 //! - With the feature `desktop`: [`launch`] runs an application whose main
 //!   window is an element.
 //!
+//! # Typed forms first
+//!
+//! What has a text form in XAML also has a typed one here, which the compiler checks and which
+//! links no parser. Text stays the form for a value that comes from data at run time.
+//!
+//! | What | Typed | Text |
+//! |---|---|---|
+//! | Selector | `style(of::<Button>().class("a").pressed())` | `style("Button.a:pressed")` |
+//! | Grid | `row_definitions([auto(), star(1.0), px(40.0)])` | `row_definitions("Auto,*,40")` |
+//! | Path | `path!("M0 0L10 10z")`, `path_data().move_to(..)` | `Geometry::parse(..)` |
+//! | Gesture | `ctrl(KeyCode::S).shift()` | `KeyGesture::parse("Ctrl+Shift+S")` |
+//! | Transform | `translate(1.0, 2.0).rotate(45.0)` | `TransformOperations::parse(..)` |
+//! | Shadow, effect | `shadow(0.0, 2.0, 4.0, color)`, `blur(5.0)` | `BoxShadows::parse(..)`, `Effect::parse(..)` |
+//! | Brush | `rgb(0x1E293B)`, `linear_gradient(..)` | `"#1E293B"` |
+//! | Binding | `Person::NAME.two_way()` (`#[derive(ViewModel)]`) | `Binding` with a path |
+//! | Route | `#[derive(Route)]`, `navigate_to(&route)` | `route("/people/:id", ..)` |
+//! | Resource | `.dynamic_resource(property, keys::Name)` | the same with `"Name"` |
+//! | Theme | `control_theme::<T>()`, `resource_dictionary()` | XAML |
+//!
 //! ```ignore
 //! use ferroui_view::prelude::*;
 //!
@@ -57,13 +76,18 @@ mod extras;
 pub mod hooks;
 pub mod hot;
 pub mod inspect;
+mod model_binding;
 mod mount;
+mod path_data;
 pub mod reactive;
 mod register_types;
+mod resources;
 pub mod router;
 mod rust_paths;
 mod style;
 mod template;
+mod theme;
+mod values;
 pub mod xaml;
 
 #[cfg(feature = "desktop")]
@@ -78,6 +102,7 @@ pub mod generated {
     pub mod dialogs;
     #[cfg(feature = "inking")]
     pub mod inking;
+    pub mod pseudo_classes;
     #[cfg(feature = "reactiveui")]
     pub mod reactiveui;
     #[cfg(feature = "repeater")]
@@ -93,25 +118,46 @@ pub use element::{rerender, ComponentElement, Element, IntoChild, IntoChildren, 
 pub use component_host::{register_component, ComponentHost, View};
 pub use hooks::{
     use_data_context, use_data_context_value, use_effect, use_effect_with, use_hook, use_memo, use_parent_control,
-    use_parent_property, use_resource, use_resource_as, use_signal, use_theme_variant,
+    use_parent_property, use_resource, use_resource_as, use_signal, use_theme_resource, use_theme_variant,
 };
 pub use animation::{
     animation, ms, transition, transition_eased, transitions, use_animation, AnimationBuilder, KeyFrameBuilder,
     Transitionable,
 };
-pub use style::{parse_selector, style, style_of, StyleBuilder};
+pub use ferroui_base::styling::{Selector, Selectors};
+pub use generated::pseudo_classes::PseudoClassSelectors;
+pub use ferroui_base::controls::ThemeResourceKey;
+pub use resources::{ResourceKeyFor, ResourceValueConverter};
+pub use style::{
+    any, any_of, is_type, nesting, of, parse_selector, style, style_of, AnySelector, IntoSelector, StyleBuilder,
+    TypedSelector,
+};
 pub use inspect::{inspector, mounted_trees, InstanceKind, InstanceNode, MountedTree, PropertyInfo};
 #[cfg(feature = "desktop")]
 pub use inspect::{attach_inspector, open_inspector};
+pub use model_binding::{BindableTo, ModelBinding, ModelProperty, ReadOnlyModelProperty};
 pub use mount::{view_stats, ViewStats};
+pub use path_data::{path_data, PathBuilder, PathData};
 pub use template::template;
+pub use theme::{
+    control_template, control_template_with, control_theme, control_theme_of, resource_dictionary, ControlThemeBuilder,
+    ResourceDictionaryBuilder,
+};
+pub use ferroui_base::input::Key as KeyCode;
+pub use values::{
+    alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
+    BoxShadowOptions, KeyGestureModifiers, LinearGradient, Transforms,
+};
 pub use register_types::{register_types, ASSEMBLY};
 #[cfg(feature = "xaml")]
 pub use xaml::{load_xaml, load_xaml_uri, use_xaml};
-pub use extras::GridDefinitions;
+pub use extras::{auto, px, star, GridDefinitionSizes, GridDefinitions, GridDefinitionsText, GridLengths, IntoGridLengths};
+pub use ferroui_controls::GridLength;
 pub use async_data::{sleep, suspense, use_future, AsyncState};
 pub use error_boundary::{error_boundary, ErrorInfo};
-pub use router::{route, router, try_use_router, use_router, RouteDef, RouteMatch, Router};
+pub use router::{
+    route, router, try_use_router, typed_route, use_router, RouteDef, RouteMatch, RouteParamError, Router, TypedRoute,
+};
 pub use reactive::{
     batch, effect, memo, on_cleanup, provide_context, signal, untrack, use_context, Memo, Owner, Signal, TwoWay,
 };
@@ -119,7 +165,20 @@ pub use reactive::{
 #[cfg(feature = "desktop")]
 pub use app::{launch, launch_themed, launch_with, mount_window, open_window};
 
-pub use ferroui_view_macros::{component, rsx};
+pub use ferroui_view_macros::{component, path, rsx, Route, ViewModel};
+
+/// What the expansion of `#[derive(ViewModel)]` names.
+#[doc(hidden)]
+pub mod __model {
+    pub use ferroui_base::data::model::{Event, INotifyPropertyChanged};
+}
+
+/// What the expansion of [`path!`] names.
+#[doc(hidden)]
+pub mod __path {
+    pub use ferroui_base::media::{FillRule, PathCommand, SweepDirection};
+    pub use ferroui_base::{Point, Size};
+}
 
 /// Everything an application written with the builders or the macro uses.
 pub mod prelude {
@@ -140,7 +199,25 @@ pub mod prelude {
         animation, batch, component, dynamic, effect, for_each, memo, ms, on_cleanup, provide_context, rerender, rsx, show,
         show_else, style, transition, transitions, use_animation, use_resource, use_resource_as, use_theme_variant,
         signal, template, untrack, use_context, use_data_context, use_effect, use_effect_with, use_hook, use_memo,
-        use_signal, Bind, ComponentHost, El, Element, ElementBuilder, GridDefinitions, IntoChild, IntoChildren, IntoElement, Key, Memo, NodeRef, Owner, Signal, TwoWay,
+        use_signal, Bind, ComponentHost, El, Element, ElementBuilder, GridDefinitions, GridDefinitionsText, IntoChild, IntoChildren, IntoElement, Key, Memo,
+        NodeRef, Owner, Signal, TwoWay,
+    };
+    pub use crate::{
+        any, any_of, is_type, nesting, of, style_of, AnySelector, IntoSelector, PseudoClassSelectors, Selector, Selectors,
+        TypedSelector,
+    };
+    pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
+    pub use crate::{path, path_data, PathBuilder, PathData};
+    pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty, ViewModel};
+    pub use crate::{typed_route, Route, RouteParamError, TypedRoute};
+    pub use crate::{use_theme_resource, ResourceKeyFor, ThemeResourceKey};
+    pub use crate::{
+        control_template, control_template_with, control_theme, control_theme_of, resource_dictionary,
+        ControlThemeBuilder, ResourceDictionaryBuilder,
+    };
+    pub use crate::{
+        alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
+        BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,
     };
     pub use crate::{
         error_boundary, route, router, sleep, suspense, try_use_router, use_future, use_router, AsyncState, ErrorInfo, RouteDef,

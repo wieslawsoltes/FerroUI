@@ -31,6 +31,7 @@ ferro_impl_classes!(
 
 impl CheckBox {
     fn static_constructor() {
+        crate::visual_state::state_mappers::register::<CheckBox>(crate::visual_state::state_mappers::check_box);
         crate::automation::AutomationProperties::control_type_override_property()
             .override_default_value::<CheckBox>(Some(crate::automation::peers::AutomationControlType::CheckBox));
     }

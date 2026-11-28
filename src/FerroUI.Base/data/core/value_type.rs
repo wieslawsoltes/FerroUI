@@ -742,7 +742,7 @@ impl ValueTypes {
 
     /// Whether the tables of types are kept: the feature `type-tables` of this crate (and its
     /// own unit tests), decided where this crate is built, whatever crate asks.
-    pub const TYPE_TABLES: bool = cfg!(any(feature = "type-tables", test));
+    pub const TYPE_TABLES: bool = cfg!(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test));
 
     /// Registers the table of value types of a crate of the framework (`register`, a function
     /// that registers every type of the crate that registers on first use, with
@@ -751,14 +751,14 @@ impl ValueTypes {
     /// up by name finds every type converted from the start. Without the feature the table is
     /// trimmed: this does nothing, and what only the table reaches is left out of the binary;
     /// a type registers when it is first used (#566).
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_table(register: fn()) {
         Self::register_global(register);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline(always)]
     pub fn register_table(register: fn()) {
         let _ = register;

@@ -1,0 +1,9 @@
+# A control written in Osprey through the C ABI (docs/osprey.md, section 8).
+[project]
+name = "gauge_control"
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
+default_namespace = "app"
+entry = "src/main.osp"
+
+[modules]
+allow_wildcard_imports = true

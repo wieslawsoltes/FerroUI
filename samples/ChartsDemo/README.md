@@ -11,7 +11,7 @@ FERROUI_CHARTS_RENDER_OUTPUT=/tmp/ferroui-charts-render \
   cargo test -p charts-demo --features render-smoke charts_demo_renders_native -- --nocapture
 ```
 
-`MainView.xaml` is compiled by `ferroui-build` against the Charts metadata exported by its build script. The runtime-loader test loads that same document independently. The optional desktop feature installs the native FerroUI WinUI theme and opens the view in a window; another host can install its normal theme and set `Control::boxed(charts_demo::create_view())` as its content.
+`MainView.xaml` is compiled by `ferroui-build` against the Charts metadata exported by its build script. The runtime-loader test loads that same document independently. The optional desktop feature installs the native FerroUI WinUI theme, constructed from the units the view needs (the table the build writes, [docs/xaml-themes.md](../../docs/xaml-themes.md), section 3), and opens the view in a window; another host can install its normal theme and set `Control::boxed(charts_demo::create_view())` as its content.
 
 Four charts demonstrate line/area/grouped bar series, circle/diamond/square/triangle markers, dashed strokes, per-point immutable label/marker overrides, a date axis and shared categories. The line, area and bar controls share the same `Samples` objects. All four charts share the actual-values source. Buttons append to the existing `FerroList` sources, replace the source objects, switch light/dark resources, toggle legends and rotate bars. Replacement retains each shared `Samples` identity and subscribes to the new source.
 

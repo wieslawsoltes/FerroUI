@@ -347,6 +347,20 @@ impl CompositionItemPlacements {
 }
 
 crate::ferro_overrides! { impl FerroObjectImpl for Visual {
+    // The handler leaves where the property is not one it named (`reacts_to`); the theme
+    // variant only concerns a visual that may cast the shadow of the theme.
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        if property == crate::styling::ThemeVariant::actual_theme_variant_property().as_property() {
+            crate::InheritedReaction::While(|object| {
+                // SAFETY: the question of the class is only asked for its objects
+                // (`InheritedReaction::While`), which have a `Visual` at offset zero.
+                unsafe { crate::cast_this::<crate::FerroObject, Visual>(object) }.may_cast_theme_shadow()
+            })
+        } else {
+            property.has_change_handler(PropertyChangeHandler::Visual).into()
+        }
+    });
+
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
 
@@ -1267,9 +1281,12 @@ impl Visual {
 
     /// Sets the bounds of the control. Called by the layout system.
     pub fn set_bounds(&self, value: Rect) {
-        if self.bounds.get() != value {
-            bump_geometry_version();
+        // A layout pass sets this for every child, mostly to what it is: unchanged bounds do not
+        // read the property, whose accessor may be a call (it depends on the inlining).
+        if self.bounds.get() == value {
+            return;
         }
+        bump_geometry_version();
         self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
     }
 
@@ -1290,6 +1307,7 @@ impl Visual {
     }
 
     /// The geometry clip for this visual.
+    #[inline]
     pub fn clip(&self) -> Option<Ref<Geometry>> {
         self.get_value(Self::clip_property())
     }
@@ -1359,6 +1377,9 @@ impl Visual {
     }
 
     /// The opacity of the control.
+    // Inlined into its callers, as it was (pinned: the inlining shifted with the typed routes in
+    // the codec, #997; property_subsystem::ControlRead).
+    #[inline]
     pub fn opacity(&self) -> f64 {
         self.get_value(Self::opacity_property())
     }
@@ -2543,20 +2564,22 @@ impl Visual {
     pub fn affects_render<T: ObjectType + Upcast<Visual>>(properties: &[&'static FerroProperty]) {
         for property in properties {
             if can_value_affect_render(property.property_type()) {
-                property.changed().subscribe(|e| {
-                    if let Some(sender) = e.sender().downcast_ref::<T>() {
+                property
+                    .changed()
+                    .add_class_handler::<T>(|sender, e| {
                         let visual: &Visual = sender.upcast();
                         visual.update_affects_render_subscription(e);
                         visual.invalidate_visual();
-                    }
-                }).detach();
+                    })
+                    .detach();
             } else {
-                property.changed().subscribe(|e| {
-                    if let Some(sender) = e.sender().downcast_ref::<T>() {
+                property
+                    .changed()
+                    .add_class_handler::<T>(|sender, _| {
                         let visual: &Visual = sender.upcast();
                         visual.invalidate_visual();
-                    }
-                }).detach();
+                    })
+                    .detach();
             }
         }
     }

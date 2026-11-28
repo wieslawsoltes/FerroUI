@@ -35,6 +35,13 @@ SOFTWARE.
 
 Avalonia itself incorporates code from other projects (for example WPF-derived layout and text code under the MIT license from the .NET Foundation, and Chromium-derived snippets in the native macOS backend); those notices are carried in the upstream `NOTICE.md` and, where the corresponding code is ported or imported here, in the component-level notices.
 
+## AvaloniaEdit, AvalonEdit and TextMateSharp
+
+- Projects: <https://github.com/AvaloniaUI/AvaloniaEdit>, <https://github.com/icsharpcode/AvalonEdit> and <https://github.com/danipen/TextMateSharp>.
+- Licenses: MIT; the full upstream copyright notices and license texts are retained in `src/FerroUI.Edit.Core/NOTICE.md`, `src/FerroUI.Edit/NOTICE.md` and `src/FerroUI.TextMate/NOTICE.md`.
+- Used for: the document and editor services, editor controls, XSHD definitions, TextMate grammar engine, language packages and themes. The source pins, exact mappings and asset hashes are recorded in `docs/porting/editor-textmate.md` and its linked inventories.
+- Bundled language packages retain their individual license files. The browser Oniguruma scanner and reference fixtures retain their component notices, pinned versions and binary/source hashes under `src/FerroUI.TextMate/resources` and `src/FerroUI.TextMate/tests/oracle`.
+
 ## XamlX
 
 - Project: <https://github.com/kekekeks/XamlX>
@@ -126,7 +133,7 @@ Some ported files derive from sources that the upstream project took from third 
 
 ## Third-party crates
 
-Rust dependencies are used under their own licenses as declared in their crate metadata; they are not vendored in this repository. Direct dependencies: `skia-safe` (MIT), `harfbuzz-sys` (MIT), `bitflags`, `paste`, `cc`, `roxmltree`, `time` (MIT OR Apache-2.0), `rust_decimal` (MIT) and `sysinfo` (MIT); for the VNC server of the headless platform `flate2`, `jpeg-encoder`, `des` and `getrandom` (MIT OR Apache-2.0). With the feature `rtf-codepages` of `ferroui-controls`, `encoding_rs` 0.8.42 (`(Apache-2.0 OR MIT) AND BSD-3-Clause`) decodes the legacy code pages of RTF.
+Rust dependencies are used under their own licenses as declared in their crate metadata; they are not vendored in this repository. Direct dependencies: `skia-safe` (MIT), `harfbuzz-sys` (MIT), `bitflags`, `cc`, `roxmltree`, `time` (MIT OR Apache-2.0), `rust_decimal` (MIT) and `sysinfo` (MIT); for the VNC server of the headless platform `flate2`, `jpeg-encoder`, `des` and `getrandom` (MIT OR Apache-2.0). With the feature `rtf-codepages` of `ferroui-controls`, `encoding_rs` 0.8.42 (`(Apache-2.0 OR MIT) AND BSD-3-Clause`) decodes the legacy code pages of RTF. `ferroui-ident-macros` is written for this project; its bracket syntax and token rules follow those of the `paste` crate by David Tolnay (MIT OR Apache-2.0), which it replaces, and it contains none of its code.
 
 The Vello render backend (`src/Vello/FerroUI.Vello`) links crates of the Vello project and their companions: `kurbo`, `peniko`, `vello_cpu` (with `vello_common`), `linesweeper` and `png`, each under the Apache License 2.0 or the MIT license at the choice of the user. The versions, what each is used for and the copyright lines are in `src/Vello/FerroUI.Vello/NOTICE.md`.
 
@@ -160,3 +167,9 @@ adaptations and validation are documented in `docs/porting/pretext.md`.
 `3694995fabbebc45a801a455880e3d31888367f1`, under Apache-2.0. The component retains
 its own LICENSE, NOTICE, THIRD-PARTY-NOTICES.md, FlorisBoard/Unicode attribution
 and resource licenses; the framework's MIT license does not replace them.
+
+## Osprey Native
+
+- Project: <https://github.com/Nimblesite/osprey> (release v0.29.0, commit `19ab5d4f231fcd20b016704606d9527645aa288f`)
+- License: MIT, Copyright (c) 2025-2026 NIMBLESITE PTY LTD, Australia.
+- Used for: the protocol of Osprey Native applications (envelope, node kinds, scene primitives, events, capabilities) and the design of its GPUI host, which `src/FerroUI.OspreyNative` (`ferroui-osprey-native`) implements from their specifications and sources; no Osprey source is copied. The crate's `NOTICE.md` holds the licence text, and `docs/osprey-native-host.md` records the host.

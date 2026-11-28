@@ -17,6 +17,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct ScreensRef(pub Rc<Screens>);
 
+ferroui_base::styled_value!(ScreensRef);
+
 impl ScreensRef {
     /// The handle of `value`.
     pub fn new(value: Rc<Screens>) -> Self {

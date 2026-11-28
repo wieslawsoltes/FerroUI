@@ -22,12 +22,29 @@ row!(LiteralBrushRow, build_literal_brush);
 row!(DynamicBrushRow, build_dynamic_brush);
 row!(StaticBrushRow, build_static_brush);
 
+/// Where the rows of a table come from: a slice of rows, or a packed table (#855) whose records
+/// are decoded when a row is read. A row that cannot be read is the error of the table.
+pub(super) trait RowSource: Copy + 'static {
+    type Row: Row + Copy;
+    fn len(&self) -> usize;
+    fn row(&self, index: usize) -> Result<Self::Row, XamlLoadError>;
+}
+
+impl<R: Row + Copy> RowSource for &'static [R] {
+    type Row = R;
+    fn len(&self) -> usize { <[R]>::len(self) }
+    fn row(&self, index: usize) -> Result<R, XamlLoadError> {
+        self.get(index).copied().ok_or_else(|| super::packed::out_of_range(index))
+    }
+}
+
 #[cfg(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions)))]
-pub(super) fn add_rows<R: Row>(
+pub(super) fn add_rows<S: RowSource>(
     dictionary: &Ref<ResourceDictionary>, context: &Rc<XamlIlContext>, document: &'static DocumentInfo,
-    rows: &'static [R],
+    rows: S,
 ) -> Result<(), XamlLoadError> {
-    for row in rows {
+    for index in 0..rows.len() {
+        let row = rows.row(index)?;
         let builder = DeferredContentBuilder::try_new(move |provider| row.build(provider, document));
         let (key, line, position) = row.info();
         add_deferred_row(dictionary, key, context, builder, line, position)?;
@@ -42,25 +59,26 @@ mod indexed {
     use ferroui_base::controls::{DeferredContentFailed, DeferredResourceGroup, IDeferredResourceGroup, ResourceKey};
     use super::super::super::xaml_il_runtime_helpers::CompactDeferredContext;
 
-    struct Rows<R: Row> {
-        rows: &'static [R],
+    struct Rows<S: RowSource> {
+        rows: S,
         document: &'static DocumentInfo,
         contexts: RefCell<Vec<Option<CompactDeferredContext>>>,
     }
 
-    impl<R: Row> IDeferredResourceGroup for Rows<R> {
+    impl<S: RowSource> IDeferredResourceGroup for Rows<S> {
         fn try_build(
             &self, index: usize, provider: Option<&Rc<dyn IServiceProvider>>,
         ) -> Result<MarkupValue, DeferredContentFailed> {
             // Release the borrow before application code runs: a resource build
             // can reenter registration/lookup on the same dictionary.
             let context = self.contexts.borrow()[index].as_ref().expect("an indexed row has a compact capture").clone();
-            match context.try_build(provider, |provider| self.rows[index].build(provider, self.document)) {
+            let built = context.try_build(provider, |provider| self.rows.row(index)?.build(provider, self.document));
+            match built {
                 Ok(value) => Ok(value),
-                Err(error) => match crate::xaml_error_scope::report(error) {
-                    Ok(()) => Err(DeferredContentFailed),
-                    Err(error) => crate::xaml_error_scope::throw(error),
-                },
+                Err(error) => {
+                    crate::xaml_error_scope::report_or_raise(error);
+                    Err(DeferredContentFailed)
+                }
             }
         }
 
@@ -72,16 +90,17 @@ mod indexed {
         }
     }
 
-    pub(in super::super) fn add_rows<R: Row>(
+    pub(in super::super) fn add_rows<S: RowSource>(
         dictionary: &Ref<ResourceDictionary>, context: &Rc<XamlIlContext>, document: &'static DocumentInfo,
-        rows: &'static [R],
+        rows: S,
     ) -> Result<(), XamlLoadError> {
-        if rows.is_empty() { return Ok(()); }
+        if rows.len() == 0 { return Ok(()); }
         let source = Rc::new(Rows {
             rows, document, contexts: RefCell::new(Vec::with_capacity(rows.len())),
         });
         let group = DeferredResourceGroup::new(source.clone());
-        for (index, row) in rows.iter().enumerate() {
+        for index in 0..rows.len() {
+            let row = rows.row(index)?;
             let (key, line, position) = row.info();
             // Capture immediately before each insertion. A preceding resource
             // notification may have changed the declaration's parent stack.

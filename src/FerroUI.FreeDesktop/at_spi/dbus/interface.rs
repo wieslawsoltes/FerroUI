@@ -10,9 +10,10 @@
 //! hand from the same descriptions, and the members it calls are the
 //! methods of the class.
 
+use ferroui_base::input::LocalBoxFuture;
 use zbus::export::serde::ser::Serialize;
 use zbus::export::serde::Deserialize;
-use zbus::zvariant::{DynamicType, Type, Value};
+use zbus::{DynamicType, Type, Variant};
 
 pub(crate) const ERROR_UNKNOWN_METHOD: &str = "org.freedesktop.DBus.Error.UnknownMethod";
 pub(crate) const ERROR_UNKNOWN_INTERFACE: &str = "org.freedesktop.DBus.Error.UnknownInterface";
@@ -57,6 +58,17 @@ impl<B: Serialize + DynamicType> ReplyBody for B {
 
 pub(crate) type Reply = Box<dyn ReplyBody>;
 pub(crate) type CallResult = Result<Reply, DBusError>;
+
+pub(crate) enum MethodReply {
+    Ready(CallResult),
+    Deferred(LocalBoxFuture<CallResult>),
+}
+
+impl From<CallResult> for MethodReply {
+    fn from(result: CallResult) -> Self {
+        Self::Ready(result)
+    }
+}
 
 /// A reply with the out arguments `body` (a tuple of them; `()` for none).
 pub(crate) fn reply<B: Serialize + DynamicType + 'static>(body: B) -> CallResult {
@@ -122,6 +134,12 @@ impl InterfaceDescription {
 pub(crate) trait DBusInterface {
     fn description(&self) -> &'static InterfaceDescription;
 
+    /// Dispatch on the UI thread. A deferred reply can await a platform
+    /// service that needs the dispatcher to stay responsive.
+    fn dispatch(&self, member: &str, body: &zbus::message::Body) -> MethodReply {
+        self.call(member, body).into()
+    }
+
     /// Answers a method call of the interface.
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
         let _ = (member, body);
@@ -130,13 +148,13 @@ pub(crate) trait DBusInterface {
 
     /// The value of a property (`TryGetProperty`); `None` for a name the
     /// interface does not have.
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         let _ = name;
         None
     }
 
     /// Every property (`GetAllProperties`), in the order of the description.
-    fn get_all_properties(&self) -> Vec<(&'static str, Value<'static>)> {
+    fn get_all_properties(&self) -> Vec<(&'static str, Variant<'static>)> {
         self.description()
             .properties
             .iter()
@@ -146,7 +164,7 @@ pub(crate) trait DBusInterface {
 
     /// Sets a property (`TrySetProperty`); false for a property that does
     /// not exist, cannot be written or was given a value of another type.
-    fn set_property(&self, name: &str, value: &Value<'_>) -> bool {
+    fn set_property(&self, name: &str, value: &Variant<'_>) -> bool {
         let _ = (name, value);
         false
     }

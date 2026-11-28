@@ -2,6 +2,8 @@
 //! Values can reenter or panic from Clone, equality, notification and Drop.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::{FerroObjectImpl, FerroPropertyRegistry, Ref, StaticType, StyledPropertyOptions, WeakRef};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -74,6 +76,8 @@ struct Tracked {
     trace: Rc<Trace>,
 }
 
+crate::styled_value!(Tracked);
+
 impl Clone for Tracked {
     fn clone(&self) -> Self {
         self.trace.record(Operation::Clone, format!("{}={}", self.serial, self.number));
@@ -99,17 +103,17 @@ fn unique_name() -> String {
     format!("DemandRootedInheritance{}", NEXT.fetch_add(1, Ordering::Relaxed))
 }
 
-fn original_callback<T: PropertyValue>(
+fn original_callback<T: crate::StyledValue>(
     source: &dyn EffectiveValueDyn,
     owner: &FerroObject,
     old_value: Option<&dyn EffectiveValueDyn>,
     new_value: Option<&dyn EffectiveValueDyn>,
 ) {
-    cast_effective_value::<T>(source).original_inherited_value_changed(owner, old_value, new_value);
+    cast_effective_value::<T::Storage>(source).original_inherited_value_changed(owner, old_value, new_value);
 }
 
-fn callback<T: PropertyValue>(original: bool) -> crate::ferro_property::InheritedValueChanged {
-    if original { original_callback::<T> } else { EffectiveValue::<T>::notify_inherited_value_changed }
+fn callback<T: crate::StyledValue>(original: bool) -> crate::ferro_property::InheritedValueChanged {
+    if original { original_callback::<T> } else { EffectiveValue::<T::Storage>::notify_inherited_value_changed }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -358,7 +362,7 @@ fn explicit_inheritance_registration_and_opt_out_keep_public_behavior() {
 }
 
 // Copied from bbff5971; only the method name differs.
-impl<T: PropertyValue> EffectiveValue<T> {
+impl<T: crate::StyledValue> EffectiveValue<T> {
     fn original_inherited_value_changed(
         &self,
         owner: &FerroObject,

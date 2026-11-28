@@ -27,6 +27,10 @@ use std::rc::Rc;
 ferroui_base::ferro_thread_local! {
     /// The high contrast variant: the theme dictionaries `HighContrast` of WinUI.
     static HIGH_CONTRAST: ThemeVariant = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
+    /// The number of themes of the UI thread that are in use (they have an owner) and follow
+    /// the contrast setting of the system: the high contrast variant of the theme is the high
+    /// contrast variant of the UI thread while it is not zero.
+    static SYSTEM_HIGH_CONTRAST_USERS: Cell<usize> = const { Cell::new(0) };
 }
 
 /// How much space the controls of the WinUI theme take: the normal density, or the compact one of
@@ -47,6 +51,9 @@ pub struct WinUITheme {
     base: Styles,
     compact_styles: OnceCell<Ref<ResourceDictionary>>,
     density_style: Cell<DensityStyle>,
+    use_system_high_contrast: Cell<bool>,
+    /// Whether the theme counts in `SYSTEM_HIGH_CONTRAST_USERS`.
+    follows_system_high_contrast: Cell<bool>,
     /// The type keys of the control themes the units of the theme leave out, for the diagnostic of
     /// a lookup that misses one (#568, step 3). Debug builds only.
     #[cfg(debug_assertions)]
@@ -79,6 +86,8 @@ impl FerroObjectImpl for WinUITheme {
             if let Some(owner) = this.owner() {
                 owner.notify_hosted_resources_changed(ResourcesChangedEventArgs::create());
             }
+        } else if change.property() == Self::use_system_high_contrast_property().as_property() {
+            this.update_system_high_contrast();
         }
     }
 }
@@ -92,6 +101,16 @@ ferro_properties! {
                 |o| o.density_style(),
                 Some(|o, v| o.set_density_style(v)),
                 DensityStyle::Normal,
+            )
+        }
+
+        /// Defines the `UseSystemHighContrast` property.
+        pub fn use_system_high_contrast_property() -> DirectProperty<WinUITheme, bool> {
+            FerroProperty::register_direct::<WinUITheme, _>(
+                "UseSystemHighContrast",
+                |o| o.use_system_high_contrast(),
+                Some(|o, v| o.set_use_system_high_contrast(v)),
+                true,
             )
         }
     }
@@ -121,6 +140,8 @@ impl WinUITheme {
             base: Styles::construct(),
             compact_styles: OnceCell::new(),
             density_style: Cell::new(DensityStyle::Normal),
+            use_system_high_contrast: Cell::new(true),
+            follows_system_high_contrast: Cell::new(false),
             #[cfg(debug_assertions)]
             trimmed: std::cell::RefCell::new(Vec::new()),
         }
@@ -179,6 +200,14 @@ impl WinUITheme {
             });
         let _ = this.compact_styles.set(compact_styles);
 
+        // The theme follows the contrast setting of the system while it is in use.
+        let weak = this.downgrade();
+        let _ = this.owner_changed(move || {
+            if let Some(this) = weak.upgrade() {
+                this.update_system_high_contrast();
+            }
+        });
+
         this
     }
 
@@ -217,6 +246,41 @@ impl WinUITheme {
 
     pub fn set_density_style(&self, value: DensityStyle) {
         self.set_and_raise_cell(Self::density_style_property(), &self.density_style, value);
+    }
+
+    /// Whether the theme follows the contrast setting of the system (WinUI's behaviour, the
+    /// default): while the theme is in use (in the styles of the application or of an element)
+    /// and the platform asks for high contrast, the application and the top levels resolve to
+    /// the [high contrast variant](Self::high_contrast), whatever variant they request, and the
+    /// system colours come from the platform (`Accents/SystemColors`). With `false` the variant
+    /// applies only where an application requests it. A FerroUI addition (WinUI always follows
+    /// the system).
+    pub fn use_system_high_contrast(&self) -> bool {
+        self.use_system_high_contrast.get()
+    }
+
+    pub fn set_use_system_high_contrast(&self, value: bool) {
+        self.set_and_raise_cell(Self::use_system_high_contrast_property(), &self.use_system_high_contrast, value);
+    }
+
+    /// Counts the theme in, or out of, the themes that follow the contrast setting of the
+    /// system, and sets the high contrast variant of the UI thread when the first one comes and
+    /// removes it when the last one goes.
+    fn update_system_high_contrast(&self) {
+        let follows = self.use_system_high_contrast.get() && self.owner().is_some();
+        if follows == self.follows_system_high_contrast.replace(follows) {
+            return;
+        }
+        let users = SYSTEM_HIGH_CONTRAST_USERS.with(|users| {
+            let count = if follows { users.get() + 1 } else { users.get().saturating_sub(1) };
+            users.set(count);
+            count
+        });
+        if follows && users == 1 {
+            ThemeVariant::set_high_contrast_variant(Some(Self::high_contrast()));
+        } else if !follows && users == 0 && ThemeVariant::high_contrast_variant() == Some(Self::high_contrast()) {
+            ThemeVariant::set_high_contrast_variant(None);
+        }
     }
 
     /// Tries to find a resource within the theme: the compact resources are

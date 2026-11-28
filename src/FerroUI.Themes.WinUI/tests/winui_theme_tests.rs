@@ -99,9 +99,9 @@ fn theme_loads_and_is_added_to_the_styles_of_an_application() {
     assert_eq!(DensityStyle::Normal, theme.density_style());
     // The compact resources are taken out of the resources by the constructor.
     assert!(!theme.resources().contains_key(&key("CompactStyles")));
-    // The system accent colours stay a merged dictionary; the resource documents are merged into
-    // the dictionary of the theme.
-    assert_eq!(1, theme.resources().merged_dictionaries().count());
+    // The system accent colours and the system colours stay merged dictionaries; the resource
+    // documents are merged into the dictionary of the theme.
+    assert_eq!(2, theme.resources().merged_dictionaries().count());
     let button_theme = application.try_get_resource(&ResourceKey::Type(Button::TYPE), None);
     assert!(button_theme.flatten().is_some());
     assert_eq!(
@@ -124,9 +124,12 @@ fn the_three_variants_resolve_their_resources() {
     assert_eq!(Color::parse("#FFFFFFFF").unwrap(), resource("TextFillColorPrimary", ThemeVariant::dark()));
     assert_eq!(Color::parse("#F3F3F3").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::light()));
     assert_eq!(Color::parse("#202020").unwrap(), resource("SolidBackgroundFillColorBase", ThemeVariant::dark()));
-    // Resources/SystemResources.xaml: the "High Contrast Black" colours.
-    assert_eq!(Color::parse("#FF000000").unwrap(), resource("SystemColorWindowColor", WinUITheme::high_contrast()));
+    // Accents/SystemColors: on a light platform that reports no system colours, the colours of
+    // "High Contrast White" in the high contrast variant, the standard ones of Windows otherwise.
+    assert_eq!(Color::parse("#FFFFFFFF").unwrap(), resource("SystemColorWindowColor", WinUITheme::high_contrast()));
+    assert_eq!(Color::parse("#FF37006E").unwrap(), resource("SystemColorHighlightColor", WinUITheme::high_contrast()));
     assert_eq!(Color::parse("#FFFFFFFF").unwrap(), resource("SystemColorWindowColor", ThemeVariant::light()));
+    assert_eq!(Color::parse("#FF0078D7").unwrap(), resource("SystemColorHighlightColor", ThemeVariant::dark()));
 
     // A brush of the high contrast dictionary takes the system colour of that variant: the
     // background of a window (SolidBackgroundFillColorBaseBrush, SystemColorWindowColor).
@@ -135,7 +138,7 @@ fn the_three_variants_resolve_their_resources() {
     window.show();
     window.set_requested_theme_variant(Some(WinUITheme::high_contrast()));
     let background = window.background().and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color()));
-    assert_eq!(Some(Color::parse("#FF000000").unwrap()), background);
+    assert_eq!(Some(Color::parse("#FFFFFFFF").unwrap()), background);
 }
 
 #[test]

@@ -1,4 +1,109 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <SplitButton x:Name="Primary" Content="Action"><SplitButton.Flyout><Flyout><StackPanel Spacing="8"><Button Content="Alternative one"/><Button Content="Alternative two"/></StackPanel></Flyout></SplitButton.Flyout></SplitButton><TextBlock x:Name="Output" Text="Primary and secondary actions"/>
+<!-- Ported from the two pinned SplitButton examples of WinUI Gallery (14061eea) and the handlers
+     of SplitButtonPage.xaml.cs (button_samples.rs); see ../NOTICE.md. FerroUI has no GridView and
+     no VariableSizedWrapGrid: both flyouts are a UniformGrid of three columns (the source's
+     MaximumRowsOrColumns) whose swatches are buttons, and GridView_ItemClick is the Click of the
+     first flyout's buttons. SwatchSize is the source's resource; the styles of the source's
+     resources are styles of the grids. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Resources>
+    <x:Double x:Key="SwatchSize">32</x:Double>
+  </StackPanel.Resources>
+
+  <StackPanel x:Name="SplitButtonExample1" Spacing="8">
+    <TextBlock Text="A SplitButton controlling text color in a RichEditBox" FontSize="18" />
+    <Grid x:Name="Control1" ColumnDefinitions="Auto,*" ColumnSpacing="24">
+      <SplitButton x:Name="myColorButton"
+                   MinWidth="0"
+                   MinHeight="0"
+                   Padding="0"
+                   VerticalAlignment="Top"
+                   AutomationProperties.Name="Font color">
+        <Border x:Name="CurrentColor"
+                Width="{StaticResource SwatchSize}"
+                Height="{StaticResource SwatchSize}"
+                Margin="0"
+                Background="Green"
+                CornerRadius="4,0,0,4" />
+        <SplitButton.Flyout>
+          <Flyout Placement="Bottom">
+            <UniformGrid x:Name="ColorGrid" Columns="3">
+              <UniformGrid.Styles>
+                <Style Selector="Rectangle">
+                  <Setter Property="Width" Value="{StaticResource SwatchSize}" />
+                  <Setter Property="Height" Value="{StaticResource SwatchSize}" />
+                  <Setter Property="RadiusX" Value="4" />
+                  <Setter Property="RadiusY" Value="4" />
+                </Style>
+                <Style Selector="Button">
+                  <Setter Property="Padding" Value="0" />
+                  <Setter Property="MinWidth" Value="0" />
+                  <Setter Property="MinHeight" Value="0" />
+                  <Setter Property="Margin" Value="4" />
+                </Style>
+              </UniformGrid.Styles>
+              <Button x:Name="RedSwatchButton" AutomationProperties.Name="Red"><Rectangle Fill="Red" /></Button>
+              <Button x:Name="OrangeSwatchButton" AutomationProperties.Name="Orange"><Rectangle Fill="Orange" /></Button>
+              <Button x:Name="YellowSwatchButton" AutomationProperties.Name="Yellow"><Rectangle Fill="Yellow" /></Button>
+              <Button x:Name="GreenSwatchButton" AutomationProperties.Name="Green"><Rectangle Fill="Green" /></Button>
+              <Button x:Name="BlueSwatchButton" AutomationProperties.Name="Blue"><Rectangle Fill="Blue" /></Button>
+              <Button x:Name="IndigoSwatchButton" AutomationProperties.Name="Indigo"><Rectangle Fill="Indigo" /></Button>
+              <Button x:Name="VioletSwatchButton" AutomationProperties.Name="Violet"><Rectangle Fill="Violet" /></Button>
+              <Button x:Name="GraySwatchButton" AutomationProperties.Name="Gray"><Rectangle Fill="Gray" /></Button>
+            </UniformGrid>
+          </Flyout>
+        </SplitButton.Flyout>
+      </SplitButton>
+      <RichEditBox x:Name="myRichEditBox"
+                   Grid.Column="1"
+                   Width="240"
+                   MinHeight="96"
+                   HorizontalAlignment="Left"
+                   AutomationProperties.Name="Text entry"
+                   PlaceholderText="Type something here" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="SplitButtonExample2" Spacing="8">
+    <TextBlock Text="A SplitButton with text" FontSize="18" />
+    <SplitButton x:Name="myColorButtonReveal"
+                 MinWidth="0"
+                 MinHeight="0"
+                 Padding="5"
+                 HorizontalAlignment="Left"
+                 VerticalAlignment="Top"
+                 AutomationProperties.Name="Font color with text"
+                 Content="Choose color">
+      <SplitButton.Flyout>
+        <Flyout Placement="Bottom">
+          <UniformGrid x:Name="RevealColorGrid" Columns="3">
+            <UniformGrid.Styles>
+              <Style Selector="Rectangle">
+                <Setter Property="Width" Value="{StaticResource SwatchSize}" />
+                <Setter Property="Height" Value="{StaticResource SwatchSize}" />
+                <Setter Property="RadiusX" Value="4" />
+                <Setter Property="RadiusY" Value="4" />
+              </Style>
+              <Style Selector="Button">
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="MinWidth" Value="0" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Margin" Value="6" />
+                <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+              </Style>
+            </UniformGrid.Styles>
+            <Button x:Name="RedRevealButton" AutomationProperties.Name="Red"><Rectangle Fill="Red" /></Button>
+            <Button x:Name="OrangeRevealButton" AutomationProperties.Name="Orange"><Rectangle Fill="Orange" /></Button>
+            <Button x:Name="YellowRevealButton" AutomationProperties.Name="Yellow"><Rectangle Fill="Yellow" /></Button>
+            <Button x:Name="GreenRevealButton" AutomationProperties.Name="Green"><Rectangle Fill="Green" /></Button>
+            <Button x:Name="BlueRevealButton" AutomationProperties.Name="Blue"><Rectangle Fill="Blue" /></Button>
+            <Button x:Name="IndigoRevealButton" AutomationProperties.Name="Indigo"><Rectangle Fill="Indigo" /></Button>
+            <Button x:Name="VioletRevealButton" AutomationProperties.Name="Violet"><Rectangle Fill="Violet" /></Button>
+            <Button x:Name="GrayRevealButton" AutomationProperties.Name="Gray"><Rectangle Fill="Gray" /></Button>
+            <Button x:Name="BlackRevealButton" AutomationProperties.Name="Black"><Rectangle Fill="Black" /></Button>
+          </UniformGrid>
+        </Flyout>
+      </SplitButton.Flyout>
+    </SplitButton>
+  </StackPanel>
 </StackPanel>

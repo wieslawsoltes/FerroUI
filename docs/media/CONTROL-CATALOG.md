@@ -123,6 +123,12 @@ include `MediaPlayPause`, `MediaStop`, `MediaMute`, `MediaSeek`, `MediaVolume`,
 `MediaTime`, `MediaStatus` and `MediaError`. Status text is no longer appended to
 the timestamp. Unsupported fullscreen/settings/subtitle actions are not shown.
 
+The WinUI theme now ports WinUI's own template: the parts keep WinUI's names
+(`PlayPauseButton`, `ProgressSlider`, `VolumeMuteButton` and the others, see
+[ISSUE-561.md](ISSUE-561.md)). The control still binds the names above, so the
+macOS and Material templates and application templates written for 0.5.0 keep
+working.
+
 The 12 video-control unit tests pass, including player ownership/source ordering,
 option synchronization and responsive overlay layout. A native Metal replay
 passes `MACOS_TRANSPORT_AX_PASS` and `MACOS_TRANSPORT_KEYBOARD_PASS` with three

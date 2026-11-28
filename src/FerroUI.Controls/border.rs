@@ -88,6 +88,11 @@ impl VisualImpl for Border {
 }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
+    // The names the handler below matches. A name added to the handler is added here.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        matches!(property.name(), "UseLayoutRounding" | "BorderThickness" | "CornerRadius").into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         match change.property().name() {

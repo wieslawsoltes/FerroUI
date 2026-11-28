@@ -19,7 +19,7 @@ use crate::rendering::composition::{
     CompositionTransparencyLevel,
 };
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
-use crate::utilities::ReleaseExcess;
+use crate::utilities::ReleaseAtRest;
 use crate::{
     CornerRadius, Matrix, Point, Rect, RelativePoint, RelativeRect, RelativeScalar, RelativeUnit, RoundedRect, Size,
     Vector, Vector3D,
@@ -178,13 +178,20 @@ impl BatchStreamData {
     /// to what an emptied buffer keeps
     /// ([`RETAINED_BUFFER_BYTES`](crate::utilities::RETAINED_BUFFER_BYTES)):
     /// the batch of the first frame of a large tree is not the size of the
-    /// ones that follow it.
-    pub(crate) fn reset(&mut self) {
+    /// ones that follow it. Tells whether they gave storage back (#836).
+    pub(crate) fn reset(&mut self) -> bool {
         self.objects.clear();
         self.structs.clear();
         self.struct_read_offset = 0;
-        self.objects.release_excess();
-        self.structs.release_excess();
+        let objects = self.objects.release_burst();
+        self.structs.release_burst() | objects
+    }
+
+    /// Takes the emptied streams down to what a buffer keeps at rest, once the burst is over
+    /// (#836); tells whether they gave storage back.
+    pub(crate) fn release_at_rest(&mut self) -> bool {
+        let objects = self.objects.release_at_rest();
+        self.structs.release_at_rest() | objects
     }
 }
 

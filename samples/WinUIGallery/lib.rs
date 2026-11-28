@@ -6,34 +6,57 @@
 
 #![forbid(unsafe_code)]
 
+mod accessibility_samples;
 mod assets;
 mod assets_data;
+mod binding_samples;
+mod brush_samples;
+mod button_samples;
 mod cat_data;
 mod chart_samples;
 mod color_picker_samples;
+mod command_samples;
 mod connected_animation_samples;
 pub mod catalog;
 mod catalog_data;
 pub mod contrast;
 mod control_samples;
+mod custom_controls;
+mod date_samples;
 pub mod examples;
 mod feedback_samples;
+mod tab_view_samples;
 mod frame_sample;
 pub mod gallery;
 mod ink_samples;
 mod input_samples;
+mod items_view_samples;
+mod layout_samples;
+mod list_samples;
 mod materials_samples;
+mod menu_samples;
 mod media_samples;
 pub mod playback_samples;
 #[cfg(feature = "desktop")]
 #[path = "../media_desktop.rs"]
 mod desktop_media;
 pub mod navigation;
+mod color_samples;
+mod color_sections;
 mod navigation_view_samples;
 mod platform_samples;
 mod repeater_samples;
+mod scroll_samples;
+mod shape_samples;
 mod sizing_sample;
+mod split_view_samples;
+mod content_dialog_samples;
+mod scratch_pad_samples;
+mod selector_bar_samples;
+mod status_samples;
+mod text_input_samples;
 mod text_samples;
+mod tree_samples;
 mod window_samples;
 
 #[cfg(any(feature = "desktop", feature = "capture"))]
@@ -49,7 +72,19 @@ pub use app::App;
 mod tests;
 
 #[cfg(test)]
+mod accessibility_samples_tests;
+
+#[cfg(test)]
+mod custom_controls_tests;
+
+#[cfg(test)]
 mod feedback_samples_tests;
+
+// The Color page is tested on the WinUI theme, which the `theme` feature brings.
+#[cfg(all(test, feature = "theme"))]
+mod color_samples_tests;
+#[cfg(test)]
+mod tab_view_samples_tests;
 
 #[cfg(test)]
 mod navigation_view_samples_tests;
@@ -63,6 +98,9 @@ mod connected_animation_samples_tests;
 #[cfg(test)]
 mod media_samples_tests;
 
+// The containers of the examples need the control themes of the WinUI theme.
+#[cfg(all(test, feature = "theme"))]
+mod items_view_samples_tests;
 #[cfg(test)]
 mod materials_samples_tests;
 
@@ -83,3 +121,51 @@ mod chart_samples_tests;
 
 #[cfg(test)]
 mod x_bind_tests;
+
+#[cfg(test)]
+mod button_samples_tests;
+
+#[cfg(test)]
+mod layout_samples_tests;
+
+#[cfg(test)]
+mod text_input_samples_tests;
+
+#[cfg(test)]
+mod content_dialog_samples_tests;
+#[cfg(test)]
+mod scratch_pad_samples_tests;
+#[cfg(test)]
+mod selector_bar_samples_tests;
+#[cfg(test)]
+mod status_samples_tests;
+
+#[cfg(test)]
+mod command_samples_tests;
+
+#[cfg(test)]
+mod menu_samples_tests;
+
+#[cfg(test)]
+mod date_samples_tests;
+
+#[cfg(test)]
+mod list_samples_tests;
+
+#[cfg(test)]
+mod tree_samples_tests;
+
+#[cfg(test)]
+mod split_view_samples_tests;
+
+#[cfg(test)]
+mod shape_samples_tests;
+
+#[cfg(test)]
+mod scroll_samples_tests;
+
+#[cfg(test)]
+mod brush_samples_tests;
+
+#[cfg(test)]
+mod binding_samples_tests;

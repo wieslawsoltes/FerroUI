@@ -52,6 +52,58 @@ pub struct DocumentSource<'s> {
 /// Receives a diagnostic of a transform and returns the severity it has from then on.
 pub type DiagnosticHandler = Rc<dyn Fn(&XamlDiagnostic) -> XamlDiagnosticSeverity>;
 
+/// Representation used for the operations that the build-time host resolves.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum XamlBackend {
+    /// Existing typed Rust factories and resource tables.
+    #[default]
+    Native,
+    /// Bytecode for resource runs and recognized control styles. Keep native template and page construction.
+    ThemeBytecode,
+    /// Also lower construction, resolved calls and compiled binding paths in pages and templates.
+    Bytecode,
+}
+
+impl XamlBackend {
+    pub fn uses_theme_programs(self) -> bool {
+        self != Self::Native
+    }
+
+    pub(super) fn uses_construction_programs(self) -> bool {
+        self == Self::Bytecode
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The representation the emitter writes on this thread and where its instruction streams
+    /// go: what [`with_xaml_backend`] selects, [`XamlBackend::Native`] outside it.
+    static BACKEND: RefCell<(XamlBackend, super::BytecodeImage)> = RefCell::new(Default::default());
+}
+
+/// Runs `compile` with the operations the XAML compiler resolves emitted as `backend`, their
+/// instruction streams packed into `image` ([`BytecodeImage::default`](super::BytecodeImage)
+/// writes them as byte literals of the generated source), and restores the previous selection
+/// afterwards. Outside it the emitter writes [`XamlBackend::Native`]. The selection is scoped
+/// rather than a field of [`TransformOptions`], whose public fields stay as they are within 0.5.
+pub fn with_xaml_backend<R>(backend: XamlBackend, image: &super::BytecodeImage, compile: impl FnOnce() -> R) -> R {
+    struct Restore(Option<(XamlBackend, super::BytecodeImage)>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            if let Some(previous) = self.0.take() {
+                BACKEND.with(|selected| *selected.borrow_mut() = previous);
+            }
+        }
+    }
+    let previous = BACKEND.with(|selected| selected.replace((backend, image.clone())));
+    let _restore = Restore(Some(previous));
+    compile()
+}
+
+/// The representation [`with_xaml_backend`] selected on this thread, and its image.
+pub(super) fn selected_xaml_backend() -> (XamlBackend, super::BytecodeImage) {
+    BACKEND.with(|selected| selected.borrow().clone())
+}
+
 /// What a transform depends on beside the documents and the type system.
 #[derive(Clone, Default)]
 pub struct TransformOptions {
@@ -70,13 +122,21 @@ pub struct TransformOptions {
     pub theme_parts: Option<Rc<ThemePartsTables>>,
 }
 
+/// The associated function a class is constructed from selected units of its compiled markup with
+/// (#568, #849): `fn with_parts(Option<Rc<dyn IServiceProvider>>, rt::ThemeParts) -> Ref<Self>`.
+/// A class whose markup is partitioned into units has the capability only when it has a public
+/// function of that name and signature (the themes of the framework); any other class is
+/// constructed with `new()`, however its markup is partitioned.
+pub const PARTS_CONSTRUCTOR: &str = "with_parts";
+
 /// The parts tables of the themes an application trims (#568, step 3 of
-/// docs/porting/theme-trimming.md): for each class whose compiled markup is partitioned into
-/// units, the expression of the static table of the units the application keeps
-/// (`crate::compiled_markup::THEME_PARTS_<CLASS>`). The emitter writes a construction of such a
-/// class in the documents (`<WinUITheme />`) as `Class::with_parts(None, <table>)` instead of
-/// `Class::new()`, and records the class; the build writes the tables, after every group is
-/// compiled, from the roots of all of them.
+/// docs/porting/theme-trimming.md): for each class that can be constructed from selected units of
+/// its compiled markup ([`PARTS_CONSTRUCTOR`]; the build states which, #849), the expression of
+/// the static table of the units the application keeps (`crate::compiled_markup::THEME_PARTS_<CLASS>`,
+/// the name the build allocated). The emitter writes a construction of such a class in the
+/// documents (`<WinUITheme />`) as `Class::with_parts(None, <table>)` instead of `Class::new()`,
+/// and records the class; the build writes the tables, after every group is compiled, from the
+/// roots of all of them. A class that is not in the tables is constructed with `new()`.
 #[derive(Debug, Default)]
 pub struct ThemePartsTables {
     /// The expression of the table of each class, by the full name of the class.

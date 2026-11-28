@@ -45,6 +45,15 @@ impl UnhandledError {
         Self { message: message.into(), inner_exception: Some(inner_exception.to_string()) }
     }
 
+    /// The exception of the default exception handler of
+    /// [`RxState`](crate::RxState) for the error of a pipeline that nothing handled:
+    /// the message that names
+    /// [`IHandleObservableErrors`](crate::IHandleObservableErrors), caused by
+    /// `inner_exception`.
+    pub fn of_broken_pipeline(inner_exception: &dyn Error) -> Self {
+        Self::with_inner(crate::rx_state::UNHANDLED_ERROR_MESSAGE, inner_exception)
+    }
+
     /// The message (`Message`).
     pub fn message(&self) -> &str {
         &self.message

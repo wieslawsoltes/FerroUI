@@ -1,4 +1,38 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Expander Header="This text is in the header" Content="This is in the content"/><Expander Header="Expanded example" IsExpanded="True"><StackPanel Spacing="8"><TextBlock Text="The content can contain controls."/><Button Content="Button in the content"/></StackPanel></Expander>
+<!-- Ported from the two pinned Expander examples of WinUI Gallery (14061eea) and the handler of
+     ExpanderPage.xaml.cs (status_samples.rs); see ../NOTICE.md. The ComboBox's Header is composed
+     above it. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ExpanderExample1" Spacing="8">
+    <TextBlock Text="An Expander with text in the header and content areas" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24" MinHeight="120">
+      <Expander x:Name="Expander1"
+                VerticalAlignment="Top"
+                Content="This is in the content"
+                ExpandDirection="Down"
+                Header="This text is in the header"
+                IsExpanded="False" />
+      <StackPanel Grid.Column="1" Spacing="4">
+        <TextBlock Text="ExpandDirection" />
+        <ComboBox x:Name="ExpandDirectionComboBox" HorizontalAlignment="Stretch" SelectedIndex="0"
+                  AutomationProperties.Name="ExpandDirection">
+          <x:String>Down</x:String>
+          <x:String>Up</x:String>
+        </ComboBox>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="ExpanderExample2" Spacing="8">
+    <TextBlock Text="Modifying Expanders content alignment" FontSize="18" />
+    <Expander x:Name="Expander2" Width="500" Padding="0" HorizontalAlignment="Left"
+              HorizontalContentAlignment="Left">
+      <Expander.Header>
+        <TextBlock x:Name="Expander2Header" HorizontalAlignment="Center" Text="This text is centered" />
+      </Expander.Header>
+      <Expander.Content>
+        <TextBlock x:Name="Expander2Content" Margin="4" Text="And this text is left aligned" />
+      </Expander.Content>
+    </Expander>
+  </StackPanel>
 </StackPanel>

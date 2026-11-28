@@ -21,6 +21,8 @@ pub struct Point3D {
     pub z: f64,
 }
 
+ferroui_base::styled_value!(Point3D);
+
 impl Point3D {
     /// A point with the given coordinates.
     #[inline]

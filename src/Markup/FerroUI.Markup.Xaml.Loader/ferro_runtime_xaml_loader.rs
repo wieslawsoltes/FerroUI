@@ -86,7 +86,21 @@ impl FerroRuntimeXamlLoader {
     }
 
     /// Loads a document. Without a configuration the default one is used.
+    ///
+    /// The load runs in an error scope of the XAML runtime
+    /// ([`with_xaml_errors`](ferroui_markup_xaml::xaml_error_scope::with_xaml_errors), #567): a
+    /// deferred resource, include or template of the document that fails while it is loaded is
+    /// the error of the load.
     pub fn load_document(
+        document: RuntimeXamlLoaderDocument,
+        configuration: Option<RuntimeXamlLoaderConfiguration>,
+    ) -> Result<BoxedValue, XamlLoadError> {
+        ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+            Self::load_document_in_scope(document, configuration)
+        })
+    }
+
+    fn load_document_in_scope(
         document: RuntimeXamlLoaderDocument,
         configuration: Option<RuntimeXamlLoaderConfiguration>,
     ) -> Result<BoxedValue, XamlLoadError> {
@@ -126,12 +140,16 @@ impl FerroRuntimeXamlLoader {
     }
 
     /// Loads a group of documents that may refer to each other. Returns the
-    /// loaded object of each input document, in order.
+    /// loaded object of each input document, in order. As
+    /// [`load_document`](Self::load_document), in an error scope of the XAML runtime.
     pub fn load_group(
         documents: Vec<RuntimeXamlLoaderDocument>,
         configuration: Option<RuntimeXamlLoaderConfiguration>,
     ) -> Result<Vec<Option<BoxedValue>>, XamlLoadError> {
-        FerroXamlIlRuntimeCompiler::load_group(documents, &configuration.unwrap_or_default()).map_err(load_exception)
+        ferroui_markup_xaml::xaml_error_scope::with_xaml_errors(|| {
+            FerroXamlIlRuntimeCompiler::load_group(documents, &configuration.unwrap_or_default())
+                .map_err(load_exception)
+        })
     }
 
     /// Parses XAML from a string.

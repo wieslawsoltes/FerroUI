@@ -1022,6 +1022,8 @@ pub enum Dock {
     Top = 3,
 }
 
+crate::styled_value!(Dock);
+
 static_type!(DockPanel);
 
 impl DockPanel {

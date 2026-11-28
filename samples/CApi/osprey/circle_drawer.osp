@@ -1,0 +1,508 @@
+// 7GUIs task 6, Circle Drawer, in Osprey through the C ABI of FerroUI (ferroui-capi): a click on
+// the canvas adds a circle, the circle nearest to the pointer is filled, a right click on it opens
+// a window with a slider of its diameter, and undo and redo go through the changes. The same task
+// as samples/SevenGuis/Builders/CircleDrawer. The handlers of PointerPressed and PointerMoved
+// read the position and the button of the event from inside the handler (ferro_event_x,
+// ferro_event_y, ferro_event_button); the circles are Ellipse objects on a Canvas, placed with the
+// attached properties Canvas.Left and Canvas.Top. The history is two Osprey lists of states (done,
+// with the current top first, and undone).
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program runs the steps of the scenario of the Rust tests
+// (adding circles from code, as the scenario does, and adjusting a diameter through the window
+// and its slider) and prints what the canvas shows.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+// @linkdir: target/debug
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_get_f64_or(object: int, property: int, fallback: float) -> float
+extern fn ferro_event_x(relativeTo: int) -> float
+extern fn ferro_event_y(relativeTo: int) -> float
+extern fn ferro_event_button() -> int
+extern fn ferro_close(window: int) -> int32
+extern fn ferro_get_i64_or(object: int, property: int, fallback: int) -> int
+extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
+extern fn ferro_set_i64(object: int, property: int, value: int) -> int32
+extern fn ferro_clear(object: int, property: int) -> int32
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_remove_child(parent: int, child: int) -> int32
+extern fn ferro_release(object: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn getNumber(object: int, name: string, fallback: float) -> float =
+    ferro_get_f64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getInt(object: int, name: string, fallback: int) -> int =
+    ferro_get_i64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getFlag(object: int, name: string) -> bool =
+    ferro_get_bool_or(object: object, property: prop(name: name), fallback: toInt8(0)) == toInt8(1)
+
+fn setInt(object: int, name: string, value: int) -> Unit =
+    check(what: name, status: ferro_set_i64(object: object, property: prop(name: name), value: value))
+
+fn clear(object: int, name: string) -> Unit = check(what: name, status: ferro_clear(object: object, property: prop(name: name)))
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- top -----------------------------------------------------------------------------------
+
+type Circle = { id: int, x: float, y: float, diameter: float }
+
+type Ui = { canvas: int, undo: int, redo: int }
+
+effect State {
+    done: fn(List<List<Circle>>) -> Unit
+    undone: fn(List<List<Circle>>) -> Unit
+    nextId: fn(int) -> Unit
+    hovered: fn(int) -> Unit
+    adjusting: fn(int, float) -> Unit
+    ellipses: fn(List<int>) -> Unit
+    ui: fn(Ui) -> Unit
+}
+
+// The states of the circles: `done` has the current one first, `undone` the ones an undo left.
+mut done = [[Circle { id: 0, x: 0.0, y: 0.0, diameter: 0.0 }]]
+mut undone = [[Circle { id: 0, x: 0.0, y: 0.0, diameter: 0.0 }]]
+mut nextId = 0
+// The circle under the pointer, -1 for none.
+mut hovered = 0 - 1
+// The circle whose diameter the window adjusts (-1 for none), and the diameter.
+mut adjustId = 0 - 1
+mut adjustDiameter = 0.0
+// The ellipses on the canvas, in the order of the circles.
+mut ellipses = [0]
+mut ui = Ui { canvas: 0, undo: 0, redo: 0 }
+
+fn setDone(value: List<List<Circle>>) -> Unit = {
+    handle State { done v => { done = v } }
+    perform State.done(value)
+}
+
+fn setUndone(value: List<List<Circle>>) -> Unit = {
+    handle State { undone v => { undone = v } }
+    perform State.undone(value)
+}
+
+fn setNextId(value: int) -> Unit = {
+    handle State { nextId v => { nextId = v } }
+    perform State.nextId(value)
+}
+
+fn setHovered(value: int) -> Unit = {
+    handle State { hovered v => { hovered = v } }
+    perform State.hovered(value)
+}
+
+fn setAdjusting(id: int, diameter: float) -> Unit = {
+    handle State {
+        adjusting i d => {
+            adjustId = i
+            adjustDiameter = d
+        }
+    }
+    perform State.adjusting(id, diameter)
+}
+
+fn setEllipses(value: List<int>) -> Unit = {
+    handle State { ellipses v => { ellipses = v } }
+    perform State.ellipses(value)
+}
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// ---- the history (History of seven_guis_model) -----------------------------------------------
+
+fn current() -> List<Circle> = match done {
+    [top, ...rest] => top
+    [] => List()
+}
+
+fn push(circles: List<Circle>) -> Unit = {
+    setDone(value: listPrepend(done, circles))
+    setUndone(value: List())
+}
+
+fn canUndo() -> bool = length(done) > 1
+
+fn canRedo() -> bool = length(undone) > 0
+
+fn undo() -> Unit = match done {
+    [top, ...rest] => match length(rest) > 0 {
+        true => {
+            setUndone(value: listPrepend(undone, top))
+            setDone(value: rest)
+        }
+        false => nothing()
+    }
+    [] => nothing()
+}
+
+fn redo() -> Unit = match undone {
+    [top, ...rest] => {
+        setDone(value: listPrepend(done, top))
+        setUndone(value: rest)
+    }
+    [] => nothing()
+}
+
+// ---- the drawer (Drawer of seven_guis_model) --------------------------------------------------
+
+// The circles as they are shown: an adjusted diameter shows before it is kept.
+fn circles() -> List<Circle> = mapList(current(), fn(circle) => circle.id == adjustId ? circle { diameter: adjustDiameter } : circle)
+
+fn addCircle(x: float, y: float) -> Unit = {
+    let id = nextId
+    setNextId(value: id + 1)
+    push(circles: listAppend(current(), Circle { id: id, x: x, y: y, diameter: 30.0 }))
+    render()
+}
+
+// The circle nearest to a point among those that contain it, -1 for none.
+type Nearest = { id: int, distance: float }
+
+fn circleAt(x: float, y: float) -> int = {
+    let nearest = foldList(circles(), Nearest { id: 0 - 1, distance: 0.0 }, fn(best, circle) => {
+        let distance = hypot(circle.x - x, circle.y - y)
+        distance <= circle.diameter / 2.0 && (best.id < 0 || distance < best.distance) ? Nearest { id: circle.id, distance: distance } : best
+    })
+    nearest.id
+}
+
+// Keeps the adjusted diameter as a change that can be undone.
+fn commitAdjustment() -> Unit = match adjustId >= 0 {
+    true => commit(id: adjustId)
+    false => nothing()
+}
+
+fn commit(id: int) -> Unit = {
+    let diameter = adjustDiameter
+    let changed = foldList(current(), false, fn(found, circle) => found || (circle.id == id && circle.diameter != diameter))
+    setAdjusting(id: 0 - 1, diameter: 0.0)
+    if changed { push(circles: mapList(current(), fn(circle) => circle.id == id ? circle { diameter: diameter } : circle)) } else { nothing() }
+    render()
+}
+
+// ---- the view --------------------------------------------------------------------------------
+
+fn removeEllipse(ellipse: int) -> Unit = {
+    check(what: "remove ellipse", status: ferro_remove_child(parent: ui.canvas, child: ellipse))
+    check(what: "release ellipse", status: ferro_release(object: ellipse))
+}
+
+fn addEllipse(circle: Circle) -> int = {
+    let ellipse = make(name: "Ellipse")
+    let radius = circle.diameter / 2.0
+    setNumber(object: ellipse, name: "Width", value: circle.diameter)
+    setNumber(object: ellipse, name: "Height", value: circle.diameter)
+    setNumber(object: ellipse, name: "Canvas.Left", value: circle.x - radius)
+    setNumber(object: ellipse, name: "Canvas.Top", value: circle.y - radius)
+    setText(object: ellipse, name: "Stroke", text: "Black")
+    setNumber(object: ellipse, name: "StrokeThickness", value: 1.0)
+    setText(object: ellipse, name: "Fill", text: circle.id == hovered ? "LightGray" : "Transparent")
+    add(parent: ui.canvas, child: ellipse)
+    ellipse
+}
+
+// The canvas shows the circles; Undo and Redo follow the history.
+fn render() -> Unit = {
+    forEachList(ellipses, removeEllipse)
+    setEllipses(value: mapList(circles(), addEllipse))
+    setFlag(object: ui.undo, name: "IsEnabled", value: canUndo())
+    setFlag(object: ui.redo, name: "IsEnabled", value: canRedo())
+}
+
+fn hoverAt(x: float, y: float) -> Unit = {
+    let id = circleAt(x: x, y: y)
+    match id != hovered {
+        true => {
+            setHovered(value: id)
+            render()
+        }
+        false => nothing()
+    }
+}
+
+fn rounded(value: float) -> string = match floatToInt(floor(value + 0.5)) {
+    Success { value } => toString(value)
+    Error { message } => "?"
+}
+
+// Opens the window that adjusts the diameter of a circle; the diameter shows as the slider moves
+// and is kept when the window closes.
+type Adjuster = { window: int, slider: int }
+
+fn adjust(circle: Circle) -> Adjuster = {
+    setAdjusting(id: circle.id, diameter: circle.diameter)
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Adjust diameter")
+    setNumber(object: window, name: "Width", value: 360.0)
+    setNumber(object: window, name: "Height", value: 120.0)
+    let panel = make(name: "StackPanel")
+    setText(object: panel, name: "Margin", text: "16")
+    setNumber(object: panel, name: "Spacing", value: 8.0)
+    let text = make(name: "TextBlock")
+    setText(object: text, name: "Text", text: "Adjust the diameter of the circle at (${rounded(value: circle.x)}, ${rounded(value: circle.y)}).")
+    let slider = make(name: "Slider")
+    setNumber(object: slider, name: "Minimum", value: 4.0)
+    setNumber(object: slider, name: "Maximum", value: 200.0)
+    setNumber(object: slider, name: "Value", value: circle.diameter)
+    let _v = ferro_subscribe(object: slider, event: ferro_event_id(name: "ValueChanged", length: 0 - 1), function: onDiameterChanged, token: 0)
+    let _c = ferro_subscribe(object: window, event: ferro_event_id(name: "WindowClosed", length: 0 - 1), function: onAdjustClosed, token: 0)
+    add(parent: panel, child: text)
+    add(parent: panel, child: slider)
+    add(parent: window, child: panel)
+    check(what: "show", status: ferro_show(window: window))
+    Adjuster { window: window, slider: slider }
+}
+
+// A right click on a circle opens the window of its diameter.
+fn adjustAt(x: float, y: float) -> Unit = match findCircle(id: circleAt(x: x, y: y)) {
+    [circle, ...rest] => {
+        let _w = adjust(circle: circle)
+    }
+    [] => nothing()
+}
+
+fn findCircle(id: int) -> List<Circle> = filterList(circles(), fn(circle) => circle.id == id)
+
+// ---- handlers --------------------------------------------------------------------------------
+
+fn onPressed(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let x = ferro_event_x(relativeTo: ui.canvas)
+    let y = ferro_event_y(relativeTo: ui.canvas)
+    let button = ferro_event_button()
+    if button == 2 { adjustAt(x: x, y: y) } else { if button == 1 { addCircle(x: x, y: y) } else { nothing() } }
+    0
+}
+
+fn onMoved(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    hoverAt(x: ferro_event_x(relativeTo: ui.canvas), y: ferro_event_y(relativeTo: ui.canvas))
+    0
+}
+
+fn onDiameterChanged(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    setAdjusting(id: adjustId, diameter: getNumber(object: sender, name: "Value", fallback: adjustDiameter))
+    render()
+    0
+}
+
+fn onAdjustClosed(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    commitAdjustment()
+    0
+}
+
+fn onUndo(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    undo()
+    render()
+    0
+}
+
+fn onRedo(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    redo()
+    render()
+    0
+}
+
+fn button(name: string) -> int = {
+    let button = make(name: "Button")
+    setText(object: button, name: "Name", text: name)
+    setText(object: button, name: "Content", text: name)
+    button
+}
+
+// The callbacks are named functions written at each ferro_subscribe: Osprey passes a function to C
+// only when it is known where it is passed, not a parameter.
+
+fn onStart(token: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Circle Drawer")
+    setNumber(object: window, name: "Width", value: 560.0)
+    setNumber(object: window, name: "Height", value: 460.0)
+    let dock = make(name: "DockPanel")
+    setText(object: dock, name: "Margin", text: "16")
+    let bar = make(name: "StackPanel")
+    setText(object: bar, name: "DockPanel.Dock", text: "Top")
+    setText(object: bar, name: "Orientation", text: "Horizontal")
+    setText(object: bar, name: "HorizontalAlignment", text: "Center")
+    setNumber(object: bar, name: "Spacing", value: 8.0)
+    setText(object: bar, name: "Margin", text: "0,0,0,8")
+    let undoButton = button(name: "Undo")
+    let _undoButton = ferro_subscribe(object: undoButton, event: ferro_event_id(name: "Click", length: 0 - 1), function: onUndo, token: 0)
+    let redoButton = button(name: "Redo")
+    let _redoButton = ferro_subscribe(object: redoButton, event: ferro_event_id(name: "Click", length: 0 - 1), function: onRedo, token: 0)
+    add(parent: bar, child: undoButton)
+    add(parent: bar, child: redoButton)
+    let border = make(name: "Border")
+    setText(object: border, name: "BorderBrush", text: "Gray")
+    setText(object: border, name: "BorderThickness", text: "1")
+    let canvas = make(name: "Canvas")
+    setText(object: canvas, name: "Name", text: "Canvas")
+    setText(object: canvas, name: "Background", text: "White")
+    let _p = ferro_subscribe(object: canvas, event: ferro_event_id(name: "PointerPressed", length: 0 - 1), function: onPressed, token: 0)
+    let _m = ferro_subscribe(object: canvas, event: ferro_event_id(name: "PointerMoved", length: 0 - 1), function: onMoved, token: 0)
+    add(parent: border, child: canvas)
+    add(parent: dock, child: bar)
+    add(parent: dock, child: border)
+    add(parent: window, child: dock)
+    setUi(value: Ui { canvas: canvas, undo: undoButton, redo: redoButton })
+    setDone(value: [List()])
+    setUndone(value: List())
+    setEllipses(value: List())
+    // A few circles, to show (Drawer::with_example).
+    addCircle(x: 90.0, y: 80.0)
+    addCircle(x: 160.0, y: 120.0)
+    addCircle(x: 240.0, y: 70.0)
+    addCircle(x: 300.0, y: 160.0)
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn expect(what: string, ok: bool) -> Unit = print("script: ${what}: ${ok ? "ok" : "FAILED"}")
+
+fn click(object: int) -> Unit = check(what: "raise", status: ferro_raise(object: object, event: ferro_event_id(name: "Click", length: 0 - 1)))
+
+fn shownCircles() -> int = length(ellipses)
+
+fn firstDiameter() -> float = match current() {
+    [circle, ...rest] => circle.diameter
+    [] => 0.0
+}
+
+fn firstWidth() -> float = match ellipses {
+    [ellipse, ...rest] => getNumber(object: ellipse, name: "Width", fallback: 0.0)
+    [] => 0.0
+}
+
+fn script() -> Unit = {
+    // The scenario starts from an empty drawer: the example circles are undone first.
+    undo()
+    undo()
+    undo()
+    undo()
+    render()
+    expect(what: "no circle, Undo is disabled", ok: shownCircles() == 0 && !getFlag(object: ui.undo, name: "IsEnabled"))
+    addCircle(x: 40.0, y: 40.0)
+    addCircle(x: 100.0, y: 60.0)
+    expect(what: "2 circles", ok: shownCircles() == 2)
+    click(object: ui.undo)
+    expect(what: "1 circle after Undo", ok: shownCircles() == 1)
+    click(object: ui.redo)
+    expect(what: "2 circles after Redo", ok: shownCircles() == 2)
+    // The diameter of the first circle through its window and slider.
+    match current() {
+        [first, ...rest] => {
+            let adjuster = adjust(circle: first)
+            expect(what: "the slider of the window starts at 30", ok: getNumber(object: adjuster.slider, name: "Value", fallback: 0.0) == 30.0)
+            adjustTo(adjuster: adjuster, diameter: 80.0)
+        }
+        [] => print("script: no circle: FAILED")
+    }
+}
+
+// Moves the slider of the adjust window (its ValueChanged handler runs as for a drag), then
+// closes the window, which keeps the diameter.
+fn adjustTo(adjuster: Adjuster, diameter: float) -> Unit = {
+    setNumber(object: adjuster.slider, name: "Value", value: diameter)
+    expect(what: "the adjusted diameter shows", ok: firstWidth() == diameter)
+    check(what: "close", status: ferro_close(window: adjuster.window))
+    click(object: ui.undo)
+    expect(what: "Undo: the first circle has a diameter of 30", ok: firstDiameter() == 30.0)
+    click(object: ui.redo)
+    expect(what: "Redo: the first circle has a diameter of 80", ok: firstDiameter() == 80.0)
+    hoverAt(x: 40.0, y: 40.0)
+    let first = match current() {
+        [circle, ...rest] => circle.id
+        [] => 0 - 1
+    }
+    expect(what: "the pointer at (40, 40) is over the first circle", ok: hovered == first && first >= 0)
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}

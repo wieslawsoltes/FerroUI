@@ -126,12 +126,22 @@ fn build_reports_the_diagnostics_of_the_compiler_with_their_codes() {
     assert!(broken.errors[0].contains("error FRN2000: "), "{:?}", broken.errors);
     assert!(broken.errors[0].contains("Missing"), "{:?}", broken.errors);
 
-    // A document the emitter refuses: the code of an emit error, with the document.
-    let refused = fixture.build("refused", &[("a-b.xaml", border.as_str()), ("a_b.xaml", border.as_str())], |build| build);
-    assert_eq!(
-        refused.errors,
-        ["a_b.xaml: error FRN3000: the generated function `build_a_b_xaml` would also be defined for the document `a-b.xaml`; rename one of them"]
+    // A document the emitter refuses: the code of an emit error, with the document. Two public
+    // documents the loader table cannot tell apart are refused, with both (#849).
+    let refused = fixture.build("refused", &[("a-b.xaml", border.as_str()), ("A-B.xaml", border.as_str())], |build| build);
+    assert_eq!(refused.errors.len(), 1, "{:?}", refused.errors);
+    assert!(
+        refused.errors[0].starts_with(
+            "A-B.xaml: error FRN3000: the document is public and its URI is the URI of the public document `a-b.xaml` for the loader table"
+        ),
+        "{:?}",
+        refused.errors
     );
+
+    // Two documents whose build functions would have one name are both compiled, with names
+    // disambiguated from their paths (#849).
+    let disambiguated = fixture.build("disambiguated", &[("a-b.xaml", border.as_str()), ("a_b.xaml", border.as_str())], |build| build);
+    assert_eq!(disambiguated.errors, Vec::<String>::new());
 }
 
 /// A method named as the handler of an event that no method of the root object answers to

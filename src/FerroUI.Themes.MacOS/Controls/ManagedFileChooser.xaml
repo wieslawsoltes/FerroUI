@@ -46,6 +46,7 @@
                     xmlns:internal="using:FerroUI.Dialogs.Internal"
                     xmlns:converters="clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
                     x:ClassModifier="internal">
+  <internal:ManagedStorageFallback x:Key="ManagedStorageFallback" />
   <Design.PreviewWith>
     <Border Padding="20" Width="800" Height="500">
       <dialogs:ManagedFileChooser />
@@ -432,7 +433,7 @@
 
   <!-- DefaultContentDialogStyle (ContentDialog_themeresources.xaml), as the overwrite prompt of the
        file chooser. -->
-  <ControlTheme x:Key="DefaultContentDialogStyle" TargetType="dialogs:ManagedFileChooserOverwritePrompt">
+  <ControlTheme x:Key="ManagedFileChooserPromptStyle" TargetType="dialogs:ManagedFileChooserOverwritePrompt">
     <Setter Property="Foreground" Value="{DynamicResource ContentDialogForeground}" />
     <Setter Property="Background" Value="{DynamicResource ContentDialogBackground}" />
     <Setter Property="BorderThickness" Value="{DynamicResource ContentDialogBorderWidth}" />
@@ -539,5 +540,5 @@
     </Style>
   </ControlTheme>
 
-  <ControlTheme x:Key="{x:Type dialogs:ManagedFileChooserOverwritePrompt}" TargetType="dialogs:ManagedFileChooserOverwritePrompt" BasedOn="{StaticResource DefaultContentDialogStyle}" />
+  <ControlTheme x:Key="{x:Type dialogs:ManagedFileChooserOverwritePrompt}" TargetType="dialogs:ManagedFileChooserOverwritePrompt" BasedOn="{StaticResource ManagedFileChooserPromptStyle}" />
 </ResourceDictionary>

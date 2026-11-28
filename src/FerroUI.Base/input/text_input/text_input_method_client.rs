@@ -82,6 +82,15 @@ impl TextInputMethodClientEvents {
     }
 }
 
+/// The text an input method is given for a masked field.
+///
+/// An input method can be another process, so it never gets the real text. Each character
+/// becomes a mask of the same UTF-16 length, so that the offsets of a selection or of an edit
+/// that the input method reports still address the real text.
+pub fn masked_surrounding_text(text: &str) -> String {
+    text.chars().map(|c| if c.len_utf16() == 2 { '\u{10FFFD}' } else { '\u{2022}' }).collect()
+}
+
 /// The text editing side of a text input method: what a text editing
 /// control gives the input method of the platform to work with.
 ///
@@ -109,7 +118,19 @@ pub trait TextInputMethodClient {
     /// [`input_method_editing`](Self::input_method_editing); for any other client
     /// this is `None`, and the platform backends keep their upstream behaviour.
     fn input_method_connection(&self) -> Option<Rc<TextInputMethodConnection>> {
+        self.input_method_editing()?;
         self.events().connection()
+    }
+
+    /// The platform can replace text adjoining the primary selection in a
+    /// single managed edit. This capability has no effect on composition.
+    fn supports_surrounding_text_edits(&self) -> bool {
+        false
+    }
+
+    /// The current managed connection for contextual replacement.
+    fn surrounding_text_edit_connection(&self) -> Option<Rc<TextInputMethodConnection>> {
+        self.supports_surrounding_text_edits().then(|| self.events().connection()).flatten()
     }
 
     /// Atomic composition, when implemented by this editing control. Returning

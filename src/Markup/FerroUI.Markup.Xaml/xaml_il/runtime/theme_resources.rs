@@ -48,6 +48,13 @@ use crate::XamlLoadError;
 
 #[path = "compact_resource_rows.rs"]
 mod compact;
+#[path = "packed_resource_rows.rs"]
+mod packed;
+pub use packed::{PackedRows, PackedValueRows};
+
+#[path = "theme_resource_program.rs"]
+mod program;
+pub use program::TypedResourceProgram;
 
 /// A resource that is `{StaticResource target}` alone (a resource that names another one),
 /// added under `key`.
@@ -285,6 +292,51 @@ fn build_static_brush(
     Ok(to_value(brush.clone()))
 }
 
+/// [`add_resource_aliases`] of the rows of a packed table (#855): the same additions and builds,
+/// in the same order, with the same errors at the same positions.
+#[inline(never)]
+pub fn add_packed_resource_aliases(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<ResourceAliasRow>::new(rows))
+}
+
+/// [`add_literal_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_literal_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<LiteralBrushRow>::new(rows))
+}
+
+/// [`add_dynamic_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_dynamic_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<DynamicBrushRow>::new(rows))
+}
+
+/// [`add_static_brushes`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_static_brushes(
+    dictionary: &Ref<ResourceDictionary>,
+    context: &Rc<XamlIlContext>,
+    document: &'static DocumentInfo,
+    rows: &'static PackedRows,
+) -> Result<(), XamlLoadError> {
+    compact::add_rows(dictionary, context, document, packed::PackedSource::<StaticBrushRow>::new(rows))
+}
+
 /// `IDictionary.Add(key, value)` of a plain value, as the statement of generated code makes it:
 /// the dictionary as its contract (`rt::cast`), the key, the value, then the call; a failure of
 /// the cast or of the call is the load error at `line`, `position`. `value` is made after the
@@ -367,6 +419,58 @@ pub fn add_string_resources(
         add_value_row(dictionary, row.key, &|| string_object(row.value), row.line, row.position)?;
     }
     Ok(())
+}
+
+/// [`add_double_resources`] of the rows of a packed table (#855): the same additions, in the same
+/// order, with the same errors at the same positions.
+#[inline(never)]
+pub fn add_packed_double_resources(dictionary: &Ref<ResourceDictionary>, rows: &'static PackedValueRows) -> Result<(), XamlLoadError> {
+    rows.each(5, &mut |index, key, line, position, value| {
+        let value = rows.number(index, value[0])?;
+        add_value_row(dictionary, key, &|| to_object(value), line, position)
+    })
+}
+
+/// The four numbers of a record of a packed table of thicknesses or corner radii.
+fn packed_components(rows: &PackedValueRows, index: usize, value: &[u16]) -> Result<[f64; 4], XamlLoadError> {
+    Ok([rows.number(index, value[0])?, rows.number(index, value[1])?, rows.number(index, value[2])?, rows.number(index, value[3])?])
+}
+
+/// [`add_thickness_resources`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_thickness_resources(dictionary: &Ref<ResourceDictionary>, rows: &'static PackedValueRows) -> Result<(), XamlLoadError> {
+    rows.each(8, &mut |index, key, line, position, value| {
+        let [left, top, right, bottom] = packed_components(rows, index, value)?;
+        add_value_row(dictionary, key, &|| to_object(Thickness::__markup_new_3(left, top, right, bottom)), line, position)
+    })
+}
+
+/// [`add_corner_radius_resources`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_corner_radius_resources(dictionary: &Ref<ResourceDictionary>, rows: &'static PackedValueRows) -> Result<(), XamlLoadError> {
+    rows.each(8, &mut |index, key, line, position, value| {
+        let [top_left, top_right, bottom_right, bottom_left] = packed_components(rows, index, value)?;
+        add_value_row(dictionary, key, &|| to_object(CornerRadius::__markup_new_3(top_left, top_right, bottom_right, bottom_left)), line, position)
+    })
+}
+
+/// [`add_color_resources`] of the rows of a packed table (#855). The colour is made before the
+/// dictionary is cast, as there.
+#[inline(never)]
+pub fn add_packed_color_resources(dictionary: &Ref<ResourceDictionary>, rows: &'static PackedValueRows) -> Result<(), XamlLoadError> {
+    rows.each(6, &mut |_, key, line, position, value| {
+        let color = Color::__markup_FromUInt32_2(u32::from(value[0]) | (u32::from(value[1]) << 16));
+        add_value_row(dictionary, key, &|| to_object(color), line, position)
+    })
+}
+
+/// [`add_string_resources`] of the rows of a packed table (#855).
+#[inline(never)]
+pub fn add_packed_string_resources(dictionary: &Ref<ResourceDictionary>, rows: &'static PackedValueRows) -> Result<(), XamlLoadError> {
+    rows.each(6, &mut |index, key, line, position, value| {
+        let text = rows.text(index, value[0], value[1])?;
+        add_value_row(dictionary, key, &|| string_object(text), line, position)
+    })
 }
 
 #[cfg(test)]

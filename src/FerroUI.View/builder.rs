@@ -26,10 +26,10 @@ use crate::element::{Attach, ControlElement, Handler, Element, ElementClass, Int
 use crate::reactive::{Memo, Signal, TwoWay};
 use ferroui_base::data::BindingBase;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent};
-use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, Upcast};
+use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, StyledValue, Upcast};
 use ferroui_controls::Control;
 use std::any::{Any, TypeId};
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
 
@@ -60,19 +60,19 @@ impl<T: ViewClass> Builder for T {
 /// element take.
 pub trait TypedProperty: 'static {
     /// The type of the value of the property.
-    type Value: PropertyValue;
+    type Value: StyledValue;
     /// The property, untyped.
     fn untyped(&'static self) -> &'static FerroProperty;
 }
 
-impl<T: PropertyValue> TypedProperty for StyledProperty<T> {
+impl<T: StyledValue> TypedProperty for StyledProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         self.as_property()
     }
 }
 
-impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
+impl<T: StyledValue> TypedProperty for AttachedProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let styled: &'static StyledProperty<T> = self;
@@ -80,7 +80,7 @@ impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
     }
 }
 
-impl<O: ObjectType, T: PropertyValue> TypedProperty for DirectProperty<O, T> {
+impl<O: ObjectType, T: StyledValue> TypedProperty for DirectProperty<O, T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let base: &'static ferroui_base::DirectPropertyBase<T> = self;
@@ -134,10 +134,18 @@ pub mod markers {
     pub struct FromControlElement;
     /// A binding.
     pub struct FromBinding;
+    /// A typed binding to a property of a view model, of value type `V`.
+    pub struct FromModel<V>(std::marker::PhantomData<V>);
 }
 
 /// What a setter of a property whose value is `T` takes. `M` tells the
 /// conversions apart and is inferred.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a value for a property of type `{T}`",
+    label = "this cannot set the property",
+    note = "a setter takes the value, what converts to it, a signal, a closure, a two-way signal or a binding",
+    note = "the short typed forms are rgb(0x1E293B), ctrl(KeyCode::S), translate(x, y), shadow(..), blur(r) and path!(\"..\")"
+)]
 pub trait IntoProp<T, M> {
     /// The value of the element.
     fn into_prop(self) -> PropValue;
@@ -255,41 +263,90 @@ impl<T: PropertyValue> KeptBox<T> {
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
+ferroui_base::ferro_thread_local! {
+    /// The control and the property whose effect runs the closure of a reactive property
+    /// (`compute_into`): a closure made by the builders takes it and sets the property itself.
+    static TARGET: Cell<Option<(Ref<Control>, &'static FerroProperty)>> = const { Cell::new(None) };
+}
+
+/// Runs the closure of a reactive property (a value of [`PropValue::Dynamic`], of
+/// [`PropValue::Follows`] or the `get` of [`PropValue::TwoWay`]) for the property of a control.
+///
+/// A closure that the builders made knows the type of its value: it sets the property with it,
+/// through the typed setter, with no box and no copy of the value, and this returns `None`
+/// (docs/porting/desktop-performance.md, the typed path of #804). The value of any other closure
+/// is returned with the control, for the untyped setter. The typed path travels beside the
+/// public representation of a property value: the closure finds its target on the thread, so
+/// `PropValue` has neither a new variant nor a new field.
+pub(crate) fn compute_into(
+    control: Ref<Control>,
+    property: &'static FerroProperty,
+    compute: &dyn Fn() -> BoxedValue,
+) -> Option<(Ref<Control>, BoxedValue)> {
+    let previous = TARGET.replace(Some((control, property)));
+    let value = compute();
+    let left = TARGET.replace(previous);
+    left.map(|(control, _)| (control, value))
+}
+
+/// The closure of a reactive property of type `T`, from what computes its value: run by the
+/// effect of the property ([`compute_into`]) it sets the property with the value as it is; run
+/// anywhere else it returns the value in the box of the run before ([`KeptBox`]).
+fn typed_compute<T: StyledValue>(value: impl Fn() -> T + 'static) -> Rc<dyn Fn() -> BoxedValue> {
+    let kept = KeptBox::<T>::new();
+    Rc::new(move || {
+        // Taken before the value is computed, so that a closure the computation runs (one of a
+        // control it mounts) does not find it.
+        let target = TARGET.try_with(Cell::take).ok().flatten();
+        let value = value();
+        match target {
+            Some((control, property)) => {
+                crate::reactive::untrack(|| {
+                    if let Err(value) = control.try_set_value_typed(property, value) {
+                        // Not the type of the property: the untyped setter converts it.
+                        control.set_value_untyped(property, &value, ferroui_base::data::BindingPriority::LocalValue);
+                    }
+                });
+                // A value that sets nothing, wherever it is given.
+                ferroui_base::data::BindingOperations::do_nothing()
+            }
+            None => kept.boxed(value),
+        }
+    })
+}
+
+impl<T: StyledValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
     fn into_prop(self) -> PropValue {
         PropValue::Value(boxed(self.into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
     fn into_prop(self) -> PropValue {
-        let kept = KeptBox::<T>::new();
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || kept.boxed(self.get().into_value())) }
+        PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
     fn into_prop(self) -> PropValue {
-        let kept = KeptBox::<T>::new();
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || kept.boxed(self.get().into_value())) }
+        PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
+impl<T: StyledValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
     fn into_prop(self) -> PropValue {
-        let kept = KeptBox::<T>::new();
-        PropValue::Dynamic(Rc::new(move || kept.boxed(self().into_value())))
+        PropValue::Dynamic(typed_compute::<T>(move || self().into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
+impl<T: StyledValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
     for TwoWay<V>
 {
     fn into_prop(self) -> PropValue {
         let signal = self.0;
         PropValue::TwoWay {
             source: Some(signal.source_id()),
-            get: Rc::new(move || boxed(signal.get().into_value())),
+            get: typed_compute::<T>(move || signal.get().into_value()),
             set: Rc::new(move |value: &dyn Any| {
                 if let Some(value) = value.downcast_ref::<T>().and_then(V::from_value) {
                     if signal.is_alive() {
@@ -320,7 +377,7 @@ impl<T: ObjectType + Upcast<Control>, E: IntoElement> IntoProp<Option<Ref<T>>, m
 /// (`.text(Bind(binding))`).
 pub struct Bind<B: BindingBase + 'static>(pub B);
 
-impl<T: PropertyValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
+impl<T: StyledValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
     fn into_prop(self) -> PropValue {
         PropValue::Binding(Rc::new(self.0))
     }
@@ -461,6 +518,54 @@ impl<T> El<T> {
         self
     }
 
+    /// Makes a property follow a resource, as `{DynamicResource}` does: through a change of the
+    /// resource or of the theme variant, with no component running again. `key` is a typed key
+    /// of a theme (`keys::ButtonBackground`), whose value must convert to the property, or text.
+    pub fn dynamic_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: true,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Gives a property the value of a resource once, as `{StaticResource}` does: the first
+    /// value the control finds, which later changes do not replace. `key` is a typed key of a
+    /// theme or text.
+    pub fn static_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: false,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Binds a property of an element of a control template to a property of the control the
+    /// template is applied to (`{TemplateBinding}`). The two have the same value type.
+    pub fn template_bind<P, Q>(mut self, property: &'static P, source: &'static Q) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        Q: TypedProperty<Value = P::Value> + ?Sized,
+    {
+        let binding = ferroui_base::data::TemplateBinding::new(source.untyped());
+        set_prop(&mut self.element, property.untyped(), PropValue::Binding(binding));
+        self
+    }
+
     /// Handles a routed event with the control that handles it.
     pub fn on<A: IRoutedEventArgs + 'static>(
         self,
@@ -570,6 +675,12 @@ impl<T> From<El<T>> for Element {
     fn from(builder: El<T>) -> Self {
         builder.build()
     }
+}
+
+/// Gives a property of an element a value, in place of one it has.
+fn set_prop(element: &mut ControlElement, property: &'static FerroProperty, value: PropValue) {
+    element.props.retain(|entry| !std::ptr::eq(entry.property, property));
+    element.props.push(PropEntry { property, value });
 }
 
 /// The object a property is set on, for the generated code.

@@ -1,0 +1,41 @@
+[package]
+name = "generated-rust-fixture-consumer"
+description = "Test fixture of the XAML compiler: an application whose compiled documents construct classes of other crates and whose generated names collide (#849)"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+# The build script hands the path of the `.xamlmeta` of the crate to the build scripts of the crates
+# that depend on this one.
+links = "generated_rust_fixture_consumer_xaml"
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+# The crates whose classes the documents of this crate construct. The build script reads the
+# `.xamlmeta` of each from `DEP_<CRATE>_XAML_XAMLMETA`.
+generated-rust-fixture-library = { path = "../Library" }
+ferroui-themes-fluent = { workspace = true }
+ferroui-themes-macos = { workspace = true }
+ferroui-themes-material = { workspace = true }
+ferroui-themes-simple = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+
+[build-dependencies]
+# The build script compiles the documents of the crate against the type models.
+ferroui-build = { workspace = true }
+
+# The themes the documents construct are trimmed (the default): a construction of a class that can
+# be constructed from selected units is `with_parts` over the table the build writes, and every
+# other class is constructed with `new()`.

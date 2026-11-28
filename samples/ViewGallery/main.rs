@@ -1,11 +1,15 @@
-//! The gallery in a window of its own, in the Fluent theme with the themes of the colour picker
-//! and the TreeDataGrid.
+//! The gallery in a window of its own, in the Fluent theme (the units the gallery needs) with the
+//! themes of the colour picker and the TreeDataGrid.
 
 use ferroui_base::styling::{IStyle, Styles};
 use ferroui_base::utilities::UriRef;
 use ferroui_base::metadata::from_markup_value;
 use ferroui_markup_xaml::FerroXamlLoader;
 use std::rc::Rc;
+
+// `compiled_markup`: the table of the units of the Fluent theme the build wrote (`build.rs`).
+ferroui_markup_xaml::include_compiled_xaml!();
+use compiled_markup::THEME_PARTS_FERROUI_THEMES_FLUENT_FLUENTTHEME as THEME_PARTS;
 
 fn style_at(uri: &str) -> Rc<dyn IStyle> {
     let uri = UriRef::parse(uri).expect("a URI");
@@ -21,7 +25,7 @@ fn main() {
     ferroui_view::launch_themed(
         || {
             let styles = Styles::new();
-            styles.add(ferroui_themes_fluent::FluentTheme::new().as_style());
+            styles.add(ferroui_themes_fluent::FluentTheme::with_parts(None, THEME_PARTS).as_style());
             styles.add(style_at("ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml"));
             styles.add(style_at("ferres://FerroUI.Controls.TreeDataGrid/Themes/Fluent.xaml"));
             let style: Rc<dyn IStyle> = styles.into();

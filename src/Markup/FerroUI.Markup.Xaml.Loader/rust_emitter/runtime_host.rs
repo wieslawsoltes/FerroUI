@@ -18,7 +18,9 @@ use super::compiled::{compile_documents_with, file_of, generate_class_file_with,
 use super::compiled_resources::CompiledMarkupTypeSystem;
 use super::runtime_types::RuntimeEmitTypes;
 use super::source::function_name_of;
-use super::transform::{transform_group, DocumentSource, TransformOptions, TransformedDocument};
+use super::transform::TransformOptions;
+#[cfg(any(test, feature = "testing"))]
+use super::transform::{transform_group, DocumentSource, TransformedDocument};
 use ferroui_build_scan::xaml_metadata::XamlMetadata;
 
 impl EmitterHost<'static> {
@@ -68,13 +70,15 @@ fn transform_with_runtime_types(
 /// With `root_uri` (`ferres://MyApp/`) the base URI of a document is the
 /// root URI followed by its name, the URI it is loaded by.
 ///
-/// A document whose generated functions would have the name of a function
-/// generated for an earlier document (names that differ only in case or in
-/// characters that are not letters or digits, or a name that ends in
-/// `_untyped`, `_deferred_<n>` or `_part_<n>`, the names of the functions of
-/// its untyped build, of its deferred content and of the parts of a split
-/// function) is reported instead of becoming a duplicate definition rustc
-/// rejects, and is left out of the group. A group that does not transform
+/// Documents whose generated functions would have one name (names that differ
+/// only in case or in characters that are not letters or digits, or a name
+/// that ends in `_untyped`, `_deferred_<n>` or `_part_<n>`, the names of the
+/// functions of an untyped build, of deferred content and of the parts of a
+/// split function) get names disambiguated from their paths
+/// ([`super::allocate_names`], #849); a document whose name is unique keeps
+/// the established one. A public document whose URI the loader table cannot
+/// tell from the URI of an earlier public document (they differ only in case)
+/// is reported with that document and left out of the group. A group that does not transform
 /// makes every document of it not eligible, with the error; a document with
 /// an unsupported node is reported with the node, and the others are not
 /// affected.
@@ -90,8 +94,17 @@ pub fn compile_documents(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> Vec<CompiledDocument> {
+    compile_with_options(documents, root_uri, &TransformOptions::of(configuration), dependencies)
+}
+
+fn compile_with_options(
+    documents: &[(&str, &str)],
+    root_uri: Option<&str>,
+    options: &TransformOptions,
+    dependencies: &[XamlMetadata],
+) -> Vec<CompiledDocument> {
     match EmitterHost::runtime(dependencies) {
-        Ok(host) => compile_documents_with(&host, documents, root_uri, &TransformOptions::of(configuration)),
+        Ok(host) => compile_documents_with(&host, documents, root_uri, options),
         Err(error) => documents
             .iter()
             .map(|(name, _)| CompiledDocument {
@@ -127,7 +140,18 @@ pub fn generate_file(
     configuration: &RuntimeXamlLoaderConfiguration,
     dependencies: &[XamlMetadata],
 ) -> GeneratedFile {
-    file_of(assembly_name, root_uri, compile_documents(documents, Some(root_uri), configuration, dependencies))
+    generate_file_with_runtime_types(assembly_name, root_uri, documents, &TransformOptions::of(configuration), dependencies)
+}
+
+/// Compiles against the registered runtime types with explicitly selected emitter options.
+pub fn generate_file_with_runtime_types(
+    assembly_name: &str,
+    root_uri: &str,
+    documents: &[(&str, &str)],
+    options: &TransformOptions,
+    dependencies: &[XamlMetadata],
+) -> GeneratedFile {
+    file_of(assembly_name, root_uri, compile_with_options(documents, Some(root_uri), options, dependencies))
 }
 
 /// A group of documents with owned texts as the borrowed form
@@ -383,35 +407,85 @@ mod tests {
         }
     }
 
+    /// Not from upstream (#849): documents whose build functions would have one name (names that
+    /// differ only in case or in characters that are not letters or digits, or a name that ends in
+    /// `_untyped` or `_deferred_<n>`) are compiled with names disambiguated from their paths, and
+    /// a document whose name is unique keeps its established name. Two public documents whose
+    /// URIs differ only in case are an error that names both; a document that is not public is
+    /// not in the loader table, so its URI is not ambiguous.
     #[test]
-    fn colliding_function_names_are_reported() {
+    fn colliding_function_names_are_disambiguated() {
         let xaml = "<Border xmlns='https://github.com/ferroui'/>";
+        let internal = "<Border xmlns='https://github.com/ferroui' \
+                        xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml' x:ClassModifier='Internal'/>";
         let documents = [
             ("a-b.xaml", xaml),
             ("a_b.xaml", xaml),
             ("Case.xaml", xaml),
             ("case.xaml", xaml),
+            ("Lower.xaml", xaml),
+            ("lower.xaml", internal),
             ("x.xaml", xaml),
             ("x.xaml_untyped", xaml),
             ("y.xaml_deferred_0", xaml),
             ("y.xaml", xaml),
+            ("unique.xaml", xaml),
         ];
-        let compiled = compile_documents(&documents, None, &RuntimeXamlLoaderConfiguration::new(), &[]);
-        for (name, other, item) in [
-            ("a_b.xaml", "a-b.xaml", "build_a_b_xaml"),
-            ("case.xaml", "Case.xaml", "build_case_xaml"),
-            ("x.xaml_untyped", "x.xaml", "build_x_xaml_untyped"),
-            ("y.xaml", "y.xaml_deferred_0", "build_y_xaml"),
-        ] {
-            let reason = reason(&compiled, name).unwrap_or_else(|| panic!("{name} is not reported"));
-            assert_eq!(
-                reason,
-                format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them")
-            );
+        let configuration = RuntimeXamlLoaderConfiguration::new();
+        let compiled = compile_documents(&documents, Some("ferres://App/"), &configuration, &[]);
+        let function = |name: &str| {
+            let document = compiled.iter().find(|document| document.name == name);
+            document.map(|document| document.function_name.clone()).unwrap_or_default()
+        };
+        let disambiguated =
+            ["a-b.xaml", "a_b.xaml", "Lower.xaml", "lower.xaml", "x.xaml", "x.xaml_untyped", "y.xaml_deferred_0", "y.xaml"];
+        for name in disambiguated {
+            assert_eq!(reason(&compiled, name), None, "{name}");
+            let (established, function) = (function_name_of(name), function(name));
+            assert!(function.starts_with(&format!("{established}_")), "{name}: {function}");
+            assert_eq!(function.len(), established.len() + 9, "{name}: {function}");
         }
-        for name in ["a-b.xaml", "Case.xaml", "x.xaml", "y.xaml_deferred_0"] {
-            let reason = reason(&compiled, name).unwrap_or_default();
-            assert!(!reason.contains("would also be defined"), "{name}: {reason}");
+        assert_ne!(function("a-b.xaml"), function("a_b.xaml"));
+        assert_eq!(function("unique.xaml"), "build_unique_xaml");
+        assert_eq!(reason(&compiled, "Case.xaml"), None);
+        let ambiguous = reason(&compiled, "case.xaml").expect("case.xaml is reported");
+        assert!(ambiguous.contains("the URI of the public document `Case.xaml`"), "{ambiguous}");
+
+        // The file of the group defines every name once.
+        let file = generate_file("App", "ferres://App/", &documents, &configuration, &[]);
+        for document in compiled.iter().filter(|document| document.source.is_ok()) {
+            let public = format!("pub fn {}(", document.function_name);
+            let internal = format!("pub(crate) fn {}(", document.function_name);
+            let count = file.source.matches(&public).count() + file.source.matches(&internal).count();
+            assert_eq!(count, 1, "{}: {}", document.name, document.function_name);
         }
+    }
+
+    /// Not from upstream (#603): with the option of compile-time declared properties on, a plain
+    /// property of a compiled binding path is written with the position of the property in its
+    /// declaration (`rt::declared_path_property`); off, the default, it is found by name at run
+    /// time (`rt::path_property`), so the checked-in files do not change.
+    #[test]
+    fn declared_properties_are_resolved_at_compile_time_with_the_option() {
+        let xaml = "<StackPanel xmlns='https://github.com/ferroui' \
+                    xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'>\
+                    <TextBlock x:DataType='ResourceDictionary' Text='{CompiledBinding Count}'/></StackPanel>";
+        let compile = |on: bool| {
+            let before = super::super::set_compile_time_declared_properties(on);
+            let configuration = RuntimeXamlLoaderConfiguration::new();
+            let compiled = compile_documents(&[("Paths.xaml", xaml)], None, &configuration, &[]);
+            super::super::set_compile_time_declared_properties(before);
+            compiled[0].source.clone().unwrap_or_else(|reason| panic!("not eligible: {reason}"))
+        };
+        let by_name = compile(false);
+        assert!(by_name.contains("rt::path_property(&builder, ") && by_name.contains("\"Count\""), "{by_name}");
+        assert!(!by_name.contains("rt::declared_path_property("), "{by_name}");
+        let resolved = compile(true);
+        let markup = <ferroui_base::controls::ResourceDictionary as ferroui_base::StaticType>::TYPE;
+        let index = ferroui_base::metadata::MarkupType::find_by_type_info(markup)
+            .and_then(|markup| markup.properties.iter().position(|property| property.name == "Count"))
+            .expect("Count is declared");
+        assert!(resolved.contains(&format!("::TYPE), {index}, \"Count\", false, ")), "{resolved}");
+        assert!(resolved.contains("rt::declared_path_property(&builder, "), "{resolved}");
     }
 }

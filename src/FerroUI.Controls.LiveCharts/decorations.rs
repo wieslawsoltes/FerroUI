@@ -1,12 +1,22 @@
-use crate::{ChartKind, ChartPointerEventArgs, LegendPosition, TooltipPosition};
+use crate::{ChartKind, ChartPointerEventArgs, LegendPosition};
 use ferroui_base::media::{Color, FlowDirection, FormattedText, Typeface};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{Point, Rect, Size};
-use ferroui_livecharts::{Geometry, PaintStyle, Primitive, Scene, TextAnchor};
+use ferroui_livecharts::{
+    DefaultTooltip, Geometry, HeatLegend, HeatLegendSource, LegendItem, PaintStyle, PopUpPlacement,
+    Primitive, Scene, TextAnchor,
+};
 
+/// The room of the title above the plot.
+const TITLE_HEIGHT: f64 = 36.0;
+
+/// The draw margin of a chart without an explicit one: the room of the axes, the title and the
+/// legend. `legend_room` is the width (at the left or right) or height (at the top or bottom) a
+/// heat legend measures; the native legend of the series takes a fixed room.
 pub(crate) fn draw_margin(
     size: Size,
     legend: LegendPosition,
+    legend_room: Option<f64>,
     title: bool,
     kind: ChartKind,
 ) -> Option<Rect> {
@@ -19,31 +29,18 @@ pub(crate) fn draw_margin(
         } else {
             (12.0, 12.0, 12.0, 12.0)
         };
-    let left: f64 = base_left
-        + if legend == LegendPosition::Left {
-            150.0
+    let room = |side: LegendPosition, fixed: f64| {
+        if legend == side {
+            legend_room.unwrap_or(fixed)
         } else {
             0.0
-        };
-    let right = base_right
-        + if legend == LegendPosition::Right {
-            150.0
-        } else {
-            0.0
-        };
-    let top: f64 = base_top
-        + if title { 36.0 } else { 0.0 }
-        + if legend == LegendPosition::Top {
-            32.0
-        } else {
-            0.0
-        };
-    let bottom = base_bottom
-        + if legend == LegendPosition::Bottom {
-            32.0
-        } else {
-            0.0
-        };
+        }
+    };
+    let left: f64 = base_left + room(LegendPosition::Left, 150.0);
+    let right = base_right + room(LegendPosition::Right, 150.0);
+    let top: f64 =
+        base_top + if title { TITLE_HEIGHT } else { 0.0 } + room(LegendPosition::Top, 32.0);
+    let bottom = base_bottom + room(LegendPosition::Bottom, 32.0);
     Some(Rect::new(
         left.min(size.width),
         top.min(size.height),
@@ -101,14 +98,54 @@ pub(crate) fn decorate(
     title_size: f64,
     color: Color,
     legend: LegendPosition,
+    heat_legend: Option<(&HeatLegend, Option<&HeatLegendSource>)>,
+    legend_background: Option<Color>,
 ) {
-    if !title.is_empty() && title_size.is_finite() && title_size > 0.0 {
+    let titled = !title.is_empty() && title_size.is_finite() && title_size > 0.0;
+    if titled {
         let value = fit_text(title, (scene.size.width - 32.0).max(0.0), title_size);
         scene
             .primitives
             .push(text(Point::new(16.0, 10.0), value, title_size, color));
     }
     if legend == LegendPosition::Hidden {
+        return;
+    }
+    if let Some((heat_legend, source)) = heat_legend {
+        // `Chart.GetLegendPosition`: centred along its side of the control, below the title at
+        // the top; the bar is as long as the plot (`DrawMarginSize`).
+        let vertical = matches!(legend, LegendPosition::Left | LegendPosition::Right);
+        let plot = scene.plot_bounds.size();
+        let measured = heat_legend.measure(source, vertical, plot, text_size);
+        let size = scene.size;
+        let origin = match legend {
+            LegendPosition::Top => Point::new(
+                (size.width - measured.width) * 0.5,
+                if titled { TITLE_HEIGHT } else { 0.0 },
+            ),
+            LegendPosition::Bottom => Point::new(
+                (size.width - measured.width) * 0.5,
+                size.height - measured.height,
+            ),
+            LegendPosition::Left => Point::new(0.0, (size.height - measured.height) * 0.5),
+            _ => Point::new(
+                size.width - measured.width,
+                (size.height - measured.height) * 0.5,
+            ),
+        };
+        let primitives = heat_legend.draw(source, vertical, origin, plot, text_size);
+        // `LegendBackgroundPaint` fills the legend under its bar and labels (the fill of the
+        // container geometry of the source's legend); the default theme has none.
+        if let Some(background) = legend_background.filter(|_| source.is_some()) {
+            scene.primitives.push(Primitive::new(
+                Geometry::Rectangle {
+                    rect: Rect::new(origin.x, origin.y, measured.width, measured.height),
+                    radius: 0.0,
+                },
+                PaintStyle::fill(background),
+            ));
+        }
+        scene.primitives.extend(primitives);
         return;
     }
     let horizontal = matches!(legend, LegendPosition::Top | LegendPosition::Bottom);
@@ -155,76 +192,41 @@ pub(crate) fn decorate(
     }
 }
 
+/// The default tooltip of the found points. The kinds whose rows are series have a miniature of
+/// the colour of the series; a node or a land has its own colours and writes its label alone.
+pub(crate) fn tooltip_layout(
+    args: &ChartPointerEventArgs,
+    legend: &[LegendItem],
+    kind: ChartKind,
+) -> DefaultTooltip {
+    let miniatures = matches!(
+        kind,
+        ChartKind::Cartesian | ChartKind::Pie | ChartKind::Polar
+    );
+    DefaultTooltip::new(&args.points, legend, miniatures, &mut text_size)
+}
+
+/// The scene of the tooltip at `origin`, with its wedge at `placement`.
 pub(crate) fn tooltip_scene(
     size: Size,
-    args: &ChartPointerEventArgs,
-    placement: TooltipPosition,
+    tooltip: &DefaultTooltip,
+    origin: Point,
+    placement: PopUpPlacement,
     color: Color,
 ) -> Scene {
     let mut scene = Scene::new(size, Rect::from_size(size));
-    // A label of several lines (the land and its series values of a map) takes a line each.
-    let lines: Vec<_> = args
-        .points
-        .iter()
-        .flat_map(|point| {
-            if point.label.is_empty() {
-                vec![ferroui_livecharts::axis::format_number(point.value)]
-            } else {
-                point.label.lines().map(str::to_owned).collect()
-            }
-        })
-        .collect();
-    let width = (lines
-        .iter()
-        .map(|s| text_size(s, 12.0).width)
-        .fold(0.0_f64, f64::max)
-        + 24.0)
-        .min(size.width.max(0.0));
-    let height = (lines.len() as f64 * 20.0 + 16.0).min(size.height.max(0.0));
-    let p = args.position;
-    let (x, y) = match placement {
-        TooltipPosition::Bottom => (p.x - width / 2.0, p.y + 14.0),
-        TooltipPosition::Left => (p.x - width - 14.0, p.y - height / 2.0),
-        TooltipPosition::Right => (p.x + 14.0, p.y - height / 2.0),
-        TooltipPosition::Center => (p.x - width / 2.0, p.y - height / 2.0),
-        _ => (
-            p.x - width / 2.0,
-            if p.y - height - 14.0 >= 0.0 {
-                p.y - height - 14.0
-            } else {
-                p.y + 14.0
-            },
-        ),
-    };
-    let origin = Point::new(
-        x.clamp(0.0, (size.width - width).max(0.0)),
-        y.clamp(0.0, (size.height - height).max(0.0)),
-    );
-    let rect = Rect::new(origin.x, origin.y, width, height);
-    scene.primitives.push(Primitive::new(
-        Geometry::Rectangle { rect, radius: 6.0 },
+    scene.primitives = tooltip.primitives(
+        origin,
+        placement,
+        size,
         PaintStyle {
             fill: Some(Color::from_argb(248, 255, 255, 255)),
             stroke: Some(Color::from_rgb(203, 213, 225)),
             stroke_width: 1.0,
             ..PaintStyle::default()
         },
-    ));
-    for (i, line) in lines.iter().enumerate() {
-        let y = origin.y + 8.0 + i as f64 * 20.0;
-        if y + 16.0 > origin.y + height {
-            break;
-        }
-        scene.primitives.push(
-            text(
-                Point::new(origin.x + 12.0, y),
-                fit_text(line, (width - 24.0).max(0.0), 12.0),
-                12.0,
-                color,
-            )
-            .clipped(rect),
-        );
-    }
+        color,
+    );
     scene
 }
 

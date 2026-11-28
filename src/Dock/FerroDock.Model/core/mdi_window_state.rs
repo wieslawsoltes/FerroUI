@@ -14,6 +14,8 @@ pub enum MdiWindowState {
     Maximized = 2,
 }
 
+ferroui_system::styled_enum!(MdiWindowState { Normal, Minimized, Maximized });
+
 impl TryFrom<i32> for MdiWindowState {
     type Error = i32;
 

@@ -7,6 +7,8 @@ use std::rc::Rc;
 /// Source observable layer list, retaining the shared framework's collection engine.
 #[derive(Clone, PartialEq)]
 pub struct OverlayLayerCollection(FerroList<Option<Rc<dyn IOverlayLayer>>>);
+
+ferroui_base::styled_value!(OverlayLayerCollection);
 impl Default for OverlayLayerCollection {
     fn default() -> Self {
         Self::new()

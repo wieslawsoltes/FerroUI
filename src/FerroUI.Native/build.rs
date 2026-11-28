@@ -127,9 +127,21 @@ fn main() {
             // CLANG_ENABLE_MODULES is YES upstream, but Xcode does not enable
             // modules for Objective-C++ sources, so no -fmodules here (with
             // it CoreFoundation's own IUnknown/REFIID clash with com.h).
-            .flag(if arc { "-fobjc-arc" } else { "-fno-objc-arc" });
+            .flag(if arc { "-fobjc-arc" } else { "-fno-objc-arc" })
+            // Nothing outside the link names these symbols, but for `CreateFerroNative`, which
+            // says so itself (patches/0006): they stay out of the export trie (#1049).
+            .flag("-fvisibility=hidden")
+            .flag("-fvisibility-inlines-hidden");
         if arc {
             b.flag("-fobjc-weak");
+        }
+        // The text range accessibility of the `text-editor` feature (automation.mm).
+        if env::var_os("CARGO_FEATURE_TEXT_EDITOR").is_some() {
+            b.define("FRN_TEXT_EDITOR", "1");
+        }
+        // The web custom formats of the `chromium-clipboard-map` feature (clipboard.mm).
+        if env::var_os("CARGO_FEATURE_CHROMIUM_CLIPBOARD_MAP").is_some() {
+            b.define("FRN_WEB_CUSTOM_FORMATS", "1");
         }
         if debug {
             b.define("DEBUG", "1");

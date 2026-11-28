@@ -1,4 +1,22 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <HyperlinkButton Content="Microsoft home page" NavigateUri="https://www.microsoft.com"/><HyperlinkButton x:Name="Primary" Content="Handle a Click event"/><TextBlock x:Name="Output" Text="Click the second hyperlink"/>
+<!-- Ported from the two pinned HyperlinkButton examples of WinUI Gallery (14061eea); see
+     ../NOTICE.md. The first navigates to its NavigateUri through the launcher of the top level.
+     The source binds IsEnabled to DisableHyperlink1.IsChecked.Value.Equals(x:False); the x:Bind here
+     is the same OneWay binding of IsChecked with the BoolConverters.Not converter. The second is
+     GoToHyperlinkButton_Click of HyperlinkButtonPage.xaml.cs: the gallery navigates to the
+     ToggleButton page (examples::GALLERY_LINKS). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="HyperlinkButtonExample1" Spacing="8">
+    <TextBlock Text="A hyperlink button that navigates to a URI." FontSize="18" />
+    <HyperlinkButton x:Name="Hyperlink1"
+                     Content="Microsoft home page"
+                     IsEnabled="{x:Bind DisableHyperlink1.IsChecked, Mode=OneWay, Converter={x:Static BoolConverters.Not}}"
+                     NavigateUri="https://www.microsoft.com" />
+    <CheckBox x:Name="DisableHyperlink1" Content="Disable hyperlink button" />
+  </StackPanel>
+
+  <StackPanel x:Name="HyperlinkButtonExample2" Spacing="8">
+    <TextBlock Text="A hyperlink button that handles a Click event." FontSize="18" />
+    <HyperlinkButton x:Name="GoToToggleButton" Content="Go to ToggleButton" />
+  </StackPanel>
 </StackPanel>

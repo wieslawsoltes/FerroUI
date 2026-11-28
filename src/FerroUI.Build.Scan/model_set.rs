@@ -24,6 +24,10 @@ pub struct ModelSet {
     models: Vec<AssemblyModel>,
     /// Every public path of every model, with the path of the declaring module.
     exports: HashMap<String, String>,
+    /// Preferred exported spellings for types mentioned inside generated signatures,
+    /// including generic collection types with no XAML declaration of their own. A `OnceLock`
+    /// keeps the set `Sync` and `RefUnwindSafe`, as it was in 0.5.0.
+    public_names: std::sync::OnceLock<HashMap<String, String>>,
     /// The types by the text of their Rust type, the first of a text.
     types: HashMap<String, (usize, usize)>,
     /// The accessors of registered properties that are functions of another type than the
@@ -43,7 +47,14 @@ impl ModelSet {
                 exports.entry(export.path.clone()).or_insert_with(|| export.declared.clone());
             }
         }
-        let mut set = Self { models, exports, types: HashMap::new(), functions: HashMap::new(), aliases: HashMap::new() };
+        let mut set = Self {
+            models,
+            exports,
+            public_names: Default::default(),
+            types: HashMap::new(),
+            functions: HashMap::new(),
+            aliases: HashMap::new(),
+        };
         let mut types = HashMap::new();
         let mut functions = HashMap::new();
         let mut aliases = HashMap::new();
@@ -70,6 +81,25 @@ impl ModelSet {
 
     pub fn models(&self) -> &[AssemblyModel] {
         &self.models
+    }
+
+    /// The shortest exported path in the defining crate for a canonical type name.
+    pub fn exported_path(&self, declared: &str) -> Option<&str> {
+        let names = self.public_names.get_or_init(|| {
+            let mut names: HashMap<String, String> = HashMap::new();
+            for (path, target) in &self.exports {
+                let target = self.canonical_path(target);
+                if path.trim_start_matches("::").split("::").next() != target.trim_start_matches("::").split("::").next() {
+                    continue;
+                }
+                let best = names.entry(target).or_insert_with(|| path.clone());
+                if (path.matches("::").count(), path.as_str()) < (best.matches("::").count(), best.as_str()) {
+                    *best = path.clone();
+                }
+            }
+            names
+        });
+        names.get(declared).map(String::as_str)
     }
 
     pub fn is_empty(&self) -> bool {
@@ -258,8 +288,15 @@ impl ModelSet {
     /// only), each assembly once, in the order of `paths`, with every file that was read.
     /// A file of format 1 is a model without types.
     pub fn read(paths: &[PathBuf]) -> Result<(Vec<AssemblyModel>, Vec<PathBuf>), String> {
+        Self::read_with_direct(paths).map(|(models, files, _)| (models, files))
+    }
+
+    /// [`read`](Self::read), with the names of the crates (`crate_name`) of the files of `paths`
+    /// themselves (#846): the direct dependencies, which the Rust code of the crate can name.
+    pub fn read_with_direct(paths: &[PathBuf]) -> Result<(Vec<AssemblyModel>, Vec<PathBuf>, Vec<String>), String> {
         let mut models: Vec<AssemblyModel> = Vec::new();
         let mut files = Vec::new();
+        let mut direct = Vec::new();
         let mut pending: Vec<PathBuf> = paths.iter().rev().cloned().collect();
         while let Some(path) = pending.pop() {
             if files.contains(&path) {
@@ -268,6 +305,9 @@ impl ModelSet {
             let text = fs::read_to_string(&path).map_err(|error| format!("{}: {error}", path.display()))?;
             let model = AssemblyModel::parse(&text).map_err(|error| format!("{}: {error}", path.display()))?;
             let directory = path.parent().map(Path::to_path_buf).unwrap_or_default();
+            if paths.contains(&path) && !direct.contains(&model.crate_name) {
+                direct.push(model.crate_name.clone());
+            }
             files.push(path);
             if models.iter().any(|known| known.name == model.name) {
                 continue;
@@ -277,7 +317,7 @@ impl ModelSet {
             }
             models.push(model);
         }
-        Ok((models, files))
+        Ok((models, files, direct))
     }
 }
 
@@ -357,6 +397,9 @@ mod tests {
         assert_eq!(set.canonical_path("::base::Shape"), "::base::shapes::shape::Shape");
         assert_eq!(set.canonical_path("::base::shapes::Shape::fill_property"), "::base::shapes::shape::Shape::fill_property");
         assert_eq!(set.canonical_path("::base::Handle"), "::other::alloc::Rc");
+        assert_eq!(set.exported_path("::base::media::pen::Pen"), Some("::base::Pen"));
+        assert_eq!(set.exported_path("::base::shapes::shape::Shape"), Some("::base::Shape"));
+        assert_eq!(set.exported_path("::other::alloc::Rc"), Some("::other::rc::Rc"));
         assert_eq!(set.canonical_path("::base::media::Brush"), "::base::media::Brush");
         assert_eq!(set.canonical_path("::base::Unknown"), "::base::Unknown");
         assert_eq!(set.canonical_path("::std::rc::Rc"), "::std::rc::Rc");

@@ -1,4 +1,4 @@
-use crate::{catch_reload, PreparedReload, ReloadError};
+use crate::{catch_reload, raise_reload_error, PreparedReload, ReloadError};
 use ferroui_base::controls::{resource_preview::ResourcePreviewScope, IResourceNode};
 use std::{cell::RefCell, rc::Rc};
 
@@ -35,9 +35,12 @@ impl ResourcePreparation {
         if scope.insert(
             &*self.0.original,
             Rc::new(move || {
-                candidate
-                    .resolve()
-                    .unwrap_or_else(|error| std::panic::panic_any(error))
+                // A candidate that cannot be prepared fails the reload (#567): the lookup goes on
+                // in the original node, and the step returns the error.
+                candidate.resolve().unwrap_or_else(|error| {
+                    raise_reload_error(error);
+                    candidate.0.original.clone()
+                })
             }),
         ) {
             Ok(())

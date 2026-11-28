@@ -123,6 +123,8 @@ pub struct TaskHandle<T: 'static> {
     wakers: Arc<Wakers>,
 }
 
+ferroui_base::styled_value!(impl<T> for TaskHandle<T>);
+
 /// The task of an action that produces no value (`Task`).
 pub type ActionTask = TaskHandle<()>;
 

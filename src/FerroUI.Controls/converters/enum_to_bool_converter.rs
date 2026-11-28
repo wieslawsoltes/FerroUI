@@ -10,11 +10,19 @@ use std::rc::Rc;
 ///
 /// This converter is useful to enable binding of radio buttons with a
 /// selected enum value.
-#[derive(Default)]
+// Made only through `new` (`non_exhaustive`), which registers the casts of the converter.
+#[non_exhaustive]
 pub struct EnumToBoolConverter;
+
+impl Default for EnumToBoolConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 impl EnumToBoolConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self
     }
 }

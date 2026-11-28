@@ -686,6 +686,7 @@ mod tests {
                 DeferredContentBuilder::new(|_| None),
                 &provider,
             )
+            .expect("the declaration provides the services of the factory")
         },
         DynamicResourceExtension => DynamicResourceExtension::new(),
         CompiledBindingExtension => CompiledBindingExtension::new(),

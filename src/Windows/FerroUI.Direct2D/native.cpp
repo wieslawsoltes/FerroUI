@@ -416,7 +416,6 @@ struct ShapeScratchLease {
 struct Font : Object {
     ComPtr<IDWriteFontFace> face;
     ComPtr<IDWriteFontFile> file;
-    std::shared_ptr<std::vector<uint8_t>> bytes;
     std::wstring family;
     // Font faces (including each variation instance) are immutable. Keep a
     // bounded design-unit cache, shared by runs at every requested em size.
@@ -520,11 +519,14 @@ struct PositionedGlyphRun : Object {
     DWRITE_GLYPH_RUN run() const {return {face.Get(),size,(UINT32)ids.size(),ids.data(),advances.data(),offsets.data(),FALSE,0};}
     bool bounds(Frame& frame,const D2D1_MATRIX_3X2_F& matrix,const D2D1_MATRIX_3X2_F& current,double shift,int alias,D2D1_RECT_F& result) const;
 };
+// Holds font bytes owned by the caller: DirectWrite keeps this object while it reads them.
 class FontBytes final : public IUnknown {
     std::atomic<ULONG> refs{1};
+    void* context;
+    void (*release)(void*);
 public:
-    std::shared_ptr<std::vector<uint8_t>> bytes;
-    explicit FontBytes(std::shared_ptr<std::vector<uint8_t>> b):bytes(std::move(b)) {}
+    FontBytes(void* c,void (*r)(void*)):context(c),release(r) {}
+    ~FontBytes() { release(context); }
     IFACEMETHOD(QueryInterface)(REFIID iid,void** out) override { *out=nullptr;if(iid!=__uuidof(IUnknown))return E_NOINTERFACE;*out=this;AddRef();return S_OK; }
     IFACEMETHOD_(ULONG,AddRef)() override { return ++refs; }
     IFACEMETHOD_(ULONG,Release)() override { auto count=--refs;if(!count)delete this;return count; }
@@ -622,12 +624,12 @@ API Ptr d2_font_family_faces(const char* family) try { std::lock_guard<std::recu
         result+=std::to_string(f->GetWeight())+","+std::to_string(style)+","+std::to_string(f->GetStretch())+"\n";
     } return new Data(result);
 } CATCH_PTR
-API Ptr d2_font_data(const uint8_t* bytes,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    if(n>UINT32_MAX) return nullptr;
+API Ptr d2_font_data(const uint8_t* bytes,size_t n,void* context,void (*release)(void*)) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    // The owner calls `release` when DirectWrite is done with the bytes, or at once on failure.
+    ComPtr<IUnknown> owner;owner.Attach(new FontBytes(context,release));
+    if(!bytes||!n||n>UINT32_MAX) return nullptr;
     auto result=std::make_unique<Font>();
-    result->bytes=std::make_shared<std::vector<uint8_t>>(bytes,bytes+n);
-    ComPtr<IUnknown> owner;owner.Attach(new FontBytes(result->bytes));
-    check(engine().loader->CreateInMemoryFontFileReference(engine().fonts.Get(),result->bytes->data(),(UINT32)n,owner.Get(),&result->file));
+    check(engine().loader->CreateInMemoryFontFileReference(engine().fonts.Get(),bytes,(UINT32)n,owner.Get(),&result->file));
     BOOL supported=FALSE; DWRITE_FONT_FILE_TYPE type; DWRITE_FONT_FACE_TYPE faceType; UINT32 faces=0;
     check(result->file->Analyze(&supported,&type,&faceType,&faces)); if(!supported||!faces) return nullptr;
     auto file=result->file.Get();
@@ -638,7 +640,7 @@ API Ptr d2_font_data(const uint8_t* bytes,size_t n) try { std::lock_guard<std::r
 } CATCH_PTR
 API Ptr d2_font_variations(Ptr p,const uint32_t* tags,const double* values,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto original=static_cast<Font*>(p); auto result=std::make_unique<Font>();
-    result->face=original->face; result->bytes=original->bytes; result->file=original->file; result->family=original->family;
+    result->face=original->face; result->file=original->file; result->family=original->family;
     if(n) {
         ComPtr<IDWriteFontFace5> face5; check(original->face.As(&face5));
         ComPtr<IDWriteFontResource> resource; check(face5->GetFontResource(&resource));
@@ -690,6 +692,49 @@ public:
     IFACEMETHOD(SetBidiLevel)(UINT32,UINT32,UINT8,UINT8) override { return S_OK; }
     IFACEMETHOD(SetNumberSubstitution)(UINT32,UINT32,IDWriteNumberSubstitution*) override { return S_OK; }
 };
+static bool paragraphBreak(uint16_t ch) { return ch==10||ch==13||ch==0x2028||ch==0x2029; }
+static std::vector<Analysis::Run> scriptRuns(const uint16_t* text,size_t begin,size_t end,
+        const std::wstring& locale,bool rtl) {
+    Analysis analysis((const WCHAR*)text+begin,(UINT32)(end-begin),locale.c_str(),rtl);
+    check(engine().analyzer->AnalyzeScript(&analysis,0,analysis.length,&analysis));
+    std::vector<Analysis::Run> runs;
+    for(auto run:analysis.runs) {
+        run.start+=(UINT32)begin;
+        // Joining does not cross paragraph delimiters, even when script analysis
+        // groups identical scripts across them.
+        UINT32 start=run.start,stop=run.start+run.length;
+        for(UINT32 i=start;i<stop;++i)if(paragraphBreak(text[i])) {
+            if(i>start)runs.push_back({start,i-start,run.script});
+            runs.push_back({i,1,run.script});start=i+1;
+        }
+        if(start<stop)runs.push_back({start,stop-start,run.script});
+    }
+    return runs;
+}
+struct ShapeAnalysis : Object {
+    const uint16_t* text;
+    size_t length;
+    std::wstring locale;
+    bool rtl;
+    std::vector<Analysis::Run> runs;
+    ShapeAnalysis(const uint16_t* text,size_t length,std::wstring locale,bool rtl,
+            std::vector<Analysis::Run> runs):text(text),length(length),locale(std::move(locale)),
+            rtl(rtl),runs(std::move(runs)) {}
+};
+API Ptr d2_analyze_shape_owner(const uint16_t* text,size_t n,const char* language,int rtl) try {
+    std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    if(!n||n>UINT32_MAX||std::any_of(text,text+n,paragraphBreak))return nullptr;
+    auto locale=localeName(language);
+    auto runs=scriptRuns(text,0,n,locale,rtl!=0);
+    // Binary lookup requires logical, nonoverlapping runs covering the owner.
+    size_t end=0;
+    for(const auto& run:runs) {
+        if(run.start!=end||!run.length||run.length>n-end)return nullptr;
+        end+=run.length;
+    }
+    if(end!=n)return nullptr;
+    return new ShapeAnalysis(text,n,std::move(locale),rtl!=0,std::move(runs));
+} CATCH_PTR
 API Ptr d2_font_match(Ptr p,const uint16_t* text,size_t n,const char* language) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     if(!n || n>UINT32_MAX) return nullptr;
     auto locale=localeName(language);
@@ -708,7 +753,7 @@ API Ptr d2_font_match(Ptr p,const uint16_t* text,size_t n,const char* language) 
 } CATCH_PTR
 static int shapeCore(bool optimize,Ptr p,const uint16_t* text,size_t n,size_t start,size_t length,const char* language,
         double size,int rtl,const uint32_t* tags,const int* values,const uint32_t* featureStarts,const uint32_t* featureEnds,
-        size_t features,Ptr info,void(*emit)(Ptr,Glyph)) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+        size_t features,Ptr ownerAnalysis,Ptr info,void(*emit)(Ptr,Glyph)) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     NativeTiming timing(10);
     if(n>UINT32_MAX || start>n || length>n-start) return 0;
     if(!length) return 1;
@@ -760,13 +805,17 @@ static int shapeCore(bool optimize,Ptr p,const uint16_t* text,size_t n,size_t st
             return 1;
         }
     }
-    auto paragraphBreak=[](uint16_t ch){return ch==10||ch==13||ch==0x2028||ch==0x2029;};
-    size_t contextStart=start,contextEnd=start+length;
-    while(contextStart&&!paragraphBreak(text[contextStart-1]))--contextStart;
-    while(contextEnd<n&&!paragraphBreak(text[contextEnd]))++contextEnd;
-    Analysis analysis((const WCHAR*)text+contextStart,(UINT32)(contextEnd-contextStart),locale.c_str(),rtl!=0);
+    const auto* cached=static_cast<const ShapeAnalysis*>(ownerAnalysis);
+    if(cached&&(cached->text!=text||cached->length!=n||cached->rtl!=(rtl!=0)||cached->locale!=locale))cached=nullptr;
+    std::vector<Analysis::Run> localRuns;
+    if(!cached) {
+        size_t contextStart=start,contextEnd=start+length;
+        while(contextStart&&!paragraphBreak(text[contextStart-1]))--contextStart;
+        while(contextEnd<n&&!paragraphBreak(text[contextEnd]))++contextEnd;
+        localRuns=scriptRuns(text,contextStart,contextEnd,locale,rtl!=0);
+    }
+    const auto& runs=cached?cached->runs:localRuns;
     auto analyzer=engine().analyzer.Get();
-    check(analyzer->AnalyzeScript(&analysis,0,analysis.length,&analysis));
     struct FeatureRanges {
         std::vector<std::vector<DWRITE_FONT_FEATURE>> data;
         std::vector<DWRITE_TYPOGRAPHIC_FEATURES> descriptions;
@@ -812,19 +861,12 @@ static int shapeCore(bool optimize,Ptr p,const uint16_t* text,size_t n,size_t st
         return ranges;
     };
     auto& result=scratch.result;result.clear();result.reserve(std::min(length,(size_t)256));
-    std::vector<Analysis::Run> runs;
-    for(auto run:analysis.runs) {
-        run.start+=(UINT32)contextStart;
-        // Script analysis can group identical scripts across paragraph delimiters.
-        // Joining does not cross those delimiters, and each paragraph owns its clusters.
-        UINT32 begin=run.start,end=run.start+run.length;
-        for(UINT32 i=begin;i<end;++i)if(paragraphBreak(text[i])) {
-            if(i>begin)runs.push_back({begin,i-begin,run.script});
-            runs.push_back({i,1,run.script});begin=i+1;
-        }
-        if(begin<end)runs.push_back({begin,end-begin,run.script});
-    }
-    for(auto run:runs) {
+    auto first=cached?std::partition_point(runs.begin(),runs.end(),[&](const auto& run) {
+        return run.start+run.length<=start;
+    }):runs.begin();
+    for(auto current=first;current!=runs.end();++current) {
+        const auto& run=*current;
+        if(cached&&run.start>=start+length)break;
         if(run.start>=start+length || run.start+run.length<=start) continue;
         // DirectWrite's cluster map is 16 bit and some implementations reject
         // smaller runs too. Keep the full context where it fits; for long runs,
@@ -901,15 +943,15 @@ static int shapeCore(bool optimize,Ptr p,const uint16_t* text,size_t n,size_t st
 } catch(const std::exception& e) { fprintf(stderr,"DirectWrite: %s\n",e.what()); return 0; }
 API int d2_shape(Ptr p,const uint16_t* text,size_t n,size_t start,size_t length,const char* language,
         double size,int rtl,const uint32_t* tags,const int* values,const uint32_t* featureStarts,const uint32_t* featureEnds,
-        size_t features,Ptr info,void(*emit)(Ptr,Glyph)) {
-    return shapeCore(true,p,text,n,start,length,language,size,rtl,tags,values,featureStarts,featureEnds,features,info,emit);
+        size_t features,Ptr ownerAnalysis,Ptr info,void(*emit)(Ptr,Glyph)) {
+    return shapeCore(true,p,text,n,start,length,language,size,rtl,tags,values,featureStarts,featureEnds,features,ownerAnalysis,info,emit);
 }
 // Independent full-pipeline reference for exact shaping regression tests. It
 // deliberately bypasses both optimization and the shape-result cache.
 API int d2_shape_reference(Ptr p,const uint16_t* text,size_t n,size_t start,size_t length,const char* language,
         double size,int rtl,const uint32_t* tags,const int* values,const uint32_t* featureStarts,const uint32_t* featureEnds,
-        size_t features,Ptr info,void(*emit)(Ptr,Glyph)) {
-    return shapeCore(false,p,text,n,start,length,language,size,rtl,tags,values,featureStarts,featureEnds,features,info,emit);
+        size_t features,Ptr,Ptr info,void(*emit)(Ptr,Glyph)) {
+    return shapeCore(false,p,text,n,start,length,language,size,rtl,tags,values,featureStarts,featureEnds,features,nullptr,info,emit);
 }
 API Ptr d2_path(const Command* commands,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     NativeTiming timing(12);

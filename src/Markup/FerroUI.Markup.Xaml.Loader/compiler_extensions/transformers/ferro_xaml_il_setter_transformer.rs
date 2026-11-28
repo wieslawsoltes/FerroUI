@@ -1,5 +1,6 @@
 //! Port of `CompilerExtensions/Transformers/FerroXamlIlSetterTransformer.cs`.
 
+use super::FerroTransformErrors;
 use std::any::Any;
 use std::cell::Cell;
 use std::rc::Rc;
@@ -26,29 +27,29 @@ use crate::compiler_extensions::{IXamlIlFerroPropertyNode, XamlIlFerroPropertyHe
 /// Errors are values of the single [`XamlError`] type; the derived class is represented by a
 /// `XamlError::Transform` tagged with the class name, which is what
 /// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` and [`Self::is`] look at.
+#[deprecated(
+    since = "0.5.1",
+    note = "use `XamlError::style_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Style`"
+)]
 pub struct XamlStyleTransformException;
 
+#[allow(deprecated)]
 impl XamlStyleTransformException {
-    pub const TYPE_NAME: &'static str = "XamlStyleTransformException";
+    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Style.type_name();
 
-    /// `new XamlStyleTransformException(message, lineInfo, innerException)`.
+    /// `new XamlStyleTransformException(message, lineInfo, innerException)`, now
+    /// [`XamlError::style_transform`](super::FerroTransformErrors::style_transform).
     pub fn new(
         message: impl Into<String>,
         line_info: &dyn IXamlLineInfo,
         inner_exception: Option<XamlError>,
     ) -> XamlError {
-        let error = match inner_exception {
-            Some(inner) => {
-                XamlError::transform_exception_with_inner(message, Some(line_info), inner)
-            }
-            None => XamlError::transform_exception(message, Some(line_info)),
-        };
-        error.with_derived_type_name(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::Style.error(message, line_info, inner_exception)
     }
 
     /// `e is XamlStyleTransformException`.
     pub fn is(error: &XamlError) -> bool {
-        error.is_derived_type(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Style)
     }
 }
 
@@ -79,7 +80,7 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
 
         if let Some(style_parent) = &style_parent {
             target_type = Some(get_nullable_clr_type(&style_parent.target_type())?.ok_or_else(|| {
-                XamlStyleTransformException::new(
+                XamlError::style_transform(
                     "Can not find parent Style Selector or ControlTemplate TargetType. If setter is not part of the style, you can set x:SetterTargetType directive on its parent.",
                     &*node,
                     None,
@@ -88,7 +89,7 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
         }
 
         let (Some(target_type), Some(style_parent)) = (target_type, style_parent) else {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 "Could not determine target type of Setter",
                 &*node,
                 None,
@@ -108,7 +109,7 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
                         .find_map(|v| v.cast::<XamlAstTextNode>())
                         .map(|t| t.text());
                     let Some(property_name) = property_name else {
-                        return Err(XamlStyleTransformException::new(
+                        return Err(XamlError::style_transform(
                             "Setter.Property must be a string.",
                             &*node,
                             None,
@@ -125,7 +126,7 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
                     if created.is_xaml_il_ferro_class_property_node()
                         && has_complex_activator(&style_parent)
                     {
-                        return Err(XamlStyleTransformException::new(
+                        return Err(XamlError::style_transform(
                             format!(
                                 "Cannot set Classes Binding property '{property_name}' because the style has an activator."
                             ),
@@ -147,12 +148,12 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
             None => {
                 let property_path = find_property_value(&on, "PropertyPath")?;
                 return Err(match property_path {
-                    None => XamlStyleTransformException::new(
+                    None => XamlError::style_transform(
                         "Setter without a property or property path is not valid",
                         &*node,
                         None,
                     ),
-                    Some(_) => XamlStyleTransformException::new(
+                    Some(_) => XamlError::style_transform(
                         "Unable to get the property path property type",
                         &*node,
                         None,
@@ -236,7 +237,7 @@ impl IXamlAstTransformer for FerroXamlIlSetterTransformer {
         }
         // If we have `Value` property with plain text content that wasn't parsed, throw an exception.
         else if let (Some(_), Some(text_value)) = (&value_property, &text_value) {
-            return Err(XamlStyleTransformException::new(
+            return Err(XamlError::style_transform(
                 format!("Unable to convert property value to {}", prop_type.get_fqn()),
                 &**text_value,
                 None,

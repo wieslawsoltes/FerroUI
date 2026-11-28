@@ -7,7 +7,15 @@ use ferroui_base::media::{
 use ferroui_base::platform::{IFontManagerImpl, ITextShaperImpl};
 use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::Vector;
-use std::{any::Any, cell::RefCell, ffi::CString, io::Read, rc::Rc, sync::Arc};
+use std::{
+    any::Any,
+    cell::RefCell,
+    collections::VecDeque,
+    ffi::CString,
+    io::Read,
+    rc::{Rc, Weak},
+    sync::Arc,
+};
 
 pub struct NativeFont {
     handle: Owned,
@@ -30,13 +38,27 @@ impl NativeFont {
         self.handle.0
     }
 }
+/// A native font that reads `data` and keeps a reference to it, with no copy.
+///
+/// # Safety
+/// The result is a font the caller owns, or null.
+unsafe fn shared_native_font(data: &Arc<[u8]>) -> ffi::Ptr {
+    extern "C" fn release(context: *mut std::ffi::c_void) {
+        // SAFETY: `context` is the box made below, and the owner object releases it once.
+        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
+    }
+    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
+    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
+    unsafe { ffi::d2_font_data(data.as_ptr(), data.len(), context, release) }
+}
+
 pub struct Typeface {
     pub font: Arc<NativeFont>,
     weight: FontWeight,
     style: FontStyle,
     stretch: FontStretch,
     simulations: FontSimulations,
-    data: Option<Vec<u8>>,
+    data: Option<Arc<[u8]>>,
 }
 impl Typeface {
     fn new(
@@ -166,10 +188,12 @@ impl FontManager {
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         let mut data = Vec::new();
         stream.read_to_end(&mut data).ok()?;
+        // The one long-lived copy of the bytes: DirectWrite reads this buffer.
+        let data: Arc<[u8]> = data.into();
         let tags: Vec<_> = variations.iter().map(|(t, _)| t.value()).collect();
         let values: Vec<_> = variations.iter().map(|(_, v)| *v).collect();
         unsafe {
-            let raw = ffi::d2_font_data(data.as_ptr(), data.len());
+            let raw = shared_native_font(&data);
             if raw.is_null() {
                 return None;
             }
@@ -343,6 +367,66 @@ impl ITextShaperTypeface for ShaperTypeface {
         self
     }
 }
+
+struct ShapeAnalysisEntry {
+    owner: Weak<[u16]>,
+    language: CString,
+    rtl: bool,
+    analysis: Option<Rc<Owned>>,
+}
+
+ferroui_base::ferro_thread_local! {
+    static SHAPE_ANALYSES: RefCell<VecDeque<ShapeAnalysisEntry>> = const { RefCell::new(VecDeque::new()) };
+}
+
+pub(super) fn shape_analysis(
+    text: &ReadOnlyMemory<u16>,
+    language: &CString,
+    rtl: bool,
+) -> Option<Rc<Owned>> {
+    const MAX_CACHED_ANALYSES: usize = 4;
+    let owner = text.owner().filter(|owner| {
+        (257..=128 * 1024).contains(&owner.len()) && !text.is_empty() && text.len() < owner.len()
+    })?;
+    // Short runs backed by independent buffers, such as tab padding, leave
+    // the paragraph analysis for their neighboring text in the cache.
+    SHAPE_ANALYSES.with(|entries| {
+        let mut entries = entries.borrow_mut();
+        // A weak owner keeps the allocation of its text: entries of dropped text leave first.
+        entries.retain(|entry| entry.owner.strong_count() > 0);
+        if let Some(index) = entries.iter().position(|entry| {
+            std::ptr::eq(entry.owner.as_ptr(), Rc::as_ptr(owner))
+                && entry.language == *language
+                && entry.rtl == rtl
+        }) {
+            let entry = entries.remove(index).expect("entry found by index");
+            let analysis = entry.analysis.clone();
+            entries.push_front(entry);
+            return analysis;
+        }
+        let analysis = unsafe {
+            Owned::try_new(ffi::d2_analyze_shape_owner(
+                owner.as_ptr(),
+                owner.len(),
+                language.as_ptr(),
+                i32::from(rtl),
+            ))
+        }
+        .map(Rc::new);
+        if entries.len() == MAX_CACHED_ANALYSES {
+            entries.pop_back();
+        }
+        // Cache declined owners too, so a multiline owner is checked once.
+        entries.push_front(ShapeAnalysisEntry {
+            owner: Rc::downgrade(owner),
+            language: language.clone(),
+            rtl,
+            analysis: analysis.clone(),
+        });
+        analysis
+    })
+}
+
 pub struct TextShaper;
 impl ITextShaperImpl for TextShaper {
     fn create_typeface(&self, _: &GlyphTypeface) -> Rc<dyn ITextShaperTypeface> {
@@ -387,6 +471,7 @@ impl ITextShaperImpl for TextShaper {
         )
         .unwrap();
         let right_to_left = options.bidi_level() & 1 != 0;
+        let analysis = shape_analysis(text, &language, right_to_left);
         let result = unsafe {
             ffi::d2_shape(
                 native.font.raw(),
@@ -402,6 +487,7 @@ impl ITextShaperImpl for TextShaper {
                 feature_starts.as_ptr(),
                 feature_ends.as_ptr(),
                 tags.len(),
+                analysis.as_ref().map_or(std::ptr::null_mut(), |analysis| analysis.0),
                 &mut glyphs as *mut _ as ffi::Ptr,
                 emit,
             )

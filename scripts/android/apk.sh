@@ -10,6 +10,8 @@
 #
 # Options:
 #   --release           build with the release profile of cargo (default: the dev profile)
+#   --profile NAME      build with the cargo profile NAME (dev, release, dist, ...): dist is the
+#                       shipped build, with the per-package optimisation levels of Cargo.toml
 #   --abi ABI           arm64-v8a (default) or x86_64
 #   --out DIR           where the package and the intermediate files go
 #                       (default: $FERROUI_ANDROID_BUILD_DIR, else <cargo target directory>/android)
@@ -40,7 +42,7 @@
 set -euo pipefail
 
 usage() {
-    sed -n '2,38p' "$0" | sed 's/^# \{0,1\}//'
+    sed -n '2,40p' "$0" | sed 's/^# \{0,1\}//'
 }
 
 app=""
@@ -65,6 +67,7 @@ while [ $# -gt 0 ]; do
         --permission) package_permissions+=("${2:?--permission needs a value}"); shift ;;
         --java-source-dir) extra_java_sources+=("${2:?--java-source-dir needs a value}"); shift ;;
         --release) profile="release" ;;
+        --profile) profile="${2:?--profile needs a value}"; shift ;;
         --abi) abi="${2:?--abi needs a value}"; shift ;;
         --out) out="${2:?--out needs a value}"; shift ;;
         --no-strip) strip=0 ;;
@@ -153,13 +156,11 @@ target_sdk="${FERROUI_ANDROID_PLATFORM#android-}"
 cargo_target_dir="${CARGO_TARGET_DIR:-$workspace/target}"
 out="${out:-${FERROUI_ANDROID_BUILD_DIR:-$cargo_target_dir/android}}"
 work="$out/$app-$abi"
-if [ "$profile" = "release" ]; then
-    profile_dir="release"
-    profile_args=(--release)
-else
-    profile_dir="debug"
-    profile_args=()
-fi
+case "$profile" in
+    dev) profile_dir="debug"; profile_args=() ;;
+    release) profile_dir="release"; profile_args=(--release) ;;
+    *) profile_dir="$profile"; profile_args=(--profile "$profile") ;;
+esac
 if [ -n "$features" ]; then
     profile_args+=(--features "$features")
 fi
@@ -235,7 +236,7 @@ class_files=()
 while IFS= read -r file; do
     class_files+=("$file")
 done < <(find "$work/classes" -name '*.class' | sort)
-if [ "$profile" = "release" ]; then d8_mode="--release"; else d8_mode="--debug"; fi
+if [ "$profile" = "dev" ]; then d8_mode="--debug"; else d8_mode="--release"; fi
 "$FERROUI_ANDROID_BUILD_TOOLS/d8" "$d8_mode" --min-api "$min_sdk" --lib "$FERROUI_ANDROID_JAR" --output "$work/stage" "${class_files[@]}"
 
 # 3. The manifest, and the package that holds it.
@@ -269,7 +270,7 @@ EOF
 echo "== aapt2 link"
 aapt_args=(link -o "$work/unaligned.apk" --manifest "$work/AndroidManifest.xml" -I "$FERROUI_ANDROID_JAR"
     --min-sdk-version "$min_sdk" --target-sdk-version "$target_sdk" --version-code 1 --version-name 1.0)
-if [ "$profile" != "release" ]; then
+if [ "$profile" = "dev" ]; then
     # Debuggable: the emulator scripts read and write the files of the application with run-as.
     aapt_args+=(--debug-mode)
 fi

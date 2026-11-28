@@ -1,4 +1,18 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <ToggleButton x:Name="Primary" Content="ToggleButton"/><ToggleButton Content="Initially checked" IsChecked="True"/><TextBlock x:Name="Output" Text="Unchecked"/>
+<!-- Ported from the pinned ToggleButton example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     button_samples.rs ports the constructor and the Checked/Unchecked handlers of
+     ToggleButtonPage.xaml.cs over IsCheckedChanged. The source binds IsEnabled to
+     DisableToggle1.IsChecked.Value.Equals(x:False); the x:Bind here is the same OneWay binding of
+     IsChecked with the BoolConverters.Not converter. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ToggleButtonExample1" Spacing="8">
+    <TextBlock Text="A simple ToggleButton with text content." FontSize="18" />
+    <StackPanel VerticalAlignment="Top" Orientation="Horizontal">
+      <ToggleButton x:Name="Toggle1"
+                    Content="ToggleButton"
+                    IsEnabled="{x:Bind DisableToggle1.IsChecked, Mode=OneWay, Converter={x:Static BoolConverters.Not}}" />
+    </StackPanel>
+    <TextBlock x:Name="Toggle1Output" />
+    <CheckBox x:Name="DisableToggle1" Content="Disable ToggleButton" />
+  </StackPanel>
 </StackPanel>

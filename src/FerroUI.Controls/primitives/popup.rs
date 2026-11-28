@@ -37,6 +37,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct CustomPopupPlacementCallbackValue(pub CustomPopupPlacementCallback);
 
+ferroui_base::styled_value!(CustomPopupPlacementCallbackValue);
+
 impl PartialEq for CustomPopupPlacementCallbackValue {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
@@ -65,6 +67,10 @@ pub struct Popup {
     /// popup is open (`subscribe_placement_target_transforms`).
     placement_target_transform_subscriptions: RefCell<Vec<Subscription>>,
     queued_for_placement_target_move: Cell<bool>,
+    /// Whether a change of the layout bounds of the placement target's
+    /// ancestors positions the open popup again
+    /// ([`set_follows_placement_target_layout`](Self::set_follows_placement_target_layout)).
+    follows_placement_target_layout: Cell<bool>,
     /// The rectangle of the placement target in its root when the popup
     /// was last positioned for a change of a render transform.
     last_placement_target_rect: Cell<Option<Rect>>,
@@ -395,6 +401,7 @@ impl Popup {
             closing: HandlerList::new(),
             placement_target_transform_subscriptions: RefCell::new(Vec::new()),
             queued_for_placement_target_move: Cell::new(false),
+            follows_placement_target_layout: Cell::new(false),
             last_placement_target_rect: Cell::new(None),
         }
     }
@@ -634,6 +641,23 @@ impl Popup {
 
     /// The horizontal offset of the popup in relation to the placement
     /// target.
+    /// Whether the open popup is positioned again when a layout pass moves
+    /// an ancestor of its placement target (its bounds change), once per
+    /// frame and only when the place of the target in the root changed.
+    /// Off by default: as upstream, a popup then follows the layout bounds
+    /// of its target only (`DEVIATIONS.md`, Popup). The code editor's
+    /// popups (completion list, insight, search panel) turn it on, since a
+    /// scroll or a reflow of the editor moves the caret they are anchored to.
+    pub fn follows_placement_target_layout(&self) -> bool {
+        self.follows_placement_target_layout.get()
+    }
+
+    /// Sets [`follows_placement_target_layout`](Self::follows_placement_target_layout).
+    /// It takes effect at the next opening.
+    pub fn set_follows_placement_target_layout(&self, value: bool) {
+        self.follows_placement_target_layout.set(value);
+    }
+
     pub fn horizontal_offset(&self) -> f64 {
         self.get_value(Self::horizontal_offset_property())
     }
@@ -1186,8 +1210,10 @@ impl Popup {
     /// transform (a page that slides in) stayed where the target was when
     /// it opened. The popup is positioned again, once per frame, when a
     /// render transform of the chain is set, replaced or removed, or a
-    /// mutable one changes in place, and the place of the target in the
-    /// root differs from the last one (`docs/porting/decisions/
+    /// mutable one changes in place, or (for a popup that opts in with
+    /// [`set_follows_placement_target_layout`](Self::set_follows_placement_target_layout))
+    /// the layout bounds of an element of the chain change, and the place of
+    /// the target in the root differs from the last one (`docs/porting/decisions/
     /// popup-opened-while-its-target-moves.md`).
     fn subscribe_placement_target_transforms(&self) {
         let generation = self.lifecycle_generation.get();
@@ -1255,7 +1281,9 @@ impl Popup {
             }
             self.last_placement_target_rect.set(last);
             self.enqueue_for_placement_target_move();
-        } else if e.property() == Visual::render_transform_origin_property().as_property() {
+        } else if e.property() == Visual::render_transform_origin_property().as_property()
+            || (self.follows_placement_target_layout.get() && e.property() == Visual::bounds_property().as_property())
+        {
             self.enqueue_for_placement_target_move();
         }
     }

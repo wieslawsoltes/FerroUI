@@ -1,0 +1,109 @@
+// A control written in Osprey (docs/osprey.md, section 8): Gauge, a bar that shows a level from 0
+// to 1 and takes the level a press gives it, the Osprey twin of samples/CApi/gauge.h. A class
+// registered with the library on the base Control, one registered property (Level, a number that
+// affects the render) and four callbacks: measure, arrange, render and pointer. The state of a
+// gauge is its Level: Osprey keeps no data of its own per instance.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program lays the window out and prints what it measured.
+
+import ferroui::*
+import ferroobjects::*
+
+type Gauge = { gaugeClass: int, gaugeLevel: int }
+
+effect GaugeState { gauge: fn(Gauge) -> Unit }
+
+mut gauge = Gauge { gaugeClass: 0, gaugeLevel: 0 }
+
+fn keepGauge(value: Gauge) -> Unit = {
+    handle GaugeState { gauge v => { gauge = v } }
+    perform GaugeState.gauge(value)
+}
+
+fn smaller(a: float, b: float) -> float = a < b ? a : b
+
+// 160 by 16, or less where less is available.
+fn measure(data: Ptr, self: int, width: float, height: float, outWidth: Ptr, outHeight: Ptr) -> int32 =
+    layoutResult(smaller(width, 160.0), smaller(height, 16.0))
+
+// The size it is given.
+fn arrange(data: Ptr, self: int, width: float, height: float, outWidth: Ptr, outHeight: Ptr) -> int32 =
+    layoutResult(width, height)
+
+// The track, and the filled part of the level over it.
+fn render(data: Ptr, self: int, context: int) -> int32 = {
+    let width = ferro_layout_bounds_width(object: self)
+    let height = ferro_layout_bounds_height(object: self)
+    let level = ferro_get_f64_or(object: self, property: gauge.gaugeLevel, fallback: 0.0)
+    let track = ferro_draw_brush(argb: 4292927712)
+    let fill = ferro_draw_brush(argb: 4281236786)
+    let _ = ferro_draw_rect(context: context, x: 0.0, y: 0.0, width: width, height: height, radiusX: height / 2.0,
+        radiusY: height / 2.0, brush: track, pen: 0)
+    ferro_draw_rect(context: context, x: 0.0, y: 0.0, width: width * level, height: height, radiusX: height / 2.0,
+        radiusY: height / 2.0, brush: fill, pen: 0)
+}
+
+// A press sets the level where it is; 1 marks the event as handled.
+fn pointer(data: Ptr, self: int, kind: int32, x: float, y: float, modifiers: int) -> int32 = {
+    let width = ferro_layout_bounds_width(object: self)
+    match toInt(kind) == 1 && width > 0.0 {
+        false => toInt32(0)
+        true => {
+            let level = x / width
+            let _ = ferro_set_f64(object: self, property: gauge.gaugeLevel, value: level < 0.0 ? 0.0 : level > 1.0 ? 1.0 : level)
+            toInt32(1)
+        }
+    }
+}
+
+fn registerGauge() -> Unit = {
+    let classId = controlClass("OspreyGauge", baseControl())
+    let level = numberProperty(classId, "Level", 0.5, affectsRender())
+    let _ = ferro_class_on_measure(classId: classId, callback: measure)
+    let _ = ferro_class_on_arrange(classId: classId, callback: arrange)
+    let _ = ferro_class_on_render(classId: classId, callback: render)
+    let _ = ferro_class_on_pointer(classId: classId, callback: pointer)
+    keepGauge(Gauge { gaugeClass: classId, gaugeLevel: level })
+}
+
+fn newGauge(level: float) -> int = {
+    let created = ferro_create(typeId: gauge.gaugeClass)
+    let _ = ferro_set_f64(object: created, property: gauge.gaugeLevel, value: level)
+    created
+}
+
+fn build() -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    registerGauge()
+    let first = newGauge(0.25)
+    let second = newGauge(0.75)
+    let panel = stackPanel() |> spacing(12.0) |> margin("24") |> add(first) |> add(second)
+        |> add(textBlock() |> text("Press a gauge to set its level"))
+    let window = window() |> title("Gauges in Osprey") |> width(320.0) |> height(200.0) |> add(panel) |> showWindow
+    report("build", failure())
+    match envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => {
+            let _ = ferro_layout_measure(object: window, width: 320.0, height: 200.0)
+            let measured = ferro_layout_desired_width(object: first)
+            let level = ferro_get_f64_or(object: second, property: gauge.gaugeLevel, fallback: -1.0)
+            let ok = measured == 160.0 && level == 0.75
+            print("script: a gauge measures ${measured} wide, the second shows ${level}: ${ok ? "ok" : "FAILED"}")
+        }
+        false => nothing()
+    }
+    0
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = match tag {
+    0 => build()
+    _ => 0
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

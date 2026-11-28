@@ -778,9 +778,18 @@ impl BrowserInputHandler {
     }
 
     pub(crate) fn raw_text_event(&self, text: &str) -> bool {
+        self.dispatch_text_event(text, false)
+    }
+
+    pub(crate) fn composition_text_event(&self, text: &str) -> bool {
+        self.dispatch_text_event(text, true)
+    }
+
+    fn dispatch_text_event(&self, text: &str, from_input_method: bool) -> bool {
         if let Some(input_root) = self.input_root() {
             let device: Rc<dyn IInputDevice> = BrowserWindowingPlatform::keyboard();
-            let args = Rc::new(RawTextInputEventArgs::new(device, self.timestamp(), input_root, text));
+            let args = RawTextInputEventArgs::new(device, self.timestamp(), input_root, text);
+            let args = Rc::new(if from_input_method { args.with_input_method_origin() } else { args });
             self.schedule_input(args.clone());
 
             return args.handled();
@@ -929,6 +938,7 @@ mod tests {
         fn focus_container_element(&self) {}
         fn clear_input_element(&self) {}
         fn set_surrounding_text(&self, _text: &str, _start: i32, _end: i32) {}
+        fn set_input_masked(&self, _masked: bool) {}
         fn has_text_input_element(&self) -> bool {
             false
         }

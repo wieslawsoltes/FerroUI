@@ -67,6 +67,30 @@ fn a_text_box_shows_its_value_as_its_text() {
     assert_eq!(state.role, "textbox");
     assert_eq!(state.name, "User name");
     assert_eq!(state.text, "ada");
+    assert_eq!(aria(&state, "aria-multiline"), "");
+
+    text_box.set_accepts_return(true);
+    assert_eq!(aria(&state_of(&text_box), "aria-multiline"), "true");
+}
+
+#[test]
+fn a_text_box_that_becomes_masked_is_read_again_and_has_no_text() {
+    let _scope = Dispatcher::unit_test_scope();
+    let text_box = TextBox::new();
+    text_box.set_text(Some("synthetic fixture"));
+    let peer = ControlAutomationPeer::create_peer_for_element(&text_box);
+    let mut state = NodeState::default();
+    read_attributes(&peer, &mut state);
+    assert_eq!(state.text, "synthetic fixture");
+
+    // The tree reads a node again only when its peer reports a property change.
+    let reported = std::rc::Rc::new(std::cell::Cell::new(false));
+    let flag = reported.clone();
+    let _token = peer.property_changed(move |_| flag.set(true));
+    text_box.set_password_char('*');
+    assert!(reported.get());
+    read_attributes(&peer, &mut state);
+    assert_eq!(state.text, "");
 }
 
 #[test]

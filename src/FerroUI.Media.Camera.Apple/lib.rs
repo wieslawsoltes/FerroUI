@@ -177,7 +177,7 @@ impl NativeCameraSession for AppleCameraSession {
                 "GPU completion is indeterminate; camera storage remains quarantined",
             ));
         }
-        let Some((buffer, timestamp)) = self.camera.frame() else {
+        let Some((buffer, timestamp, rotation)) = self.camera.frame() else {
             return Ok(None);
         };
         let (width, height, stride, bytes, color) = buffer.info();
@@ -214,7 +214,7 @@ impl NativeCameraSession for AppleCameraSession {
                 FrameColor::Rec709Full
             },
             alpha: FrameAlpha::Opaque,
-            rotation: FrameRotation::None,
+            rotation,
             mirrored: false,
             top_left_origin: true,
             timestamp: duration(timestamp).unwrap_or_default(),

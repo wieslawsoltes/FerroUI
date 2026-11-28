@@ -1,6 +1,6 @@
 use crate::animation::{AnimatorTransitionObservable, Transition, TransitionBase};
 use crate::reactive::IObservable;
-use crate::PropertyValue;
+
 use std::rc::Rc;
 
 /// The base for user-defined transitions that are fully described by an
@@ -10,7 +10,7 @@ use std::rc::Rc;
 /// [`ferro_transition_class!`](crate::ferro_transition_class), implement
 /// this trait and implement [`Transition::do_transition`] by calling
 /// [`interpolating_do_transition`].
-pub trait InterpolatingTransitionBase<T: PropertyValue>: Transition<T> {
+pub trait InterpolatingTransitionBase<T: crate::StyledValue>: Transition<T> {
     /// Interpolates between two values using the specified progress.
     fn interpolate(this: &Self, progress: f64, from: &T, to: &T) -> T;
 }
@@ -25,7 +25,7 @@ pub fn interpolating_do_transition<C, T>(
 ) -> Rc<dyn IObservable<T>>
 where
     C: InterpolatingTransitionBase<T> + crate::ObjectType,
-    T: PropertyValue,
+    T: crate::StyledValue,
 {
     let base: &TransitionBase = this.upcast();
     let easing = base.easing();

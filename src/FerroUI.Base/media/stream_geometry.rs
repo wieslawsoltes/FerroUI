@@ -90,6 +90,17 @@ impl StreamGeometry {
         stream_geometry
     }
 
+    /// Builds the geometry in one pass as a compiled path's commands are decoded.
+    pub fn try_from_commands<E>(commands: impl Iterator<Item = Result<PathCommand, E>>) -> Result<Ref<StreamGeometry>, E> {
+        let stream_geometry = StreamGeometry::new();
+        let mut builder = Self::create_builder(None);
+        for command in commands {
+            PathCommand::replay(std::slice::from_ref(&command?), &mut *builder);
+        }
+        *stream_geometry.impl_.borrow_mut() = Some(builder.to_geometry());
+        Ok(stream_geometry)
+    }
+
     /// Opens the geometry to start defining it.
     ///
     /// Returns a [`StreamGeometryContext`] which can be used to define the
@@ -99,6 +110,20 @@ impl StreamGeometry {
     /// updated when the context is disposed.
     pub fn open(&self) -> StreamGeometryContext {
         StreamGeometryContext::from_context(self.open_core())
+    }
+
+    /// Opens the geometry to define it again: the figures written on the returned context
+    /// replace the ones the geometry has. The object is kept, with its transform and what
+    /// listens to it; the geometry raises its change once, when the context is disposed.
+    ///
+    /// A FerroUI addition (desktop-performance.md, #805): a shape or a border whose stream
+    /// geometry is made of its size or its angles writes the geometry it has again, where it
+    /// made a new object and a new subscription for every change.
+    pub fn reopen(&self) -> StreamGeometryContext {
+        StreamGeometryContext::from_context(Box::new(BuilderWrapper {
+            builder: Self::create_builder(None),
+            owner: self.to_ref(),
+        }))
     }
 
     fn set_impl(&self, impl_: Arc<dyn IGeometryImpl>) {
@@ -217,6 +242,51 @@ mod tests {
             }
 
             assert_eq!(1, changed.get());
+        });
+    }
+
+    fn line(target: &StreamGeometry, to: f64) {
+        let mut context = target.reopen();
+        context.begin_figure(Point::new(0.0, 0.0), true);
+        context.line_to(Point::new(to, 0.0), true);
+        context.end_figure(false);
+    }
+
+    #[test]
+    fn reopen_replaces_the_figures_and_raises_changed_once() {
+        with_mock_render_interface(|_| {
+            let target = StreamGeometry::new();
+            let changed = count_changed(&target);
+
+            line(&target, 10.0);
+            assert_eq!(1, changed.get());
+            let first = target.platform_impl().expect("a geometry");
+
+            line(&target, 20.0);
+            assert_eq!(2, changed.get());
+            let second = target.platform_impl().expect("a geometry");
+
+            // The second geometry was built from nothing, not from the first one.
+            assert!(!Arc::ptr_eq(&first, &second));
+        });
+    }
+
+    #[test]
+    fn open_adds_to_the_figures_where_reopen_replaces_them() {
+        with_mock_render_interface(|interface| {
+            let target = StreamGeometry::new();
+            line(&target, 10.0);
+            {
+                let mut context = target.open();
+                context.begin_figure(Point::new(0.0, 5.0), true);
+                context.line_to(Point::new(10.0, 5.0), true);
+                context.end_figure(false);
+            }
+            let sources_after_open = interface.stream_sources.borrow().clone();
+            line(&target, 10.0);
+            let sources_after_reopen = interface.stream_sources.borrow().clone();
+            assert_eq!(sources_after_open.last(), Some(&true), "open builds on the figures it has");
+            assert_eq!(sources_after_reopen.last(), Some(&false), "reopen starts from nothing");
         });
     }
 }

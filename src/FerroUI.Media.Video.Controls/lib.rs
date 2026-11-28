@@ -27,7 +27,7 @@ pub static ASSEMBLY: ferroui_base::metadata::MarkupAssembly =
     };
 ferroui_base::ferro_rust_paths! {
     classes: [crate::MediaPlayerElement, crate::MediaPlayerPresenter, crate::MediaTransportControls],
-    types: [], contracts: [], generics: [], generic_contracts: [],
+    types: [crate::FastPlayFallbackBehaviour], contracts: [], generics: [], generic_contracts: [],
 }
 const TYPES: &[&ferroui_base::TypeInfo] = &[
     MediaPlayerElement::TYPE,

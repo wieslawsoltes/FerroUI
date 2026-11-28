@@ -706,3 +706,300 @@ fn source_heat_hit_tests() {
         )
         .is_empty());
 }
+
+// HeatSeriesTest.ShouldPlaceDataLabel: the source's nine cells (weights 0 to 2 by column) on a
+// 500 by 500 chart with a draw margin of 100 and hidden axes. Without data labels a cell has no
+// label; with them, the label of the primary value is centred on the inset cell (`Middle`, the
+// default of a heat series) or beside it at the `Top`, `Bottom`, `Left` and `Right`, its size
+// the text grown by `DataLabelsPadding`. `End` and `Start` go below and above the cells of this
+// fixture, whose primary values are not greater than the pivot or are (rows 1 and 2).
+#[test]
+fn source_heat_should_place_data_label() {
+    let metrics =
+        |text: &str, size: f64| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2);
+    let mut series = Series::new(SeriesKind::Heat);
+    series.values = (0..9)
+        .map(|i| Coordinate::weighted((i % 3) as f64, (i / 3) as f64, (i % 3) as f64))
+        .collect();
+    series.data_padding = ferroui_base::Point::new(0.0, 0.0);
+    let hidden = Axis {
+        visible: false,
+        ..Axis::default()
+    };
+    // The cell visual and the centre and size of the label of every point.
+    let place = |series: &Series, position: Option<DataLabelsPosition>| {
+        let mut options = CartesianSeriesOptions::default();
+        options.data_labels_position = position;
+        let scene = CartesianChartEngine::measure_with_series_options(
+            Size::new(500.0, 500.0),
+            std::slice::from_ref(series),
+            std::slice::from_ref(&hidden),
+            std::slice::from_ref(&hidden),
+            &CartesianOptions {
+                draw_margin: Some(Rect::new(100.0, 100.0, 300.0, 300.0)),
+                ..CartesianOptions::default()
+            },
+            metrics,
+            &[options],
+        )
+        .unwrap()
+        .scene;
+        let cells = rectangles(&scene, 0);
+        let labels: Vec<_> = scene
+            .primitives
+            .iter()
+            .filter_map(|p| match (&p.geometry, p.id) {
+                (
+                    Geometry::Text {
+                        origin, text, size, ..
+                    },
+                    Some(id),
+                ) if id.series == 0 => {
+                    let measured = metrics(text, *size);
+                    let label = Size::new(
+                        measured.width + crate::series::DATA_LABELS_PADDING.0 * 2.0,
+                        measured.height + crate::series::DATA_LABELS_PADDING.1 * 2.0,
+                    );
+                    let center =
+                        ferroui_base::Point::new(origin.x, origin.y + measured.height * 0.5);
+                    Some((id.point, center, label))
+                }
+                _ => None,
+            })
+            .collect();
+        (cells, labels)
+    };
+    let (cells, labels) = place(&series, None);
+    assert_eq!(cells.len(), 9);
+    assert!(labels.is_empty(), "no labels without DataLabels");
+    series.data_labels = true;
+    let check = |position: Option<DataLabelsPosition>,
+                 expected: &dyn Fn(Rect, Size, usize) -> (f64, f64)| {
+        let (cells, labels) = place(&series, position);
+        assert_eq!(labels.len(), 9, "{position:?}");
+        for (point, center, label) in labels {
+            let (x, y) = expected(cells[point], label, point);
+            assert_close(center.x, x, "label x");
+            assert_close(center.y, y, "label y");
+        }
+    };
+    let middle = |v: Rect, _: Size, _: usize| (v.x + v.width * 0.5, v.y + v.height * 0.5);
+    let top = |v: Rect, l: Size, _: usize| (v.x + v.width * 0.5, v.y - l.height * 0.5);
+    let bottom =
+        |v: Rect, l: Size, _: usize| (v.x + v.width * 0.5, v.y + v.height + l.height * 0.5);
+    check(None, &middle);
+    check(Some(DataLabelsPosition::Middle), &middle);
+    check(Some(DataLabelsPosition::Top), &top);
+    check(Some(DataLabelsPosition::Bottom), &bottom);
+    check(Some(DataLabelsPosition::Right), &|v, l, _| {
+        (v.x + v.width + l.width * 0.5, v.y + v.height * 0.5)
+    });
+    check(Some(DataLabelsPosition::Left), &|v, l, _| {
+        (v.x - l.width * 0.5, v.y + v.height * 0.5)
+    });
+    // The primary value of the first row is the pivot (0): its end is below, its start above.
+    check(Some(DataLabelsPosition::End), &|v, l, point| {
+        if point < 3 {
+            bottom(v, l, point)
+        } else {
+            top(v, l, point)
+        }
+    });
+    check(Some(DataLabelsPosition::Start), &|v, l, point| {
+        if point < 3 {
+            top(v, l, point)
+        } else {
+            bottom(v, l, point)
+        }
+    });
+}
+
+// HeatSeries<TModel, VariableSVGPathGeometry> with GeometrySvg: each cell is the SVG path fitted
+// to the inset cell (`Svg.Draw`), here a square that covers it; path data the parser rejects is
+// an error.
+#[test]
+fn heat_cells_draw_the_svg_geometry_of_the_series() {
+    let mut series = Series::new(SeriesKind::Heat);
+    series.values = (0..4)
+        .map(|i| Coordinate::weighted((i % 2) as f64, (i / 2) as f64, i as f64))
+        .collect();
+    let measure = |svg: &str| {
+        let mut options = CartesianSeriesOptions::default();
+        options.geometry_svg = Some(svg.to_owned());
+        CartesianChartEngine::measure_with_series_options(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[Axis::default()],
+            &CartesianOptions::default(),
+            |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+            &[options],
+        )
+    };
+    let scene = measure("M0,0 L10,0 L10,10 L0,10 Z").unwrap().scene;
+    let cells: Vec<_> = scene
+        .primitives
+        .iter()
+        .filter_map(|p| match (&p.geometry, p.id) {
+            (Geometry::Path(commands), Some(id)) if id.series == 0 => Some((id.point, commands)),
+            _ => None,
+        })
+        .collect();
+    assert_eq!(cells.len(), 4);
+    for (point, commands) in cells {
+        let HitShape::Rectangle(cell) = scene.hits[point].shape else {
+            panic!("a heat cell hovers its whole cell")
+        };
+        let inset = Rect::new(
+            cell.x + 4.0,
+            cell.y + 4.0,
+            cell.width - 8.0,
+            cell.height - 8.0,
+        );
+        let PathCommand::MoveTo(first) = commands[0] else {
+            panic!("the path starts with a move")
+        };
+        assert_close(first.x, inset.x, "left of the cell");
+        assert_close(first.y, inset.y, "top of the cell");
+        let PathCommand::LineTo(corner) = commands[2] else {
+            panic!("the far corner")
+        };
+        assert_close(corner.x, inset.x + inset.width, "right of the cell");
+        assert_close(corner.y, inset.y + inset.height, "bottom of the cell");
+    }
+    assert!(measure("M0,0 X").is_err());
+}
+
+// LineSeries, ScatterSeries and ColumnSeries of VariableSVGPathGeometry with GeometrySvg: the path
+// is drawn in place of each marker and each bar, fitted to its visual (`Svg.Draw`); the series
+// without it keep their ellipses and rectangles, and other paths of the series (the line) stay.
+#[test]
+fn markers_and_bars_draw_the_svg_geometry_of_the_series() {
+    let svg = "M0,0 L10,0 L10,10 L0,10 Z";
+    let visuals = |kind: SeriesKind, svg: Option<&str>| {
+        let mut series = Series::from_values(kind, [2.0, 5.0, 3.0]);
+        series.geometry_size = 12.0;
+        let mut options = CartesianSeriesOptions::default();
+        options.geometry_svg = svg.map(str::to_owned);
+        let scene = CartesianChartEngine::measure_with_series_options(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[Axis::default()],
+            &CartesianOptions::default(),
+            |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+            &[options],
+        )
+        .unwrap()
+        .scene;
+        let mut found: Vec<_> = scene
+            .primitives
+            .into_iter()
+            .filter(|p| p.id.is_some_and(|id| id.series == 0))
+            .map(|p| (p.id.unwrap().point, p.geometry))
+            .collect();
+        found.sort_by_key(|(point, _)| *point);
+        found
+    };
+    for kind in [SeriesKind::Line, SeriesKind::Scatter, SeriesKind::Column] {
+        let native = visuals(kind, None);
+        let drawn = visuals(kind, Some(svg));
+        assert_eq!(native.len(), drawn.len(), "{kind:?}");
+        let mut replaced = 0;
+        for ((_, before), (_, after)) in native.iter().zip(&drawn) {
+            let rect = match before {
+                Geometry::Ellipse(rect) | Geometry::Rectangle { rect, .. } => *rect,
+                other => {
+                    assert_eq!(other, after, "{kind:?}: other visuals stay");
+                    continue;
+                }
+            };
+            let Geometry::Path(commands) = after else {
+                panic!("{kind:?}: the visual is the SVG path")
+            };
+            let PathCommand::MoveTo(first) = commands[0] else {
+                panic!("the path starts with a move")
+            };
+            assert_close(first.x, rect.x, "left of the visual");
+            assert_close(first.y, rect.y, "top of the visual");
+            replaced += 1;
+        }
+        assert_eq!(replaced, 3, "{kind:?}: a visual for each point");
+    }
+    let mut series = Series::from_values(SeriesKind::Line, [1.0]);
+    series.geometry_size = 12.0;
+    let mut options = CartesianSeriesOptions::default();
+    options.geometry_svg = Some("M0,0 X".into());
+    assert!(CartesianChartEngine::measure_with_series_options(
+        Size::new(400.0, 400.0),
+        &[series],
+        &[],
+        &[],
+        &CartesianOptions::default(),
+        |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+        &[options],
+    )
+    .is_err());
+}
+
+// OhlcSeriesAnimationTests.OhlcSeries_FirstDraw_BarsAppearWithOHLC: the source's three I-bars on
+// a 400 by 400 chart with a Y axis from 0 to 40 start their first draw with the high, the close
+// and the low at the open (every line of a bar at the pixel of its open) and end with the low
+// below the high; the candles of a financial series start as a body of no height at the open.
+#[test]
+fn source_ohlc_first_draw_bars_grow_from_their_open() {
+    let bars = [
+        (35.0, 25.0, 20.0, 15.0),
+        (30.0, 22.0, 28.0, 18.0),
+        (32.0, 27.0, 24.0, 19.0),
+    ];
+    for kind in [SeriesKind::Ohlc, SeriesKind::Financial] {
+        let mut series = Series::new(kind);
+        series.values = bars
+            .iter()
+            .enumerate()
+            .map(|(i, &(h, o, c, l))| Coordinate::financial(i as f64, h, o, c, l))
+            .collect();
+        let measured = CartesianChartEngine::measure_with_axes(
+            Size::new(400.0, 400.0),
+            std::slice::from_ref(&series),
+            &[Axis::default()],
+            &[limits(0.0, 40.0)],
+            &CartesianOptions::default(),
+        )
+        .unwrap();
+        let seed = CartesianChartEngine::first_draw_seed(
+            &measured.scene,
+            std::slice::from_ref(&series),
+            &measured.y_scales,
+        );
+        let y = measured.y_scales[0];
+        for (target, start) in measured.scene.primitives.iter().zip(&seed.primitives) {
+            let Some(id) = target.id else {
+                assert_eq!(target, start, "the rest of the scene is in place");
+                continue;
+            };
+            let (h, o, _, l) = bars[id.point];
+            let open = y.to_pixels(o);
+            match (&target.geometry, &start.geometry) {
+                (Geometry::Line { start: a, end: b }, Geometry::Line { start: s, end: e }) => {
+                    assert_close(s.y, open, "a line starts at the open");
+                    assert_close(e.y, open, "a line starts at the open");
+                    assert_close(s.x, a.x, "in place");
+                    assert_close(e.x, b.x, "in place");
+                    if a.x == b.x {
+                        // The spine of the bar: the low below the high at the end.
+                        assert!(y.to_pixels(l) > y.to_pixels(h));
+                        assert!(a.y.max(b.y) > a.y.min(b.y));
+                    }
+                }
+                (Geometry::Rectangle { rect: r, .. }, Geometry::Rectangle { rect: s, .. }) => {
+                    assert_close(s.y, open, "the body starts at the open");
+                    assert_close(s.height, 0.0, "with no height");
+                    assert_close(s.x, r.x, "in place");
+                }
+                _ => {}
+            }
+        }
+    }
+}

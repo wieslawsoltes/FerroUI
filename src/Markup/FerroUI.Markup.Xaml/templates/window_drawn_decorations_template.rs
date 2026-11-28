@@ -30,12 +30,15 @@ impl WindowDrawnDecorationsTemplate {
         *self.content.borrow_mut() = value;
     }
 
-    /// Builds the decorations content.
-    ///
-    /// # Panics
-    /// Panics if the template has no content.
+    /// Builds the decorations content. A template without content, or content
+    /// that fails to build, reports its error (to the error scope of a load,
+    /// else to the dispatcher of the thread, #567) and builds empty
+    /// decorations.
     pub fn build(&self) -> TemplateResult<Ref<WindowDrawnDecorationsContent>> {
-        crate::throw(self.try_build())
+        crate::throw_or(self.try_build(), || {
+            let name_scope = ferroui_base::controls::NameScopeRef(Rc::new(ferroui_base::controls::NameScope::new()));
+            TemplateResult::new(WindowDrawnDecorationsContent::new(), name_scope)
+        })
     }
 
     /// [`build`](Self::build) without the panic: a template without content

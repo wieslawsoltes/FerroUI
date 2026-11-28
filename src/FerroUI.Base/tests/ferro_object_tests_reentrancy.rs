@@ -117,6 +117,8 @@ pub struct Droppy {
     id: i32,
 }
 
+crate::styled_value!(Droppy);
+
 impl Droppy {
     fn new(id: i32) -> Self {
         Self { id }

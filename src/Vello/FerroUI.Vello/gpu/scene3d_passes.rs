@@ -6,13 +6,16 @@
 //! **The kept outputs.** Each device keeps up to [`CAPACITY`] outputs, each a texture of the pool
 //! with the uniform buffers of its viewport ([`Scene3DViewport`]):
 //!
-//! 1. A scene whose snapshot, generations, size, scale and edge mode are those of a kept output is
-//!    painted from that output: no 3D pass ([`VelloScene3DCounters::cached_output_frames`]).
+//! 1. A scene whose snapshot, generations, size, scale, edge mode and brush textures (the
+//!    identities and versions of the bitmaps of its image brushes, step D6) are those of a kept
+//!    output is painted from that output: no 3D pass
+//!    ([`VelloScene3DCounters::cached_output_frames`]).
 //! 2. Otherwise the scene is drawn into the output of the same viewport (the one at the same
 //!    device position and size), or of a scene that is gone, or a new one. The executor writes
 //!    only the uniforms that changed, uploads only the meshes whose `(id, version)` is new, and
-//!    makes no pipeline it has: a camera that moves writes the frame uniforms alone
-//!    ([`VelloScene3DCounters::uniform_only_frames`]).
+//!    makes no pipeline it has, and uploads the texture of a brush once per key: a camera that
+//!    moves writes the frame uniforms alone ([`VelloScene3DCounters::uniform_only_frames`]; the
+//!    uploads of brush textures are counted by `ferroui_render3d::wgpu_executor::texture_counters`).
 //! 3. An output still held by a scene that is not rendered yet is not drawn over: the viewport
 //!    takes another texture of the pool, and the held one is the pool's again once that scene is
 //!    rendered.
@@ -22,15 +25,23 @@
 //! then draws its 3D scenes with the CPU reference of step D3, each counted
 //! (`ferroui_render3d::scenes_drawn_on_cpu`) by the drawing context.
 //!
+//! **Frames of a video or a camera (step D7).** An image brush whose bitmap is a shared frame of
+//! this device samples the frame's converted texture ([`VelloSharedFrameBitmap::texture`], the one
+//! conversion the 2D path also draws from): no copy, no upload, and a new frame is a new render
+//! with no mesh or texture upload.
+//!
 //! The executors are kept per device and thread, as the pipelines of the other passes are, and
 //! go with their device.
 
-use super::{effect_passes, VelloDeviceTexture, VelloWgpuDevice};
+use super::{effect_passes, VelloDeviceTexture, VelloSharedFrameBitmap, VelloWgpuDevice};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use ferroui_base::platform::SharedBitmapImpl;
 use ferroui_base::rendering::scene3d::Scene3DSnapshot;
 use ferroui_base::PixelSize;
+use ferroui_render3d::brush::scene_texture_inputs;
 use ferroui_render3d::wgpu_executor::{
-    gpu_counters, Scene3DTarget, Scene3DViewport, Scene3DWgpuError, Scene3DWgpuExecutor,
+    gpu_counters, texture_counters, Scene3DDeviceTexture, Scene3DDeviceTextures, Scene3DTarget, Scene3DViewport,
+    Scene3DWgpuError, Scene3DWgpuExecutor,
 };
 use std::cell::{Cell, RefCell};
 use std::mem::ManuallyDrop;
@@ -48,6 +59,9 @@ struct Slot {
     size: (u32, u32),
     scale_bits: u64,
     antialiased: bool,
+    /// The textures of the image brushes of the scene (new pixels of a bitmap change no
+    /// generation).
+    inputs: u64,
     /// The device pixel of the top left of the viewport: what names a viewport whose snapshot
     /// changed.
     origin: (i32, i32),
@@ -151,6 +165,31 @@ fn report_failure(error: &Scene3DWgpuError) {
     }
 }
 
+/// The shared frames of a device, as the executor samples them.
+struct FrameTextures<'a>(&'a Arc<VelloWgpuDevice>);
+
+impl FrameTextures<'_> {
+    fn frame<'b>(&self, bitmap: &'b SharedBitmapImpl) -> Option<&'b VelloSharedFrameBitmap> {
+        let frame = bitmap.as_any().downcast_ref::<VelloSharedFrameBitmap>()?;
+        Arc::ptr_eq(frame.device(), self.0).then_some(frame)
+    }
+}
+
+impl Scene3DDeviceTextures for FrameTextures<'_> {
+    fn is_on_device(&self, bitmap: &SharedBitmapImpl) -> bool {
+        self.frame(bitmap).is_some()
+    }
+
+    fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<Scene3DDeviceTexture> {
+        let texture = self.frame(bitmap)?.texture()?;
+        Some(Scene3DDeviceTexture {
+            texture: texture.texture().clone(),
+            view: texture.view().clone(),
+            owner: texture,
+        })
+    }
+}
+
 /// A scene drawn on the device: the texture it is in, and the pixels of the image at its top left.
 pub(crate) struct DeviceScene {
     pub(crate) texture: Arc<VelloDeviceTexture>,
@@ -172,6 +211,7 @@ pub(crate) fn scene_texture(
     let size = (size.width.max(1) as u32, size.height.max(1) as u32);
     let scale_bits = scale.to_bits();
     let generations = scene.generations();
+    let inputs = scene_texture_inputs(scene);
     DEVICES.with(|devices| {
         let mut devices = devices.borrow_mut();
         // The executors of devices that are gone or lost go with them.
@@ -201,6 +241,7 @@ pub(crate) fn scene_texture(
                 && slot.size == size
                 && slot.scale_bits == scale_bits
                 && slot.antialiased == antialiased
+                && slot.inputs == inputs
         }) {
             slot.last_used = clock;
             count(|counters| {
@@ -240,6 +281,7 @@ pub(crate) fn scene_texture(
                     size,
                     scale_bits,
                     antialiased,
+                    inputs: 0,
                     origin,
                     texture,
                     viewport: Scene3DViewport::new(),
@@ -272,8 +314,10 @@ pub(crate) fn scene_texture(
             size,
             antialiased,
         };
+        let uploads = texture_counters().textures_uploaded;
         let rendered = super::with_autorelease_pool(|| {
-            executor.render(device.device(), device.queue(), &mut slot.viewport, scene, &target)
+            let frames = FrameTextures(device);
+            executor.render_with_textures(device.device(), device.queue(), &mut slot.viewport, scene, &target, &frames)
         });
         match rendered {
             Ok(report) => {
@@ -282,9 +326,11 @@ pub(crate) fn scene_texture(
                 slot.size = size;
                 slot.scale_bits = scale_bits;
                 slot.antialiased = antialiased;
+                slot.inputs = inputs;
                 slot.origin = origin;
                 slot.last_used = clock;
-                let uniform_only = report.is_uniform_only() && new_textures == 0;
+                let uploaded = texture_counters().textures_uploaded != uploads;
+                let uniform_only = report.is_uniform_only() && new_textures == 0 && !uploaded;
                 count(|counters| {
                     counters.output_textures_allocated += new_textures;
                     counters.scenes_drawn_on_gpu += 1;

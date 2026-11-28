@@ -1,0 +1,401 @@
+{
+  "native": {
+    "stripped_bytes": 18578224,
+    "samples_ns": [
+      [
+        30567125,
+        2723458,
+        2234708,
+        2767
+      ],
+      [
+        3594541,
+        104208,
+        47666,
+        2654
+      ],
+      [
+        3534250,
+        101083,
+        47042,
+        2807
+      ],
+      [
+        3757458,
+        102958,
+        53000,
+        2691
+      ],
+      [
+        4170125,
+        116042,
+        55417,
+        2696
+      ],
+      [
+        3588208,
+        109250,
+        47125,
+        2697
+      ],
+      [
+        3556291,
+        103625,
+        44667,
+        2682
+      ],
+      [
+        3547917,
+        100834,
+        43958,
+        2590
+      ],
+      [
+        3710042,
+        108834,
+        52792,
+        2645
+      ],
+      [
+        3591167,
+        104042,
+        45292,
+        2750
+      ],
+      [
+        4164250,
+        106417,
+        44791,
+        2667
+      ]
+    ],
+    "median_ns": [
+      3594541,
+      104208,
+      47125,
+      2691
+    ],
+    "mach_o_text_bytes": 15052688,
+    "named_file_backed_section_bytes": 18310675,
+    "sha256": "79ffc4f145c6c7f0daa091cd630bd9f0365d2ae0d84c00335e130d52881df2d3",
+    "single_process_max_resident_set_bytes": 24100864,
+    "single_process_peak_memory_footprint_bytes": 10551776
+  },
+  "ast": {
+    "stripped_bytes": 24208208,
+    "samples_ns": [
+      [
+        1238051375,
+        1405291,
+        150875,
+        28689
+      ],
+      [
+        1139026709,
+        366667,
+        92542,
+        28986
+      ],
+      [
+        1150795042,
+        361250,
+        86708,
+        28839
+      ],
+      [
+        1131184375,
+        357792,
+        85042,
+        28453
+      ],
+      [
+        1141569167,
+        360416,
+        89334,
+        29679
+      ],
+      [
+        1155516584,
+        364042,
+        87917,
+        29411
+      ],
+      [
+        1157929292,
+        377667,
+        98125,
+        32781
+      ],
+      [
+        1183852333,
+        382541,
+        90916,
+        29970
+      ],
+      [
+        1139538583,
+        354625,
+        88542,
+        30027
+      ],
+      [
+        1141700834,
+        372125,
+        86791,
+        29122
+      ],
+      [
+        1142563000,
+        358583,
+        86917,
+        29090
+      ]
+    ],
+    "median_ns": [
+      1142563000,
+      364042,
+      88542,
+      29122
+    ],
+    "mach_o_text_bytes": 20262892,
+    "named_file_backed_section_bytes": 23958607,
+    "sha256": "3fdc849ecde868ba7af60465f95ce989fa20b8798072892787e76613a49502a5",
+    "single_process_max_resident_set_bytes": 109690880,
+    "single_process_peak_memory_footprint_bytes": 90194448
+  },
+  "runtime": {
+    "stripped_bytes": 24355760,
+    "samples_ns": [
+      [
+        1568666125,
+        487750,
+        93459,
+        29137
+      ],
+      [
+        1559218333,
+        414166,
+        97375,
+        28955
+      ],
+      [
+        1573873166,
+        440083,
+        99417,
+        29544
+      ],
+      [
+        1557473708,
+        395625,
+        87167,
+        28690
+      ],
+      [
+        1560399000,
+        408041,
+        96542,
+        30942
+      ],
+      [
+        1581655542,
+        400125,
+        89833,
+        28635
+      ],
+      [
+        1679876542,
+        407750,
+        88958,
+        29221
+      ],
+      [
+        1585934667,
+        401375,
+        88917,
+        28468
+      ],
+      [
+        1574226917,
+        401959,
+        89708,
+        28928
+      ],
+      [
+        1596029958,
+        408416,
+        92209,
+        28989
+      ],
+      [
+        1699153250,
+        457625,
+        89834,
+        29486
+      ]
+    ],
+    "median_ns": [
+      1574226917,
+      408041,
+      89834,
+      28989
+    ],
+    "mach_o_text_bytes": 20202988,
+    "named_file_backed_section_bytes": 24123985,
+    "sha256": "54392e945e40ea00cb57126ff12297d534019c341486127b160e5cd790af88e1",
+    "single_process_max_resident_set_bytes": 269041664,
+    "single_process_peak_memory_footprint_bytes": 246497928
+  },
+  "stages": [
+    "WinUITheme::new",
+    "Button theme + template lookup",
+    "first template build",
+    "mean of 128 repeated builds"
+  ],
+  "revision": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "codec_revision": "8678e15b8ae738931237c0e70ef66f61a6ecbfd2",
+  "host": "macOS arm64, Rust 1.99.1, LLVM 23.1.1, aarch64-apple-darwin",
+  "method": "11 fresh processes per backend, rotating order, warm file cache, 128 repeated Button builds/process; concurrent build activity.",
+  "winui": {
+    "xml_source_bytes": 2132586,
+    "documents": 175,
+    "solid_fxp_bytes": 251770,
+    "xml_tokens_bytes": 487507,
+    "typed_control_themes": 104,
+    "distinct_dictionary_string_keys": 2984,
+    "inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c"
+  },
+  "control_catalog": {
+    "methods": "Default desktop Skia features, matching fat-LTO dist profiles, 166/166 WinUI units. Native uses the earlier stock Cargo build. FXP private workspace builds the same pages/inking/diagnostics and replaces linked WinUI markup with portable FXP and runtime dependency closure. Apple strip, codesign -f -s -, codesign --verify on both. Startup is wall time from spawning process until the app prints its after-setup light theme selection, 7 rotating paired runs per mode, warm filesystem. Captures pin desktop position 20,40 and size 950x680 with 2x screen scaling.",
+    "native": {
+      "post_strip_and_adhoc_sign_bytes": 65493168,
+      "sha256": "47758133910e8596dcc9afbb955a1a0b9a2bd5413ef0e525b4c85da6d667f15f",
+      "post_strip_before_adhoc_sign_bytes": 65876048,
+      "previously_stripped_stock_bytes": 65876072,
+      "macho_file_backed_sections": {
+        "__TEXT,__text": 51347192,
+        "__TEXT,__stubs": 6348,
+        "__TEXT,__stub_helper": 6324,
+        "__TEXT,__objc_stubs": 26048,
+        "__TEXT,__objc_methlist": 12148,
+        "__TEXT,__const": 7321870,
+        "__TEXT,__gcc_except_tab": 84860,
+        "__TEXT,__cstring": 241372,
+        "__TEXT,__objc_methname": 34013,
+        "__TEXT,__objc_classname": 852,
+        "__TEXT,__objc_methtype": 8649,
+        "__TEXT,__info_plist": 444,
+        "__TEXT,__unwind_info": 429072,
+        "__TEXT,__eh_frame": 80868,
+        "__DATA_CONST,__mod_init_func": 48,
+        "__DATA_CONST,__const": 5013344,
+        "__DATA_CONST,__cfstring": 2880,
+        "__DATA_CONST,__objc_classlist": 232,
+        "__DATA_CONST,__objc_catlist": 8,
+        "__DATA_CONST,__objc_protolist": 136,
+        "__DATA_CONST,__objc_imageinfo": 8,
+        "__DATA_CONST,__objc_intobj": 120,
+        "__DATA_CONST,__objc_arraydata": 16,
+        "__DATA_CONST,__objc_arrayobj": 48,
+        "__DATA_CONST,__got": 1968,
+        "__DATA,__la_symbol_ptr": 4200,
+        "__DATA,__objc_const": 23312,
+        "__DATA,__objc_selrefs": 10672,
+        "__DATA,__objc_protorefs": 8,
+        "__DATA,__objc_classrefs": 888,
+        "__DATA,__objc_superrefs": 176,
+        "__DATA,__objc_ivar": 580,
+        "__DATA,__objc_data": 2320,
+        "__DATA,__data": 40312,
+        "__DATA,__thread_vars": 78288,
+        "__DATA,__thread_data": 3836
+      },
+      "named_file_backed_total_bytes": 64783460,
+      "startup": {
+        "samples_ns": [
+          116770959,
+          115100916,
+          113782584,
+          119577917,
+          112997500,
+          119367666,
+          118383458
+        ],
+        "median_ns": 116770959
+      }
+    },
+    "ast": {
+      "post_strip_and_adhoc_sign_bytes": 65261072,
+      "sha256": "15713b9e244ed21a004fafa2a3ed4593db76234f032cbed927fa7b7060c6e312",
+      "post_strip_before_adhoc_sign_bytes": 65642560,
+      "cargo_output_bytes": 65642528,
+      "macho_file_backed_sections": {
+        "__TEXT,__text": 51736676,
+        "__TEXT,__stubs": 6348,
+        "__TEXT,__stub_helper": 6324,
+        "__TEXT,__objc_stubs": 26048,
+        "__TEXT,__objc_methlist": 12148,
+        "__TEXT,__const": 7479950,
+        "__TEXT,__gcc_except_tab": 85020,
+        "__TEXT,__cstring": 315940,
+        "__TEXT,__objc_methname": 34013,
+        "__TEXT,__objc_classname": 852,
+        "__TEXT,__objc_methtype": 8649,
+        "__TEXT,__info_plist": 444,
+        "__TEXT,__unwind_info": 419312,
+        "__TEXT,__eh_frame": 74052,
+        "__DATA_CONST,__mod_init_func": 48,
+        "__DATA_CONST,__const": 4238000,
+        "__DATA_CONST,__cfstring": 2880,
+        "__DATA_CONST,__objc_classlist": 232,
+        "__DATA_CONST,__objc_catlist": 8,
+        "__DATA_CONST,__objc_protolist": 136,
+        "__DATA_CONST,__objc_imageinfo": 8,
+        "__DATA_CONST,__objc_intobj": 120,
+        "__DATA_CONST,__objc_arraydata": 16,
+        "__DATA_CONST,__objc_arrayobj": 48,
+        "__DATA_CONST,__got": 1968,
+        "__DATA,__la_symbol_ptr": 4200,
+        "__DATA,__objc_const": 23312,
+        "__DATA,__objc_selrefs": 10672,
+        "__DATA,__objc_protorefs": 8,
+        "__DATA,__objc_classrefs": 888,
+        "__DATA,__objc_superrefs": 176,
+        "__DATA,__objc_ivar": 580,
+        "__DATA,__objc_data": 2320,
+        "__DATA,__data": 40432,
+        "__DATA,__thread_vars": 78432,
+        "__DATA,__thread_data": 3820
+      },
+      "named_file_backed_total_bytes": 64614080,
+      "startup": {
+        "samples_ns": [
+          1202596625,
+          1226424583,
+          1211819500,
+          1214882208,
+          1214556708,
+          1210180917,
+          1215180167
+        ],
+        "median_ns": 1214556708
+      }
+    },
+    "screenshot_differing_pixels": {
+      "light": {
+        "01-buttons.png": 0,
+        "02-listbox.png": 0,
+        "03-calendar.png": 0
+      },
+      "dark": {
+        "01-buttons.png": 0,
+        "02-listbox.png": 0,
+        "03-calendar.png": 0
+      },
+      "highcontrast": {
+        "01-buttons.png": 0,
+        "02-listbox.png": 0,
+        "03-calendar.png": 0
+      }
+    }
+  }
+}

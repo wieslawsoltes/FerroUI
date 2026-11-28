@@ -1,7 +1,7 @@
 use crate::animation::{Animatable, IClock, TransitionBase, TransitionBaseImpl, TransitionInstance};
 use crate::data::BindingPriority;
 use crate::reactive::{IDisposable, IObservable};
-use crate::{AnyValue, BoxedValue, PropertyValue, Upcast};
+use crate::{AnyValue, BoxedValue, Upcast};
 use std::rc::Rc;
 
 /// Defines how a property of value type `T` should be animated using a
@@ -10,7 +10,7 @@ use std::rc::Rc;
 /// A transition class derives from [`TransitionBase`], is declared with
 /// [`ferro_transition_class!`](crate::ferro_transition_class) and implements
 /// this trait.
-pub trait Transition<T: PropertyValue>: TransitionBaseImpl + Upcast<TransitionBase> {
+pub trait Transition<T: crate::StyledValue>: TransitionBaseImpl + Upcast<TransitionBase> {
     /// Creates the observable of the values of the transition from
     /// `old_value` to `new_value`, driven by `progress` (from 0 to 1).
     fn do_transition(
@@ -23,7 +23,7 @@ pub trait Transition<T: PropertyValue>: TransitionBaseImpl + Upcast<TransitionBa
 
 /// The implementation of [`TransitionBaseImpl::apply`] for a transition of
 /// value type `T`.
-pub fn apply_transition<C: Transition<T>, T: PropertyValue>(
+pub fn apply_transition<C: Transition<T>, T: crate::StyledValue>(
     this: &C,
     control: &Animatable,
     clock: Rc<dyn IClock>,

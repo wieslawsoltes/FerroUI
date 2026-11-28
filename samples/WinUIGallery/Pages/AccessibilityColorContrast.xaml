@@ -1,19 +1,134 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Color Contrast Checker" FontSize="22"/>
-  <Grid ColumnDefinitions="*,*" ColumnSpacing="16">
-    <StackPanel Spacing="6">
-      <TextBlock Text="Text color (#RRGGBB)"/>
-      <TextBox x:Name="TextColor" Text="#000000" AutomationProperties.Name="Text color in RGB hexadecimal"/>
-    </StackPanel>
-    <StackPanel Grid.Column="1" Spacing="6">
-      <TextBlock Text="Background color (#RRGGBB)"/>
-      <TextBox x:Name="BackgroundColor" Text="#FFFFFF" AutomationProperties.Name="Background color in RGB hexadecimal"/>
-    </StackPanel>
-  </Grid>
-  <TextBlock x:Name="ContrastRatio" Text="21.00:1" FontSize="24"/>
-  <TextBlock x:Name="ContrastChecks" TextWrapping="Wrap"/>
-  <Border x:Name="ContrastPreview" Background="White" Padding="20" CornerRadius="6">
-    <TextBlock x:Name="ContrastText" Foreground="Black" Text="The quick brown fox jumped over the lazy fox." FontSize="18" TextWrapping="Wrap"/>
+<!-- Ported from the pinned AccessibilityColorContrast page of WinUI Gallery (14061eea), its code
+     behind AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker
+     (accessibility_samples.rs, contrast.rs); see ../NOTICE.md. The catalog has no sample
+     definition for the page: this is the page itself. Each InlineColorPicker is its composition:
+     the header, a SplitButton with the color preview whose flyout is the color picker (FerroUI's
+     ColorView: WinUI's inline ColorPicker is not a FerroUI control, see the ColorPicker page), and
+     the hex box, wired in Rust with its ColorChanged. The x:Bind of the pickers' ColorBrush to the
+     preview is the code behind in Rust. The page's implicit TextBlock style (WrapWholeWords) is
+     each TextBlock's WrapWithOverflow; ThemeResource is DynamicResource; StackPanels with padding
+     are margins; GalleryTileGridStyle is a Border with the card brushes; SampleThemeListener
+     (the example's own theme) is the page's theme. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="Accessibility is about building experiences that make your Windows application usable by people of all abilities. For more information about designing accessible apps: " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/accessibility/accessibility-overview"><Run Text="Accessibility overview" /></Hyperlink><Run Text="." /></Paragraph>
+    <Paragraph><Run Text="To ensure optimal accessibility and usability, apps should strive to use high-contrast and easy-to-read color combinations for text and its background. Not only will this benefit users with lower visual acuity, but this will also ensure visibility and legibility under a wide range of lighting conditions, screens, and device settings." /></Paragraph>
+    <Paragraph><Run Text="Check out the " /><Hyperlink NavigateUri="https://accessibilityinsights.io/"><Run Text="Accessibility Insights" /></Hyperlink><Run Text=" app to help you find and fix accessibility issues in your Windows apps." /></Paragraph>
+  </RichTextBlock>
+  <TextBlock Margin="0,20,0,0" AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             Text="Color Contrast Checker" />
+  <TextBlock Margin="0,0,0,10" Theme="{DynamicResource BodyTextBlockStyle}" TextWrapping="Wrap"
+             Text="Use this tool to calculate the contrast ratio of two colors and measure them against the Web Content Accessibility Guidelines (WCAG)." />
+  <Border Padding="8" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+          BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+    <Grid ColumnDefinitions="Auto,Auto,Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
+        <!-- The gallery's InlineColorPicker: its header, the SplitButton with the color preview and
+             the ColorPicker of its flyout (a ColorView), and the hex box. -->
+        <Grid x:Name="TextColorPicker" Grid.RowSpan="2" Margin="12,12,0,12" ColumnDefinitions="Auto,*"
+              RowDefinitions="Auto,Auto" ColumnSpacing="2" AutomationProperties.Name="TextColorPicker">
+          <TextBlock x:Name="TextColorHeader" Grid.ColumnSpan="2" Margin="0,0,0,12" VerticalAlignment="Bottom"
+                     Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Text Color" />
+          <SplitButton x:Name="TextColorButton" Grid.Row="1" Padding="0" VerticalAlignment="Stretch"
+                       AutomationProperties.LabeledBy="{Binding ElementName=TextColorHeader}">
+            <Rectangle x:Name="TextColorPreview" Width="40" MinHeight="30" VerticalAlignment="Stretch" />
+            <SplitButton.Flyout>
+              <Flyout>
+                <ColorView x:Name="TextColorView" IsAlphaVisible="False" IsHexInputVisible="False"
+                           IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBox x:Name="TextColorHex" Grid.Row="1" Grid.Column="1" MinWidth="120" Margin="4,0,0,0"
+                   HorizontalAlignment="Stretch"
+                   AutomationProperties.LabeledBy="{Binding ElementName=TextColorHeader}" />
+        </Grid>
+        <!-- The gallery's InlineColorPicker: its header, the SplitButton with the color preview and
+             the ColorPicker of its flyout (a ColorView), and the hex box. -->
+        <Grid x:Name="BackgroundColorPicker" Grid.RowSpan="2" Grid.Column="1" Margin="12,12,0,12" ColumnDefinitions="Auto,*"
+              RowDefinitions="Auto,Auto" ColumnSpacing="2" AutomationProperties.Name="BackgroundColorPicker">
+          <TextBlock x:Name="BackgroundColorHeader" Grid.ColumnSpan="2" Margin="0,0,0,12" VerticalAlignment="Bottom"
+                     Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Background Color" />
+          <SplitButton x:Name="BackgroundColorButton" Grid.Row="1" Padding="0" VerticalAlignment="Stretch"
+                       AutomationProperties.LabeledBy="{Binding ElementName=BackgroundColorHeader}">
+            <Rectangle x:Name="BackgroundColorPreview" Width="40" MinHeight="30" VerticalAlignment="Stretch" />
+            <SplitButton.Flyout>
+              <Flyout>
+                <ColorView x:Name="BackgroundColorView" IsAlphaVisible="False" IsHexInputVisible="False"
+                           IsComponentTextInputVisible="False" />
+              </Flyout>
+            </SplitButton.Flyout>
+          </SplitButton>
+          <TextBox x:Name="BackgroundColorHex" Grid.Row="1" Grid.Column="1" MinWidth="120" Margin="4,0,0,0"
+                   HorizontalAlignment="Stretch"
+                   AutomationProperties.LabeledBy="{Binding ElementName=BackgroundColorHeader}" />
+        </Grid>
+      <TextBlock Grid.Column="3" Margin="12,0,0,0" VerticalAlignment="Center"
+                 Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Contrast Ratio" />
+      <TextBlock x:Name="ContrastRatioPresenter" Grid.Row="1" Grid.Column="3" Margin="12,-4,0,0"
+                 Theme="{DynamicResource SubtitleTextBlockStyle}" Text="21:1" />
+      <Grid Grid.Row="2" Grid.ColumnSpan="4" MinHeight="300" Margin="12,0,12,12" ColumnDefinitions="*,*">
+        <!-- Status checks. -->
+        <Grid Background="{DynamicResource ControlFillColorDefaultBrush}" ColumnDefinitions="Auto,Auto,*"
+              RowDefinitions="*,*,*" ColumnSpacing="8" RowSpacing="16" Margin="0">
+          <Grid Margin="12,0,0,0">
+            <Ellipse x:Name="NormalTextCheckEllipse" Width="30" Height="30" VerticalAlignment="Center"
+                     Fill="{DynamicResource SystemFillColorSuccessBrush}" />
+            <FontIcon x:Name="NormalTextCheckIcon" Foreground="White" Glyph="&#xE73E;" />
+          </Grid>
+          <TextBlock x:Name="NormalTextCheckResult" Grid.Column="1" Width="40" VerticalAlignment="Center"
+                     Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Pass" />
+          <StackPanel Grid.Column="2" Margin="0,0,12,0" VerticalAlignment="Center">
+            <TextBlock FontWeight="Bold" TextWrapping="WrapWithOverflow" Text="Regular text" />
+            <TextBlock TextWrapping="WrapWithOverflow" Text="Requires at least 4.5:1" />
+          </StackPanel>
+          <Grid Grid.Row="1" Margin="12,0,0,0">
+            <Ellipse x:Name="LargeTextCheckEllipse" Width="30" Height="30" VerticalAlignment="Center"
+                     Fill="{DynamicResource SystemFillColorSuccessBrush}" />
+            <FontIcon x:Name="LargeTextCheckIcon" Foreground="White" Glyph="&#xE73E;" />
+          </Grid>
+          <TextBlock x:Name="LargeTextCheckResult" Grid.Row="1" Grid.Column="1" Width="40" VerticalAlignment="Center"
+                     Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Pass" />
+          <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,0,12,0" VerticalAlignment="Center">
+            <TextBlock FontWeight="Bold" TextWrapping="WrapWithOverflow" Text="Large text (14 pt. bold or 18pt. regular)" />
+            <TextBlock TextWrapping="WrapWithOverflow" Text="Requires at least 3:1" />
+          </StackPanel>
+          <Grid Grid.Row="2" Margin="10,0,0,0">
+            <Ellipse x:Name="ComponentsCheckEllipse" Width="30" Height="30" VerticalAlignment="Center"
+                     Fill="{DynamicResource SystemFillColorSuccessBrush}" />
+            <FontIcon x:Name="ComponentsCheckIcon" Foreground="White" Glyph="&#xE73E;" />
+          </Grid>
+          <TextBlock x:Name="ComponentsCheckResult" Grid.Row="2" Grid.Column="1" Width="40" VerticalAlignment="Center"
+                     Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Pass" />
+          <StackPanel Grid.Row="2" Grid.Column="2" Margin="0,0,10,0" VerticalAlignment="Center">
+            <TextBlock FontWeight="Bold" TextWrapping="WrapWithOverflow" Text="Graphical objects and UI components" />
+            <TextBlock TextWrapping="WrapWithOverflow" Text="Requires at least 3:1" />
+          </StackPanel>
+        </Grid>
+        <!-- Preview. -->
+        <Grid x:Name="ContrastPreview" Grid.Column="1" RowDefinitions="*,*,*">
+          <TextBlock x:Name="PreviewText" Margin="12,0,12,0" VerticalAlignment="Center" TextWrapping="WrapWithOverflow"
+                     Text="The quick brown fox jumped over the lazy fox." />
+          <StackPanel Grid.Row="1" Margin="12,0,12,0" VerticalAlignment="Center">
+            <TextBlock x:Name="PreviewBoldText" FontSize="14" FontWeight="Bold" TextWrapping="WrapWithOverflow"
+                       Text="The quick brown fox jumped over the lazy fox." />
+            <TextBlock x:Name="PreviewLargeText" FontSize="18" TextWrapping="WrapWithOverflow"
+                       Text="The quick brown fox jumped over the lazy fox." />
+          </StackPanel>
+          <StackPanel Grid.Row="2" Margin="12,0,12,0" VerticalAlignment="Center" Orientation="Horizontal" Spacing="8">
+            <Grid>
+              <Rectangle x:Name="PreviewCheckBox" Width="30" Height="30" RadiusX="4" RadiusY="4" />
+              <FontIcon Foreground="White" Glyph="&#xE73E;" />
+            </Grid>
+            <Grid>
+              <Rectangle x:Name="PreviewToggle" Width="50" Height="30" RadiusX="15" RadiusY="50" />
+              <Ellipse Width="15" Height="15" Margin="0,0,5,0" HorizontalAlignment="Right" VerticalAlignment="Center"
+                       Fill="White" />
+            </Grid>
+            <FontIcon x:Name="PreviewIcon" FontSize="20" Glyph="&#xE735;" />
+          </StackPanel>
+        </Grid>
+      </Grid>
+    </Grid>
   </Border>
 </StackPanel>

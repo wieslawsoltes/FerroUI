@@ -24,7 +24,7 @@ use super::dbus::types::AtSpiAttributeSet;
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::automation::provider::{
     IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, IRootProvider, IScrollProvider,
-    ISelectionItemProvider, ISelectionProvider, IToggleProvider, IValueProvider, ToggleState,
+    ISelectionItemProvider, ISelectionProvider, ITextProvider, IToggleProvider, IValueProvider, ToggleState,
 };
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationProperties, AutomationPropertyChangedEventArgs, ExpandCollapsePatternIdentifiers,
@@ -34,7 +34,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::hash::Hash;
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 /// The handlers of a node, one per interface it has.
 #[derive(Clone, Default)]
@@ -204,15 +204,21 @@ impl AtSpiNode {
             handlers.selection = Some(selection);
         }
 
-        if let (Some(value_provider), false) = (peer.get_provider::<dyn IValueProvider>(), has_range_value) {
+        let text_value = if has_range_value {
+            None
+        } else {
+            peer.get_provider::<dyn IValueProvider>()
+        };
+        if text_value.is_some() || peer.get_provider::<dyn ITextProvider>().is_some() {
             let text = Rc::new(AtSpiTextHandler::new(node.clone()));
+            text.observe_text();
             targets.push(text.clone());
             handlers.text = Some(text);
-            if !value_provider.is_read_only() {
-                let editable_text = Rc::new(AtSpiEditableTextHandler::new(node.clone()));
-                targets.push(editable_text.clone());
-                handlers.editable_text = Some(editable_text);
-            }
+        }
+        if text_value.is_some_and(|provider| !provider.is_read_only()) {
+            let editable_text = Rc::new(AtSpiEditableTextHandler::new(node.clone()));
+            targets.push(editable_text.clone());
+            handlers.editable_text = Some(editable_text);
         }
 
         if peer.get_automation_control_type() == AutomationControlType::Image {
@@ -513,7 +519,7 @@ impl AtSpiNode {
         }
     }
 
-    fn get_child_variant(server: &AtSpiServer, child: &Rc<AtSpiNode>) -> Value<'static> {
+    fn get_child_variant(server: &AtSpiServer, child: &Rc<AtSpiNode>) -> Variant<'static> {
         server.get_reference(Some(child)).to_dbus_struct()
     }
 
@@ -567,20 +573,20 @@ impl AtSpiNode {
 
         if std::ptr::eq(property, AutomationElementIdentifiers::name_property()) {
             event_handler
-                .emit_property_change_signal("accessible-name", Value::from(Self::get_accessible_name(&self.peer)));
+                .emit_property_change_signal("accessible-name", Variant::from(Self::get_accessible_name(&self.peer)));
         } else if std::ptr::eq(property, AutomationElementIdentifiers::help_text_property()) {
             event_handler
-                .emit_property_change_signal("accessible-description", Value::from(value_to_string(e.new_value())));
+                .emit_property_change_signal("accessible-description", Variant::from(value_to_string(e.new_value())));
         } else if std::ptr::eq(property, TogglePatternIdentifiers::toggle_state_property()) {
             let new_state = e
                 .new_value()
                 .and_then(|value| value.downcast_ref::<ToggleState>().copied())
                 .unwrap_or(ToggleState::Off);
-            event_handler.emit_state_changed_signal("checked", i32::from(new_state == ToggleState::On), Value::from(0i32));
+            event_handler.emit_state_changed_signal("checked", i32::from(new_state == ToggleState::On), Variant::from(0i32));
             event_handler.emit_state_changed_signal(
                 "indeterminate",
                 i32::from(new_state == ToggleState::Indeterminate),
-                Value::from(0i32),
+                Variant::from(0i32),
             );
         } else if std::ptr::eq(property, ExpandCollapsePatternIdentifiers::expand_collapse_state_property()) {
             let new_state = e
@@ -590,15 +596,15 @@ impl AtSpiNode {
             event_handler.emit_state_changed_signal(
                 "expanded",
                 i32::from(new_state == ExpandCollapseState::Expanded),
-                Value::from(0i32),
+                Variant::from(0i32),
             );
             event_handler.emit_state_changed_signal(
                 "collapsed",
                 i32::from(new_state == ExpandCollapseState::Collapsed),
-                Value::from(0i32),
+                Variant::from(0i32),
             );
         } else if std::ptr::eq(property, ValuePatternIdentifiers::value_property()) {
-            event_handler.emit_property_change_signal("accessible-value", Value::from(value_to_string(e.new_value())));
+            event_handler.emit_property_change_signal("accessible-value", Variant::from(value_to_string(e.new_value())));
         } else if std::ptr::eq(property, SelectionPatternIdentifiers::selection_property()) {
             event_handler.emit_selection_changed_signal();
         } else if std::ptr::eq(property, AutomationElementIdentifiers::bounding_rectangle_property()) {

@@ -56,6 +56,8 @@ pub struct WindowTransparencyLevelCollection {
     list: Vec<WindowTransparencyLevel>,
 }
 
+ferroui_base::styled_value!(WindowTransparencyLevelCollection);
+
 impl WindowTransparencyLevelCollection {
     /// Creates a collection from a list of levels.
     pub fn new(list: impl Into<Vec<WindowTransparencyLevel>>) -> Self {

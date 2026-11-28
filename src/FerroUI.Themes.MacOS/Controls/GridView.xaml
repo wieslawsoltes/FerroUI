@@ -1,0 +1,175 @@
+<!-- macOS 26 theme: the control theme of the WinUI theme (src/FerroUI.Themes.WinUI/Controls/GridView.xaml),
+     as docs/porting/macos26-theme.md derives every control theme of the WinUI theme; the resources are this theme's. -->
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    dxaml/xcp/dxaml/themes/generic.xaml (the implicit style of GridView)
+    controls/dev/CommonStyles/GridViewItem_themeresources.xaml (DefaultGridViewItemStyle and the
+    implicit style; the resources are Resources/GridViewItem_themeresources.xaml)
+    dxaml/xcp/core/core/elements/ListViewBaseItemChrome.cpp (the chrome that
+    ListViewItemPresenter draws for a GridViewItem)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  The templates of WinUI's GridView and GridViewItem, which FerroUI ports as controls
+  (ferroui-controls, docs/porting/winui-calculator-gaps.md, LV-2); the Fluent theme has no document
+  for them. Translation notes (docs/porting/winui-theme.md, section 4):
+  - GridView: as ListView.xaml (the header and the footer as content presenters around the items
+    presenter; the scroll modes, rails and the theme transitions left out); the items panel is an
+    ItemsWrapGrid in rows, which does not virtualize (decision D5).
+  - DefaultGridViewItemStyle: the template is a ListViewItemPresenter, chrome WinUI draws in native
+    code. The port draws it with elements (decision D6): a Border with the corner radius
+    GridViewItemCornerRadius in the background of the state, and the selection border
+    (GridViewItemSelectedBorderThickness of GridViewItemSelectedBorderBrush and its pointer and
+    pressed brushes) over the content while the item is selected; the disabled opacity is
+    ListViewItemDisabledThemeOpacity. The check mark of the selected item and the check box of the
+    multi-select mode (SelectionCheckMarkVisualEnabled, CheckMode, the Check and CheckBox brushes)
+    are left out, as in DefaultListViewItemStyle (LBI-6); the drag and placeholder brushes and the
+    reorder hint belong to drag and drop, which is not ported.
+  - The states of the presenter are pseudo-classes: :pointerover, :pressed, :selected, :disabled.
+  - UseSystemFocusVisuals with its margin and brushes is the focus adorner, as in
+    DefaultListViewItemStyle.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <Design.PreviewWith>
+    <Border Padding="20" Width="320" Height="240">
+      <GridView>
+        <GridViewItem Content="1" Width="80" Height="80" />
+        <GridViewItem Content="2" Width="80" Height="80" />
+        <GridViewItem Content="3" Width="80" Height="80" />
+        <GridViewItem Content="4" Width="80" Height="80" />
+      </GridView>
+    </Border>
+  </Design.PreviewWith>
+
+  <ControlTheme x:Key="DefaultGridViewStyle" TargetType="GridView">
+    <Setter Property="Padding" Value="0,0,0,10" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.IsDeferredScrollingEnabled" Value="False" />
+    <Setter Property="ScrollViewer.BringIntoViewOnFocusChange" Value="True" />
+    <Setter Property="IsSwipeEnabled" Value="True" />
+    <Setter Property="ItemsPanel">
+      <ItemsPanelTemplate>
+        <ItemsWrapGrid Orientation="Horizontal" />
+      </ItemsPanelTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Border BorderBrush="{TemplateBinding BorderBrush}"
+                Background="{TemplateBinding Background}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <ScrollViewer x:Name="ScrollViewer"
+                        HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                        VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                        IsDeferredScrollingEnabled="{TemplateBinding (ScrollViewer.IsDeferredScrollingEnabled)}"
+                        BringIntoViewOnFocusChange="{TemplateBinding (ScrollViewer.BringIntoViewOnFocusChange)}"
+                        IsScrollChainingEnabled="{TemplateBinding (ScrollViewer.IsScrollChainingEnabled)}"
+                        AutomationProperties.AccessibilityView="Raw">
+            <StackPanel Margin="{TemplateBinding Padding}">
+              <ContentPresenter Content="{TemplateBinding Header}"
+                                ContentTemplate="{TemplateBinding HeaderTemplate}" />
+              <ItemsPresenter x:Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}" />
+              <ContentPresenter Content="{TemplateBinding Footer}"
+                                ContentTemplate="{TemplateBinding FooterTemplate}" />
+            </StackPanel>
+          </ScrollViewer>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type GridView}" TargetType="GridView" BasedOn="{StaticResource DefaultGridViewStyle}" />
+
+  <ControlTheme x:Key="DefaultGridViewItemStyle" TargetType="GridViewItem">
+    <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+    <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+    <Setter Property="Background" Value="{DynamicResource GridViewItemBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource GridViewItemForeground}" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Local" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="Margin" Value="0,0,4,4" />
+    <Setter Property="MinWidth" Value="{DynamicResource GridViewItemMinWidth}" />
+    <Setter Property="MinHeight" Value="{DynamicResource GridViewItemMinHeight}" />
+    <Setter Property="FocusAdorner">
+      <FocusAdornerTemplate>
+        <Border Margin="-3"
+                BorderThickness="2"
+                BorderBrush="{DynamicResource GridViewItemFocusVisualPrimaryBrush}"
+                CornerRadius="{DynamicResource GridViewItemCornerRadius}">
+          <Border BorderThickness="1"
+                  BorderBrush="{DynamicResource GridViewItemFocusVisualSecondaryBrush}"
+                  CornerRadius="{DynamicResource GridViewItemCornerRadius}" />
+        </Border>
+      </FocusAdornerTemplate>
+    </Setter>
+    <Setter Property="Template">
+      <ControlTemplate>
+        <Panel x:Name="Root">
+          <Border x:Name="Backplate"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{DynamicResource GridViewItemCornerRadius}"
+                  IsHitTestVisible="False"
+                  TemplatedControl.IsTemplateFocusTarget="True" />
+          <ContentPresenter x:Name="PART_ContentPresenter"
+                            Content="{TemplateBinding Content}"
+                            ContentTemplate="{TemplateBinding ContentTemplate}"
+                            Foreground="{TemplateBinding Foreground}"
+                            Margin="{TemplateBinding Padding}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Border x:Name="SelectionBorder"
+                  BorderThickness="{DynamicResource GridViewItemSelectedBorderThickness}"
+                  BorderBrush="{DynamicResource GridViewItemSelectedBorderBrush}"
+                  CornerRadius="{DynamicResource GridViewItemCornerRadius}"
+                  IsHitTestVisible="False"
+                  IsVisible="False" />
+        </Panel>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource GridViewItemForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundPressed}" />
+    </Style>
+    <Style Selector="^:selected">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundSelected}" />
+      <Setter Property="Foreground" Value="{DynamicResource GridViewItemForegroundSelected}" />
+      <Style Selector="^ /template/ Border#SelectionBorder">
+        <Setter Property="IsVisible" Value="True" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:pointerover">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundSelectedPointerOver}" />
+      <Style Selector="^ /template/ Border#SelectionBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemSelectedPointerOverBorderBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:selected:pressed">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundSelectedPressed}" />
+      <Style Selector="^ /template/ Border#SelectionBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemSelectedPressedBorderBrush}" />
+      </Style>
+    </Style>
+    <Style Selector="^:disabled">
+      <Setter Property="Opacity" Value="{DynamicResource ListViewItemDisabledThemeOpacity}" />
+    </Style>
+    <Style Selector="^:selected:disabled">
+      <Setter Property="Background" Value="{DynamicResource GridViewItemBackgroundSelectedDisabled}" />
+      <Style Selector="^ /template/ Border#SelectionBorder">
+        <Setter Property="BorderBrush" Value="{DynamicResource GridViewItemSelectedDisabledBorderBrush}" />
+      </Style>
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type GridViewItem}" TargetType="GridViewItem" BasedOn="{StaticResource DefaultGridViewItemStyle}" />
+</ResourceDictionary>

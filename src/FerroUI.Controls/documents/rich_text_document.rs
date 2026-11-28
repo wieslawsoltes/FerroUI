@@ -132,6 +132,8 @@ impl DocumentChangedEventArgs {
 #[derive(Clone)]
 pub struct RichTextDocument(Rc<RichTextDocumentData>);
 
+ferroui_base::styled_value!(RichTextDocument);
+
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum ParagraphAlignmentSource {
     Leading,

@@ -45,6 +45,8 @@ impl ValueTypeRegistration for UsedExplicitly {
 #[derive(Clone, Debug, PartialEq)]
 struct HeldByProperty(i32);
 
+crate::styled_value!(HeldByProperty);
+
 impl ValueTypeRegistration for HeldByProperty {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<HeldByProperty>();

@@ -367,7 +367,7 @@ impl X11Window {
                             window.x11.last_activity_timestamp() as u64,
                             input_root,
                             s,
-                        )));
+                        ).with_input_method_origin()));
                     }
                 });
             }

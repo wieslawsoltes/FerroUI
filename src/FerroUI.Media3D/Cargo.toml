@@ -38,6 +38,8 @@ ferroui-base = { workspace = true, features = ["testing", "type-tables"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
 # The run-time loader of markup, for the tests that load a scene from XAML.
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
+# The CPU reference rasterizer, for the tests that hold a pick to the pixel drawn under it.
+ferroui-render3d.workspace = true
 
 [build-dependencies]
 ferroui-build-scan.workspace = true

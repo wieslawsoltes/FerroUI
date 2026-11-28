@@ -1,4 +1,50 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <DropDownButton Content="Email"><DropDownButton.Flyout><MenuFlyout><MenuItem Header="Send"/><MenuItem Header="Reply"/><MenuItem Header="Reply All"/></MenuFlyout></DropDownButton.Flyout></DropDownButton>
+<!-- Ported from the two pinned DropDownButton examples of WinUI Gallery (14061eea); see
+     ../NOTICE.md. The page has no code-behind upstream. WinUI's MenuFlyoutItem is MenuItem (Text is
+     Header); the icons are FontIcon with the theme's symbol font, as in WinUI. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="DropDownButtonExample1" Spacing="8">
+    <TextBlock Text="Simple DropDownButton" FontSize="18" />
+    <StackPanel x:Name="Control1" Orientation="Horizontal">
+      <DropDownButton x:Name="EmailDropDownButton" Content="Email">
+        <DropDownButton.Flyout>
+          <MenuFlyout Placement="BottomEdgeAlignedLeft">
+            <MenuItem Header="Send" />
+            <MenuItem Header="Reply" />
+            <MenuItem Header="Reply All" />
+          </MenuFlyout>
+        </DropDownButton.Flyout>
+      </DropDownButton>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="DropDownButtonExample2" Spacing="8">
+    <TextBlock Text="DropDownButton with Icons" FontSize="18" />
+    <StackPanel x:Name="Control2" Orientation="Horizontal">
+      <DropDownButton x:Name="EmailIconDropDownButton" AutomationProperties.Name="Email">
+        <DropDownButton.Content>
+          <FontIcon x:Name="EmailIcon" Glyph="&#xE715;" />
+        </DropDownButton.Content>
+        <DropDownButton.Flyout>
+          <MenuFlyout Placement="BottomEdgeAlignedLeft">
+            <MenuItem Header="Send">
+              <MenuItem.Icon>
+                <FontIcon Glyph="&#xE725;" />
+              </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Reply">
+              <MenuItem.Icon>
+                <FontIcon Glyph="&#xE8CA;" />
+              </MenuItem.Icon>
+            </MenuItem>
+            <MenuItem Header="Reply All">
+              <MenuItem.Icon>
+                <FontIcon Glyph="&#xE8C2;" />
+              </MenuItem.Icon>
+            </MenuItem>
+          </MenuFlyout>
+        </DropDownButton.Flyout>
+      </DropDownButton>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

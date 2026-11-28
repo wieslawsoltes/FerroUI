@@ -25,6 +25,14 @@ struct Inner {
     direct_for: FxHashMap<(TypeKey, u32), Option<&'static dyn DirectPropertyDyn>>,
 }
 
+/// The failure of [`FerroPropertyRegistry::get_registered_direct_for`], compiled once instead of
+/// once for each value type.
+#[cold]
+#[inline(never)]
+fn direct_not_registered(owner: &'static TypeInfo, property: &FerroProperty, o: &FerroObject) -> ! {
+    panic!("Property '{}.{}' not registered on '{}'", owner, property.name(), o.get_type())
+}
+
 /// Tracks registered property definitions.
 #[derive(Default)]
 pub struct FerroPropertyRegistry {
@@ -106,6 +114,13 @@ impl FerroPropertyRegistry {
         }
 
         true
+    }
+
+    /// Whether a property of this name is registered on exactly `type_`, without running the
+    /// static initialisation of the type, which the other look-ups do.
+    #[cfg(test)]
+    pub(crate) fn has_registered_name(&self, type_: &'static TypeInfo, name: &str) -> bool {
+        self.inner.borrow().registered.get(&key(type_)).is_some_and(|props| props.values().any(|p| p.name() == name))
     }
 
     /// Gets all non-attached properties registered on a type (and its bases).
@@ -206,9 +221,10 @@ impl FerroPropertyRegistry {
         o: &FerroObject,
         property: &'static DirectPropertyBase<T>,
     ) -> &'static DirectPropertyBase<T> {
-        self.find_registered_direct(o, property).unwrap_or_else(|| {
-            panic!("Property '{}.{}' not registered on '{}'", property.owner(), property.name(), o.get_type())
-        })
+        match self.find_registered_direct(o, property) {
+            Some(registered) => registered,
+            None => direct_not_registered(property.owner(), property, o),
+        }
     }
 
     /// Finds the direct property registered on the type of `o` that shares

@@ -21,6 +21,7 @@
 //! parameter and satisfies the predicate of the node. Each node exposes that lookup as
 //! `builder_method`; it fails with a `XamlTypeSystemException` when there is no such method.
 
+use super::FerroTransformErrors;
 use std::any::Any;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -50,29 +51,29 @@ use crate::compiler_extensions::XamlIlFerroPropertyHelper;
 /// Errors are values of the single [`XamlError`] type; the derived class is represented by a
 /// `XamlError::Transform` tagged with the class name, which is what
 /// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` and [`Self::is`] look at.
+#[deprecated(
+    since = "0.5.1",
+    note = "use `XamlError::selectors_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Selectors`"
+)]
 pub struct XamlSelectorsTransformException;
 
+#[allow(deprecated)]
 impl XamlSelectorsTransformException {
-    pub const TYPE_NAME: &'static str = "XamlSelectorsTransformException";
+    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Selectors.type_name();
 
-    /// `new XamlSelectorsTransformException(message, lineInfo, innerException)`.
+    /// `new XamlSelectorsTransformException(message, lineInfo, innerException)`, now
+    /// [`XamlError::selectors_transform`](super::FerroTransformErrors::selectors_transform).
     pub fn new(
         message: impl Into<String>,
         line_info: &dyn IXamlLineInfo,
         inner_exception: Option<XamlError>,
     ) -> XamlError {
-        let error = match inner_exception {
-            Some(inner) => {
-                XamlError::transform_exception_with_inner(message, Some(line_info), inner)
-            }
-            None => XamlError::transform_exception(message, Some(line_info)),
-        };
-        error.with_derived_type_name(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::Selectors.error(message, line_info, inner_exception)
     }
 
     /// `e is XamlSelectorsTransformException`.
     pub fn is(error: &XamlError) -> bool {
-        error.is_derived_type(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Selectors)
     }
 }
 
@@ -172,7 +173,7 @@ impl IXamlAstTransformer for FerroXamlIlSelectorTransformer {
         };
 
         if pn.values.borrow().len() != 1 {
-            return Err(XamlSelectorsTransformException::new(
+            return Err(XamlError::selectors_transform(
                 "Selector property should have exactly one value",
                 &*node,
                 None,
@@ -186,7 +187,7 @@ impl IXamlAstTransformer for FerroXamlIlSelectorTransformer {
         }
 
         let Some(tn) = value.cast::<XamlAstTextNode>() else {
-            return Err(XamlSelectorsTransformException::new(
+            return Err(XamlError::selectors_transform(
                 "Selector property should be a text node",
                 &*node,
                 None,
@@ -213,7 +214,7 @@ impl IXamlAstTransformer for FerroXamlIlSelectorTransformer {
         let parsed = match SelectorGrammar::parse(&tn.text()) {
             Ok(parsed) => parsed,
             Err(e) => {
-                return Err(XamlSelectorsTransformException::new(
+                return Err(XamlError::selectors_transform(
                     format!("Unable to parse selector: {}", e.message()),
                     &*node,
                     Some(XamlError::internal("ExpressionParseException", e.message())),

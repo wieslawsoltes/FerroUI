@@ -182,6 +182,26 @@ impl Selector {
         Selectors::class(Some(self), name)
     }
 
+    /// Returns a selector which additionally matches a style class and leaves every other
+    /// handle of this selector as it was.
+    ///
+    /// [`class`](Self::class) adds the class to the node it is called on, as the selectors of
+    /// upstream do, so a clone of the selector gets it too. This copies a node that something
+    /// else holds, which is what a prefix used by several styles needs.
+    pub fn with_class(self, name: &str) -> Selector {
+        if Rc::strong_count(&self.0) > 1 {
+            if let Some(node) = self.node::<TypeNameAndClassSelector>() {
+                if name.trim().is_empty() {
+                    panic!("Name may not be empty");
+                }
+                let copy = node.duplicate();
+                copy.add_class(name);
+                return Selector::new(copy);
+            }
+        }
+        Selectors::class(Some(self), name)
+    }
+
     /// Returns a selector which matches a descendant of this selector.
     pub fn descendant(self) -> Selector {
         Selectors::descendant(Some(self))

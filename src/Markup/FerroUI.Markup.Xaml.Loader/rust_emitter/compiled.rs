@@ -40,7 +40,7 @@ use super::emitter::theme_units::{UnitEmission, TABLE as THEME_UNITS_TABLE};
 use super::emitter::{emit_function, reflection_path_types, reflection_path_types_by_unit, root_value_handle_of, DocumentFunctions};
 use super::theme_unit_graph;
 use super::transform::{transform_group, DocumentSource, TransformOptions};
-use super::source::{function_name_of, rust_string_literal};
+use super::source::{allocate_names, function_name_of, rust_string_literal, same_document_uri};
 use crate::compiler_extensions::group_transformers::MergedEntryOrigins;
 use ferroui_build_scan::xaml_metadata::{DocumentModel, ThemeUnitsModel, XamlMetadata};
 
@@ -140,35 +140,23 @@ pub fn compile_documents_with(
     options: &TransformOptions,
 ) -> Vec<CompiledDocument> {
     let mut compiled: Vec<CompiledDocument> = Vec::with_capacity(documents.len());
-    // The items of the file each document defines, with the document that defines them.
-    let mut items: Vec<(String, &str)> = Vec::with_capacity(documents.len() * 2);
+    // Whether each document is public (`x:ClassModifier`), or why the directive is refused.
+    let modifiers: Vec<Result<bool, String>> =
+        documents.iter().map(|(_, xaml)| class_modifier_public(xaml).map(|public| public.unwrap_or(true))).collect();
+    // The names of the build functions (#849): the established ones where they are unique, the
+    // others disambiguated from the paths of the documents ([`allocate_names`]).
+    let requests: Vec<(String, &str)> = documents.iter().map(|(name, _)| (function_name_of(name), *name)).collect();
+    let borrowed: Vec<(&str, &str)> = requests.iter().map(|(function, name)| (function.as_str(), *name)).collect();
+    let function_names = allocate_names(&borrowed, functions_collide);
     let mut group: Vec<(usize, &str, &str, Option<String>)> = Vec::with_capacity(documents.len());
-    for (name, xaml) in documents {
-        let function_name = function_name_of(name);
-        let defined = [function_name.clone(), untyped_function_name(&function_name)];
-        let collision = defined
-            .iter()
-            .find_map(|item| items.iter().find(|(known, _)| collides(known, item)).map(|(_, other)| (item.clone(), *other)));
-        items.extend(defined.into_iter().map(|item| (item, *name)));
-        if let Some((item, other)) = collision {
-            let reason = format!("the generated function `{item}` would also be defined for the document `{other}`; rename one of them");
-            compiled.push(CompiledDocument {
-                name: name.to_string(),
-                function_name,
-                source: Err(reason),
-                namespaces: None,
-                root_type: None,
-                public: true,
-            });
-            continue;
-        }
-        let public = match class_modifier_public(xaml) {
-            Ok(public) => public.unwrap_or(true),
+    for (index, ((name, xaml), function_name)) in documents.iter().zip(function_names).enumerate() {
+        let public = match &modifiers[index] {
+            Ok(public) => *public,
             Err(reason) => {
                 compiled.push(CompiledDocument {
                     name: name.to_string(),
                     function_name,
-                    source: Err(reason),
+                    source: Err(reason.clone()),
                     namespaces: None,
                     root_type: None,
                     public: true,
@@ -176,6 +164,25 @@ pub fn compile_documents_with(
                 continue;
             }
         };
+        // Two public documents the loader table cannot tell apart: an error that names both.
+        let ambiguous = public.then(|| {
+            documents[..index]
+                .iter()
+                .zip(&modifiers)
+                .find(|((other, _), modifier)| *modifier == &Ok(true) && same_document_uri(other, name))
+                .map(|((other, _), _)| *other)
+        });
+        if let Some(Some(other)) = ambiguous {
+            compiled.push(CompiledDocument {
+                name: name.to_string(),
+                function_name,
+                source: Err(ambiguous_uri(other)),
+                namespaces: None,
+                root_type: None,
+                public: true,
+            });
+            continue;
+        }
         group.push((compiled.len(), name, xaml, root_uri.map(|root| format!("{root}{name}"))));
         compiled.push(CompiledDocument {
             name: name.to_string(),
@@ -199,6 +206,7 @@ pub fn compile_documents_with(
             let names: Vec<String> = group.iter().map(|(index, _, _, _)| compiled[*index].function_name.clone()).collect();
             let functions_of_group = || {
                 let mut functions = DocumentFunctions::default();
+                (functions.backend, functions.bytecode_image) = super::transform::selected_xaml_backend();
                 for (name, transformed) in names.iter().zip(&transformed) {
                     if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
                         functions.insert_value(build, name, root_class);
@@ -523,6 +531,23 @@ fn collides(a: &str, b: &str) -> bool {
     a == b || is_deferred_of(a, b) || is_deferred_of(b, a)
 }
 
+/// Whether the build functions `a` and `b` of two documents of a group would give two items one
+/// name ([`collides`]), with the untyped build functions of the loader table
+/// ([`untyped_function_name`]).
+fn functions_collide(a: &str, b: &str) -> bool {
+    let (untyped_a, untyped_b) = (untyped_function_name(a), untyped_function_name(b));
+    collides(a, b) || collides(&untyped_a, b) || collides(a, &untyped_b) || collides(&untyped_a, &untyped_b)
+}
+
+/// Why a public document is refused when the loader table cannot tell it from the public document
+/// `other` (#849): their URIs are equal without regard to case.
+fn ambiguous_uri(other: &str) -> String {
+    format!(
+        "the document is public and its URI is the URI of the public document `{other}` for the loader table, which \
+         compares URIs without regard to case: rename one of them, or make one of them internal (`x:ClassModifier`)"
+    )
+}
+
 /// The name of the untyped build function that wraps the build function `function_name`.
 fn untyped_function_name(function_name: &str) -> String {
     format!("{function_name}_untyped")
@@ -762,18 +787,35 @@ pub fn generate_class_file_with(host: &EmitterHost<'_>, group: &ClassGroup<'_>, 
         }
         public.push(modifier.unwrap_or(true));
     }
+    // Two public documents the loader table cannot tell apart: an error that names both (#849).
+    for index in 1..documents.len() {
+        let ambiguous = |&other: &usize| public[other] && same_document_uri(&documents[other].0, &documents[index].0);
+        if let Some(other) = (0..index).find(ambiguous).filter(|_| public[index]) {
+            return Err(format!("{}: {}", documents[index].0, ambiguous_uri(&documents[other].0)));
+        }
+    }
+
+    // The names of the functions of the documents (#849): the established ones where they are
+    // unique, the others disambiguated from the paths of the documents ([`allocate_names`]).
+    let requests: Vec<(String, &str)> = documents
+        .iter()
+        .enumerate()
+        .map(|(index, document)| match index {
+            0 => (function_name_of(&document.0).replacen("build_", "populate_", 1), document.0.as_str()),
+            _ => (function_name_of(&document.0), document.0.as_str()),
+        })
+        .collect();
+    let borrowed: Vec<(&str, &str)> = requests.iter().map(|(function, name)| (function.as_str(), *name)).collect();
+    let allocated = allocate_names(&borrowed, collides);
 
     // The functions of the documents, by their build methods.
     let mut functions = DocumentFunctions::default();
+    (functions.backend, functions.bytecode_image) = super::transform::selected_xaml_backend();
     let mut names = Vec::with_capacity(documents.len());
     let mut has_build = vec![false; documents.len()];
-    for (index, (document, transformed)) in documents.iter().zip(&transformed).enumerate() {
-        let function_name = match index {
-            0 => function_name_of(&document.0).replacen("build_", "populate_", 1),
-            _ => function_name_of(&document.0),
-        };
+    for (index, (document, function_name)) in transformed.iter().zip(allocated).enumerate() {
         if index > 0 {
-            if let (Some(build), Some(root_class)) = (&transformed.build, root_value_handle_of(types, &transformed.root)) {
+            if let (Some(build), Some(root_class)) = (&document.build, root_value_handle_of(types, &document.root)) {
                 functions.insert_value(build, &function_name, root_class);
                 has_build[index] = true;
             }
@@ -1157,5 +1199,33 @@ mod tests {
             class_document_group("ferres://Fixture/", &documents, "Missing.xaml"),
             Err("the document `Missing.xaml` of the class is not a document of the group".to_string())
         );
+    }
+
+    /// Not from upstream (#850): the group of a class is found from its includes as the parser of
+    /// the documents reads them: a `Source` with an entity names the decoded file, a `>` in a key
+    /// does not hide an include, and an include written in CDATA is text.
+    #[test]
+    fn the_group_of_a_class_follows_its_includes_as_parsed() {
+        let namespaces = "xmlns='https://github.com/ferroui' xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+        let theme = format!(
+            "<Styles {namespaces} x:Class='Fixture.Theme'>\
+             <Styles.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries>\
+             <MergeResourceInclude Source='/A&amp;B.xaml'/>\
+             <ResourceInclude x:Key='a>b' Source='/Keyed.xaml'/>\
+             </ResourceDictionary.MergedDictionaries>\
+             <x:String x:Key='Text'><![CDATA[<StyleInclude Source='/Text.xaml'/>]]></x:String>\
+             </ResourceDictionary></Styles.Resources></Styles>"
+        );
+        let dictionary = format!("<ResourceDictionary {namespaces}/>");
+        let styles = format!("<Styles {namespaces}/>");
+        let documents = [
+            ("Theme.xaml", theme.as_str()),
+            ("A&B.xaml", dictionary.as_str()),
+            ("Keyed.xaml", dictionary.as_str()),
+            ("Text.xaml", styles.as_str()),
+        ];
+        let group = class_document_group("ferres://Fixture/", &documents, "Theme.xaml").expect("the group");
+        let names: Vec<&str> = group.iter().map(|(name, _, _)| name.as_str()).collect();
+        assert_eq!(names, ["Theme.xaml", "A&B.xaml", "Keyed.xaml"]);
     }
 }

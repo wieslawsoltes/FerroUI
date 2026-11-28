@@ -239,11 +239,12 @@ impl BindingBase for XBinding {
         target_property: Option<&'static FerroProperty>,
         _anchor: Option<&Ref<FerroObject>>,
     ) -> Rc<dyn BindingExpressionBase> {
-        let expression = match self.try_create_instance(target, target_property) {
+        // The only error is a missing target property, which the loader and the property
+        // system always pass: a bug of the caller, not an error to report (#567).
+        match self.try_create_instance(target, target_property) {
             Ok(expression) => expression,
-            Err(error) => crate::xaml_error_scope::throw(error),
-        };
-        expression
+            Err(error) => panic!("{error}"),
+        }
     }
 
     fn as_any(&self) -> Option<&dyn std::any::Any> {

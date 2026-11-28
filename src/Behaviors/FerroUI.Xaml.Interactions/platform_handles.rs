@@ -23,6 +23,8 @@ macro_rules! handle {
         #[derive(Clone)]
         pub struct $name(pub Rc<dyn $contract>);
 
+        ferroui_base::styled_value!($name);
+
         impl $name {
             /// The handle of `value`.
             pub fn new(value: Rc<dyn $contract>) -> Self {

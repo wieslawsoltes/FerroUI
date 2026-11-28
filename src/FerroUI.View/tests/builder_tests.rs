@@ -1,6 +1,7 @@
 use crate::generated::builders::*;
 use crate::reactive::{signal, Owner};
-use crate::{Element, GridDefinitions, IntoElement};
+use crate::element::{PropEntry, PropValue};
+use crate::{Element, GridDefinitions, IntoElement, IntoProp};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::media::Color;
@@ -164,6 +165,65 @@ fn a_property_follows_a_signal_and_a_closure() {
 }
 
 #[test]
+fn a_closure_sets_its_property_typed_and_a_value_equal_to_the_one_before_changes_nothing() {
+    let owner = Owner::new_root();
+    let (version, control) = owner.with(|| {
+        let version = signal(0_u32);
+        let text = move || {
+            let version = version.get();
+            if version < 2 { String::from("same") } else { format!("at {version}") }
+        };
+        let control = text_block().text(text).foreground(move || {
+            let _ = version.get();
+            Color::from_rgb(1, 2, 3)
+        });
+        (version, control.into_element().mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    let changes = Rc::new(Cell::new(0));
+    let counted = changes.clone();
+    let subscription = block.property_changed(move |e| {
+        if matches!(e.property().name(), "Text" | "Foreground") {
+            counted.set(counted.get() + 1);
+        }
+    });
+    let address = || block.foreground().map(|brush| Rc::as_ptr(&brush) as *const ());
+    let foreground = address();
+    version.set(1);
+    assert_eq!((changes.get(), block.text().as_deref()), (0, Some("same")));
+    // The brush of the property is the one it had: the equal one was not taken.
+    assert_eq!(address(), foreground);
+    version.set(2);
+    assert_eq!((changes.get(), block.text().as_deref()), (1, Some("at 2")));
+    subscription.dispose();
+    owner.dispose();
+}
+
+#[test]
+fn a_closure_run_outside_its_effect_and_a_closure_made_elsewhere_give_their_values() {
+    // Outside the effect of a property the closure of the builders returns its value boxed.
+    let PropValue::Dynamic(compute) = IntoProp::<f64, _>::into_prop(|| 5.0) else { panic!("a closure") };
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+
+    // A closure that is not of the builders is set through the untyped setter.
+    let owner = Owner::new_root();
+    let (count, control) = owner.with(|| {
+        let count = signal(1);
+        let mut element = text_block().build();
+        let Element::Control(control) = &mut element else { panic!("a control element") };
+        let compute: Rc<dyn Fn() -> BoxedValue> = Rc::new(move || Rc::new(Some(format!("made {}", count.get()))));
+        control.props.push(PropEntry { property: TextBlock::text_property().as_property(), value: PropValue::Dynamic(compute) });
+        (count, element.mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    assert_eq!(block.text().as_deref(), Some("made 1"));
+    count.set(2);
+    assert_eq!(block.text().as_deref(), Some("made 2"));
+    owner.dispose();
+}
+
+#[test]
 fn a_two_way_signal_follows_the_property_and_the_property_the_signal() {
     let owner = Owner::new_root();
     let (draft, control) = owner.with(|| {
@@ -219,6 +279,154 @@ fn grid_definitions_and_attached_properties() {
     let add = grid.children().to_vec().into_iter().nth(1).unwrap();
     assert_eq!(Grid::get_column(&add), 1);
     owner.dispose();
+}
+
+#[test]
+fn definitions_of_the_same_count_and_kinds_take_their_sizes_in_place() {
+    use crate::{rerender, GridDefinitionsText};
+    use ferroui_controls::{ColumnDefinition, GridLength, GridUnitType};
+    let star = |value| GridLength::new(value, GridUnitType::Star);
+    let owner = Owner::new_root();
+    let (weight, pixels, control) = owner.with(|| {
+        let (weight, pixels) = (signal(1_u32), signal(false));
+        let control = rerender(move || {
+            let rows = if pixels.get() { "Auto,40" } else { "Auto,*" };
+            grid()
+                .row_definitions(rows)
+                .set(GridDefinitionsText::columns_property(), move || format!("{}*,Auto", weight.get()))
+        })
+        .into_element()
+        .mount();
+        (weight, pixels, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    let columns = grid.column_definitions();
+    let first: Ref<ColumnDefinition> = columns.snapshot()[0].clone();
+    assert_eq!(first.width(), star(1.0));
+
+    // The same count and kinds: the collection and its definitions stay and take the sizes.
+    weight.set(3);
+    assert!(grid.column_definitions() == columns);
+    assert!(grid.column_definitions().snapshot()[0].ptr_eq(&first));
+    assert_eq!(first.width(), star(3.0));
+
+    // Another kind: a new collection, as the setter of the grid gives it.
+    let rows = grid.row_definitions();
+    pixels.set(true);
+    assert!(grid.row_definitions() != rows);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), GridLength::new(40.0, GridUnitType::Pixel));
+    owner.dispose();
+}
+
+#[test]
+fn typed_definitions_take_their_sizes_in_place_like_text() {
+    use crate::{auto, px, rerender, star, GridDefinitionSizes, GridDefinitionsText};
+    use ferroui_controls::{ColumnDefinition, GridLength, GridUnitType};
+    let owner = Owner::new_root();
+    let (weight, pixels, control) = owner.with(|| {
+        let (weight, pixels) = (signal(1_u32), signal(false));
+        let control = rerender(move || {
+            let rows = if pixels.get() { [auto(), px(40.0)] } else { [auto(), star(1.0)] };
+            grid()
+                .row_definitions(rows)
+                .set(GridDefinitionSizes::columns_property(), move || [star(f64::from(weight.get())), auto()])
+        })
+        .into_element()
+        .mount();
+        (weight, pixels, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    let columns = grid.column_definitions();
+    let first: Ref<ColumnDefinition> = columns.snapshot()[0].clone();
+    assert_eq!(first.width(), star(1.0));
+
+    // The same count and kinds: the collection and its definitions stay and take the sizes.
+    weight.set(3);
+    assert!(grid.column_definitions() == columns);
+    assert!(grid.column_definitions().snapshot()[0].ptr_eq(&first));
+    assert_eq!(first.width(), star(3.0));
+
+    // Another kind: a new collection, as the setter of the grid gives it.
+    let rows = grid.row_definitions();
+    pixels.set(true);
+    assert!(grid.row_definitions() != rows);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), GridLength::new(40.0, GridUnitType::Pixel));
+
+    // The typed form holds no text.
+    assert_eq!(grid.get_value(GridDefinitionsText::rows_property()), None);
+    assert_eq!(grid.get_value(GridDefinitionsText::columns_property()), None);
+    owner.dispose();
+}
+
+#[test]
+fn typed_and_text_definitions_are_the_same_lengths() {
+    use crate::{auto, px, star, IntoGridLengths};
+    let typed = [auto(), star(1.0), star(2.0), px(40.0)].into_grid_lengths("row");
+    assert_eq!(typed, "Auto,*,2*,40".into_grid_lengths("row"));
+    let (control, owner) = mount(grid().row_definitions([auto(), star(2.0)]).column_definitions("*,40"));
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), star(2.0));
+    assert_eq!(grid.column_definitions().snapshot()[1].width(), px(40.0));
+    owner.dispose();
+}
+
+#[test]
+fn an_element_going_from_text_to_typed_lengths_keeps_the_typed_ones() {
+    use crate::{auto, px, rerender, GridDefinitionSizes, GridDefinitionsText};
+    let owner = Owner::new_root();
+    let (typed, control) = owner.with(|| {
+        let typed = signal(false);
+        let control = rerender(move || {
+            if typed.get() {
+                grid().set(GridDefinitionSizes::rows_property(), [auto(), px(10.0)])
+            } else {
+                grid().set(GridDefinitionsText::rows_property(), "Auto,20")
+            }
+        })
+        .into_element()
+        .mount();
+        (typed, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(20.0));
+    typed.set(true);
+    assert_eq!(grid.row_definitions().count(), 2);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    owner.dispose();
+}
+
+#[test]
+fn an_element_going_from_typed_lengths_to_text_keeps_the_text() {
+    use crate::{auto, px, rerender, GridDefinitionSizes, GridDefinitionsText};
+    let owner = Owner::new_root();
+    let (text, control) = owner.with(|| {
+        let text = signal(false);
+        let control = rerender(move || {
+            if text.get() {
+                grid().set(GridDefinitionsText::rows_property(), "Auto,20,30")
+            } else {
+                grid().set(GridDefinitionSizes::rows_property(), [auto(), px(10.0)])
+            }
+        })
+        .into_element()
+        .mount();
+        (text, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    text.set(true);
+    assert_eq!(grid.row_definitions().count(), 3);
+    assert_eq!(grid.row_definitions().snapshot()[2].height(), px(30.0));
+    text.set(false);
+    assert_eq!(grid.row_definitions().count(), 2);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), px(10.0));
+    owner.dispose();
+}
+
+#[test]
+#[should_panic(expected = "are not row definitions")]
+fn row_definitions_that_do_not_parse_say_so() {
+    let _ = grid().row_definitions("Auto,nonsense");
 }
 
 #[test]

@@ -24,7 +24,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
 use zbus::proxy::CacheProperties;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub struct AtSpiServer {
     weak_self: Weak<AtSpiServer>,
@@ -92,10 +92,8 @@ impl AtSpiServer {
 
         // No object server: the method calls of this connection are
         // answered by the loop of `AtSpiConnection`.
-        let connection = zbus::blocking::connection::Builder::address(address.as_str())
-            .and_then(|builder| builder.build())
-            .map(zbus::blocking::Connection::into_inner)
-            .map_err(|e| e.to_string())?;
+        let connection =
+            zbus::connection::Builder::address(address.as_str()).build().await.map_err(|e| e.to_string())?;
         self.start_on_connection(connection);
         Ok(())
     }
@@ -306,7 +304,7 @@ impl AtSpiServer {
         }
 
         if let Some(event_handler) = window_node.event_object_handler() {
-            event_handler.emit_state_changed_signal("active", i32::from(active), Value::from(0i32));
+            event_handler.emit_state_changed_signal("active", i32::from(active), Variant::from(0i32));
         }
 
         let Some(window_handler) = window_node.event_window_handler() else { return };
@@ -325,7 +323,7 @@ impl AtSpiServer {
         }
 
         if let Some(event_handler) = focused_node.event_object_handler() {
-            event_handler.emit_state_changed_signal("focused", 1, Value::from(0i32));
+            event_handler.emit_state_changed_signal("focused", 1, Variant::from(0i32));
         }
     }
 
@@ -413,7 +411,7 @@ impl AtSpiServer {
             if let (true, true, Some(event_handler)) =
                 (emit_defunct, self.has_event_listeners(), node.event_object_handler())
             {
-                event_handler.emit_state_changed_signal("defunct", 1, Value::from("0"));
+                event_handler.emit_state_changed_signal("defunct", 1, Variant::from("0"));
             }
 
             self.nodes_by_path.borrow_mut().remove(node.path());
@@ -465,10 +463,10 @@ impl AtSpiServer {
 
     async fn get_accessibility_bus_address_async() -> String {
         let result: zbus::Result<String> = async {
-            let connection = zbus::blocking::connection::Builder::session()?.build()?.into_inner();
+            let connection = zbus::connection::Builder::session().build().await?;
             let proxy = OrgA11yBusProxy::builder(&connection)
-                .destination(BUS_NAME_A11Y)?
-                .path(PATH_A11Y)?
+                .destination(BUS_NAME_A11Y)
+                .path(PATH_A11Y)
                 .cache_properties(CacheProperties::No)
                 .build()
                 .await?;
@@ -491,8 +489,8 @@ impl AtSpiServer {
         let Some(connection) = self.a11y_connection() else { return Ok(()) };
 
         let proxy = OrgA11yAtspiSocketProxy::builder(connection.connection())
-            .destination(BUS_NAME_REGISTRY)?
-            .path(ROOT_PATH)?
+            .destination(BUS_NAME_REGISTRY)
+            .path(ROOT_PATH)
             .cache_properties(CacheProperties::No)
             .build()
             .await?;
@@ -526,7 +524,7 @@ mod path_tests {
         assert_eq!(server.allocate_node_path(), "/org/ferroui/a11y/1");
         assert_eq!(server.allocate_node_path(), "/org/ferroui/a11y/2");
         assert_eq!(node_path(17), "/org/ferroui/a11y/17");
-        assert!(zbus::zvariant::ObjectPath::try_from(node_path(17)).is_ok());
+        assert!(zbus::ObjectPath::try_from(node_path(17)).is_ok());
     }
 
     #[test]

@@ -116,6 +116,11 @@ ferro_class! {
 crate::ferro_class_info!(Layoutable { new: Layoutable::new });
 
 crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::Layoutable).into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -597,6 +602,8 @@ impl Layoutable {
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
+    // Inlined into `Interactive::construct`, its one caller outside tests (see there).
+    #[inline]
     pub fn construct() -> Self {
         Self {
             base: Visual::construct(),
@@ -803,6 +810,11 @@ impl Layoutable {
     }
 
     fn set_desired_size(&self, value: Size) {
+        // A layout pass sets this for every child, mostly to what it is: an unchanged size does
+        // not read the property, whose accessor may be a call (it depends on the inlining).
+        if self.desired_size.get() == value {
+            return;
+        }
         self.set_and_raise_cell(Self::desired_size_property(), &self.desired_size, value);
     }
 
@@ -1049,12 +1061,13 @@ impl Layoutable {
     /// `invalidate_measure` is called on it.
     pub fn affects_measure<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_measure();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 
@@ -1063,12 +1076,13 @@ impl Layoutable {
     /// `invalidate_arrange` is called on it.
     pub fn affects_arrange<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_arrange();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 
@@ -1151,3 +1165,7 @@ impl HotSizes {
     const USE_LAYOUT_ROUNDING: u16 = 1 << 9;
     const CONTAINER_SIZING: u16 = 1 << 10;
 }
+
+#[cfg(test)]
+#[path = "unchanged_layout_value_tests.rs"]
+mod unchanged_layout_value_tests;

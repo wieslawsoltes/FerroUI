@@ -12,9 +12,9 @@ use crate::rendering::{
     IHitTester, IPresentationSource, IRenderer, RendererDiagnostics, SceneInvalidatedEventArgs,
 };
 use crate::threading::DispatcherPriority;
-use crate::utilities::{HandlerList, ReleaseExcess};
+use crate::utilities::{HandlerList, ReleaseAtRest};
 use crate::visual::CompositionItemPlacements;
-use crate::{Matrix, Point, Rect, Ref, Size, Visual};
+use crate::{Matrix, Point, Rect, Ref, Size, Visual, WeakRef};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
@@ -61,11 +61,15 @@ enum VisualSet {
 /// A removal clears the bit at once and leaves the entry in the list, which is compacted when
 /// the stale entries are half of it or the set is read, so that removing is constant time
 /// instead of a scan of the list for every visual that is invalidated while it has no
-/// composition visual. The visuals a set yields are unchanged; a removed visual is released at
-/// the next compaction.
+/// composition visual. The visuals a set yields are unchanged.
+///
+/// The lists refer to their visuals weakly. A visual in a set is in a tree, which owns it, and
+/// one that leaves the tree is released by its last owner at once: the next update pass can be
+/// held back for as long as a batch is in flight or rendering is stopped, and a stale entry must
+/// not keep the visual, or run its destructor while the sets are borrowed.
 struct VisualSets {
     epoch: u64,
-    items: [Vec<Ref<Visual>>; Self::SETS],
+    items: [Vec<WeakRef<Visual>>; Self::SETS],
     /// The visuals of each set.
     live: [usize; Self::SETS],
     /// The entries of each list whose visual was removed.
@@ -122,7 +126,7 @@ impl VisualSets {
         let (bits, bit) = (self.bits(visual), 1 << set as u64);
         if bits & bit == 0 {
             self.set_bits(visual, bits | bit);
-            self.items[set as usize].push(visual.to_ref());
+            self.items[set as usize].push(visual.to_ref().downgrade());
             self.live[set as usize] += 1;
         }
     }
@@ -179,16 +183,17 @@ impl VisualSets {
         let mut items = std::mem::take(&mut self.items[index]);
         items.reverse();
         items.retain(|item| {
-            let bits = self.bits(item);
+            let Some(item) = item.upgrade() else { return false };
+            let bits = self.bits(&item);
             let keep = bits & bit != 0 && bits & kept == 0;
             if keep {
-                self.set_bits(item, bits | kept);
+                self.set_bits(&item, bits | kept);
             }
             keep
         });
         items.reverse();
-        for item in &items {
-            self.set_bits(item, self.bits(item) & !kept);
+        for item in items.iter().filter_map(WeakRef::upgrade) {
+            self.set_bits(&item, self.bits(&item) & !kept);
         }
         self.live[index] = items.len();
         self.items[index] = items;
@@ -203,7 +208,7 @@ impl VisualSets {
         if self.stale[set as usize] > 0 {
             self.compact(set);
         }
-        self.items[set as usize].iter().filter(|item| self.contains(set, item)).cloned().collect()
+        self.items[set as usize].iter().filter_map(WeakRef::upgrade).filter(|item| self.contains(set, item)).collect()
     }
 
     fn is_empty(&self, set: VisualSet) -> bool {
@@ -255,6 +260,9 @@ pub struct CompositingRenderer {
     diagnostics: Rc<RendererDiagnostics>,
     diagnostics_subscription: RefCell<Option<Subscription>>,
     scene_invalidated: HandlerList<dyn Fn(&SceneInvalidatedEventArgs)>,
+    /// Whether the renderer is registered to have its list of departed visuals released once a
+    /// burst is over (#836).
+    resting: Cell<bool>,
 }
 
 impl CompositingRenderer {
@@ -299,6 +307,7 @@ impl CompositingRenderer {
             diagnostics: RendererDiagnostics::new(),
             diagnostics_subscription: RefCell::new(None),
             scene_invalidated: HandlerList::new(),
+            resting: Cell::new(false),
         });
         let weak = Rc::downgrade(&renderer);
         let subscription = renderer.diagnostics.property_changed(move |diagnostics, property_name| {
@@ -313,6 +322,22 @@ impl CompositingRenderer {
             renderers.insert(key, Rc::downgrade(&renderer));
         });
         renderer
+    }
+
+    /// After a large tree left: the list of its visuals is released once the burst is over
+    /// (#836, `utilities::resting`); the renderer is registered with the job of its thread the
+    /// first time.
+    fn rest_after_burst(&self) {
+        crate::utilities::rest_after_burst(&self.resting, || {
+            let weak = self.this.clone();
+            move || {
+                let Some(renderer) = weak.upgrade() else { return false };
+                if let Ok(mut departed) = renderer.departed.try_borrow_mut() {
+                    departed.release_at_rest();
+                }
+                true
+            }
+        });
     }
 
     /// The composition target the renderer draws the tree to.
@@ -559,8 +584,12 @@ impl CompositingRenderer {
         // meanwhile.
         let mut list = self.departed.borrow_mut();
         if list.is_empty() {
-            departed.release_excess();
+            let burst = departed.release_burst();
             *list = departed;
+            drop(list);
+            if burst {
+                self.rest_after_burst();
+            }
         }
     }
 

@@ -1,4 +1,5 @@
 use super::*;
+use crate::brush::{BrushUniforms, BRUSH_WGSL_DECLARATIONS, GRADIENT_TEXTURE_WIDTH, MAX_INLINE_STOPS};
 use crate::uniforms::{DrawUniforms, FrameUniforms, LightUniforms, MAX_LIGHTS, WGSL_DECLARATIONS};
 use ferroui_base::numerics::{Vector2, Vector3};
 use ferroui_base::rendering::scene3d::MeshData;
@@ -65,12 +66,25 @@ fn scene3d_wgsl_is_valid_and_has_its_entry_points() {
     for (name, stage) in [
         (VERTEX_ENTRY, naga::ShaderStage::Vertex),
         (FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (GRADIENT_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (GRADIENT_TEXTURE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (IMAGE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
         (RESOLVE_VERTEX_ENTRY, naga::ShaderStage::Vertex),
         (RESOLVE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
     ] {
         assert!(stages.contains(&(name, stage)), "{name} is a {stage:?} entry point: {stages:?}");
     }
-    assert_eq!(4, stages.len(), "{stages:?}");
+    assert_eq!(7, stages.len(), "{stages:?}");
+    // One entry point per variant of the brush shader.
+    for (shader, entry) in [
+        (BrushShader::Solid, FRAGMENT_ENTRY),
+        (BrushShader::Gradient, GRADIENT_FRAGMENT_ENTRY),
+        (BrushShader::GradientTexture, GRADIENT_TEXTURE_FRAGMENT_ENTRY),
+        (BrushShader::Image, IMAGE_FRAGMENT_ENTRY),
+    ] {
+        assert_eq!(entry, fragment_entry(shader));
+        assert_eq!(matches!(shader, BrushShader::GradientTexture | BrushShader::Image), samples_texture(shader));
+    }
 }
 
 #[test]
@@ -93,6 +107,20 @@ fn scene3d_wgsl_translates_to_glsl_es_3_for_webgl2() {
     // The uniform blocks are std140, the layout of the Rust structures.
     assert!(fragment.contains("std140"), "{fragment}");
 
+    // The brushes of step D6: the frame, the draw and the brush uniforms; a texture with its
+    // sampler for the lookup texture and the image, sampled at level 0 (no derivatives).
+    let (gradient, gradient_reflection) = glsl(&module, &info, naga::ShaderStage::Fragment, GRADIENT_FRAGMENT_ENTRY);
+    assert_glsl_es(&gradient, true, GRADIENT_FRAGMENT_ENTRY);
+    assert_eq!(3, gradient_reflection.uniforms.len(), "{gradient}");
+    assert!(gradient_reflection.texture_mapping.is_empty(), "{gradient}");
+    for entry in [GRADIENT_TEXTURE_FRAGMENT_ENTRY, IMAGE_FRAGMENT_ENTRY] {
+        let (source, reflection) = glsl(&module, &info, naga::ShaderStage::Fragment, entry);
+        assert_glsl_es(&source, true, entry);
+        assert_eq!(3, reflection.uniforms.len(), "{entry}: {source}");
+        assert_eq!(1, reflection.texture_mapping.len(), "{entry}: {source}");
+        assert!(source.contains("textureLod("), "{entry}: {source}");
+    }
+
     let (resolve_vertex, _) = glsl(&module, &info, naga::ShaderStage::Vertex, RESOLVE_VERTEX_ENTRY);
     assert_glsl_es(&resolve_vertex, false, RESOLVE_VERTEX_ENTRY);
     assert!(resolve_vertex.contains("gl_VertexID"), "{resolve_vertex}");
@@ -112,6 +140,12 @@ fn the_shader_holds_the_uniform_declarations_of_the_cpu_reference() {
         "scene3d.wgsl declares the structures of uniforms.rs (WGSL_DECLARATIONS) unchanged"
     );
     assert!(SCENE3D_WGSL.contains(&format!("const MAX_LIGHTS: u32 = {MAX_LIGHTS}u;")));
+    assert!(
+        SCENE3D_WGSL.contains(BRUSH_WGSL_DECLARATIONS),
+        "scene3d.wgsl declares the brush uniforms of brush.rs (BRUSH_WGSL_DECLARATIONS) unchanged"
+    );
+    assert!(SCENE3D_WGSL.contains(&format!("const MAX_STOPS: u32 = {MAX_INLINE_STOPS}u;")));
+    assert!(SCENE3D_WGSL.contains(&format!("const GRADIENT_TEXTURE_WIDTH: f32 = {GRADIENT_TEXTURE_WIDTH}.0;")));
 }
 
 #[test]
@@ -171,6 +205,22 @@ fn naga_lays_the_uniforms_out_as_the_rust_structures() {
             ("material", offset_of!(DrawUniforms, material)),
         ]),
         draw
+    );
+
+    let (span, brush) = members("BrushUniforms");
+    assert_eq!(size_of::<BrushUniforms>() as u32, span);
+    assert_eq!(
+        owned(&[
+            ("metadata", offset_of!(BrushUniforms, metadata)),
+            ("to_brush_x", offset_of!(BrushUniforms, to_brush_x)),
+            ("to_brush_y", offset_of!(BrushUniforms, to_brush_y)),
+            ("geometry", offset_of!(BrushUniforms, geometry)),
+            ("geometry2", offset_of!(BrushUniforms, geometry2)),
+            ("clip", offset_of!(BrushUniforms, clip)),
+            ("stop_offsets", offset_of!(BrushUniforms, stop_offsets)),
+            ("stop_colors", offset_of!(BrushUniforms, stop_colors)),
+        ]),
+        brush
     );
 }
 
@@ -237,4 +287,48 @@ fn a_mesh_is_written_interleaved_with_the_triangles_the_cpu_reference_draws() {
     assert_eq!(&[0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.5, 0.25], &floats[0..8]);
     assert_eq!(&[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0], &floats[8..16]);
     assert_eq!(&[0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &floats[16..24]);
+}
+
+/// The Metal Shading Language of the build (feature `msl`, step D5): every entry point a
+/// function of its stage, the clip position invariant, the resources at the slots of the
+/// argument tables the Metal executor binds, the sampler inlined.
+#[cfg(feature = "msl")]
+#[test]
+fn scene3d_wgsl_is_written_in_the_metal_shading_language() {
+    let source = msl::SOURCE;
+    assert!(source.contains("#include <metal_stdlib>"), "{source}");
+    for (stage, function) in [
+        ("vertex", msl::VERTEX_FUNCTION),
+        ("fragment", msl::FRAGMENT_FUNCTION),
+        ("fragment", msl::GRADIENT_FRAGMENT_FUNCTION),
+        ("fragment", msl::GRADIENT_TEXTURE_FRAGMENT_FUNCTION),
+        ("fragment", msl::IMAGE_FRAGMENT_FUNCTION),
+        ("vertex", msl::RESOLVE_VERTEX_FUNCTION),
+        ("fragment", msl::RESOLVE_FRAGMENT_FUNCTION),
+    ] {
+        let declared = source.lines().any(|line| line.starts_with(stage) && line.contains(&format!(" {function}(")));
+        assert!(declared, "{function} is a {stage} function: {source}");
+    }
+    // The layers of a material have the same depth in every draw.
+    assert!(source.contains("invariant"), "{source}");
+    for slot in [msl::FRAME_BUFFER_INDEX, msl::DRAW_BUFFER_INDEX, msl::BRUSH_BUFFER_INDEX] {
+        assert!(source.contains(&format!("[[buffer({slot})]]")), "buffer {slot}: {source}");
+    }
+    // The vertices come through the vertex descriptor (stage_in), not a buffer of the source.
+    assert!(!source.contains(&format!("[[buffer({})]]", msl::VERTEX_BUFFER_INDEX)), "{source}");
+    assert!(source.contains("[[stage_in]]"), "{source}");
+    assert!(source.contains(&format!("[[texture({})]]", msl::BRUSH_TEXTURE_INDEX)), "{source}");
+    assert!(source.contains(&format!("[[texture({})]]", msl::RESOLVED_TEXTURE_INDEX)), "{source}");
+    // The sampler is inlined: no sampler is bound.
+    assert!(source.contains("constexpr metal::sampler"), "{source}");
+    assert!(!source.contains("[[sampler("), "{source}");
+    assert!(source.contains("front_facing"), "{source}");
+    for (shader, function) in [
+        (BrushShader::Solid, msl::FRAGMENT_FUNCTION),
+        (BrushShader::Gradient, msl::GRADIENT_FRAGMENT_FUNCTION),
+        (BrushShader::GradientTexture, msl::GRADIENT_TEXTURE_FRAGMENT_FUNCTION),
+        (BrushShader::Image, msl::IMAGE_FRAGMENT_FUNCTION),
+    ] {
+        assert_eq!(function, msl::fragment_function(shader));
+    }
 }

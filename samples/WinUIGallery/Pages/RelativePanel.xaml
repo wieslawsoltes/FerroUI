@@ -1,4 +1,18 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <RelativePanel Width="300" Height="120" HorizontalAlignment="Left"><Rectangle x:Name="Rectangle1" Fill="Red" Height="50" Width="50"/><Rectangle x:Name="Rectangle2" Fill="Blue" Height="50" Width="50" RelativePanel.RightOf="Rectangle1" Margin="8,0,0,0"/><Rectangle x:Name="Rectangle3" Fill="Green" Height="50" Width="50" RelativePanel.AlignRightWithPanel="True"/><Rectangle x:Name="Rectangle4" Fill="Yellow" Height="50" Width="50" RelativePanel.Below="Rectangle3" RelativePanel.AlignHorizontalCenterWith="Rectangle3" Margin="0,8,0,0"/></RelativePanel>
+<!-- Ported from the pinned RelativePanel example of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="RelativePanelExample1" Spacing="8">
+    <TextBlock Text="A RelativePanel control." FontSize="18" />
+    <RelativePanel x:Name="Control1" Width="300" HorizontalAlignment="Left" VerticalAlignment="Top">
+      <Rectangle x:Name="Rectangle1" Width="50" Height="50" Fill="Red" />
+      <Rectangle x:Name="Rectangle2" Width="50" Height="50" Margin="8,0,0,0" Fill="Blue"
+                 RelativePanel.RightOf="Rectangle1" />
+      <Rectangle x:Name="Rectangle3" Width="50" Height="50" Fill="Green"
+                 RelativePanel.AlignRightWithPanel="True" />
+      <Rectangle x:Name="Rectangle4" Width="50" Height="50" Margin="0,8,0,0" Fill="Yellow"
+                 RelativePanel.AlignHorizontalCenterWith="Rectangle3"
+                 RelativePanel.Below="Rectangle3" />
+    </RelativePanel>
+  </StackPanel>
 </StackPanel>

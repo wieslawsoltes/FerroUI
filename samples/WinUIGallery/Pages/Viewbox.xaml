@@ -1,4 +1,52 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Viewbox Width="250" Height="160" HorizontalAlignment="Left" StretchDirection="Both"><Border BorderBrush="Gray" BorderThickness="4" Padding="6"><StackPanel><StackPanel Orientation="Horizontal"><Rectangle Fill="Blue" Width="20" Height="10"/><Rectangle Fill="Green" Width="20" Height="10"/><Rectangle Fill="Red" Width="20" Height="10"/><Rectangle Fill="Yellow" Width="20" Height="10"/></StackPanel><TextBlock Text="This is text." FontSize="12"/></StackPanel></Border></Viewbox>
+<!-- Ported from the pinned Viewbox example of WinUI Gallery (14061eea) and the handlers
+     Stretch_SelectionChanged and StretchDirection_SelectionChanged of ViewboxPage.xaml.cs
+     (layout_samples.rs); see ../NOTICE.md. The Width and Height keep the source's OneWay x:Bind of
+     the slider's Value; layout_samples.rs sets the source's Slices.png on the image. The slider's
+     Header is composed. The options are the source's RadioButton items with their Tags, whose
+     IsChecked option is the SelectedIndex of the group. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Content inside of a Viewbox." FontSize="18" />
+    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="24">
+      <Viewbox x:Name="Control1"
+               Width="{x:Bind SizeSlider.Value, Mode=OneWay}"
+               Height="{x:Bind SizeSlider.Value, Mode=OneWay}"
+               HorizontalAlignment="Left"
+               VerticalAlignment="Top"
+               StretchDirection="Both">
+        <Border BorderBrush="Gray" BorderThickness="15">
+          <StackPanel Background="DarkGray">
+            <StackPanel Orientation="Horizontal">
+              <Rectangle Width="40" Height="10" Fill="Blue" />
+              <Rectangle Width="40" Height="10" Fill="Green" />
+              <Rectangle Width="40" Height="10" Fill="Red" />
+              <Rectangle Width="40" Height="10" Fill="Yellow" />
+            </StackPanel>
+            <Image x:Name="ViewboxImage" />
+            <TextBlock HorizontalAlignment="Center" Text="This is text." />
+          </StackPanel>
+        </Border>
+      </Viewbox>
+
+      <StackPanel Grid.Column="1" Width="200" Spacing="8">
+        <StackPanel>
+          <TextBlock Text="Width/Height" />
+          <Slider x:Name="SizeSlider" AutomationProperties.Name="Width/Height" Maximum="300" Minimum="20"
+                  Value="200" />
+        </StackPanel>
+        <RadioButtons x:Name="StretchRadioButtons" Header="Stretch" SelectedIndex="2">
+          <RadioButton Content="None" Tag="None" />
+          <RadioButton Content="Fill" Tag="Fill" />
+          <RadioButton Content="Uniform" Tag="Uniform" />
+          <RadioButton Content="UniformToFill" Tag="UniformToFill" />
+        </RadioButtons>
+        <RadioButtons x:Name="StretchDirectionRadioButtons" Header="StretchDirection" SelectedIndex="2">
+          <RadioButton Content="UpOnly" GroupName="StretchDirection" Tag="UpOnly" />
+          <RadioButton Content="DownOnly" GroupName="StretchDirection" Tag="DownOnly" />
+          <RadioButton Content="Both" GroupName="StretchDirection" Tag="Both" />
+        </RadioButtons>
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

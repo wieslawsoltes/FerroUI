@@ -6,6 +6,7 @@ edition.workspace = true
 rust-version.workspace = true
 license.workspace = true
 publish = false
+build = "build.rs"
 
 [lib]
 path = "lib.rs"
@@ -23,3 +24,10 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-view = { workspace = true }
 seven-guis-model = { path = "../../Model" }
+# The theme the window is in, constructed from the table of the units of the theme the build
+# writes (`build.rs`); the runtime library of markup is named by the table.
+ferroui-themes-winui = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }

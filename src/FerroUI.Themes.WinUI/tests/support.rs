@@ -313,7 +313,8 @@ pub fn enumerate_dictionary_resources(
 }
 
 /// The keys of the resource providers of the theme that compute their
-/// resources and have no keys collection to read: the accent colours.
+/// resources and have no keys collection to read: the accent colours and the
+/// system colours.
 fn try_get_known_resource_keys(provider: &Rc<dyn IResourceProvider>) -> Option<Vec<&'static str>> {
     const ACCENT_KEYS: [&str; 7] = [
         "SystemAccentColor",
@@ -327,6 +328,9 @@ fn try_get_known_resource_keys(provider: &Rc<dyn IResourceProvider>) -> Option<V
     let object = provider.as_object()?;
     if object.downcast_ref::<crate::accents::SystemAccentColors>().is_some() {
         return Some(ACCENT_KEYS.to_vec());
+    }
+    if object.downcast_ref::<crate::accents::SystemColors>().is_some() {
+        return Some(crate::accents::SystemColors::KEYS.to_vec());
     }
     None
 }

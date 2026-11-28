@@ -2,7 +2,7 @@ use super::{AutomationControlType, AutomationLandmarkType, AutomationPeer, Autom
 use crate::automation::{
     AccessibilityView, AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperties, IsOffscreenBehavior,
 };
-use crate::{Control, DataValidationErrors, ToolTip};
+use crate::{Control, DataValidationErrors};
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
@@ -11,6 +11,15 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::OnceLock;
+
+/// Resolves a control to the control whose automation peer stands for it in
+/// focus and hit testing ([`ControlAutomationPeer::register_automation_target`]).
+pub type AutomationTargetResolver = fn(&Ref<Control>) -> Option<Ref<Control>>;
+
+/// The resolver a library registered: `None` in an application without one, so
+/// the root peers ask nothing of the controls and no class gains a member.
+static AUTOMATION_TARGET: OnceLock<AutomationTargetResolver> = OnceLock::new();
 
 /// An automation peer which represents a [`Control`].
 ///
@@ -140,7 +149,7 @@ impl AutomationPeerImpl for ControlAutomationPeer {
         }
 
         if is_null_or_white_space(&result) {
-            result = ToolTip::get_tip(&owner).and_then(|tip| {
+            result = crate::tool_tip::tip_if_any(&owner).and_then(|tip| {
                 let tip: &dyn AnyValue = &*tip;
                 tip.downcast_ref::<String>().cloned()
             });
@@ -360,6 +369,24 @@ impl ControlAutomationPeer {
 
     /// Gets or creates an automation peer for a control: this peer for its
     /// owner, the peer of `element` otherwise.
+    /// Registers the resolver the root peers use for focus and hit testing: for
+    /// a control it returns the control whose peer represents it (an internal
+    /// presenter delegating to its owner, as the code editor's text area does),
+    /// or `None` for the control itself. The first registration of a process
+    /// stays; a later one is ignored and returns `false`.
+    pub fn register_automation_target(resolver: AutomationTargetResolver) -> bool {
+        AUTOMATION_TARGET.set(resolver).is_ok()
+    }
+
+    /// The control whose peer represents `control` in focus and hit testing:
+    /// `control` itself unless a registered resolver names another.
+    pub(crate) fn automation_target(control: Ref<Control>) -> Ref<Control> {
+        match AUTOMATION_TARGET.get() {
+            Some(resolve) => resolve(&control).unwrap_or(control),
+            None => control,
+        }
+    }
+
     pub fn get_or_create(&self, element: &Control) -> Ref<AutomationPeer> {
         if self.owner.upgrade().is_some_and(|owner| std::ptr::eq::<Control>(&*owner, element)) {
             return self.to_ref().upcast();
@@ -450,6 +477,24 @@ impl ControlAutomationPeer {
             );
         } else if property == Visual::visual_parent_property().as_property() {
             self.invalidate_parent();
+        } else if property == AutomationProperties::name_property().as_property() {
+            // Platforms cache the peer's attributes. Report the effective virtual value so
+            // removing an explicit name also restores a derived peer's content fallback.
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::name_property(),
+                None,
+                Some(Rc::new(self.get_name()) as BoxedValue),
+            );
+        } else if property == AutomationProperties::help_text_property().as_property()
+            || crate::tool_tip::is_tip_property(property)
+        {
+            // HelpText can come from validation, a tooltip, or a placeholder. The old
+            // attached value is not necessarily the old effective help text.
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::help_text_property(),
+                None,
+                Some(Rc::new(self.get_help_text()) as BoxedValue),
+            );
         } else if property == AutomationProperties::item_status_property().as_property() {
             let (old_value, new_value) = e.get_old_and_new_value::<Option<String>>();
             self.raise_property_changed_event(

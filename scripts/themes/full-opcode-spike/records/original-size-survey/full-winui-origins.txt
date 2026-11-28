@@ -1,0 +1,21 @@
+Mach-O __text 20264744 symbol bytes accounted 20201700
+Largest origins (bytes, Rust names by leading crate in demangled symbol, native by archive)
+ferroui_base 8176164
+libskia_bindings 3477680
+ferroui_controls 2557932
+other 1723284
+core 1020628
+ferroui_themes_winui 816940
+libharfbuzz_sys 606896
+alloc 274764
+ferroui_native 239820
+ferroui_markup_xaml 231672
+libferro_native_osx.a 218688
+ferroui_skia 192584
+std 188868
+hashbrown 117976
+ferroui_system 68488
+url 44308
+icu_locale_core 33940
+gimli 32876
+Three property modules by leading path {'property_store': 1631604, 'styled_property': 973316, 'direct_property': 372104} total 2977024

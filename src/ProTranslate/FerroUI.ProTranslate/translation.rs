@@ -82,6 +82,8 @@ ferro_properties! {
 
 #[derive(Clone)]
 struct AttachedSubscription(Rc<SourceObservation>);
+
+ferroui_base::styled_value!(AttachedSubscription);
 impl PartialEq for AttachedSubscription {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)
@@ -90,6 +92,8 @@ impl PartialEq for AttachedSubscription {
 
 #[derive(Clone)]
 struct FlowOverride(Rc<FlowOverrideInner>);
+
+ferroui_base::styled_value!(FlowOverride);
 struct FlowOverrideInner {
     value: FlowDirection,
     entry: Rc<dyn IDisposable>,

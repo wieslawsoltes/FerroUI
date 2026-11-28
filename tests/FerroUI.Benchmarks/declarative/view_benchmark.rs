@@ -8,7 +8,7 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontFamily, FontWeight, IBrush};
 use ferroui_base::{CornerRadius, Ref, Thickness};
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
-use ferroui_controls::{Border, Control, Grid, StackPanel, TextBlock, WrapPanel};
+use ferroui_controls::{Border, ColumnDefinitions, Control, Grid, StackPanel, TextBlock, WrapPanel};
 use ferroui_view::prelude::*;
 use std::rc::Rc;
 
@@ -78,6 +78,83 @@ impl ViewBenchmark {
             stack_panel().children(rows).into_element().mount()
         }));
         this.level = Some(level);
+        this
+    }
+
+    /// A thousand texts computed by closures from one signal: every write of the signal runs
+    /// the effect of each, and each sets a new text (`changed`) or the text it has (`!changed`).
+    fn with_shared_text(changed: bool) -> Self {
+        let mut this = Self::empty();
+        let version = this.version;
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS)
+                .map(|i| {
+                    text_block().text(move || {
+                        let version = version.get();
+                        if changed { format!("row {i} at {version}") } else { format!("row {i}") }
+                    })
+                })
+                .collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
+        this
+    }
+
+    /// A thousand foregrounds computed by closures from one signal, each a brush equal to the
+    /// one before: every write of the signal runs the effect of each and changes nothing.
+    fn with_shared_brush() -> Self {
+        let mut this = Self::empty();
+        let version = this.version;
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS)
+                .map(|_| {
+                    text_block().foreground(move || {
+                        let _ = version.get();
+                        Color::from_rgb(0xFF, 0xFF, 0xFF)
+                    })
+                })
+                .collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
+        this
+    }
+
+    /// A thousand grids of two star columns whose weights follow one signal, as a bar written as
+    /// a grid does: each grid is given new column definitions by an effect of its own whenever
+    /// the signal changes (what an application of the declarative layer writes for that with
+    /// the control's setter).
+    fn with_replaced_definitions() -> Self {
+        let mut this = Self::empty();
+        let version = this.version;
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS)
+                .map(|_| {
+                    grid().with(move |grid| {
+                        let grid = grid.clone();
+                        effect(move || {
+                            let text = bar_columns(version.get());
+                            let columns = ColumnDefinitions::parse(&text).expect("column definitions");
+                            untrack(|| grid.set_column_definitions(columns));
+                        });
+                    })
+                })
+                .collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
+        this
+    }
+
+    /// The same bars with their columns given as a text that follows the signal
+    /// (`GridDefinitionsText`): the definitions a grid has take the new weights.
+    fn with_followed_definitions() -> Self {
+        let mut this = Self::empty();
+        let version = this.version;
+        this._root = Some(this.owner.with(|| {
+            let rows = (0..ROWS)
+                .map(|_| grid().set(GridDefinitionsText::columns_property(), move || bar_columns(version.get())))
+                .collect::<Vec<_>>();
+            stack_panel().children(rows).into_element().mount()
+        }));
         this
     }
 
@@ -265,6 +342,16 @@ impl ViewBenchmark {
         }
     }
 
+    /// Writes the signal a thousand texts or foregrounds are computed from.
+    pub fn shared_closure_ran(&mut self) {
+        self.version.update(|v| *v += 1);
+    }
+
+    /// Writes the signal the weights of a thousand bars follow.
+    pub fn bar_weights_changed(&mut self) {
+        self.version.update(|v| *v += 1);
+    }
+
     pub fn run_parent_of_components(&mut self) {
         self.version.update(|v| *v += 1);
     }
@@ -274,6 +361,12 @@ impl Drop for ViewBenchmark {
     fn drop(&mut self) {
         self.owner.dispose();
     }
+}
+
+/// The columns of a bar at `version`: two star columns whose weights change.
+fn bar_columns(version: u64) -> String {
+    let filled = 1 + version % 9;
+    format!("{filled}*,{}*", 10 - filled)
 }
 
 fn list_view(order: Signal<Vec<u32>>, version: Signal<u64>, changed: Signal<u32>) -> Element {
@@ -316,6 +409,13 @@ pub fn register(registry: &mut Registry) {
     class.benchmark("reverse_rows", "", ViewBenchmark::with_list, |b| b.reverse_rows());
     class.benchmark("fine_grained_one_row_changed", "", ViewBenchmark::with_fine_grained_list, |b| b.fine_grained_one_row_changed());
     class.benchmark("shared_signal_changed", "", ViewBenchmark::with_shared_signal, |b| b.shared_signal_changed());
+    class.benchmark("shared_text_changed", "", || ViewBenchmark::with_shared_text(true), |b| b.shared_closure_ran());
+    class.benchmark("shared_text_equal", "", || ViewBenchmark::with_shared_text(false), |b| b.shared_closure_ran());
+    class.benchmark("shared_brush_equal", "", ViewBenchmark::with_shared_brush, |b| b.shared_closure_ran());
+    let replaced = ViewBenchmark::with_replaced_definitions;
+    class.benchmark("grid_definitions_replaced", "", replaced, |b| b.bar_weights_changed());
+    let followed = ViewBenchmark::with_followed_definitions;
+    class.benchmark("grid_definitions_followed", "", followed, |b| b.bar_weights_changed());
     class.benchmark("run_parent_of_components", "always", || ViewBenchmark::with_components(false), |b| b.run_parent_of_components());
     class.benchmark("run_parent_of_components", "memoized by default", || ViewBenchmark::with_components(true), |b| b.run_parent_of_components());
 }

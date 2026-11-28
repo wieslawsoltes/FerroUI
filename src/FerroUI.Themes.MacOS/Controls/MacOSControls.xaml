@@ -64,6 +64,7 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewCell.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewColumnHeader.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TableViewRow.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ContentDialog.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ManagedFileChooser.xaml" />
         <!-- B5: navigation, pages, tabs and command bar. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabStrip.xaml" />
@@ -118,6 +119,11 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Frame.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/NavigationView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TitleBar.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/ListView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/GridView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/Pivot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/SwipeControl.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.MacOS/Controls/TabView.xaml" />
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </Styles.Resources>

@@ -1,13 +1,44 @@
-<!-- Adapted from CommandBarLabelsSide.txt in the pinned Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <CheckBox x:Name="Open" Content="Open command bar"/>
-  <CommandBar x:Name="Bar" Background="Transparent" IsOpen="{Binding IsChecked, ElementName=Open, Mode=TwoWay}" DefaultLabelPosition="Right">
-    <CommandBar.PrimaryCommands>
-      <CommandBarButton x:Name="Primary" Label="Add"><CommandBarButton.Icon><PathIcon Data="M 4,0 L 6,0 L 6,4 L 10,4 L 10,6 L 6,6 L 6,10 L 4,10 L 4,6 L 0,6 L 0,4 L 4,4 Z"/></CommandBarButton.Icon></CommandBarButton>
-      <CommandBarButton Label="Edit"/>
-      <CommandBarButton Label="Share"/>
-    </CommandBar.PrimaryCommands>
-    <CommandBar.SecondaryCommands><CommandBarButton Label="Settings" HotKey="Ctrl+I"/></CommandBar.SecondaryCommands>
-  </CommandBar>
-  <TextBlock x:Name="Output" Text="Clicked 0 times"/>
+<!-- Ported from the pinned CommandBar example of WinUI Gallery (14061eea) and the code behind of
+     CommandBarPage.xaml.cs (command_samples.rs); see ../NOTICE.md. WinUI's AppBarButton and
+     AppBarSeparator are FerroUI's CommandBarButton and CommandBarSeparator, the icons are
+     SymbolIcons and each KeyboardAccelerator is the button's HotKey (the constructor's
+     AddKeyboardAccelerators sets those of Add, Edit and Share). FerroUI's CommandBar has no closed
+     display mode: its buttons keep their labels while the bar is closed. The glyphs need the
+     symbol font of the platform (Segoe Fluent Icons on Windows). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="CommandBarExample1" Spacing="8">
+    <TextBlock Text="A command bar with labels on the side free floating in a page" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel>
+        <CommandBar x:Name="PrimaryCommandBar" DefaultLabelPosition="Right" IsOpen="False">
+          <CommandBar.PrimaryCommands>
+            <CommandBarButton x:Name="addButton" Label="Add">
+              <CommandBarButton.Icon><SymbolIcon Symbol="Add" /></CommandBarButton.Icon>
+            </CommandBarButton>
+            <CommandBarButton x:Name="editButton" Label="Edit">
+              <CommandBarButton.Icon><SymbolIcon Symbol="Edit" /></CommandBarButton.Icon>
+            </CommandBarButton>
+            <CommandBarButton x:Name="shareButton" Label="Share">
+              <CommandBarButton.Icon><SymbolIcon Symbol="Share" /></CommandBarButton.Icon>
+            </CommandBarButton>
+          </CommandBar.PrimaryCommands>
+          <CommandBar.SecondaryCommands>
+            <CommandBarButton x:Name="settingsButton" Label="Settings" HotKey="Ctrl+I">
+              <CommandBarButton.Icon><SymbolIcon Symbol="Setting" /></CommandBarButton.Icon>
+            </CommandBarButton>
+          </CommandBar.SecondaryCommands>
+        </CommandBar>
+        <TextBlock x:Name="SelectedOptionText" Padding="0,8,0,0" />
+      </StackPanel>
+      <StackPanel Grid.Column="1">
+        <TextBlock Text="Show or hide" />
+        <Button x:Name="OpenButton" Margin="0,12,0,0" Content="Open command bar" />
+        <Button x:Name="CloseButton" Margin="0,12,0,0" Content="Close command bar" />
+        <TextBlock Margin="0,16,0,0" Text="Modify content" />
+        <Button x:Name="AddSecondaryCommandsButton" Margin="0,12,0,0" Content="Add secondary commands" />
+        <Button x:Name="RemoveSecondaryCommandsButton" Margin="0,12,0,0" Content="Remove secondary commands" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

@@ -122,6 +122,15 @@ impl TextRunProperties for GenericTextRunProperties {
     }
 
     fn cached_glyph_typeface(&self) -> Rc<GlyphTypeface> {
-        self.cached_glyph_typeface.get_or_init(|| self.typeface.glyph_typeface()).clone()
+        // A variable font with an optical size axis is at the optical size of the text (#859).
+        self.cached_glyph_typeface
+            .get_or_init(|| {
+                crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
+                    self.typeface.glyph_typeface(),
+                    self.typeface.font_family(),
+                    self.font_rendering_em_size * self.font_scale,
+                )
+            })
+            .clone()
     }
 }

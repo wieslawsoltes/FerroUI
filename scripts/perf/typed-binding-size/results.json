@@ -1,0 +1,739 @@
+{
+  "source": {
+    "workspace_head": "933fd46325772fd1cdec81add9d4912dda2fe931",
+    "pr_496_tip": "8678e15b8ae738931237c0e70ef66f61a6ecbfd2",
+    "historical_controller": "86159449b",
+    "candidate_source_sha256": "0023f15bb26c5abf9cc5c41a2f2438abe96551e0bf60114776e3ad6c9fa01d16",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "cpu": "Apple silicon",
+    "os": "macOS",
+    "architecture": "macOS arm64",
+    "dist": {
+      "opt_level": 3,
+      "lto": "fat",
+      "codegen_units": 1,
+      "strip": "symbols",
+      "panic": "abort"
+    },
+    "build": "Only the typed binding implementation differs in the isolated workspace snapshot for the three full ControlCatalog builds. All use default Catalog features and normal dist Cargo settings. The historical controller and source-slot ablation use the separate 64-pair probe."
+  },
+  "full_catalog": {
+    "stock": {
+      "bytes": 65859504,
+      "sha256": "39ce6790364280963d391e7607ff76e6d1b645714fccc6d67e91217e06e1b44a",
+      "macho_segments": {
+        "__PAGEZERO": 0,
+        "__TEXT": 59604992,
+        "__DATA_CONST": 5029888,
+        "__DATA": 180224,
+        "__LINKEDIT": 1044400
+      },
+      "text_bytes": 51347192,
+      "typed_binding_instruction_bytes": 4514656,
+      "allocation": {
+        "Other instructions and code alignment": 11941160,
+        "Rust core, alloc and std": 3431708,
+        "Other FerroUI.Base instructions": 8624100,
+        "Core controls": 3934936,
+        "Other ControlCatalog instructions": 1543132,
+        "Generated XAML instructions": 7997836,
+        "XAML runtime library": 846064,
+        "FerroUI.Base property store and property types": 4429040,
+        "FerroUI.Base typed binding expressions": 4514656,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3522159,
+        "Relocatable constant data": 5013344,
+        "Mach-O link and signing data": 1044400,
+        "Other sections, headers and padding": 1132698
+      },
+      "largest_binding_families_bytes_count": {
+        "update_source": [
+          491116,
+          509
+        ],
+        "write_source_value_to_target": [
+          437096,
+          508
+        ],
+        "start": [
+          342304,
+          508
+        ],
+        "{closure#0}": [
+          304328,
+          508
+        ],
+        "set": [
+          275172,
+          508
+        ],
+        "dispose": [
+          259360,
+          508
+        ],
+        "set_boxed": [
+          247676,
+          508
+        ],
+        "try_get": [
+          235616,
+          508
+        ],
+        "write_value_to_source": [
+          226236,
+          452
+        ],
+        "try_get_boxed": [
+          203948,
+          508
+        ],
+        "value_from_untyped": [
+          188352,
+          271
+        ],
+        "attach": [
+          184672,
+          231
+        ],
+        "try_get_target_value": [
+          170136,
+          233
+        ],
+        "get_value_boxed": [
+          164608,
+          508
+        ],
+        "stop_core": [
+          154024,
+          508
+        ],
+        "{closure#1}": [
+          143936,
+          508
+        ],
+        "try_get_value": [
+          137724,
+          508
+        ],
+        "owner_of": [
+          69864,
+          151
+        ],
+        "get": [
+          59632,
+          508
+        ],
+        "unsubscribe_source": [
+          55520,
+          267
+        ],
+        "get_boxed": [
+          52736,
+          508
+        ],
+        "has_value": [
+          36920,
+          508
+        ],
+        "log": [
+          19764,
+          43
+        ],
+        "unsubscribe": [
+          18280,
+          508
+        ],
+        "type_id": [
+          10144,
+          508
+        ],
+        "try_get_typed": [
+          8696,
+          29
+        ],
+        "as_any": [
+          6100,
+          509
+        ],
+        "as_binding_expression": [
+          6096,
+          508
+        ],
+        "set_on": [
+          3528,
+          17
+        ],
+        "property": [
+          268,
+          7
+        ],
+        "set_typed": [
+          152,
+          2
+        ],
+        "needs_handle": [
+          112,
+          1
+        ],
+        "try_get_target": [
+          112,
+          2
+        ],
+        "priority": [
+          72,
+          9
+        ],
+        "default_priority": [
+          72,
+          9
+        ]
+      }
+    },
+    "pr": {
+      "bytes": 65132000,
+      "sha256": "ba0f92d0570ac39d49f0d96f0f8300179e9802e81c1cca8f082bb73bd90d848f",
+      "macho_segments": {
+        "__PAGEZERO": 0,
+        "__TEXT": 58884096,
+        "__DATA_CONST": 5029888,
+        "__DATA": 180224,
+        "__LINKEDIT": 1037792
+      },
+      "text_bytes": 50624376,
+      "typed_binding_instruction_bytes": 3887880,
+      "allocation": {
+        "Other instructions and code alignment": 11940716,
+        "Rust core, alloc and std": 3359876,
+        "Other FerroUI.Base instructions": 8600272,
+        "Core controls": 3935004,
+        "Other ControlCatalog instructions": 1543328,
+        "Generated XAML instructions": 7997852,
+        "XAML runtime library": 846016,
+        "FerroUI.Base property store and property types": 4428872,
+        "FerroUI.Base typed binding expressions": 3887880,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3522159,
+        "Relocatable constant data": 5012736,
+        "Mach-O link and signing data": 1037792,
+        "Other sections, headers and padding": 1135226
+      },
+      "largest_binding_families_bytes_count": {
+        "{closure#0}": [
+          448320,
+          1016
+        ],
+        "write_source_value_to_target": [
+          444796,
+          508
+        ],
+        "start": [
+          342360,
+          508
+        ],
+        "update_source": [
+          323052,
+          509
+        ],
+        "set_boxed": [
+          247688,
+          508
+        ],
+        "set": [
+          240788,
+          508
+        ],
+        "write_value_to_source": [
+          226308,
+          452
+        ],
+        "try_get": [
+          216732,
+          508
+        ],
+        "try_get_boxed": [
+          207024,
+          508
+        ],
+        "try_get_target_value": [
+          170188,
+          233
+        ],
+        "get_value_boxed": [
+          164620,
+          508
+        ],
+        "stop_core": [
+          154096,
+          508
+        ],
+        "try_get_value": [
+          137732,
+          508
+        ],
+        "value_from_untyped": [
+          133324,
+          216
+        ],
+        "dispose": [
+          119632,
+          508
+        ],
+        "owner_of": [
+          69804,
+          151
+        ],
+        "get": [
+          54740,
+          508
+        ],
+        "get_boxed": [
+          52736,
+          508
+        ],
+        "has_value": [
+          36896,
+          508
+        ],
+        "unsubscribe_source": [
+          28476,
+          137
+        ],
+        "attach": [
+          19664,
+          217
+        ],
+        "unsubscribe": [
+          18280,
+          508
+        ],
+        "type_id": [
+          10144,
+          508
+        ],
+        "as_any": [
+          6100,
+          509
+        ],
+        "as_binding_expression": [
+          6096,
+          508
+        ],
+        "set_on": [
+          3528,
+          17
+        ],
+        "try_get_typed": [
+          2908,
+          13
+        ],
+        "complete": [
+          504,
+          1
+        ],
+        "log": [
+          468,
+          1
+        ],
+        "conversion_error": [
+          200,
+          1
+        ],
+        "set_typed": [
+          152,
+          2
+        ],
+        "needs_handle": [
+          112,
+          1
+        ],
+        "property": [
+          88,
+          2
+        ],
+        "try_get_from": [
+          72,
+          2
+        ],
+        "default_priority": [
+          64,
+          8
+        ]
+      }
+    },
+    "candidate": {
+      "bytes": 63839040,
+      "sha256": "6c94cb229537e047c69cc94f88aee57a97c8be47393c8943cd07d3d54081d5d3",
+      "macho_segments": {
+        "__PAGEZERO": 0,
+        "__TEXT": 57556992,
+        "__DATA_CONST": 5079040,
+        "__DATA": 180224,
+        "__LINKEDIT": 1022784
+      },
+      "text_bytes": 49303800,
+      "typed_binding_instruction_bytes": 2684244,
+      "allocation": {
+        "Other instructions and code alignment": 11842916,
+        "Rust core, alloc and std": 3334900,
+        "Other FerroUI.Base instructions": 8599028,
+        "Core controls": 3934936,
+        "Other ControlCatalog instructions": 1543252,
+        "Generated XAML instructions": 7997912,
+        "XAML runtime library": 856080,
+        "FerroUI.Base property store and property types": 4425972,
+        "FerroUI.Base typed binding expressions": 2684244,
+        "Skia and HarfBuzz native archives": 4084560,
+        "Embedded assets matched to source files": 3799711,
+        "Other read-only constants": 3522159,
+        "Relocatable constant data": 5069248,
+        "Mach-O link and signing data": 1022784,
+        "Other sections, headers and padding": 1121338
+      },
+      "largest_binding_families_bytes_count": {
+        "set_boxed": [
+          247688,
+          508
+        ],
+        "set": [
+          240788,
+          508
+        ],
+        "write_value_to_source": [
+          226312,
+          452
+        ],
+        "try_get": [
+          216732,
+          508
+        ],
+        "try_get_boxed": [
+          207024,
+          508
+        ],
+        "unsubscribe": [
+          182044,
+          645
+        ],
+        "try_get_target_value": [
+          170164,
+          233
+        ],
+        "refresh_source": [
+          153020,
+          508
+        ],
+        "value_from_untyped": [
+          133316,
+          216
+        ],
+        "try_get_value": [
+          132876,
+          526
+        ],
+        "source_changed": [
+          130216,
+          464
+        ],
+        "get_value_boxed": [
+          107332,
+          584
+        ],
+        "write_target_change": [
+          91632,
+          494
+        ],
+        "owner_of": [
+          69804,
+          151
+        ],
+        "write_source_value_to_target": [
+          69792,
+          158
+        ],
+        "replace": [
+          57032,
+          103
+        ],
+        "get": [
+          54848,
+          509
+        ],
+        "get_boxed": [
+          52736,
+          508
+        ],
+        "has_value": [
+          45040,
+          508
+        ],
+        "attach": [
+          19688,
+          217
+        ],
+        "dispose": [
+          14900,
+          509
+        ],
+        "update": [
+          12992,
+          43
+        ],
+        "start": [
+          12912,
+          509
+        ],
+        "type_id": [
+          10144,
+          508
+        ],
+        "as_any": [
+          6100,
+          509
+        ],
+        "as_binding_expression": [
+          6096,
+          508
+        ],
+        "set_on": [
+          3528,
+          17
+        ],
+        "disconnect_source": [
+          3204,
+          267
+        ],
+        "try_get_typed": [
+          2908,
+          13
+        ],
+        "{closure#0}": [
+          644,
+          2
+        ],
+        "source_value_changed": [
+          600,
+          1
+        ],
+        "log": [
+          468,
+          1
+        ],
+        "property": [
+          356,
+          9
+        ],
+        "stop_core": [
+          316,
+          1
+        ],
+        "conversion_error": [
+          200,
+          1
+        ]
+      }
+    }
+  },
+  "tests": {
+    "hot_reload_enabled_base_binding_tests": 681,
+    "failures": 0,
+    "reentrant_source_ownership_trace": "[(\"get\", 1, 4), (\"get\", 1, 3), (\"get\", 2, 5), (\"resumed\", 1, 2), (\"get\", 2, 3), (\"set\", 2, 3), (\"get\", 2, 4)] 1"
+  },
+  "crossed_fixture_bytes": {
+    "stock": 3643008,
+    "pr": 3610016,
+    "value_only": 3410960,
+    "history": 3460576,
+    "candidate": 3394432
+  },
+  "timings": {
+    "original_window_31": {
+      "stock": {
+        "source_to_target_ns": 29,
+        "target_to_source_ns": 37,
+        "retarget_ns": 81,
+        "attach_dispose_ns": 212,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "pr": {
+        "source_to_target_ns": 33,
+        "target_to_source_ns": 36,
+        "retarget_ns": 83,
+        "attach_dispose_ns": 211,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "history": {
+        "source_to_target_ns": 32,
+        "target_to_source_ns": 39,
+        "retarget_ns": 84,
+        "attach_dispose_ns": 212,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      },
+      "candidate": {
+        "source_to_target_ns": 31,
+        "target_to_source_ns": 38,
+        "retarget_ns": 85,
+        "attach_dispose_ns": 209,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      }
+    },
+    "short_window_repeat_61": {
+      "stock": {
+        "source_to_target_ns": 73,
+        "target_to_source_ns": 74,
+        "retarget_ns": 162,
+        "attach_dispose_ns": 368,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "pr": {
+        "source_to_target_ns": 68,
+        "target_to_source_ns": 74,
+        "retarget_ns": 133,
+        "attach_dispose_ns": 318,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "history": {
+        "source_to_target_ns": 43,
+        "target_to_source_ns": 67,
+        "retarget_ns": 153,
+        "attach_dispose_ns": 336,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      },
+      "candidate": {
+        "source_to_target_ns": 50,
+        "target_to_source_ns": 68,
+        "retarget_ns": 127,
+        "attach_dispose_ns": 343,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      }
+    },
+    "warmed_window_31": {
+      "stock": {
+        "source_to_target_ns": 42,
+        "target_to_source_ns": 51,
+        "retarget_ns": 84,
+        "attach_dispose_ns": 214,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "pr": {
+        "source_to_target_ns": 42,
+        "target_to_source_ns": 52,
+        "retarget_ns": 83,
+        "attach_dispose_ns": 211,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 192
+        }
+      },
+      "history": {
+        "source_to_target_ns": 45,
+        "target_to_source_ns": 55,
+        "retarget_ns": 88,
+        "attach_dispose_ns": 220,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      },
+      "candidate": {
+        "source_to_target_ns": 45,
+        "target_to_source_ns": 57,
+        "retarget_ns": 87,
+        "attach_dispose_ns": 213,
+        "allocations_and_layout": {
+          "first_attach_allocations": 10,
+          "source_50000_allocations": 0,
+          "target_50000_allocations": 0,
+          "retarget_10000_allocations": 10001,
+          "attach_dispose_10000_allocations": 50000,
+          "expression_bytes": 200
+        }
+      }
+    }
+  },
+  "screenshots": {
+    "candidate": [
+      "01-listbox.png 1900 x 1360 pixels, 0 differ",
+      "02-data-validation.png 1900 x 1360 pixels, 0 differ",
+      "03-treedatagrid.png 1900 x 1360 pixels, 0 differ"
+    ],
+    "pr": [
+      "01-listbox.png 2200 x 1524 pixels, 0 differ",
+      "02-data-validation.png 2200 x 1524 pixels, 0 differ",
+      "03-treedatagrid.png 2200 x 1524 pixels, 0 differ"
+    ]
+  },
+  "allocation_note": "Allocation counts use a separate counter-instrumented run on the same binding. Propagation time comes from an uninstrumented binary. Times are medians of fresh processes. Short windows varied between campaigns under changing scheduler load."
+}

@@ -28,6 +28,8 @@ pub struct Quaternion {
     pub w: f64,
 }
 
+ferroui_base::styled_value!(Quaternion);
+
 impl Quaternion {
     /// The rotation by no angle (WPF's `Quaternion.Identity`): `(0, 0, 0, 1)`.
     pub const IDENTITY: Quaternion = Quaternion::new(0.0, 0.0, 0.0, 1.0);

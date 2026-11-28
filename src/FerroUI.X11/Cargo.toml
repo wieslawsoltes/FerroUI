@@ -17,6 +17,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The code no longer names this crate, so the linker drops it. The entry stays until the
+# separate lock files of the components can change with it.
 ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
@@ -43,6 +45,7 @@ libc.workspace = true
 # IBus on a private session bus).
 [target.'cfg(unix)'.dev-dependencies]
 zbus.workspace = true
+futures-util.workspace = true
 
 [features]
 # Builds `examples/x11_window.rs`: a window with the Skia renderer in software, the HarfBuzz text

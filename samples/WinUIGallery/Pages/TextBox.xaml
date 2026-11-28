@@ -1,4 +1,44 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBox x:Name="Primary" Width="320" HorizontalAlignment="Left" PlaceholderText="Enter your name" AutomationProperties.Name="Enter your name"/><TextBox Width="320" HorizontalAlignment="Left" Text="A read-only text box" IsReadOnly="True"/><TextBox Width="320" Height="100" HorizontalAlignment="Left" AcceptsReturn="True" TextWrapping="Wrap" PlaceholderText="Multiple lines"/><TextBlock x:Name="Output" Text="0 characters"/>
+<!-- Ported from the four pinned TextBox examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. FerroUI's TextBox has no Header (composed above the box,
+     whose automation name it is) and no IsSpellCheckEnabled (the multi-line box does not check
+     spelling). WinUI's CharacterSpacing is in thousandths of an em: 200 at a font size of 24 is a
+     LetterSpacing of 4.8. SelectionHighlightColor is SelectionBrush. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="TextBoxExample1" Spacing="8">
+    <TextBlock Text="A simple TextBox." FontSize="18" />
+    <TextBox x:Name="SimpleTextBox" AutomationProperties.Name="simple TextBox" />
+  </StackPanel>
+
+  <StackPanel x:Name="TextBoxExample2" Spacing="8">
+    <TextBlock Text="A TextBox with a header and placeholder text." FontSize="18" />
+    <StackPanel Spacing="4">
+      <TextBlock x:Name="NameHeader" Text="Enter your name:" />
+      <TextBox x:Name="NameTextBox" AutomationProperties.Name="Enter your name:" PlaceholderText="Name" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="TextBoxExample3" Spacing="8">
+    <TextBlock Text="A read-only TextBox with various properties set." FontSize="18" />
+    <TextBox x:Name="CustomizedTextBox"
+             AutomationProperties.Name="customized TextBox"
+             LetterSpacing="4.8"
+             FontFamily="Arial"
+             FontSize="24"
+             FontStyle="Italic"
+             Foreground="#5178BE"
+             IsReadOnly="True"
+             Text="I am super excited to be here!" />
+  </StackPanel>
+
+  <StackPanel x:Name="TextBoxExample4" Spacing="8">
+    <TextBlock Text="A multi-line TextBox with spell checking and custom selection highlight color."
+               FontSize="18" TextWrapping="Wrap" />
+    <TextBox x:Name="MultiLineTextBox"
+             MinWidth="400"
+             AcceptsReturn="True"
+             AutomationProperties.Name="multi-line TextBox"
+             SelectionBrush="Green"
+             TextWrapping="Wrap" />
+  </StackPanel>
 </StackPanel>

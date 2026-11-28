@@ -2,8 +2,10 @@ use crate::interop::dom_helper;
 use crate::windowing_platform::BrowserWindowingPlatform;
 use ferroui_base::input::platform::PlatformHotkeyConfiguration;
 use ferroui_base::input::PointerType;
+use ferroui_base::media::Color;
 use ferroui_base::platform::{
     ColorContrastPreference, DefaultPlatformSettings, IPlatformSettings, PlatformColorValues, PlatformThemeVariant,
+    SystemColors,
 };
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::Size;
@@ -11,11 +13,12 @@ use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::time::Duration;
 
-/// What the page reports: the dark-mode and contrast media queries, the
-/// language of the browser and the reduced-motion media query. Replaced by
-/// fixed values in the tests.
+/// What the page reports: the dark-mode and contrast media queries (`prefers-contrast: more`
+/// or `forced-colors: active`), the system colours of forced colours, the language of the
+/// browser and the reduced-motion media query. Replaced by fixed values in the tests.
 trait IPageSettings {
     fn get_dark_mode(&self) -> Vec<i32>;
+    fn get_system_colors(&self) -> Vec<u32>;
     fn get_navigator_language(&self) -> Option<String>;
     fn animations_enabled(&self) -> bool;
 }
@@ -27,6 +30,10 @@ impl IPageSettings for PageSettings {
         dom_helper::get_dark_mode(&BrowserWindowingPlatform::global_this())
     }
 
+    fn get_system_colors(&self) -> Vec<u32> {
+        dom_helper::get_system_colors(&BrowserWindowingPlatform::global_this())
+    }
+
     fn get_navigator_language(&self) -> Option<String> {
         dom_helper::get_navigator_language(&BrowserWindowingPlatform::global_this())
     }
@@ -36,12 +43,32 @@ impl IPageSettings for PageSettings {
     }
 }
 
+/// The system colours of the page from the ARGB colours of `getSystemColors`, in the order of
+/// [`SystemColors`] (Canvas, CanvasText, ButtonFace, ButtonText, Highlight, HighlightText,
+/// LinkText, GrayText); `None` for an answer of another shape (no forced colours).
+fn to_system_colors(colors: &[u32]) -> Option<SystemColors> {
+    let colors: [u32; 8] = colors.try_into().ok()?;
+    let [window, window_text, button_face, button_text, highlight, highlight_text, hotlight, gray_text] =
+        colors.map(Color::from_uint32);
+    Some(
+        SystemColors::new(window, window_text)
+            .with_button_face(button_face)
+            .with_button_text(button_text)
+            .with_highlight(highlight)
+            .with_highlight_text(highlight_text)
+            .with_hotlight(hotlight)
+            .with_gray_text(gray_text),
+    )
+}
+
 /// The platform settings of the browser: the colour scheme, the contrast
-/// preference and the language of the page.
+/// preference (with the system colours while the browser forces colours, #560) and the
+/// language of the page.
 pub struct BrowserPlatformSettings {
     base: DefaultPlatformSettings,
     is_dark_mode: Cell<bool>,
     is_high_contrast: Cell<bool>,
+    system_colors: Cell<Option<SystemColors>>,
     is_initialized: Cell<bool>,
     color_values: Cell<Option<PlatformColorValues>>,
     last_language: RefCell<Option<String>>,
@@ -65,6 +92,7 @@ impl BrowserPlatformSettings {
             base: DefaultPlatformSettings::new(),
             is_dark_mode: Cell::new(false),
             is_high_contrast: Cell::new(false),
+            system_colors: Cell::new(None),
             is_initialized: Cell::new(false),
             color_values: Cell::new(None),
             last_language: RefCell::new(None),
@@ -72,7 +100,11 @@ impl BrowserPlatformSettings {
         }
     }
 
-    fn build_platform_color_values(is_dark_mode: bool, is_high_contrast: bool) -> PlatformColorValues {
+    fn build_platform_color_values(
+        is_dark_mode: bool,
+        is_high_contrast: bool,
+        system_colors: Option<SystemColors>,
+    ) -> PlatformColorValues {
         PlatformColorValues::new()
             .with_theme_variant(if is_dark_mode { PlatformThemeVariant::Dark } else { PlatformThemeVariant::Light })
             .with_contrast_preference(if is_high_contrast {
@@ -80,6 +112,16 @@ impl BrowserPlatformSettings {
             } else {
                 ColorContrastPreference::NoPreference
             })
+            .with_system_colors(system_colors.filter(|_| is_high_contrast))
+    }
+
+    /// The system colours of the page while it is in high contrast (forced colours).
+    fn read_system_colors(&self, is_high_contrast: bool) -> Option<SystemColors> {
+        if is_high_contrast {
+            to_system_colors(&self.page.get_system_colors())
+        } else {
+            None
+        }
     }
 
     /// The page reported a change of its colour scheme or contrast
@@ -87,6 +129,7 @@ impl BrowserPlatformSettings {
     pub fn on_color_values_changed(&self, is_dark_mode: bool, is_high_contrast: bool) {
         self.is_dark_mode.set(is_dark_mode);
         self.is_high_contrast.set(is_high_contrast);
+        self.system_colors.set(self.read_system_colors(is_high_contrast));
         self.update_color_values();
     }
 
@@ -109,6 +152,7 @@ impl BrowserPlatformSettings {
             if values.len() == 2 {
                 self.is_dark_mode.set(values[0] > 0);
                 self.is_high_contrast.set(values[1] > 0);
+                self.system_colors.set(self.read_system_colors(values[1] > 0));
             }
 
             *self.last_language.borrow_mut() = self.page.get_navigator_language();
@@ -117,7 +161,11 @@ impl BrowserPlatformSettings {
 
     fn update_color_values(&self) {
         let old_color_values = self.color_values.get();
-        let color_values = Self::build_platform_color_values(self.is_dark_mode.get(), self.is_high_contrast.get());
+        let color_values = Self::build_platform_color_values(
+            self.is_dark_mode.get(),
+            self.is_high_contrast.get(),
+            self.system_colors.get(),
+        );
 
         if old_color_values != Some(color_values) {
             self.color_values.set(Some(color_values));
@@ -167,7 +215,11 @@ impl IPlatformSettings for BrowserPlatformSettings {
         }
 
         self.ensure_settings();
-        let color_values = Self::build_platform_color_values(self.is_dark_mode.get(), self.is_high_contrast.get());
+        let color_values = Self::build_platform_color_values(
+            self.is_dark_mode.get(),
+            self.is_high_contrast.get(),
+            self.system_colors.get(),
+        );
         self.color_values.set(Some(color_values));
         color_values
     }
@@ -189,6 +241,7 @@ mod tests {
 
     struct FixedPage {
         dark_mode: Vec<i32>,
+        system_colors: Vec<u32>,
         language: Option<&'static str>,
         queries: Rc<Cell<u32>>,
         animations: Rc<Cell<bool>>,
@@ -198,6 +251,10 @@ mod tests {
         fn get_dark_mode(&self) -> Vec<i32> {
             self.queries.set(self.queries.get() + 1);
             self.dark_mode.clone()
+        }
+
+        fn get_system_colors(&self) -> Vec<u32> {
+            self.system_colors.clone()
         }
 
         fn get_navigator_language(&self) -> Option<String> {
@@ -212,7 +269,11 @@ mod tests {
     fn settings(dark_mode: &[i32], language: Option<&'static str>) -> (BrowserPlatformSettings, Rc<Cell<u32>>) {
         let queries = Rc::new(Cell::new(0));
         let page = FixedPage {
-            dark_mode: dark_mode.to_vec(), language, queries: queries.clone(), animations: Rc::new(Cell::new(true)),
+            dark_mode: dark_mode.to_vec(),
+            system_colors: Vec::new(),
+            language,
+            queries: queries.clone(),
+            animations: Rc::new(Cell::new(true)),
         };
         (BrowserPlatformSettings::with_page(Box::new(page)), queries)
     }
@@ -221,7 +282,11 @@ mod tests {
     fn animation_preference_is_read_again_for_each_animation() {
         let animations = Rc::new(Cell::new(false));
         let page = FixedPage {
-            dark_mode: vec![0, 0], language: None, queries: Rc::new(Cell::new(0)), animations: animations.clone(),
+            dark_mode: vec![0, 0],
+            system_colors: Vec::new(),
+            language: None,
+            queries: Rc::new(Cell::new(0)),
+            animations: animations.clone(),
         };
         let settings = BrowserPlatformSettings::with_page(Box::new(page));
         assert!(!settings.animations_enabled());
@@ -258,6 +323,31 @@ mod tests {
             assert_eq!(theme, values.theme_variant());
             assert_eq!(contrast, values.contrast_preference());
         }
+    }
+
+    #[test]
+    fn forced_colours_bring_the_system_colours_of_the_page() {
+        // "High Contrast Black" as the CSS system colours of a page in forced colours.
+        let black = vec![
+            0xFF000000, 0xFFFFFFFF, 0xFF000000, 0xFFFFFFFF, 0xFF1AEBFF, 0xFF000000, 0xFFFFFF00, 0xFF3FF23F,
+        ];
+        let page = FixedPage {
+            dark_mode: vec![1, 1],
+            system_colors: black.clone(),
+            language: None,
+            queries: Rc::new(Cell::new(0)),
+            animations: Rc::new(Cell::new(true)),
+        };
+        let settings = BrowserPlatformSettings::with_page(Box::new(page));
+        let values = settings.get_color_values();
+        assert!(values.is_high_contrast());
+        assert_eq!(values.system_colors(), Some(SystemColors::high_contrast_black()));
+
+        // High contrast off: no system colours.
+        settings.on_color_values_changed(true, false);
+        assert_eq!(settings.get_color_values().system_colors(), None);
+        assert!(to_system_colors(&black[..7]).is_none());
+        assert!(to_system_colors(&[]).is_none());
     }
 
     #[test]

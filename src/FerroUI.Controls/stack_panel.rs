@@ -126,7 +126,9 @@ impl LayoutableImpl for StackPanel {
     /// Content arrangement.
     fn arrange_override(this: &Self, final_size: Size) -> Size {
         let children = this.children().snapshot();
-        let horizontal = this.orientation() == Orientation::Horizontal;
+        // Read once: the arrangement of every child is given it.
+        let orientation = this.orientation();
+        let horizontal = orientation == Orientation::Horizontal;
         let mut rc_child = Rect::from_size(final_size);
         let mut previous_child_size = 0.0;
         let spacing = this.spacing();
@@ -151,7 +153,7 @@ impl LayoutableImpl for StackPanel {
                 previous_child_size += spacing;
             }
 
-            this.arrange_child(child, rc_child, final_size, this.orientation());
+            this.arrange_child(child, rc_child, final_size, orientation);
         }
 
         this.raise_snap_points_changed();

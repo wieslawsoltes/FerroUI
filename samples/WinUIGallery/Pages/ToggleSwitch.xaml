@@ -1,8 +1,24 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Toggle work"/>
-  <ToggleSwitch x:Name="Primary" AutomationProperties.Name="Toggle work" OffContent="Do work" OnContent="Working"/>
-  <TextBlock Text="Disabled switch"/>
-  <ToggleSwitch AutomationProperties.Name="Disabled switch" IsEnabled="False"/>
-  <TextBlock x:Name="Output" Text="Unchecked"/>
+<!-- Ported from the two pinned ToggleSwitch examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. WinUI's IsOn is IsChecked and its Header is the Content
+     of FerroUI's ToggleSwitch (the WinUI theme presents it as the header). The ProgressRing keeps
+     the source's OneWay x:Bind of the switch. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="ToggleSwitchExample1" Spacing="8">
+    <TextBlock Text="A simple ToggleSwitch." FontSize="18" />
+    <ToggleSwitch x:Name="ToggleSwitch1" AutomationProperties.Name="simple ToggleSwitch" />
+  </StackPanel>
+
+  <StackPanel x:Name="ToggleSwitchExample2" Spacing="8">
+    <TextBlock Text="A ToggleSwitch with custom header and content." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <ToggleSwitch x:Name="ToggleSwitch2"
+                    Content="Toggle work"
+                    IsChecked="True"
+                    OffContent="Do work"
+                    OnContent="Working" />
+      <ProgressRing x:Name="ToggleSwitch2Progress" Width="32"
+                    IsActive="{x:Bind ToggleSwitch2.IsChecked, Mode=OneWay}" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

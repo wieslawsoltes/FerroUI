@@ -1,8 +1,10 @@
-<!-- Ported from both pinned ProgressRing examples; see ../NOTICE.md. IsActive keeps the source's
-     OneWay x:Bind, compiled by the x:Bind core (#525); IsOn is IsChecked of the ToggleSwitch. -->
+<!-- Ported from both pinned ProgressRing examples of WinUI Gallery (14061eea) and the handlers of
+     ProgressRingPage.xaml.cs (feedback_samples.rs); see ../NOTICE.md. IsActive keeps the
+     source's OneWay x:Bind, compiled by the x:Bind core (#525); IsOn is IsChecked of the
+     ToggleSwitch, whose Header is its Content. The ComboBoxes' Headers are composed. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
-  <TextBlock Text="An indeterminate ProgressRing" FontSize="18" />
+  <TextBlock Text="An indeterminate progress ring." FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <ProgressRing x:Name="ProgressRing1" Width="60" Height="60"
                         Margin="10,10,0,0" HorizontalAlignment="Left" VerticalAlignment="Top"
@@ -13,13 +15,13 @@
                     OffContent="Do work" OnContent="Working"
                     AutomationProperties.Name="Progress Options" />
       <TextBlock Text="Background color" />
-      <ComboBox x:Name="BackgroundComboBox1" Width="200" SelectedIndex="0"
+      <ComboBox x:Name="BackgroundComboBox1" Width="200" PlaceholderText="Pick a color"
                 AutomationProperties.Name="Indeterminate background color">
         <x:String>Transparent</x:String><x:String>LightGray</x:String>
       </ComboBox>
     </StackPanel>
   </Grid>
-  <TextBlock Text="A determinate ProgressRing" FontSize="18" />
+  <TextBlock Text="A determinate progress ring." FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <StackPanel Orientation="Horizontal" Spacing="40">
       <ProgressRing x:Name="ProgressRing2" Width="60" Height="60"
@@ -30,7 +32,7 @@
     </StackPanel>
     <StackPanel Grid.Column="1" Spacing="12">
       <TextBlock Text="Background color" />
-      <ComboBox x:Name="BackgroundComboBox2" Width="200" SelectedIndex="0"
+      <ComboBox x:Name="BackgroundComboBox2" Width="200" PlaceholderText="Pick a color"
                 AutomationProperties.Name="Determinate background color">
         <x:String>Transparent</x:String><x:String>LightGray</x:String>
       </ComboBox>

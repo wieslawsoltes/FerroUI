@@ -1263,6 +1263,15 @@ mod imp {
                     self.on_display_change();
                 }
 
+                WindowsMessage::WM_SETFOCUS => {
+                    // A focused window can receive no WM_IME_SETCONTEXT, for
+                    // example on a desktop without an input method context.
+                    // It still needs the thread's system caret for accessibility.
+                    if Imm32InputMethod::current().hwnd() != hwnd {
+                        self.update_input_method(get_keyboard_layout(0));
+                    }
+                }
+
                 WindowsMessage::WM_KILLFOCUS => {
                     if Imm32InputMethod::current().is_composing() {
                         self.set_kill_focus_requested(true);

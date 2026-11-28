@@ -14,14 +14,18 @@ use ferroui_view::prelude::*;
 use std::path::{Path, PathBuf};
 use std::time::Duration;
 
+// The table of the units of the theme the build wrote (`build.rs`).
+use crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
+
 /// The variable that names the directory of the picture.
 const SHOTS: &str = "FERROUI_TODOMVC_SHOTS";
 
-/// Runs TodoMVC in the main window, in the WinUI 3 theme.
+/// Runs TodoMVC in the main window, in the WinUI 3 theme with the units its
+/// controls need.
 pub fn run() {
     let shots = std::env::var_os(SHOTS).is_some();
     launch_themed(
-        || ferroui_themes_winui::WinUITheme::new().as_style(),
+        || ferroui_themes_winui::WinUITheme::with_parts(None, THEME_PARTS).as_style(),
         move || {
             // The picture shows a list with todos of both kinds.
             let todos = shots.then(|| {

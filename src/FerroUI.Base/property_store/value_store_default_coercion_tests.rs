@@ -107,6 +107,8 @@ struct Tracked {
     trace: Rc<Trace>,
 }
 
+crate::styled_value!(Tracked);
+
 impl Clone for Tracked {
     fn clone(&self) -> Self {
         self.trace.record(Operation::Clone, format!("{}={}", self.serial, self.number));
@@ -276,7 +278,7 @@ fn default_coercion_keeps_metadata_reload_and_returned_entry_cleanup_during_reen
 
 #[test]
 fn default_coercion_retains_partial_eq_nan_and_absent_callback_behavior() {
-    assert!(!std::mem::needs_drop::<CoercedDefaultFactory<'_, Tracked>>());
+    assert!(!std::mem::needs_drop::<CoercedDefaultFactory<'_>>());
     for original in [false, true] {
         let owner = FerroObject::new();
         for (default, with_coercer, creates_entry) in [(1.0, false, false), (1.0, true, false), (f64::NAN, true, true)] {
@@ -297,7 +299,11 @@ fn default_coercion_retains_partial_eq_nan_and_absent_callback_behavior() {
 
 // Copied from bbff5971; only the oracle method name differs.
 impl ValueStore {
-    fn original_coerce_default_value<T: PropertyValue>(&self, owner: &FerroObject, property: &'static StyledProperty<T>) {
+    fn original_coerce_default_value<T: crate::StyledValue>(
+        &self,
+        owner: &FerroObject,
+        property: &'static StyledProperty<T>,
+    ) {
         let metadata = property.get_metadata_for(owner);
         let Some(coerce) = metadata.coerce_value() else { return };
         let default = metadata.default_value().clone();
@@ -309,6 +315,6 @@ impl ValueStore {
         // an effective value entry is needed.
         let effective = self.create_effective_value(owner, property);
         self.add_effective_value(owner, property, effective.clone());
-        effective.set_coerced_default_value_and_raise(owner, coerced);
+        effective.set_coerced_default_value_and_raise(owner, coerced.into_storage());
     }
 }

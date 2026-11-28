@@ -1,4 +1,34 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Vertical"/><StackPanel Spacing="8" HorizontalAlignment="Left"><Rectangle Fill="Red" Width="160" Height="28"/><Rectangle Fill="Blue" Width="160" Height="28"/><Rectangle Fill="Green" Width="160" Height="28"/></StackPanel><TextBlock Text="Horizontal"/><StackPanel Orientation="Horizontal" Spacing="8"><Rectangle Fill="Red" Width="40" Height="40"/><Rectangle Fill="Blue" Width="40" Height="40"/><Rectangle Fill="Green" Width="40" Height="40"/></StackPanel>
+<!-- Ported from the pinned StackPanel example of WinUI Gallery (14061eea) and the handler of
+     StackPanelPage.xaml.cs (layout_samples.rs); see ../NOTICE.md. The spacing keeps the source's
+     OneWay x:Bind of the slider. FerroUI's Slider has no Header (composed) and no StepFrequency or
+     SnapsTo: the steps of 1 are TickFrequency with IsSnapToTickEnabled. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="StackPanelExample1" Spacing="8">
+    <TextBlock Text="A StackPanel control." FontSize="18" />
+    <StackPanel x:Name="Control1" HorizontalAlignment="Left" VerticalAlignment="Top"
+                Spacing="{x:Bind SpacingSlider.Value, Mode=OneWay}">
+      <StackPanel.Styles>
+        <Style Selector="Rectangle">
+          <Setter Property="Height" Value="40" />
+          <Setter Property="Width" Value="40" />
+        </Style>
+      </StackPanel.Styles>
+      <Rectangle Fill="Red" />
+      <Rectangle Fill="Blue" />
+      <Rectangle Fill="Green" />
+      <Rectangle Fill="Yellow" />
+    </StackPanel>
+    <StackPanel Spacing="12">
+      <RadioButtons x:Name="OrientationGroup" Header="Orientation">
+        <RadioButton x:Name="HorizontalOrientation" Content="Horizontal" Tag="Horizontal" />
+        <RadioButton x:Name="VerticalOrientation" Content="Vertical" IsChecked="True" Tag="Vertical" />
+      </RadioButtons>
+      <StackPanel>
+        <TextBlock Text="Spacing" />
+        <Slider x:Name="SpacingSlider" Width="200" HorizontalAlignment="Left" AutomationProperties.Name="Spacing"
+                Maximum="16" Minimum="0" IsSnapToTickEnabled="True" TickFrequency="1" Value="8" />
+      </StackPanel>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

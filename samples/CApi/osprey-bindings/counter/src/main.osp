@@ -1,0 +1,75 @@
+// 7GUIs task 1, Counter, with layer 1 of the generated Osprey bindings of FerroUI
+// (docs/osprey.md): a read-only text box with a number and a button that counts. The count lives
+// in a file-scope cell that only the arm of an effect handler assigns (the rule of Osprey for
+// mutable state); the click sends the tag 1 to the one dispatcher of the application.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program clicks the button twice itself and prints what the
+// text box shows.
+
+import ferroui::*
+import ferroobjects::*
+
+fn incrementTag() -> int = 1
+
+type Ui = { field: int, counter: int }
+
+effect State { count: fn(int) -> Unit  ui: fn(Ui) -> Unit }
+
+mut count = 0
+mut ui = Ui { field: 0, counter: 0 }
+
+fn setCount(value: int) -> Unit = {
+    handle State { count v => { count = v } }
+    perform State.count(value)
+}
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+fn build() -> int = {
+    let field = textBox() |> text("0") |> isReadOnly(true) |> width(80.0)
+    let counter = button() |> content("Count") |> onClick(incrementTag())
+    let panel = stackPanel() |> orientation(OrientationHorizontal) |> verticalAlignment(VerticalAlignmentTop)
+        |> spacing(8.0) |> margin("16") |> add(field) |> add(counter)
+    let _ = window() |> title("Counter") |> width(320.0) |> height(110.0) |> add(panel) |> showWindow
+    setUi(Ui { field: field, counter: counter })
+    report("build", failure())
+    match envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script()
+        false => nothing()
+    }
+    0
+}
+
+fn increment() -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    setCount(count + 1)
+    let _ = ui.field |> text(toString(count))
+    0
+}
+
+// The scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs): two clicks count to 2.
+fn script() -> Unit = {
+    let _ = ui.counter |> raiseClick |> raiseClick
+    let shown = getText(ui.field)
+    match failure() {
+        Success { value } => print("script: after two clicks the count shows '${shown}': ${shown == "2" ? "ok" : "FAILED"}")
+        Error { message } => print("script: FAILED: ${message}")
+    }
+}
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = match tag {
+    0 => build()
+    _ => increment()
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

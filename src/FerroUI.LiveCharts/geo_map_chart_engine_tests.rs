@@ -228,6 +228,53 @@ fn marker_center(measurement: &GeoMapMeasurement, index: usize) -> Point {
     }
 }
 
+/// A geographic visual other than a circle: the path of `geometry_svg` fitted to the size of the
+/// marker, centred on the coordinate, and a label there in the fill colour.
+#[test]
+fn geo_visuals_draw_a_path_or_a_label_at_their_coordinate() {
+    const AT: (f64, f64) = (-74.00, 40.71);
+    let measure = |marker: GeoMarker| {
+        GeoMapChartEngine::measure(Size::new(800.0, 600.0), world(), &[], &[marker], &mercator())
+    };
+    let path = GeoMarker {
+        geometry_svg: Some("M0,0 L10,0 L10,10 L0,10 Z".into()),
+        ..GeoMarker::new(AT.0, AT.1)
+    };
+    let measured = measure(path.clone()).unwrap();
+    let expected = measured.project(AT.0, AT.1).unwrap();
+    let Some(Geometry::Path(commands)) = measured.scene.primitives.last().map(|p| &p.geometry) else {
+        panic!("the marker is the path")
+    };
+    let PathCommand::MoveTo(first) = commands[0] else {
+        panic!("the path starts with a move")
+    };
+    assert!((first.x - (expected.x - path.size * 0.5)).abs() < 1e-9);
+    assert!((first.y - (expected.y - path.size * 0.5)).abs() < 1e-9);
+
+    let label = GeoMarker {
+        text: Some("New York".into()),
+        ..GeoMarker::new(AT.0, AT.1)
+    };
+    let measured = measure(label.clone()).unwrap();
+    let last = measured.scene.primitives.last().unwrap();
+    let Geometry::Text { origin, text, size, anchor, .. } = &last.geometry else {
+        panic!("the marker is a label")
+    };
+    assert_eq!(text, "New York");
+    assert_eq!(*size, label.size);
+    assert_eq!(*anchor, TextAnchor::Center);
+    assert!((origin.x - expected.x).abs() < 1e-9);
+    assert_eq!(last.style.fill, label.fill);
+
+    // An empty text is none: the circle.
+    let empty = GeoMarker { text: Some(String::new()), ..GeoMarker::new(AT.0, AT.1) };
+    let measured = measure(empty).unwrap();
+    assert!(matches!(measured.scene.primitives.last().unwrap().geometry, Geometry::Ellipse(_)));
+
+    let invalid = GeoMarker { geometry_svg: Some("M0,0 X".into()), ..GeoMarker::new(AT.0, AT.1) };
+    assert!(measure(invalid).is_err());
+}
+
 /// GeoVisualElementTests: a marker is drawn at the projection of its coordinate, moved from the
 /// origin, and two coordinates are two pixels.
 #[test]
@@ -428,4 +475,44 @@ fn heat_maps_need_two_colours() {
         &GeoMapOptions::default()
     )
     .is_err());
+}
+
+/// GeoMap_TooltipFormatter_IsAppliedToEachValue: the source's two series of France on a 600 by
+/// 600 Mercator map; the `TooltipFormatter` of the map writes the line of each value of the
+/// tooltip, once per value and in the order of the series, under the name of the land.
+#[test]
+fn source_geo_map_tooltip_formatter_is_applied_to_each_value() {
+    use std::cell::RefCell;
+    use std::rc::Rc;
+    let mut population = heat(&[("fra", 67.5)]);
+    population.series.name = "Pop".into();
+    let mut gdp = heat(&[("fra", 2937.0)]);
+    gdp.series.name = "GDP".into();
+    let calls = Rc::new(RefCell::new(Vec::new()));
+    let sink = calls.clone();
+    let formatter = GeoTooltipFormatter::new(move |value| {
+        sink.borrow_mut().push(value.series_name.clone());
+        format!("[{}] {:.1}", value.series_name, value.value)
+    });
+    let measured = GeoMapChartEngine::measure_with_tooltip_formatter(
+        Size::new(600.0, 600.0),
+        world(),
+        &[population, gdp],
+        &[],
+        &mercator(),
+        Some(&formatter),
+    )
+    .unwrap();
+    let paris = mercator_pixel(600.0, 600.0, 2.35, 48.85);
+    let land = measured.find_land_at(paris).expect("Paris hits France");
+    assert_eq!(land.short_name, "fra");
+    let region = measured.scene.hits.iter().find(|h| h.id == land.id).unwrap();
+    assert_eq!(region.label, "France\n[Pop] 67.5\n[GDP] 2937.0");
+    assert_eq!(*calls.borrow(), vec!["Pop".to_owned(), "GDP".to_owned()]);
+    // Without a formatter the lines are the source's `{name}: {value:N2}`.
+    assert_eq!(
+        tooltip_label_with(land, None),
+        "France\nPop: 67.50\nGDP: 2,937.00"
+    );
+    assert_eq!(formatter, formatter.clone());
 }

@@ -1,0 +1,710 @@
+{
+  "revision": "933fd46325772fd1cdec81add9d4912dda2fe931",
+  "codec_revision": "8678e15b8ae738931237c0e70ef66f61a6ecbfd2",
+  "host": "macOS arm64",
+  "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+  "method": [
+    "prepare.py --readers verifies the source and decoded syntax graph of every included document by re-encoding both with the pinned FXD encoder.",
+    "Reader timings alternate XML and FXP on the same preloaded markup for 21 trials after warming each reader. Both materialize and drop every untransformed XamlX document.",
+    "fluent.py uses seven interleaved fresh processes per mode. Both execute the full Fluent root, resolve and build Button, check two padding updates, resolve Light/Dark ButtonBackground and check compact ComboBox height.",
+    "The four execution fields are theme construction, first Button theme and template lookup, first template build and mean of 128 subsequent builds. Times are nanoseconds, excluding process launch.",
+    "cached.py executes two full WinUI themes per process, nine interleaved processes per mode. The second constructor reuses the loader's transformed group in the same address space. Both constructors use the real theme and retain normal deferred realization.",
+    "All executable comparisons use release with fat LTO, one codegen unit, panic=abort and size-optimized theme crates. Some local builds overlapped the measurements."
+  ],
+  "reproduce_from_root": [
+    "python3 -B scripts/themes/semantic-spike/prepare.py --readers",
+    "python3 -B scripts/themes/full-opcode-spike/prepare.py",
+    "python3 -B scripts/themes/full-opcode-spike/ast_project.py",
+    "python3 -B scripts/themes/semantic-spike/fluent.py",
+    "python3 -B scripts/themes/semantic-spike/cached.py",
+    "python3 -B scripts/themes/semantic-spike/collect.py"
+  ],
+  "archives": {
+    "winui": {
+      "documents": 175,
+      "source_bytes": 2132586,
+      "archive_bytes": 251770,
+      "archive_sha256": "77cc0d12c78bf6f349885012456b1c1d58bad71e4f49f6cd982192d9587e2050",
+      "expanded_archive_bytes": 2085717,
+      "reader_median_ns": {
+        "xml_ns": 29463000,
+        "expand_index_ns": 4301083,
+        "decode_drop_ns": 17323042
+      },
+      "fxp_total_median_ns": 21608833,
+      "reader_samples": [
+        {
+          "xml_ns": 29999042,
+          "expand_index_ns": 4416125,
+          "decode_drop_ns": 17572334,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29675833,
+          "expand_index_ns": 4360458,
+          "decode_drop_ns": 17468250,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29398666,
+          "expand_index_ns": 4221167,
+          "decode_drop_ns": 17275500,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29158875,
+          "expand_index_ns": 4265458,
+          "decode_drop_ns": 17196958,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29299875,
+          "expand_index_ns": 4289084,
+          "decode_drop_ns": 16986666,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29237375,
+          "expand_index_ns": 4301083,
+          "decode_drop_ns": 17227708,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29326291,
+          "expand_index_ns": 4243666,
+          "decode_drop_ns": 17405167,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29501958,
+          "expand_index_ns": 4321667,
+          "decode_drop_ns": 17147208,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29116125,
+          "expand_index_ns": 4321209,
+          "decode_drop_ns": 16920125,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29333125,
+          "expand_index_ns": 4291667,
+          "decode_drop_ns": 16808166,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29093375,
+          "expand_index_ns": 4309750,
+          "decode_drop_ns": 17213708,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29975583,
+          "expand_index_ns": 4233250,
+          "decode_drop_ns": 17380792,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29631042,
+          "expand_index_ns": 4400833,
+          "decode_drop_ns": 17271875,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29463000,
+          "expand_index_ns": 4220083,
+          "decode_drop_ns": 17323042,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 30296667,
+          "expand_index_ns": 4340875,
+          "decode_drop_ns": 17516792,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 31259959,
+          "expand_index_ns": 4289875,
+          "decode_drop_ns": 18856833,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 30997125,
+          "expand_index_ns": 4262542,
+          "decode_drop_ns": 18513167,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29694834,
+          "expand_index_ns": 4301458,
+          "decode_drop_ns": 17329958,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29261500,
+          "expand_index_ns": 4349708,
+          "decode_drop_ns": 17259125,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 30344000,
+          "expand_index_ns": 4236792,
+          "decode_drop_ns": 17335791,
+          "expanded_bytes": 2085717
+        },
+        {
+          "xml_ns": 29268667,
+          "expand_index_ns": 4400750,
+          "decode_drop_ns": 17788459,
+          "expanded_bytes": 2085717
+        }
+      ]
+    },
+    "fluent": {
+      "documents": 86,
+      "source_bytes": 750286,
+      "archive_bytes": 135280,
+      "archive_sha256": "2593c5d0e59842be291148d546e335684d52875fd49339a7ade1caeb459f5893",
+      "expanded_archive_bytes": 886273,
+      "reader_median_ns": {
+        "xml_ns": 12102292,
+        "expand_index_ns": 2043833,
+        "decode_drop_ns": 7184792
+      },
+      "fxp_total_median_ns": 9218916,
+      "reader_samples": [
+        {
+          "xml_ns": 12374333,
+          "expand_index_ns": 2112458,
+          "decode_drop_ns": 7400333,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12139458,
+          "expand_index_ns": 1998083,
+          "decode_drop_ns": 7032333,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12043708,
+          "expand_index_ns": 2047333,
+          "decode_drop_ns": 7077792,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12065375,
+          "expand_index_ns": 1984625,
+          "decode_drop_ns": 7159459,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12038167,
+          "expand_index_ns": 2030000,
+          "decode_drop_ns": 7245916,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12079667,
+          "expand_index_ns": 2057167,
+          "decode_drop_ns": 7157458,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12358459,
+          "expand_index_ns": 2079458,
+          "decode_drop_ns": 7211250,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12194209,
+          "expand_index_ns": 2047041,
+          "decode_drop_ns": 7261959,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12102292,
+          "expand_index_ns": 2063208,
+          "decode_drop_ns": 7086583,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12030291,
+          "expand_index_ns": 2045917,
+          "decode_drop_ns": 6928250,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12079250,
+          "expand_index_ns": 2014375,
+          "decode_drop_ns": 7144666,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12196625,
+          "expand_index_ns": 2045333,
+          "decode_drop_ns": 7184792,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12043125,
+          "expand_index_ns": 2047209,
+          "decode_drop_ns": 7026041,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12042375,
+          "expand_index_ns": 2015209,
+          "decode_drop_ns": 7032375,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12099500,
+          "expand_index_ns": 2043833,
+          "decode_drop_ns": 7311792,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12244125,
+          "expand_index_ns": 1989291,
+          "decode_drop_ns": 7071959,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12072083,
+          "expand_index_ns": 2044625,
+          "decode_drop_ns": 7218500,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12131667,
+          "expand_index_ns": 1998500,
+          "decode_drop_ns": 7271625,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12194542,
+          "expand_index_ns": 2034375,
+          "decode_drop_ns": 7342208,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12189542,
+          "expand_index_ns": 2025833,
+          "decode_drop_ns": 7193083,
+          "expanded_bytes": 886273
+        },
+        {
+          "xml_ns": 12151042,
+          "expand_index_ns": 2019083,
+          "decode_drop_ns": 7331667,
+          "expanded_bytes": 886273
+        }
+      ]
+    }
+  },
+  "fluent_full_execution": {
+    "ast": {
+      "bytes": 23614288,
+      "samples_ns": [
+        [
+          447753834,
+          451750,
+          96500,
+          18240
+        ],
+        [
+          447671125,
+          424667,
+          58709,
+          19674
+        ],
+        [
+          442130250,
+          379792,
+          55375,
+          18848
+        ],
+        [
+          494811959,
+          413416,
+          70166,
+          19615
+        ],
+        [
+          533249417,
+          391375,
+          57541,
+          18497
+        ],
+        [
+          448461084,
+          451125,
+          63375,
+          18768
+        ],
+        [
+          469956500,
+          394417,
+          57875,
+          18170
+        ]
+      ],
+      "median_ns": [
+        448461084,
+        413416,
+        58709,
+        18768
+      ]
+    },
+    "native": {
+      "bytes": 15468768,
+      "samples_ns": [
+        [
+          2529917,
+          1006791,
+          93500,
+          1819
+        ],
+        [
+          1213042,
+          259541,
+          22709,
+          1783
+        ],
+        [
+          1417584,
+          453125,
+          24917,
+          1853
+        ],
+        [
+          1469625,
+          701917,
+          76958,
+          4813
+        ],
+        [
+          1777667,
+          293791,
+          23583,
+          1860
+        ],
+        [
+          1254333,
+          296584,
+          23458,
+          2151
+        ],
+        [
+          1228875,
+          268875,
+          23167,
+          1778
+        ]
+      ],
+      "median_ns": [
+        1417584,
+        296584,
+        23583,
+        1853
+      ]
+    }
+  },
+  "winui_transformed_group_cache": {
+    "samples_ns": {
+      "ast": [
+        [
+          [
+            1103661958,
+            339792,
+            79125,
+            28125
+          ],
+          [
+            11663541,
+            283375,
+            54583,
+            28097
+          ]
+        ],
+        [
+          [
+            1106843334,
+            353083,
+            87167,
+            29494
+          ],
+          [
+            11956041,
+            249167,
+            45667,
+            29494
+          ]
+        ],
+        [
+          [
+            1115546583,
+            345542,
+            91541,
+            28599
+          ],
+          [
+            11781458,
+            244125,
+            40166,
+            28780
+          ]
+        ],
+        [
+          [
+            1124020584,
+            372584,
+            91667,
+            29983
+          ],
+          [
+            11824750,
+            292417,
+            57375,
+            28189
+          ]
+        ],
+        [
+          [
+            1112576834,
+            343833,
+            85042,
+            29251
+          ],
+          [
+            11792750,
+            250291,
+            43500,
+            29415
+          ]
+        ],
+        [
+          [
+            1107520167,
+            348125,
+            89417,
+            29034
+          ],
+          [
+            11689000,
+            257417,
+            50459,
+            28421
+          ]
+        ],
+        [
+          [
+            1108796375,
+            350000,
+            81583,
+            28496
+          ],
+          [
+            12165750,
+            242167,
+            56000,
+            28415
+          ]
+        ],
+        [
+          [
+            1108726709,
+            336084,
+            84625,
+            28633
+          ],
+          [
+            11917209,
+            251000,
+            54208,
+            28736
+          ]
+        ],
+        [
+          [
+            1106191875,
+            350917,
+            84541,
+            28865
+          ],
+          [
+            11898834,
+            236666,
+            39083,
+            28864
+          ]
+        ]
+      ],
+      "native": [
+        [
+          [
+            3452209,
+            101875,
+            40125,
+            2531
+          ],
+          [
+            2897792,
+            46583,
+            6958,
+            2520
+          ]
+        ],
+        [
+          [
+            3445458,
+            101125,
+            40542,
+            2609
+          ],
+          [
+            2970000,
+            40792,
+            11333,
+            2469
+          ]
+        ],
+        [
+          [
+            3416542,
+            90250,
+            33084,
+            2578
+          ],
+          [
+            2878000,
+            39291,
+            6334,
+            2504
+          ]
+        ],
+        [
+          [
+            3503958,
+            98625,
+            39250,
+            2598
+          ],
+          [
+            2961042,
+            46000,
+            11250,
+            2861
+          ]
+        ],
+        [
+          [
+            3366042,
+            94333,
+            36500,
+            2555
+          ],
+          [
+            2867625,
+            40792,
+            7375,
+            2521
+          ]
+        ],
+        [
+          [
+            3485000,
+            101750,
+            41500,
+            2573
+          ],
+          [
+            2947917,
+            42208,
+            7083,
+            2537
+          ]
+        ],
+        [
+          [
+            3772542,
+            98666,
+            33917,
+            2750
+          ],
+          [
+            3228042,
+            45917,
+            7875,
+            2730
+          ]
+        ],
+        [
+          [
+            3474959,
+            101125,
+            39250,
+            2530
+          ],
+          [
+            2923834,
+            39709,
+            6458,
+            2452
+          ]
+        ],
+        [
+          [
+            3495625,
+            91709,
+            35167,
+            2475
+          ],
+          [
+            2892500,
+            38625,
+            5875,
+            2465
+          ]
+        ]
+      ]
+    },
+    "fields": [
+      "construct theme",
+      "lookup Button template",
+      "first template",
+      "mean of 128 builds"
+    ],
+    "median_ns": {
+      "ast": [
+        [
+          1108726709,
+          348125,
+          85042,
+          28865
+        ],
+        [
+          11824750,
+          250291,
+          50459,
+          28736
+        ]
+      ],
+      "native": [
+        [
+          3474959,
+          98666,
+          39250,
+          2573
+        ],
+        [
+          2923834,
+          40792,
+          7083,
+          2520
+        ]
+      ]
+    }
+  }
+}

@@ -37,6 +37,8 @@ impl NativeMenuInfo {
 #[derive(Clone)]
 struct NativeMenuInfoRef(Rc<NativeMenuInfo>);
 
+ferroui_base::styled_value!(NativeMenuInfoRef);
+
 impl PartialEq for NativeMenuInfoRef {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)

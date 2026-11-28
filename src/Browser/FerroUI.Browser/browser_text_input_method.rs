@@ -1,8 +1,10 @@
 use crate::browser_input_handler::BrowserInputHandler;
+use crate::browser_text_input_edit::edit_from_dom;
 use crate::browser_text_input_options::BrowserTextInputOptions;
 use crate::interop::{input_helper, JsObject};
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection,
+    masked_surrounding_text, ITextInputMethodImpl, TextInputContentType, TextInputMethodClient,
+    TextInputMethodComposition, TextInputMethodConnection, TextInputMethodState,
     TextInputOptions, TextSelection,
 };
 use ferroui_base::reactive::IDisposable;
@@ -26,6 +28,8 @@ pub(crate) trait ITextInputPage {
     fn focus_container_element(&self);
     fn clear_input_element(&self);
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32);
+    /// Makes the hidden input element a password input, or a text input again.
+    fn set_input_masked(&self, masked: bool);
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32);
     fn selection_start(&self) -> i32;
     fn selection_end(&self) -> i32;
@@ -83,6 +87,10 @@ impl ITextInputPage for TextInputPage {
 
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
         input_helper::set_surrounding_text(&self.input_element, text, start, end);
+    }
+
+    fn set_input_masked(&self, masked: bool) {
+        input_helper::set_input_masked(&self.input_element, masked);
     }
 
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
@@ -162,8 +170,11 @@ pub struct BrowserTextInputMethod {
     applied_options: RefCell<Option<BrowserTextInputOptions>>,
     options_revision: Cell<u64>,
     applying_options: Cell<bool>,
+    /// Whether the hidden input element is a password input now.
+    input_masked: Cell<bool>,
     dom: RefCell<dom::DomState>,
     client_revision: Cell<u64>,
+    legacy_context_revision: Cell<Option<u64>>,
     mirroring_dom: Cell<bool>,
     dom_dirty: Cell<bool>,
 }
@@ -216,8 +227,10 @@ impl BrowserTextInputMethod {
             applied_options: RefCell::new(None),
             options_revision: Cell::new(0),
             applying_options: Cell::new(false),
+            input_masked: Cell::new(false),
             dom: RefCell::new(dom::DomState::default()),
             client_revision: Cell::new(0),
+            legacy_context_revision: Cell::new(None),
             mirroring_dom: Cell::new(false),
             dom_dirty: Cell::new(false),
         })
@@ -305,9 +318,11 @@ impl BrowserTextInputMethod {
             return;
         }
         if let Some(client) = self.client() {
-            let surrounding_text = client.surrounding_text();
+            let revision = client.supports_surrounding_text_edits()
+                .then(|| client.input_method_state_revision()).flatten();
+            let surrounding_text = self.mirrored_text(&*client);
             let selection = client.selection();
-
+            self.legacy_context_revision.set(revision);
             self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
         }
     }
@@ -352,6 +367,57 @@ impl BrowserTextInputMethod {
         // selection (and any filtering performed by the native control).
         self.surrounding_text_changed();
         handled
+    }
+
+    /// Runs the native deletion for a browser edit that has no usable key event.
+    pub fn on_standalone_delete(&self, backward: bool) -> bool {
+        if self.is_composing() || self.uses_connection() || self.focus_is_leaving_view.get()
+            || self.client().is_none()
+        {
+            return false;
+        }
+        let Some(input_handler) = self.input_handler.upgrade() else {
+            return false;
+        };
+        let key = if backward { "Backspace" } else { "Delete" };
+        // A virtual key has a logical meaning but no physical scancode. Use
+        // the normal key route so editor handlers, graphemes and undo apply.
+        input_handler.on_key_down(None, Some(key), 0);
+        // Some browsers have already changed the proxy by the time they notify
+        // us. The native client owns the final value even if it rejected the edit.
+        self.surrounding_text_changed();
+        true
+    }
+
+    /// A browser correction can change a range away from the editor's caret.
+    /// Only the focused owner's current surrounding projection can anchor it.
+    pub(crate) fn on_replacement_text(
+        &self,
+        before: &TextInputMethodState,
+        native_selection: Option<TextSelection>,
+        after: &TextInputMethodState,
+    ) {
+        if self.is_composing() || self.uses_connection() || self.focus_is_leaving_view.get() {
+            return;
+        }
+        let generation = self.generation.get();
+        if let Some(client) = self.client() {
+            if let Some(connection) = client.surrounding_text_edit_connection() {
+                let text = client.surrounding_text().replace(['\r', '\n'], " ");
+                if text == before.text && client.selection() == before.selection
+                    && client.input_method_state_revision() == self.legacy_context_revision.get()
+                    && self.generation.get() == generation
+                {
+                    if let Ok(Some(edit)) = edit_from_dom(before, native_selection, after, "insertReplacementText") {
+                        let _ = connection.apply_surrounding_text_edit(&edit, self.timestamp());
+                    }
+                }
+            }
+        }
+        // Mirror the final model state, including when a correction was rejected.
+        if self.generation.get() == generation && !self.is_composing() {
+            self.surrounding_text_changed();
+        }
     }
 
     /// A native focus change or reset ends the old client's composition even
@@ -413,8 +479,13 @@ impl BrowserTextInputMethod {
         }
         if let Some(data) = data {
             if let Some(input_handler) = self.input_handler.upgrade() {
-                input_handler.raw_text_event(data);
+                input_handler.composition_text_event(data);
             }
+        }
+        // A commit that changed nothing raises no change of the text, and the element must
+        // not keep what was composed in it.
+        if self.masks_mirrored_text() {
+            self.surrounding_text_changed();
         }
     }
 
@@ -537,7 +608,7 @@ impl BrowserTextInputMethod {
         let old_client = self.client.replace(client);
         drop(old_client);
 
-        if let Some(client) = self.client() {
+        if self.client().is_some() {
             self.show_ime();
             if self.generation.get() != generation {
                 return;
@@ -545,9 +616,7 @@ impl BrowserTextInputMethod {
             if connection.is_some() {
                 self.synchronize_dom();
             } else {
-                let surrounding_text = client.surrounding_text();
-                let selection = client.selection();
-                self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+                self.surrounding_text_changed();
             }
         } else {
             self.hide_ime();
@@ -564,7 +633,8 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         let connection = client
             .as_ref()
             .filter(|_| self.page.has_text_input_element())
-            .and_then(|client| client.input_method_editing().and_then(|_| client.input_method_connection()));
+            .and_then(|client| client.input_method_connection())
+            .filter(|connection| connection.supports_exact_edits());
         if self.generation.get() != generation {
             return;
         }
@@ -594,13 +664,9 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         let old_client = self.client.replace(client);
         drop(old_client);
 
-        if let Some(client) = self.client() {
+        if self.client().is_some() {
             self.show_ime();
-
-            let surrounding_text = client.surrounding_text();
-            let selection = client.selection();
-
-            self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
+            self.surrounding_text_changed();
         } else {
             self.hide_ime();
         }
@@ -620,6 +686,13 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         self.options.replace(Some(options.clone()));
         self.options_revision.set(self.options_revision.get().wrapping_add(1));
         self.apply_input_options();
+        let masked = self.masks_mirrored_text();
+        if masked != self.input_masked.replace(masked) {
+            self.page.set_input_masked(masked);
+            if !self.uses_connection() {
+                self.surrounding_text_changed();
+            }
+        }
     }
 
     fn reset(&self) {
@@ -628,12 +701,32 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
             return;
         }
         self.cancel_composition();
+        self.legacy_context_revision.set(None);
         self.page.clear_input_element();
         self.page.set_surrounding_text("", 0, 0);
     }
 }
 
 impl BrowserTextInputMethod {
+    /// Whether the hidden element must not hold the text: it is a real, focused element of the
+    /// page, which assistive technology and page scripts can read.
+    fn masks_mirrored_text(&self) -> bool {
+        self.options.borrow().as_ref().is_some_and(|options| {
+            matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin)
+                || options.is_sensitive
+        })
+    }
+
+    /// The text the hidden element holds for `client`.
+    fn mirrored_text(&self, client: &dyn TextInputMethodClient) -> String {
+        let text = client.surrounding_text();
+        if self.masks_mirrored_text() {
+            masked_surrounding_text(&text)
+        } else {
+            text
+        }
+    }
+
     fn reset_connection_client(&self) {
         let generation = self.next_generation();
         let dom_revision = self.invalidate_dom();
@@ -697,6 +790,10 @@ mod tests {
 
         fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
             self.log(format!("text '{text}' {start} {end}"));
+        }
+
+        fn set_input_masked(&self, masked: bool) {
+            self.log(format!("masked {masked}"));
         }
 
         fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
@@ -868,6 +965,58 @@ mod tests {
         client.raise_surrounding_text_changed();
 
         assert_eq!(vec!["text 'hello world' 11 11"], fixture.take_calls());
+    }
+
+    #[test]
+    fn the_hidden_element_never_holds_the_text_of_a_sensitive_client() {
+        let fixture = Fixture::new();
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        assert_eq!(vec!["masked true"], fixture.take_calls());
+        let client = TestClient::new("a\u{1F600}b", 1, 3);
+        fixture.set_client(&client);
+        let calls = fixture.take_calls();
+        // A mask of the same UTF-16 length keeps the selection offsets.
+        let masked = format!("text '{}' 1 3", masked_surrounding_text("a\u{1F600}b"));
+        assert_eq!(4, masked_surrounding_text("a\u{1F600}b").encode_utf16().count());
+        assert!(calls.contains(&masked), "{calls:?}");
+        assert!(!calls.iter().any(|call| call.contains('a') && call.starts_with("text")), "{calls:?}");
+
+        *client.text.borrow_mut() = "secret".to_string();
+        client.selection.set(TextSelection::new(6, 6));
+        client.raise_surrounding_text_changed();
+        assert_eq!(vec![format!("text '{}' 6 6", "\u{2022}".repeat(6))], fixture.take_calls());
+    }
+
+    #[test]
+    fn the_end_of_a_composition_writes_the_mask_again() {
+        let fixture = Fixture::new();
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        let client = TestClient::new("abc", 1, 1);
+        fixture.set_client(&client);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("x"));
+        fixture.take_calls();
+
+        // A canceled composition commits nothing, so no change of the text follows.
+        fixture.method.on_composition_end(None);
+        let masked = format!("text '{}' 1 1", "\u{2022}".repeat(3));
+        assert!(fixture.take_calls().contains(&masked));
+    }
+
+    #[test]
+    fn a_client_that_becomes_sensitive_is_masked_in_the_hidden_element_at_once() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("secret", 2, 2);
+        fixture.set_client(&client);
+        assert!(fixture.take_calls().contains(&"text 'secret' 2 2".to_string()));
+
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        let masked = format!("text '{}' 2 2", "\u{2022}".repeat(6));
+        // The element is a password input before the mask replaces the text.
+        assert_eq!(vec!["masked true".to_string(), masked], fixture.take_calls());
+
+        fixture.method.set_options(&TextInputOptions::default());
+        assert_eq!(vec!["masked false", "text 'secret' 2 2"], fixture.take_calls());
     }
 
     #[test]

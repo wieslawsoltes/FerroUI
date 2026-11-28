@@ -111,6 +111,20 @@ impl IPlatformDragSource for InProcessDragSource {
 
         let state = &self.state;
         if state.dragged_data.borrow().is_none() {
+            let properties = trigger_event.get_current_point(None).properties;
+            let mut buttons = RawInputModifiers::NONE;
+            for (pressed, button) in [
+                (properties.is_left_button_pressed, RawInputModifiers::LEFT_MOUSE_BUTTON),
+                (properties.is_middle_button_pressed, RawInputModifiers::MIDDLE_MOUSE_BUTTON),
+                (properties.is_right_button_pressed, RawInputModifiers::RIGHT_MOUSE_BUTTON),
+            ] {
+                if pressed {
+                    buttons |= button;
+                }
+            }
+            if !buttons.is_empty() {
+                state.initial_input_modifiers.set(Some(buttons));
+            }
             *state.dragged_data.borrow_mut() = Some(data_transfer.clone());
             *state.last_source.borrow_mut() = None;
             state.last_position.set(Point::default());
@@ -239,6 +253,11 @@ impl State {
     }
 
     fn process_key_events(&self, e: &RawKeyEventArgs) {
+        // More input can arrive before the completed future disposes its subscription.
+        if self.result.effect.get().is_some() {
+            return;
+        }
+
         if e.type_() == RawKeyEventType::KeyDown && e.key() == Key::Escape {
             if let Some(last_source) = self.last_root() {
                 self.raise_event_and_update_cursor(
@@ -265,6 +284,14 @@ impl State {
 
     fn check_dragging_accepted(&self, e: &RawPointerEventArgs, changed_mouse_button: RawInputModifiers) {
         if self.initial_input_modifiers.get().is_some_and(|initial| initial.contains(changed_mouse_button)) {
+            // The move that started the drag was delivered before the input
+            // subscription was installed. A release can be its first event.
+            let root = self.last_root();
+            if root.as_ref().is_none_or(|last| !Rc::ptr_eq(last, e.root()))
+                || self.last_position.get() != e.position()
+            {
+                self.raise_event_and_update_cursor(RawDragEventType::DragOver, e.root(), e.position(), e.input_modifiers());
+            }
             let result =
                 self.raise_event_and_update_cursor(RawDragEventType::Drop, e.root(), e.position(), e.input_modifiers());
             self.update_cursor(None, DragDropEffects::NONE);
@@ -276,6 +303,10 @@ impl State {
     }
 
     fn process_mouse_events(&self, e: &RawPointerEventArgs) {
+        if self.result.effect.get().is_some() {
+            return;
+        }
+
         if self.initial_input_modifiers.get().is_none() {
             self.initial_input_modifiers.set(Some(e.input_modifiers() & MOUSE_INPUTMODIFIERS));
         }

@@ -647,6 +647,11 @@ impl ServerCompositionTarget {
                 match layer {
                     Some(layer) => {
                         if draws {
+                            // The rows the frame can change: those of the dirty area, a row more on each side for
+                            // the antialiased edges at its border.
+                            let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
+                            let rows = (dirty.top.floor() as i32 - 1, dirty.bottom.ceil() as i32 + 1);
+                            layer.set_frame_dirty_rows(Some(rows));
                             let mut context = layer.create_drawing_context();
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();
@@ -656,13 +661,17 @@ impl ServerCompositionTarget {
                         }
                         self.layer_unpresented.set(false);
 
-                        render_target_context.clear(Colors::TRANSPARENT);
                         render_target_context.set_transform(Matrix::IDENTITY);
-                        if layer.can_blit() {
-                            layer.blit(&mut *render_target_context);
-                        } else {
-                            let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
-                            render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                        // A layer that covers the target replaces its pixels, which are those of a clear to
+                        // transparent and the layer over it: no clear, and no read of the target.
+                        if !(layer.can_blit() && layer.blit_replacing(&mut *render_target_context)) {
+                            render_target_context.clear(Colors::TRANSPARENT);
+                            if layer.can_blit() {
+                                layer.blit(&mut *render_target_context);
+                            } else {
+                                let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
+                                render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                            }
                         }
                         self.overlays.draw(self, &mut *render_target_context, true);
                     }
@@ -689,6 +698,7 @@ impl ServerCompositionTarget {
     /// prints what the render thread counted since the last report, a frame. The counters are
     /// those of this thread, so with several targets a report covers the frames of all of them.
     fn report_render_counters(&self) {
+        super::unchanged_drawings::frame_drawn();
         use crate::diagnostics::perf_counters::{self, PerfCounter};
         if !perf_counters::ENABLED || self.frame_times.borrow().is_none() {
             return;

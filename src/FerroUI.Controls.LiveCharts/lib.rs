@@ -1,7 +1,8 @@
 //! Live chart controls using FerroUI's property, input and drawing services: the Cartesian and
 //! pie charts (L2), the polar chart (L4), the Sankey and treemap charts (L4b), the geographic map
-//! (L4c), and the OHLC series, date and time axes and angular gauge visuals (L5) of the
-//! LiveCharts2 port (docs/porting/livecharts2.md); see NOTICE.md for the source attribution.
+//! (L4c), the OHLC series, date and time axes and angular gauge visuals (L5), and the heat legend
+//! (#624) of the LiveCharts2 port (docs/porting/livecharts2.md); see NOTICE.md for the source
+//! attribution.
 
 pub use ferroui_livecharts as core;
 
@@ -15,13 +16,16 @@ mod chart_series;
 mod collections;
 mod decorations;
 mod enums;
+mod gauges;
 mod geo_models;
 mod identity;
+mod legends;
 mod node_models;
 mod register_types;
 pub mod renderer;
 pub mod scene_transition;
 mod series_classes;
+mod tooltip_motion;
 mod visual_elements;
 
 pub use axis::{Axis, DateTimeAxis, TimeSpanAxis};
@@ -36,11 +40,14 @@ pub use collections::{
 };
 pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, ZoomAndPanMode};
 pub use ferroui_livecharts::{
-    AxisPosition, BrushSpace, ChartPointFormatter, DrawnMap, FindingStrategy, GeoLand,
-    GeoTooltipValue, Labeler, Labelers, MapProjection, MapViewport, Maps, PolarLabelsPosition,
-    PolarScale, RadialAlignment, SankeyLabelPosition, SankeyLayoutKind, SeriesKind, ZoomDirection,
+    AxisPosition, BrushSpace, ChartPointFormatter, DataLabelsPosition, DrawnMap, FindingStrategy,
+    GeoLand, GeoTooltipFormatter, GeoTooltipValue, Labeler, Labelers, MapProjection, MapViewport,
+    Maps, NodeTooltipFormatter, NodeTooltipPoint, PolarLabelsPosition, PolarScale, RadialAlignment,
+    SankeyLabelPosition, SankeyLayoutKind, SeriesKind, ZoomDirection,
 };
+pub use gauges::{GaugeGenerator, GaugeItem};
 pub use geo_models::{GeoMarker, HeatLand};
+pub use legends::{ChartLegend, HeatLegend};
 pub use node_models::{SankeyLink, SankeyNode, TreemapNode};
 pub use register_types::{register_types, ASSEMBLY};
 pub use series_classes::*;

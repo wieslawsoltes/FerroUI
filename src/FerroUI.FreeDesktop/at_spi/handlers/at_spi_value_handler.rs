@@ -8,7 +8,7 @@ use crate::at_spi::dbus::descriptions::VALUE;
 use crate::at_spi::dbus::interface::{DBusInterface, InterfaceDescription};
 use ferroui_controls::automation::provider::IRangeValueProvider;
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiValueHandler {
     node: Weak<AtSpiNode>,
@@ -65,21 +65,21 @@ impl DBusInterface for AtSpiValueHandler {
         &VALUE
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         Some(match name {
-            "version" => Value::from(self.version()),
-            "MinimumValue" => Value::from(self.minimum_value()),
-            "MaximumValue" => Value::from(self.maximum_value()),
-            "MinimumIncrement" => Value::from(self.minimum_increment()),
-            "CurrentValue" => Value::from(self.current_value()),
-            "Text" => Value::from(self.text()),
+            "version" => Variant::from(self.version()),
+            "MinimumValue" => Variant::from(self.minimum_value()),
+            "MaximumValue" => Variant::from(self.maximum_value()),
+            "MinimumIncrement" => Variant::from(self.minimum_increment()),
+            "CurrentValue" => Variant::from(self.current_value()),
+            "Text" => Variant::from(self.text()),
             _ => return None,
         })
     }
 
-    fn set_property(&self, name: &str, value: &Value<'_>) -> bool {
+    fn set_property(&self, name: &str, value: &Variant<'_>) -> bool {
         match (name, value) {
-            ("CurrentValue", Value::F64(value)) => {
+            ("CurrentValue", Variant::F64(value)) => {
                 self.set_current_value(*value);
                 true
             }

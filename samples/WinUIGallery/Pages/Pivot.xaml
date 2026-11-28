@@ -1,4 +1,23 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TabControl Width="500" Height="220" HorizontalAlignment="Left"><TabItem Header="All"><TextBlock Text="All items" Margin="20"/></TabItem><TabItem Header="Unread"><TextBlock Text="Unread items" Margin="20"/></TabItem><TabItem Header="Flagged"><TextBlock Text="Flagged items" Margin="20"/></TabItem></TabControl>
+<!-- Ported from the pinned Pivot example of WinUI Gallery (14061eea); see ../NOTICE.md. The page
+     has no code-behind upstream. The native Pivot (its template in the WinUI theme) with the
+     source's title and four items. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Margin="0,0,24,0" Spacing="8">
+    <TextBlock Text="A basic pivot." FontSize="18" />
+    <Pivot x:Name="EmailPivot" Title="EMAIL" MinHeight="400">
+      <PivotItem Header="All">
+        <TextBlock Text="all emails go here." />
+      </PivotItem>
+      <PivotItem Header="Unread">
+        <TextBlock Text="unread emails go here." />
+      </PivotItem>
+      <PivotItem Header="Flagged">
+        <TextBlock Text="flagged emails go here." />
+      </PivotItem>
+      <PivotItem Header="Urgent">
+        <TextBlock Text="urgent emails go here." />
+      </PivotItem>
+    </Pivot>
+  </StackPanel>
 </StackPanel>

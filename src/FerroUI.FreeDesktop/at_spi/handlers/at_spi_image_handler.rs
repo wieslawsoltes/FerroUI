@@ -8,7 +8,7 @@ use crate::at_spi::at_spi_server::AtSpiServer;
 use crate::at_spi::dbus::descriptions::IMAGE;
 use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use std::rc::Weak;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiImageHandler {
     node: Weak<AtSpiNode>,
@@ -64,12 +64,12 @@ impl DBusInterface for AtSpiImageHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         let node = self.node.upgrade()?;
         Some(match name {
-            "version" => Value::from(Self::version()),
-            "ImageDescription" => Value::from(Self::image_description(&node)),
-            "ImageLocale" => Value::from(Self::image_locale()),
+            "version" => Variant::from(Self::version()),
+            "ImageDescription" => Variant::from(Self::image_description(&node)),
+            "ImageLocale" => Variant::from(Self::image_locale()),
             _ => return None,
         })
     }

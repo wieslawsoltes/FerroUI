@@ -264,9 +264,10 @@ pub struct DrawUniforms {
 pub enum BrushSampling {
     /// A solid colour brush: its colour is in the uniforms.
     Solid,
-    /// A brush the renderer cannot sample yet (a gradient, an image, a visual or drawing brush
-    /// without a shared form; step D6 of the port): the layer is drawn with its `Color` and the
-    /// opacity of the brush, and counted ([`crate::layers_with_unsampled_brushes`]).
+    /// Any other brush: the colour of the uniforms is the layer's `Color` with the opacity of the
+    /// brush, which the sample of the brush multiplies where the renderer samples it (gradients
+    /// and images, [`crate::brush::MaterialBrush`]); a brush it cannot sample is drawn with that
+    /// colour alone and counted ([`crate::layers_with_unsampled_brushes`]).
     Unsampled,
 }
 
@@ -297,7 +298,8 @@ impl DrawUniforms {
 }
 
 /// The colour a layer is drawn with: its brush's colour times its `Color`, the opacity of the
-/// brush in the alpha (straight alpha, 0 to 1).
+/// brush in the alpha (straight alpha, 0 to 1). For a brush other than a solid colour, the
+/// brush's colour is white here: the sample of the brush at each point multiplies it.
 pub fn layer_color(layer: &Scene3DMaterialLayer) -> ([f32; 4], BrushSampling) {
     let material = color_uniform(layer.color);
     let (brush, opacity, sampling) = match layer.brush.as_ref() {

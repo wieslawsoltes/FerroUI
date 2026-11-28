@@ -2,6 +2,8 @@
 //! animation.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::reactive::IDisposable;
 use crate::{StyledPropertyOptions, Thickness};
 use std::mem::size_of;
@@ -17,6 +19,8 @@ struct Counted {
     number: i32,
     alive: Rc<Cell<usize>>,
 }
+
+crate::styled_value!(Counted);
 
 impl Counted {
     fn new(number: i32, alive: &Rc<Cell<usize>>) -> Self {
@@ -53,9 +57,9 @@ fn counted() -> (crate::Ref<FerroObject>, &'static StyledProperty<Counted>, Rc<C
 }
 
 /// Whether the base value of the property is the value (`true`) or a value of its own.
-fn base_is_the_value<T: PropertyValue>(owner: &FerroObject, property: &'static StyledProperty<T>) -> bool {
+fn base_is_the_value<T: crate::StyledValue>(owner: &FerroObject, property: &'static StyledProperty<T>) -> bool {
     let effective = owner.values().get_effective_value(property).unwrap();
-    let typed = cast_effective_value::<T>(&*effective);
+    let typed = cast_effective_value::<T::Storage>(&*effective);
     assert!(!(typed.state.base_is_value.get() && typed.base_value.is_some()));
     typed.state.base_is_value.get()
 }
