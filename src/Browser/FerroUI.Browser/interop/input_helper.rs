@@ -1,6 +1,7 @@
 use super::completion_helper::{await_promise, PromiseOutcome};
 use super::{non_null, JsObject};
 use crate::browser_top_level_impl::BrowserTopLevelImpl;
+use ferroui_base::input::text_input::{TextInputMethodState, TextSelection};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen(raw_module = "./ferroui.js")]
@@ -318,6 +319,34 @@ pub fn on_before_input(top_level_id: i32, input_type: &str, start: i32, end: i32
 pub fn on_text_input(top_level_id: i32, data: Option<String>) -> bool {
     BrowserTopLevelImpl::try_get_top_level(top_level_id)
         .is_some_and(|top_level| top_level.input_handler().text_input_method().on_text_input(data.as_deref()))
+}
+
+#[wasm_bindgen(js_name = InputHelper_OnStandaloneDelete)]
+pub fn on_standalone_delete(top_level_id: i32, backward: bool) -> bool {
+    BrowserTopLevelImpl::try_get_top_level(top_level_id)
+        .is_some_and(|top_level| top_level.input_handler().text_input_method().on_standalone_delete(backward))
+}
+
+#[wasm_bindgen(js_name = InputHelper_OnReplacementText)]
+#[allow(clippy::too_many_arguments)]
+pub fn on_replacement_text(
+    top_level_id: i32,
+    before: String,
+    before_anchor: i32,
+    before_active: i32,
+    native_start: i32,
+    native_end: i32,
+    after: String,
+    after_anchor: i32,
+    after_active: i32,
+) {
+    if let Some(top_level) = BrowserTopLevelImpl::try_get_top_level(top_level_id) {
+        top_level.input_handler().text_input_method().on_replacement_text(
+            &TextInputMethodState { text: before, selection: TextSelection::new(before_anchor, before_active) },
+            (native_start >= 0 && native_end >= 0).then(|| TextSelection::new(native_start, native_end)),
+            &TextInputMethodState { text: after, selection: TextSelection::new(after_anchor, after_active) },
+        );
+    }
 }
 
 #[wasm_bindgen(js_name = InputHelper_OnCompositionStart)]

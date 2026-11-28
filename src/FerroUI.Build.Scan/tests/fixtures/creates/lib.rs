@@ -79,3 +79,12 @@ mod tests {
         let _ = Marker::new();
     }
 }
+
+// The typed keys of a theme: a path, an import, the body of a macro.
+use some_theme::keys::{ImportedKey, RenamedKey as Other};
+
+pub fn names_typed_keys() {
+    let _ = some_theme::keys::PathKey;
+    let _ = vec![keys::MacroKey];
+    let _ = (ImportedKey, Other, UnrelatedName);
+}
