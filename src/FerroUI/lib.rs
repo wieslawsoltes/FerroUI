@@ -209,7 +209,7 @@ pub use ferroui_reactiveui as reactiveui;
 #[cfg(feature = "reactiveui")]
 pub use ferroui_reactiveui_controls as reactiveui_controls;
 
-#[cfg(feature = "browser")]
+#[cfg(any(feature = "browser", feature = "browser-vello"))]
 pub use ferroui_browser as browser;
 #[cfg(feature = "headless")]
 pub use ferroui_headless as headless;
