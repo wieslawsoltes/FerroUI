@@ -343,6 +343,56 @@ fn native_password_privacy_handles_reentrant_mask_removal() {
 }
 
 #[test]
+fn masking_a_field_with_text_tells_the_platforms_to_forget_it() {
+    use crate::automation::{peers::ControlAutomationPeer, ValuePatternIdentifiers};
+    let _scope = test_scope();
+    let field = TextBox::new();
+    field.set_text(Some("synthetic fixture"));
+    let peer = ControlAutomationPeer::create_peer_for_element(&field);
+    let events = Rc::new(std::cell::RefCell::new(Vec::new()));
+    let recorded = events.clone();
+    let _token = peer.property_changed(move |change| {
+        if std::ptr::eq(change.property(), ValuePatternIdentifiers::value_property()) {
+            let text = |value: Option<&ferroui_base::BoxedValue>| {
+                value.and_then(|value| value.downcast_ref::<String>().cloned())
+            };
+            recorded.borrow_mut().push((text(change.old_value()), text(change.new_value())));
+        }
+    });
+
+    // The old value is the text being hidden: it is not in the event either.
+    field.set_password_char('*');
+    assert_eq!(*events.borrow(), vec![(None, None)]);
+
+    // Another mask character discloses nothing new, and neither does a reveal.
+    field.set_password_char('#');
+    field.set_reveal_password(true);
+    field.set_reveal_password(false);
+    assert_eq!(events.borrow().len(), 1);
+
+    field.set_password_char('\0');
+    assert_eq!(events.borrow().last().unwrap(), &(None, Some("synthetic fixture".to_string())));
+}
+
+#[test]
+fn masking_an_empty_field_raises_no_value_event() {
+    use crate::automation::{peers::ControlAutomationPeer, ValuePatternIdentifiers};
+    let _scope = test_scope();
+    let field = TextBox::new();
+    let peer = ControlAutomationPeer::create_peer_for_element(&field);
+    let events = Rc::new(Cell::new(0));
+    let counted = events.clone();
+    let _token = peer.property_changed(move |change| {
+        if std::ptr::eq(change.property(), ValuePatternIdentifiers::value_property()) {
+            counted.set(counted.get() + 1);
+        }
+    });
+    field.set_password_char('*');
+    field.set_password_char('\0');
+    assert_eq!(events.get(), 0);
+}
+
+#[test]
 fn native_password_automation_redacts_retained_providers_and_value_events() {
     use crate::automation::{ValuePatternIdentifiers, peers::{ControlAutomationPeer, TextBoxAutomationPeer}, provider::IValueProvider};
     let _scope = test_scope();
