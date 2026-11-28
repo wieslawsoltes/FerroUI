@@ -22,7 +22,8 @@ use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{IBrush, MatrixTransform};
 use ferroui_base::threading::DispatcherTimer;
 use ferroui_base::{Matrix, Ref, RelativePoint};
-use ferroui_controls::{Canvas, Dock};
+use ferroui_controls::primitives::{ScrollBarVisibility, ToggleButton};
+use ferroui_controls::{Button, Canvas, Dock};
 use ferroui_view::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -96,29 +97,24 @@ pub fn node_graph_editor(
     // -------------------------------------------------------------------------
     // 1. Top Component Ribbon & Canvas Toolbar (Stock FerroUI Controls)
     // -------------------------------------------------------------------------
-    let mut cat_tabs = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(3.0);
+    let mut cat_tabs = wrap_panel().item_spacing(6.0).line_spacing(6.0);
     for cat in &categories {
-        let c = cat.clone();
-        let c_act = c.clone();
-        let c_cl = c.clone();
+        let selected = cat.clone();
+        let category = cat.clone();
         cat_tabs = cat_tabs.child(
-            button()
+            toggle_button()
                 .padding((10.0, 4.0, 10.0, 4.0))
-                .border_brush(move || {
-                    if active_cat.get() == c_act {
-                        solid(0xFF0078D4)
-                    } else {
-                        None
-                    }
-                })
-                .border_thickness(move || if active_cat.get() == c { 1.5 } else { 1.0 })
-                .font_size(11.0)
-                .content(c_cl.label().to_string())
-                .on_click(move |_| {
+                .min_height(32.0)
+                .is_checked(move || Some(active_cat.get() == selected))
+                .content(cat.label().to_string())
+                .on(Button::click_event(), move |button, _| {
+                    // A category remains selected when clicked again. The native
+                    // toggle supplies the current theme's checked appearance.
+                    button.set_current_value(ToggleButton::is_checked_property(), Some(true));
                     search_query.set(String::new());
-                    active_cat.set(c_cl.clone());
+                    if active_cat.get_untracked() != category {
+                        active_cat.set(category.clone());
+                    }
                 }),
         );
     }
@@ -135,14 +131,14 @@ pub fn node_graph_editor(
     let st_prof = state.clone();
     let st_json = state.clone();
 
-    let action_bar = stack_panel()
-        .orientation(Orientation::Horizontal)
-        .spacing(3.0)
+    let action_bar = wrap_panel()
+        .item_spacing(6.0)
+        .line_spacing(6.0)
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("↶")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Undo")
                 .on_click(move |_| {
                     if st_undo.graph.borrow_mut().undo() {
                         st_undo.notify_history_restored();
@@ -152,9 +148,9 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("↷")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Redo")
                 .on_click(move |_| {
                     if st_redo.graph.borrow_mut().redo() {
                         st_redo.notify_history_restored();
@@ -164,9 +160,9 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("⊞ Layout")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Auto layout")
                 .on_click(move |_| {
                     st_layout.sync_measured_node_sizes();
                     st_layout.graph.borrow_mut().auto_layout();
@@ -176,16 +172,16 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("⊡ Fit")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Fit graph")
                 .on_click(move |_| st_fit.fit_view()),
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("▢ Group")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Group")
                 .on_click(move |_| {
                     if st_grp
                         .graph
@@ -199,9 +195,9 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("⧉ Dup")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Duplicate")
                 .on_click(move |_| {
                     if !st_dup.graph.borrow_mut().duplicate_selection().is_empty() {
                         st_dup.notify_topology_changed();
@@ -211,9 +207,9 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
-                .content("✕")
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .content("Delete")
                 .on_click(move |_| {
                     if st_del.graph.borrow_mut().delete_selection() {
                         st_del.notify_topology_changed();
@@ -222,23 +218,11 @@ pub fn node_graph_editor(
                 }),
         )
         .child(
-            button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || {
-                    if solution_locked.get() {
-                        solid(0xFFD97706)
-                    } else {
-                        None
-                    }
-                })
-                .font_size(10.5)
-                .content(move || {
-                    if solution_locked.get() {
-                        "🔒 Locked"
-                    } else {
-                        "🔓 Live"
-                    }
-                })
+            toggle_button()
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .is_checked(move || Some(!solution_locked.get()))
+                .content("Live evaluation")
                 .on_click(move |_| {
                     let next = !solution_locked.get_untracked();
                     st_lock.graph.borrow_mut().solution_locked = next;
@@ -249,17 +233,11 @@ pub fn node_graph_editor(
                 }),
         )
         .child(
-            button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || {
-                    if fancy_wires.get() {
-                        solid(0xFF22C55E)
-                    } else {
-                        None
-                    }
-                })
-                .font_size(10.5)
-                .content("Fancy")
+            toggle_button()
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .is_checked(move || Some(fancy_wires.get()))
+                .content("Wire details")
                 .on_click(move |_| {
                     let next = !fancy_wires.get_untracked();
                     st_fancy.graph.borrow_mut().fancy_wires = next;
@@ -268,17 +246,11 @@ pub fn node_graph_editor(
                 }),
         )
         .child(
-            button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .border_brush(move || {
-                    if show_profiler.get() {
-                        solid(0xFF22C55E)
-                    } else {
-                        None
-                    }
-                })
-                .font_size(10.5)
-                .content("Prof")
+            toggle_button()
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
+                .is_checked(move || Some(show_profiler.get()))
+                .content("Profiler")
                 .on_click(move |_| {
                     let next = !show_profiler.get_untracked();
                     st_prof.graph.borrow_mut().show_profiler = next;
@@ -288,8 +260,8 @@ pub fn node_graph_editor(
         )
         .child(
             button()
-                .padding((7.0, 4.0, 7.0, 4.0))
-                .font_size(10.5)
+                .padding((10.0, 4.0, 10.0, 4.0))
+                .min_height(32.0)
                 .content("Copy JSON")
                 .on_click(move |_| st_json.copy_definition_to_clipboard()),
         );
@@ -303,18 +275,22 @@ pub fn node_graph_editor(
         } else {
             st_shelf.registry.search(&q)
         };
-        let mut row = stack_panel()
-            .orientation(Orientation::Horizontal)
-            .spacing(4.0);
-        for meta in items.into_iter().take(13) {
+        if items.is_empty() {
+            return Element::Fragment(vec![text_block()
+                .text("No matching components")
+                .vertical_alignment(VerticalAlignment::Center)
+                .into_element()]);
+        }
+        let mut buttons = Vec::with_capacity(items.len());
+        for meta in items {
             let tid = meta.type_id.clone();
             let disp = meta.display_name.clone();
             let st_add = st_shelf.clone();
-            row = row.child(
+            buttons.push(
                 button()
-                    .padding((8.0, 3.0, 8.0, 3.0))
-                    .font_size(10.5)
-                    .content(meta.nickname)
+                    .padding((10.0, 4.0, 10.0, 4.0))
+                    .min_height(32.0)
+                    .content(meta.display_name)
                     .on_click(move |_| {
                         let added = {
                             let mut g = st_add.graph.borrow_mut();
@@ -337,10 +313,11 @@ pub fn node_graph_editor(
                                 .status_msg
                                 .set(format!("Placed `{disp}` component on canvas."));
                         }
-                    }),
+                    })
+                    .into_element(),
             );
         }
-        row.into_element()
+        Element::Fragment(buttons)
     });
 
     let ribbon = border()
@@ -353,27 +330,43 @@ pub fn node_graph_editor(
             }
         })
         .border_thickness((0.0, 0.0, 0.0, 1.0))
-        .padding((10.0, 6.0, 10.0, 6.0))
+        .padding((10.0, 10.0, 10.0, 10.0))
         .clip_to_bounds(true)
         .child(
             stack_panel()
-                .spacing(5.0)
+                .spacing(8.0)
+                // Commands remain available while the component palette stays
+                // out of the canvas until it is needed, especially at compact widths.
+                .child(action_bar)
                 .child(
-                    dock_panel()
-                        .child(action_bar.dock_panel_dock(Dock::Right))
-                        .child(cat_tabs),
-                )
-                .child(
-                    dock_panel()
-                        .child(
-                            text_box()
-                                .dock_panel_dock(Dock::Left)
-                                .width(154.0)
-                                .margin((0.0, 0.0, 8.0, 0.0))
-                                .placeholder_text("🔍 Search 65+ nodes…")
-                                .text(search_query.two_way()),
-                        )
-                        .child(shelf),
+                    expander()
+                        .header("Add components")
+                        .is_expanded(false)
+                        .horizontal_alignment(HorizontalAlignment::Stretch)
+                        .horizontal_content_alignment(HorizontalAlignment::Stretch)
+                        .content(
+                            stack_panel().spacing(8.0).child(cat_tabs).child(
+                                scroll_viewer()
+                                    .horizontal_scroll_bar_visibility(ScrollBarVisibility::Disabled)
+                                    .vertical_scroll_bar_visibility(ScrollBarVisibility::Auto)
+                                    .max_height(108.0)
+                                    .content(
+                                        wrap_panel()
+                                            .item_spacing(6.0)
+                                            .line_spacing(6.0)
+                                            // Keep the search control mounted while results
+                                            // change, preserving focus and the text caret.
+                                            .child(
+                                                text_box()
+                                                    .width(220.0)
+                                                    .min_height(32.0)
+                                                    .placeholder_text("Search components…")
+                                                    .text(search_query.two_way()),
+                                            )
+                                            .child(shelf),
+                                    ),
+                            ),
+                        ),
                 ),
         );
 
