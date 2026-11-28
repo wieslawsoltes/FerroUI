@@ -37,6 +37,13 @@ fn reduction_report(m: &Mounted) -> String {
         panel.bounds().width,
         panel.extent_width()
     );
+    let top_level = ferroui_controls::TopLevel::get_top_level(Some(&m.ribbon));
+    report.push_str(&format!(
+        " render scaling {:?} winui rounding {} ribbon font {}",
+        top_level.as_ref().map(|t| t.render_scaling()),
+        m.ribbon.use_winui_measure_rounding(),
+        m.ribbon.font_size()
+    ));
     let metrics = panel.metrics().unwrap();
     for group in m.groups() {
         let cached = panel.cached_classic_widths(&group);
