@@ -3,13 +3,12 @@
 use super::at_spi_coordinate_helper::AtSpiCoordinateHelper;
 use super::{node_of, server_of};
 use crate::at_spi::at_spi_constants::*;
-use crate::at_spi::at_spi_coord_type::AtSpiCoordType;
 use crate::at_spi::at_spi_node::AtSpiNode;
 use crate::at_spi::at_spi_server::AtSpiServer;
 use crate::at_spi::dbus::descriptions::COMPONENT;
 use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use crate::at_spi::dbus::types::{AtSpiObjectReference, AtSpiRect};
-use ferroui_base::{PixelPoint, Point};
+use ferroui_base::Point;
 use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::provider::IRootProvider;
 use std::rc::{Rc, Weak};
@@ -66,8 +65,8 @@ impl AtSpiComponentHandler {
 
     fn contains_async(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> bool {
         let rect = AtSpiCoordinateHelper::get_screen_extents(node);
-        let point = Self::translate_to_screen(node, x, y, coord_type);
-        rect.contains_exclusive(Point::new(f64::from(point.0), f64::from(point.1)))
+        let point = AtSpiCoordinateHelper::screen_point(node, x, y, coord_type);
+        rect.contains_exclusive(Point::new(f64::from(point.x), f64::from(point.y)))
     }
 
     fn get_accessible_at_point_async(
@@ -111,23 +110,8 @@ impl AtSpiComponentHandler {
         };
         let Some(window_impl) = platform_impl.as_window_impl() else { return false };
 
-        let screen_pos = Self::translate_to_screen(node, x, y, coord_type);
-        window_impl.move_(PixelPoint::new(screen_pos.0, screen_pos.1));
+        window_impl.move_(AtSpiCoordinateHelper::screen_point(node, x, y, coord_type));
         true
-    }
-
-    fn translate_to_screen(node: &AtSpiNode, x: i32, y: i32, coord_type: u32) -> (i32, i32) {
-        match AtSpiCoordType::from_u32(coord_type) {
-            Some(AtSpiCoordType::Screen) | None => (x, y),
-            Some(AtSpiCoordType::Window) => {
-                let window_rect = AtSpiCoordinateHelper::get_window_rect(node);
-                (x + window_rect.x as i32, y + window_rect.y as i32)
-            }
-            Some(AtSpiCoordType::Parent) => {
-                let parent_rect = AtSpiCoordinateHelper::get_parent_screen_rect(node);
-                (x + parent_rect.x as i32, y + parent_rect.y as i32)
-            }
-        }
     }
 }
 

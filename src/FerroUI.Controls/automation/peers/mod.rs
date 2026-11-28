@@ -112,7 +112,8 @@ pub(crate) use combo_box_automation_peer::UnrealizedSelectionPeer;
 pub use content_control_automation_peer::ContentControlAutomationPeer;
 pub use content_page_automation_peer::ContentPageAutomationPeer;
 pub use control_automation_peer::{
-    ControlAutomationPeer, ControlAutomationPeerImpl, ControlAutomationPeerImplExt, ControlAutomationPeerVTable,
+    AutomationTargetResolver, ControlAutomationPeer, ControlAutomationPeerImpl, ControlAutomationPeerImplExt,
+    ControlAutomationPeerVTable,
 };
 pub use date_picker_automation_peer::DatePickerAutomationPeer;
 pub use drawer_page_automation_peer::DrawerPageAutomationPeer;

@@ -32,6 +32,10 @@ vello-gpu = ["vello", "ferroui-vello/gpu"]
 quartz = ["dep:ferroui-quartz"]
 quartz-metal = ["quartz", "ferroui-quartz/metal"]
 quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
+# The text range accessibility of an editor's text provider on macOS (`ferroui-native/text-editor`).
+# `ferroui-edit` turns it on through `ferroui-native`; this forwards it for an application that
+# implements span operations of its own.
+text-editor = ["ferroui-native/text-editor"]
 
 [dependencies]
 ferroui-base.workspace = true

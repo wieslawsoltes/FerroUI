@@ -1,4 +1,4 @@
-use super::{VulkanCommandBufferPool, VulkanMemoryHelper};
+use super::{BarrierMasks, VulkanCommandBufferPool, VulkanMemoryHelper};
 use crate::{
     IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanImageInfo,
     VulkanResultExtensions,
@@ -27,6 +27,11 @@ pub(crate) struct VulkanImageBase {
     size: PixelSize,
     memory_size: Cell<u64>,
     current_layout: Cell<vk::ImageLayout>,
+    /// The current layout was recorded with
+    /// [`set_current_layout`](Self::set_current_layout): another user of
+    /// the memory brought the image there, with work this device does not
+    /// know, so the next transition waits for every stage.
+    foreign_layout: Cell<bool>,
 }
 
 /// Memory to import for an image.
@@ -64,6 +69,7 @@ impl VulkanImageBase {
             size,
             memory_size: Cell::new(0),
             current_layout: Cell::new(vk::ImageLayout::UNDEFINED),
+            foreign_layout: Cell::new(false),
         }
     }
 
@@ -76,7 +82,6 @@ impl VulkanImageBase {
         self.handle.get()
     }
 
-    #[allow(dead_code)]
     pub fn format(&self) -> vk::Format {
         self.format
     }
@@ -103,9 +108,12 @@ impl VulkanImageBase {
     }
 
     /// Records the layout an image is in that was brought there by another
-    /// user of its memory.
+    /// user of its memory. What that user accessed is not known, so the next
+    /// transition is submitted even to the same layout.
     pub fn set_current_layout(&self, layout: vk::ImageLayout) {
         self.current_layout.set(layout);
+        self.current_access_flags.set(vk::AccessFlags::empty());
+        self.foreign_layout.set(true);
     }
 
     pub fn memory_handle(&self) -> vk::DeviceMemory {
@@ -225,25 +233,45 @@ impl VulkanImageBase {
     }
 
     /// Submits the change of the layout of the image and records the new
-    /// layout.
+    /// layout. Nothing is submitted when the image is in that layout with
+    /// those access flags already ([`needs_transition`]).
     pub fn transition_layout(
         &self,
         destination_layout: vk::ImageLayout,
         destination_access_flags: vk::AccessFlags,
     ) -> Result<(), VulkanError> {
+        if !needs_transition(
+            (self.current_layout.get(), self.current_access_flags.get()),
+            (destination_layout, destination_access_flags),
+        ) {
+            return Ok(());
+        }
         let command_buffer = self.command_buffer_pool.create_command_buffer()?;
         command_buffer.begin_recording()?;
 
-        VulkanMemoryHelper::transition_layout(
-            &*self.context,
-            &command_buffer,
-            self.handle(),
-            self.current_layout.get(),
-            self.current_access_flags.get(),
-            destination_layout,
-            destination_access_flags,
-            self.mip_levels.get(),
-        );
+        if self.foreign_layout.replace(false) {
+            // Kept broad: the image's earlier user is another API or process.
+            VulkanMemoryHelper::record_barrier(
+                &*self.context,
+                &command_buffer,
+                self.handle(),
+                self.current_layout.get(),
+                destination_layout,
+                BarrierMasks::broad(self.current_access_flags.get(), destination_access_flags),
+                self.mip_levels.get(),
+            );
+        } else {
+            VulkanMemoryHelper::transition_layout(
+                &*self.context,
+                &command_buffer,
+                self.handle(),
+                self.current_layout.get(),
+                self.current_access_flags.get(),
+                destination_layout,
+                destination_access_flags,
+                self.mip_levels.get(),
+            );
+        }
 
         command_buffer.end_recording()?;
 
@@ -286,6 +314,17 @@ impl VulkanImageBase {
     }
 }
 
+/// Whether an image in the layout and with the access flags of `current`
+/// needs a barrier to be in those of `destination`: not when both are the
+/// same, unless the layout is undefined (the contents are not kept, and a
+/// transition there is never a no-op that may be left out).
+pub(crate) fn needs_transition(
+    current: (vk::ImageLayout, vk::AccessFlags),
+    destination: (vk::ImageLayout, vk::AccessFlags),
+) -> bool {
+    current != destination || current.0 == vk::ImageLayout::UNDEFINED
+}
+
 /// The number of mip levels of an image: the given one, or for zero the
 /// whole part of the binary logarithm of the larger side.
 pub(crate) fn mip_levels_for(mip_levels: u32, size: PixelSize) -> u32 {
@@ -305,7 +344,9 @@ pub(crate) struct VulkanImage {
 
 impl VulkanImage {
     /// Creates the image and brings it into the layout of a colour
-    /// attachment.
+    /// attachment. With `mip_levels` zero it gets the full chain of its size;
+    /// an image that is never sampled with mips (the image a window's frame
+    /// is rendered to) takes one.
     pub fn new(
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
         command_buffer_pool: Rc<VulkanCommandBufferPool>,
@@ -331,6 +372,28 @@ impl std::ops::Deref for VulkanImage {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_transition_to_the_layout_and_access_the_image_has_is_left_out() {
+        let color = (vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE);
+        assert!(!needs_transition(color, color));
+        let read = (vk::ImageLayout::TRANSFER_SRC_OPTIMAL, vk::AccessFlags::TRANSFER_READ);
+        assert!(!needs_transition(read, read));
+    }
+
+    #[test]
+    fn a_transition_to_another_layout_or_access_is_submitted() {
+        let color = (vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE);
+        let read = (vk::ImageLayout::TRANSFER_SRC_OPTIMAL, vk::AccessFlags::TRANSFER_READ);
+        assert!(needs_transition(color, read));
+        assert!(needs_transition(read, color));
+        // The same layout with other access flags: a memory dependency is still needed.
+        assert!(needs_transition(color, (vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::SHADER_READ)));
+        // An image in an unknown layout (just created, or brought there by another user).
+        let undefined = (vk::ImageLayout::UNDEFINED, vk::AccessFlags::empty());
+        assert!(needs_transition(undefined, undefined));
+        assert!(needs_transition(undefined, color));
+    }
 
     #[test]
     fn given_mip_levels_are_kept() {

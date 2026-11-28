@@ -134,10 +134,18 @@ pub mod markers {
     pub struct FromControlElement;
     /// A binding.
     pub struct FromBinding;
+    /// A typed binding to a property of a view model, of value type `V`.
+    pub struct FromModel<V>(std::marker::PhantomData<V>);
 }
 
 /// What a setter of a property whose value is `T` takes. `M` tells the
 /// conversions apart and is inferred.
+#[diagnostic::on_unimplemented(
+    message = "`{Self}` is not a value for a property of type `{T}`",
+    label = "this cannot set the property",
+    note = "a setter takes the value, what converts to it, a signal, a closure, a two-way signal or a binding",
+    note = "the short typed forms are rgb(0x1E293B), ctrl(KeyCode::S), translate(x, y), shadow(..), blur(r) and path!(\"..\")"
+)]
 pub trait IntoProp<T, M> {
     /// The value of the element.
     fn into_prop(self) -> PropValue;
@@ -510,6 +518,54 @@ impl<T> El<T> {
         self
     }
 
+    /// Makes a property follow a resource, as `{DynamicResource}` does: through a change of the
+    /// resource or of the theme variant, with no component running again. `key` is a typed key
+    /// of a theme (`keys::ButtonBackground`), whose value must convert to the property, or text.
+    pub fn dynamic_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: true,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Gives a property the value of a resource once, as `{StaticResource}` does: the first
+    /// value the control finds, which later changes do not replace. `key` is a typed key of a
+    /// theme or text.
+    pub fn static_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: false,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Binds a property of an element of a control template to a property of the control the
+    /// template is applied to (`{TemplateBinding}`). The two have the same value type.
+    pub fn template_bind<P, Q>(mut self, property: &'static P, source: &'static Q) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        Q: TypedProperty<Value = P::Value> + ?Sized,
+    {
+        let binding = ferroui_base::data::TemplateBinding::new(source.untyped());
+        set_prop(&mut self.element, property.untyped(), PropValue::Binding(binding));
+        self
+    }
+
     /// Handles a routed event with the control that handles it.
     pub fn on<A: IRoutedEventArgs + 'static>(
         self,
@@ -619,6 +675,12 @@ impl<T> From<El<T>> for Element {
     fn from(builder: El<T>) -> Self {
         builder.build()
     }
+}
+
+/// Gives a property of an element a value, in place of one it has.
+fn set_prop(element: &mut ControlElement, property: &'static FerroProperty, value: PropValue) {
+    element.props.retain(|entry| !std::ptr::eq(entry.property, property));
+    element.props.push(PropEntry { property, value });
 }
 
 /// The object a property is set on, for the generated code.

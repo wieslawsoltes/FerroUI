@@ -405,6 +405,7 @@ impl IInputDevice for KeyboardDevice {
             let mut ev = TextInputEventArgs::new();
             ev.text = Some(text.text().to_string());
             ev.input_method_commit = text.input_method_commit().cloned();
+            ev.from_input_method = text.is_from_input_method();
             ev.set_source(&target);
             ev.set_routed_event(Some(InputElement::text_input_event()));
 

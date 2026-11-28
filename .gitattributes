@@ -6,3 +6,7 @@
 # write, which is LF, also on Windows.
 *.rs text eol=lf
 *.json text eol=lf
+
+# Preserve the original upstream bytes of the legacy grammar test inputs.
+src/FerroUI.TextMate/tests/fixtures/pinned-grammars/*.tmLanguage.json -text
+src/FerroUI.TextMate/tests/fixtures/pinned-grammars/*.ng.json -text

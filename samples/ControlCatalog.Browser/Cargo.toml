@@ -30,6 +30,13 @@ ferroui-browser = { workspace = true }
 ferroui-fonts-inter = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
 wasm-bindgen = { workspace = true }
+# Named to turn on the 3D scenes (`media3d`) of the Skia backend for the pages of the section "3D"
+# of the catalog: on WebGL2 the GL executor of `ferroui-opengl` draws them on the GPU
+# (docs/porting/media3d.md, section 3.20). Without it a scene draws nothing. The renderer
+# `catalogScene3D` reports what they were drawn with (ferroui-render3d's count of the scenes the CPU
+# reference drew).
+ferroui-skia = { workspace = true, features = ["media3d"] }
+ferroui-render3d = { workspace = true }
 
 # The Vello render backend beside Skia in the module, chosen with `?Renderer=Vello`
 # (docs/porting/vello-backend.md, section 12). Off by default: the published module is the Skia one.

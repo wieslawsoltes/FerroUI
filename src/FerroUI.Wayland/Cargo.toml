@@ -17,6 +17,8 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The code no longer names this crate, so the linker drops it. The entry stays until the
+# separate lock files of the components can change with it.
 ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
@@ -62,6 +64,9 @@ example = [
 # --target x86_64-unknown-linux-gnu --example wayland_window` type-checks the example from there.
 # An example built with this feature alone does not run.
 example-check = ["dep:wayland-protocols-wlr", "dep:wayland-protocols-misc"]
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["chromium-clipboard-map"] }
 
 [[example]]
 name = "wayland_window"

@@ -10,6 +10,7 @@
 //! hand from the same descriptions, and the members it calls are the
 //! methods of the class.
 
+use ferroui_base::input::LocalBoxFuture;
 use zbus::export::serde::ser::Serialize;
 use zbus::export::serde::Deserialize;
 use zbus::{DynamicType, Type, Variant};
@@ -57,6 +58,17 @@ impl<B: Serialize + DynamicType> ReplyBody for B {
 
 pub(crate) type Reply = Box<dyn ReplyBody>;
 pub(crate) type CallResult = Result<Reply, DBusError>;
+
+pub(crate) enum MethodReply {
+    Ready(CallResult),
+    Deferred(LocalBoxFuture<CallResult>),
+}
+
+impl From<CallResult> for MethodReply {
+    fn from(result: CallResult) -> Self {
+        Self::Ready(result)
+    }
+}
 
 /// A reply with the out arguments `body` (a tuple of them; `()` for none).
 pub(crate) fn reply<B: Serialize + DynamicType + 'static>(body: B) -> CallResult {
@@ -121,6 +133,12 @@ impl InterfaceDescription {
 /// A handler of one interface at one object path.
 pub(crate) trait DBusInterface {
     fn description(&self) -> &'static InterfaceDescription;
+
+    /// Dispatch on the UI thread. A deferred reply can await a platform
+    /// service that needs the dispatcher to stay responsive.
+    fn dispatch(&self, member: &str, body: &zbus::message::Body) -> MethodReply {
+        self.call(member, body).into()
+    }
 
     /// Answers a method call of the interface.
     fn call(&self, member: &str, body: &zbus::message::Body) -> CallResult {
