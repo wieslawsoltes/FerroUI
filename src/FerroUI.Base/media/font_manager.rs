@@ -706,6 +706,18 @@ impl FontManager {
         }
 
         self.platform_impl.dispose();
+        // What the thread found with the glyph typefaces of this manager is found again.
+        advance_glyph_typeface_generation();
+    }
+
+    /// The glyph typeface generation of the thread, for what keeps something it found with glyph
+    /// typefaces outside a font manager: it holds while the generation stays the same, which a
+    /// change of the fonts advances (a collection added, removed or replaced, a collection that
+    /// gained or lost a typeface, a font manager disposed of).
+    #[doc(hidden)]
+    #[inline]
+    pub fn glyph_typeface_generation() -> u64 {
+        glyph_typeface_generation()
     }
 }
 
