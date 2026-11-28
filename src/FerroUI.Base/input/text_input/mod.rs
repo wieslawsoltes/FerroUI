@@ -22,7 +22,7 @@ pub use text_input_method_range_geometry::{
     TextInputMethodRangeGeometry, TextInputMethodTextBounds,
 };
 pub use text_input_method_client::{
-    ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
+    masked_surrounding_text, ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
 };
 pub use text_input_method_client_requery_requested_event_args::TextInputMethodClientRequeryRequestedEventArgs;
 pub use text_input_method_client_requested_event_args::TextInputMethodClientRequestedEventArgs;

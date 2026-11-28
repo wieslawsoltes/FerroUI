@@ -63,6 +63,9 @@ fn retained_plain_provider_redacts_masked_reads_and_suppresses_value_payloads() 
         );
         observed.borrow_mut().clear();
         field.set_password_char('●');
+        // Masking tells the platforms to forget the text; the event carries no text.
+        assert_eq!(&*observed.borrow(), &[(None, None)]);
+        observed.borrow_mut().clear();
         field.set_text(Some("synthetic secret"));
         assert_eq!(retained.value(), None);
         field.set_reveal_password(true);

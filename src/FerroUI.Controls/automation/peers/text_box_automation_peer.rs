@@ -81,6 +81,7 @@ impl TextBoxAutomationPeerImpl for TextBoxAutomationPeer {
     fn owner_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
         if e.property() == TextBox::password_char_property().as_property() {
             this.invalidate_children();
+            this.publish_masking_change(e.get_old_value::<char>().is_some_and(|old| old != '\0'));
         }
         if e.property() == TextBox::text_property().as_property() && this.accessible_text_owner().is_some() {
             this.raise_property_changed_event(
@@ -135,6 +136,21 @@ impl TextBoxAutomationPeer {
     pub(crate) fn accessible_text_owner(&self) -> Option<Ref<TextBox>> {
         let owner = self.try_owner()?.cast::<TextBox>()?;
         (owner.password_char() == '\0').then_some(owner)
+    }
+
+    /// Tells the platforms that the disclosed value changed because masking started or ended.
+    ///
+    /// A platform keeps the last value it was told: the cached value of iOS, the text node of
+    /// the browser, the node caches of Android and AT-SPI clients. Text set before the mask must
+    /// not survive there. The old value is never sent, because it is the text being hidden.
+    fn publish_masking_change(&self, was_masked: bool) {
+        let Some(owner) = self.try_owner().and_then(|owner| owner.cast::<TextBox>()) else { return };
+        let is_masked = owner.password_char() != '\0';
+        if was_masked == is_masked || owner.text().unwrap_or_default().is_empty() {
+            return;
+        }
+        let value = self.value().map(|value| Rc::new(value) as BoxedValue);
+        self.raise_property_changed_event(ValuePatternIdentifiers::value_property(), None, value);
     }
 
     /// The text of an ordinary text box; password fields never disclose a value.

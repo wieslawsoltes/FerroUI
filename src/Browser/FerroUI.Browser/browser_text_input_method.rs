@@ -3,7 +3,8 @@ use crate::browser_text_input_edit::edit_from_dom;
 use crate::browser_text_input_options::BrowserTextInputOptions;
 use crate::interop::{input_helper, JsObject};
 use ferroui_base::input::text_input::{
-    ITextInputMethodImpl, TextInputMethodClient, TextInputMethodComposition, TextInputMethodConnection, TextInputMethodState,
+    masked_surrounding_text, ITextInputMethodImpl, TextInputContentType, TextInputMethodClient,
+    TextInputMethodComposition, TextInputMethodConnection, TextInputMethodState,
     TextInputOptions, TextSelection,
 };
 use ferroui_base::reactive::IDisposable;
@@ -27,6 +28,8 @@ pub(crate) trait ITextInputPage {
     fn focus_container_element(&self);
     fn clear_input_element(&self);
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32);
+    /// Makes the hidden input element a password input, or a text input again.
+    fn set_input_masked(&self, masked: bool);
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32);
     fn selection_start(&self) -> i32;
     fn selection_end(&self) -> i32;
@@ -84,6 +87,10 @@ impl ITextInputPage for TextInputPage {
 
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
         input_helper::set_surrounding_text(&self.input_element, text, start, end);
+    }
+
+    fn set_input_masked(&self, masked: bool) {
+        input_helper::set_input_masked(&self.input_element, masked);
     }
 
     fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
@@ -163,6 +170,8 @@ pub struct BrowserTextInputMethod {
     applied_options: RefCell<Option<BrowserTextInputOptions>>,
     options_revision: Cell<u64>,
     applying_options: Cell<bool>,
+    /// Whether the hidden input element is a password input now.
+    input_masked: Cell<bool>,
     dom: RefCell<dom::DomState>,
     client_revision: Cell<u64>,
     legacy_context_revision: Cell<Option<u64>>,
@@ -218,6 +227,7 @@ impl BrowserTextInputMethod {
             applied_options: RefCell::new(None),
             options_revision: Cell::new(0),
             applying_options: Cell::new(false),
+            input_masked: Cell::new(false),
             dom: RefCell::new(dom::DomState::default()),
             client_revision: Cell::new(0),
             legacy_context_revision: Cell::new(None),
@@ -310,7 +320,7 @@ impl BrowserTextInputMethod {
         if let Some(client) = self.client() {
             let revision = client.supports_surrounding_text_edits()
                 .then(|| client.input_method_state_revision()).flatten();
-            let surrounding_text = client.surrounding_text();
+            let surrounding_text = self.mirrored_text(&*client);
             let selection = client.selection();
             self.legacy_context_revision.set(revision);
             self.page.set_surrounding_text(&surrounding_text, selection.start, selection.end);
@@ -471,6 +481,11 @@ impl BrowserTextInputMethod {
             if let Some(input_handler) = self.input_handler.upgrade() {
                 input_handler.composition_text_event(data);
             }
+        }
+        // A commit that changed nothing raises no change of the text, and the element must
+        // not keep what was composed in it.
+        if self.masks_mirrored_text() {
+            self.surrounding_text_changed();
         }
     }
 
@@ -671,6 +686,13 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
         self.options.replace(Some(options.clone()));
         self.options_revision.set(self.options_revision.get().wrapping_add(1));
         self.apply_input_options();
+        let masked = self.masks_mirrored_text();
+        if masked != self.input_masked.replace(masked) {
+            self.page.set_input_masked(masked);
+            if !self.uses_connection() {
+                self.surrounding_text_changed();
+            }
+        }
     }
 
     fn reset(&self) {
@@ -686,6 +708,25 @@ impl ITextInputMethodImpl for BrowserTextInputMethod {
 }
 
 impl BrowserTextInputMethod {
+    /// Whether the hidden element must not hold the text: it is a real, focused element of the
+    /// page, which assistive technology and page scripts can read.
+    fn masks_mirrored_text(&self) -> bool {
+        self.options.borrow().as_ref().is_some_and(|options| {
+            matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin)
+                || options.is_sensitive
+        })
+    }
+
+    /// The text the hidden element holds for `client`.
+    fn mirrored_text(&self, client: &dyn TextInputMethodClient) -> String {
+        let text = client.surrounding_text();
+        if self.masks_mirrored_text() {
+            masked_surrounding_text(&text)
+        } else {
+            text
+        }
+    }
+
     fn reset_connection_client(&self) {
         let generation = self.next_generation();
         let dom_revision = self.invalidate_dom();
@@ -749,6 +790,10 @@ mod tests {
 
         fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
             self.log(format!("text '{text}' {start} {end}"));
+        }
+
+        fn set_input_masked(&self, masked: bool) {
+            self.log(format!("masked {masked}"));
         }
 
         fn set_bounds(&self, x: i32, y: i32, width: i32, height: i32, caret: i32) {
@@ -920,6 +965,58 @@ mod tests {
         client.raise_surrounding_text_changed();
 
         assert_eq!(vec!["text 'hello world' 11 11"], fixture.take_calls());
+    }
+
+    #[test]
+    fn the_hidden_element_never_holds_the_text_of_a_sensitive_client() {
+        let fixture = Fixture::new();
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        assert_eq!(vec!["masked true"], fixture.take_calls());
+        let client = TestClient::new("a\u{1F600}b", 1, 3);
+        fixture.set_client(&client);
+        let calls = fixture.take_calls();
+        // A mask of the same UTF-16 length keeps the selection offsets.
+        let masked = format!("text '{}' 1 3", masked_surrounding_text("a\u{1F600}b"));
+        assert_eq!(4, masked_surrounding_text("a\u{1F600}b").encode_utf16().count());
+        assert!(calls.contains(&masked), "{calls:?}");
+        assert!(!calls.iter().any(|call| call.contains('a') && call.starts_with("text")), "{calls:?}");
+
+        *client.text.borrow_mut() = "secret".to_string();
+        client.selection.set(TextSelection::new(6, 6));
+        client.raise_surrounding_text_changed();
+        assert_eq!(vec![format!("text '{}' 6 6", "\u{2022}".repeat(6))], fixture.take_calls());
+    }
+
+    #[test]
+    fn the_end_of_a_composition_writes_the_mask_again() {
+        let fixture = Fixture::new();
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        let client = TestClient::new("abc", 1, 1);
+        fixture.set_client(&client);
+        fixture.method.on_composition_start();
+        fixture.method.on_composition_update(Some("x"));
+        fixture.take_calls();
+
+        // A canceled composition commits nothing, so no change of the text follows.
+        fixture.method.on_composition_end(None);
+        let masked = format!("text '{}' 1 1", "\u{2022}".repeat(3));
+        assert!(fixture.take_calls().contains(&masked));
+    }
+
+    #[test]
+    fn a_client_that_becomes_sensitive_is_masked_in_the_hidden_element_at_once() {
+        let fixture = Fixture::new();
+        let client = TestClient::new("secret", 2, 2);
+        fixture.set_client(&client);
+        assert!(fixture.take_calls().contains(&"text 'secret' 2 2".to_string()));
+
+        fixture.method.set_options(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() });
+        let masked = format!("text '{}' 2 2", "\u{2022}".repeat(6));
+        // The element is a password input before the mask replaces the text.
+        assert_eq!(vec!["masked true".to_string(), masked], fixture.take_calls());
+
+        fixture.method.set_options(&TextInputOptions::default());
+        assert_eq!(vec!["masked false", "text 'secret' 2 2"], fixture.take_calls());
     }
 
     #[test]

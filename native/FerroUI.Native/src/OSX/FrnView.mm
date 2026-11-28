@@ -1302,6 +1302,11 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
 
 - (void)setInputContentType:(FrnTextInputContentType)contentType
 {
+    // A secure entry offers only Roman input sources, as NSSecureTextField does, so
+    // that no composing input method sees its keys.
+    [self inputContext].allowedInputSourceLocales =
+        contentType == FrnTextInputContentSecure ? @[ NSAllRomanInputSourcesLocaleIdentifier ] : nil;
+
     NSTextContentType nativeType = nil;
     // These public semantic types were added in macOS 14. Earlier supported
     // systems retain the default; no private string constants are invented.
