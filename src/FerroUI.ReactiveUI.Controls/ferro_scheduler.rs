@@ -158,27 +158,6 @@ impl FerroScheduler {
     // context itself; the base crate of FerroUI keeps its own current context, so the integration
     // installs it as the context of `ferroui-system`, which the tasks and the reactive libraries
     // read.
-    #[deprecated(
-        since = "0.5.0",
-        note = "the dispatcher is the schedule of its thread and of its jobs (`ferroui_system::task::current_schedule`); nothing is to be installed"
-    )]
-    #[allow(deprecated)]
-    pub fn install_on_ui_thread() {
-        use ferroui_base::threading::FerroSynchronizationContext;
-        use ferroui_system::threading::{set_synchronization_context, SynchronizationContext};
-
-        let dispatcher = Dispatcher::ui_thread();
-        dispatcher.verify_access();
-        FerroSynchronizationContext::install_if_needed();
-        let context = FerroSynchronizationContext::current()
-            .unwrap_or_else(|| FerroSynchronizationContext::with_dispatcher(&dispatcher, DispatcherPriority::NORMAL));
-        let context: Arc<dyn SynchronizationContext> = context;
-        if <dyn SynchronizationContext>::is_current(&context) {
-            return;
-        }
-        set_synchronization_context(Some(context));
-    }
-
     /// The scheduler as the scheduler handed to its work.
     fn this(&self) -> Rc<dyn IScheduler> {
         self.this.upgrade().expect("the scheduler is alive while it schedules")

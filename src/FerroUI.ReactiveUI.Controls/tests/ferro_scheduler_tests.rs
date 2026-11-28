@@ -1,5 +1,5 @@
-//! The tests of the scheduler's queue, its drains and its cancellation, of the installation of the
-//! synchronization context, and of a post of the view thread invoker. The port's own: upstream
+//! The tests of the scheduler's queue, its drains and its cancellation, of the schedule of the user
+//! interface thread, and of a post of the view thread invoker. The port's own: upstream
 //! tests the queue in the tests of its `Primitives` (`CoalescingDispatchStateTests`), against
 //! another platform.
 
@@ -9,10 +9,6 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_reactive::concurrency::IScheduler;
 use ferroui_reactive::disposables::Disposable;
 use ferroui_reactiveui::IViewThreadInvoker;
-// The synchronization context of `ferroui-system` is deprecated since 0.5.0: the test of the
-// deprecated `install_on_ui_thread` uses it.
-#[allow(deprecated)]
-use ferroui_system::threading::{current_synchronization_context, set_synchronization_context};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -147,21 +143,6 @@ fn the_dispatcher_of_the_user_interface_thread_is_its_schedule_without_an_instal
     crate::ferro_scheduler::prepare_ui_thread();
     assert!(Dispatcher::current_priority().is_some());
     assert!(ferroui_system::task::current_schedule().is_some());
-}
-
-#[test]
-#[allow(deprecated)]
-fn install_on_ui_thread_sets_the_synchronization_context_of_the_thread() {
-    let _app = start_app();
-    set_synchronization_context(None);
-
-    FerroScheduler::install_on_ui_thread();
-    let installed = current_synchronization_context().expect("a synchronization context");
-    FerroScheduler::install_on_ui_thread();
-    let again = current_synchronization_context().expect("a synchronization context");
-
-    assert!(std::ptr::addr_eq(Arc::as_ptr(&installed), Arc::as_ptr(&again)));
-    set_synchronization_context(None);
 }
 
 #[test]

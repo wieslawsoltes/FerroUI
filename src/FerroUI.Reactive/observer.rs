@@ -155,15 +155,6 @@ pub trait ObserverExt<T> {
         self.notify_on(crate::concurrency::SynchronizationContextScheduler::with_schedule(schedule))
     }
 
-    /// An observer that delivers the notifications to this one through `context`, in order
-    /// (`NotifyOn(SynchronizationContext)`: the observer of `NotifyOn(IScheduler)` on a
-    /// [`SynchronizationContextScheduler`](crate::concurrency::SynchronizationContextScheduler) of
-    /// the context, which posts with `post_local`: the observer is notified on the thread of the
-    /// context).
-    #[deprecated(since = "0.5.0", note = "use `notify_on_schedule` with a `ferroui_system::task::Schedule`")]
-    #[allow(deprecated)]
-    fn notify_on_context(&self, context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>) -> Rc<dyn IObserver<T>>;
-
     /// A progress object whose reports are the values of this observer (`ToProgress(IObserver<T>)`).
     fn to_progress(&self) -> Rc<dyn IProgress<T>>;
 
@@ -210,11 +201,6 @@ impl<T: 'static> ObserverExt<T> for Rc<dyn IObserver<T>> {
         Rc::new(NotifyOnObserver { inner: crate::internal::ScheduledObserver::new(scheduler, self.clone()) })
     }
 
-    #[allow(deprecated)]
-    fn notify_on_context(&self, context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>) -> Rc<dyn IObserver<T>> {
-        let scheduler: Rc<dyn crate::concurrency::IScheduler> = crate::concurrency::SynchronizationContextScheduler::new(context);
-        self.notify_on(scheduler)
-    }
 
     fn to_progress(&self) -> Rc<dyn IProgress<T>> {
         let observer = self.clone();

@@ -112,8 +112,7 @@
       "Comparer": 4,
       "EqualityComparer": 1,
       "IAsyncDisposable": 1,
-      "IList": 1,
-      "SortException": 1
+      "IList": 1
     },
     "ferroui-dynamic-data-tests": {
       "Comparer": 9,
@@ -170,16 +169,11 @@
       "Comparer": 6,
       "CompositeDisposable": 1,
       "Disposable": 1,
-      "InvalidCastException": 1,
       "MultipleAssignmentDisposable": 1,
       "PriorityQueue": 1,
       "RefCountDisposable": 1,
       "SerialDisposable": 1,
-      "SingleAssignmentDisposable": 1,
-      "TimeoutException": 1
-    },
-    "ferroui-reactive-testing": {
-      "TestException": 1
+      "SingleAssignmentDisposable": 1
     },
     "ferroui-reactive-tests": {
       "ArgumentException": 1,
@@ -190,12 +184,7 @@
     "ferroui-reactiveui": {
       "Comparer": 1,
       "Convert": 1,
-      "EventHandler": 1,
-      "PanicException": 1,
-      "TargetInvocationException": 1,
-      "UnhandledErrorException": 1,
-      "UnhandledInteractionException": 1,
-      "ViewLocatorNotFoundException": 1
+      "EventHandler": 1
     },
     "ferroui-reactiveui-testing-tests": {
       "InvalidOperationException": 1

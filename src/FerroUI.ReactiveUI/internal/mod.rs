@@ -7,7 +7,5 @@ pub(crate) mod subjects;
 pub(crate) mod task_observable;
 
 pub use panic_exception::PanicError;
-#[allow(deprecated)]
-pub use panic_exception::PanicException;
 #[allow(unused_imports)]
 pub(crate) use scheduler_extensions::SchedulerExtensions;

@@ -73,10 +73,6 @@ pub struct TargetInvocationError {
     inner_exception: Option<String>,
 }
 
-/// The name of [`TargetInvocationError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `TargetInvocationError`")]
-pub type TargetInvocationException = TargetInvocationError;
-
 impl TargetInvocationError {
     /// The exception with `message`, caused by `inner_exception`
     /// (`TargetInvocationException(string, Exception)`).

@@ -14,5 +14,3 @@ pub use i_output_context::IOutputContext;
 pub use interaction::{Interaction, InteractionHandler};
 pub use interaction_context::InteractionContext;
 pub use unhandled_interaction_exception::UnhandledInteractionError;
-#[allow(deprecated)]
-pub use unhandled_interaction_exception::UnhandledInteractionException;

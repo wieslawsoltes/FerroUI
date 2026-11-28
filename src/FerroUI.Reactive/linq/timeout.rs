@@ -19,15 +19,6 @@ use std::time::{Duration, SystemTime};
 #[derive(Debug, Default, Clone, Copy, PartialEq, Eq)]
 pub struct TimeoutError;
 
-/// The name of [`TimeoutError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `TimeoutError`")]
-pub type TimeoutException = TimeoutError;
-
-/// The value of the unit struct [`TimeoutError`] under its name before 0.5.
-#[deprecated(since = "0.5.0", note = "use `TimeoutError`")]
-#[allow(non_upper_case_globals)]
-pub const TimeoutException: TimeoutError = TimeoutError;
-
 impl fmt::Display for TimeoutError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("The operation has timed out.")

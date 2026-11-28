@@ -15,10 +15,6 @@ pub struct ViewLocatorNotFoundError {
     inner_exception: Option<String>,
 }
 
-/// The name of [`ViewLocatorNotFoundError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `ViewLocatorNotFoundError`")]
-pub type ViewLocatorNotFoundException = ViewLocatorNotFoundError;
-
 impl Default for ViewLocatorNotFoundError {
     fn default() -> Self {
         Self::new()

@@ -15,10 +15,6 @@ pub struct SortError {
     inner: Option<ObservableError>,
 }
 
-/// The name of [`SortError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `SortError`")]
-pub type SortException = SortError;
-
 impl SortError {
     /// An error with `message` (`SortException(string)`).
     pub fn new(message: impl Into<String>) -> Self {
