@@ -12,6 +12,10 @@ use ferroui_headless::{
     FerroHeadlessPlatformExtensions, FerroHeadlessPlatformOptions, FerroTestApplicationAttribute,
     FerroTestAssembly, HeadlessUnitTestSession,
 };
+use std::any::Any;
+use std::cell::RefCell;
+use std::panic::{AssertUnwindSafe, catch_unwind};
+use std::sync::Once;
 fn build() -> AppBuilder {
     AppBuilder::configure::<Application>().use_headless(FerroHeadlessPlatformOptions::default())
 }
@@ -20,17 +24,73 @@ const TEST_ASSEMBLY: FerroTestAssembly = FerroTestAssembly {
     test_application: Some(FerroTestApplicationAttribute::new(build)),
     test_isolation: None,
 };
+ferroui_base::ferro_thread_local! {
+    /// The panic messages of the test that the session thread runs: `None` outside a test.
+    static SESSION_PANICS: RefCell<Option<String>> = const { RefCell::new(None) };
+}
+/// The test runs on the session thread, not on the thread of the test: what the panic hook
+/// prints there is not in the output of the failed test, and the panic raised again on the
+/// waiting thread (`resume_unwind`) does not run the hook. The hook keeps every message of the
+/// running test, also of the panics that were caught (a dispatcher job, a render tick), and the
+/// waiting thread fails with them.
+fn record_session_panics() {
+    static HOOK: Once = Once::new();
+    HOOK.call_once(|| {
+        let previous = std::panic::take_hook();
+        std::panic::set_hook(Box::new(move |info| {
+            let _ = SESSION_PANICS.try_with(|messages| {
+                if let Ok(mut messages) = messages.try_borrow_mut()
+                    && let Some(messages) = messages.as_mut()
+                {
+                    if !messages.is_empty() {
+                        messages.push_str("\nthen ");
+                    }
+                    messages.push_str(&info.to_string());
+                }
+            });
+            previous(info);
+        }));
+    });
+}
+fn payload_message(payload: &(dyn Any + Send)) -> String {
+    payload
+        .downcast_ref::<&str>()
+        .map(|message| message.to_string())
+        .or_else(|| payload.downcast_ref::<String>().cloned())
+        .unwrap_or_else(|| "the headless case panicked".to_owned())
+}
 pub(crate) fn run(test: impl FnOnce() + Send + 'static) {
-    HeadlessUnitTestSession::get_or_start_for_assembly(Some(&TEST_ASSEMBLY))
-        .dispatch(
+    record_session_panics();
+    let task = HeadlessUnitTestSession::get_or_start_for_assembly(Some(&TEST_ASSEMBLY))
+        .dispatch_result(
             move || {
-                register_types();
-                test();
+                SESSION_PANICS.with(|messages| *messages.borrow_mut() = Some(String::new()));
+                let outcome = catch_unwind(AssertUnwindSafe(|| {
+                    register_types();
+                    test();
+                }));
+                let messages = SESSION_PANICS
+                    .with(|messages| messages.borrow_mut().take())
+                    .unwrap_or_default();
+                outcome.map_err(|payload| {
+                    if messages.is_empty() {
+                        payload_message(&*payload)
+                    } else {
+                        messages
+                    }
+                })
             },
             CancellationToken::none(),
-        )
-        .wait()
-        .expect("headless case");
+        );
+    // The cleanup of the session after the test can panic too; its payload is raised again
+    // without the hook, so its message is printed here.
+    let outcome = match catch_unwind(AssertUnwindSafe(|| task.wait())) {
+        Ok(outcome) => outcome.expect("headless case"),
+        Err(payload) => panic!("headless case: {}", payload_message(&*payload)),
+    };
+    if let Err(message) = outcome {
+        panic!("{message}");
+    }
 }
 fn layout(panel: &RibbonUniformGridPanel) {
     panel.invalidate_measure();
