@@ -1,0 +1,62 @@
+[package]
+name = "physics-sandbox"
+default-run = "physics-sandbox"
+description = "Fluent Motion Studio showcasing interactive FerroUI controls, compositor motion, parametric node graphs, and CPU/GPU physics simulations"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+build = "build.rs"
+
+autotests = false
+autobenches = false
+autoexamples = false
+autobins = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "physics-sandbox"
+path = "main.rs"
+test = false
+required-features = ["desktop"]
+
+[dependencies]
+ferroui-physics = { workspace = true, features = ["simd", "gpu", "ferroui"] }
+ferroui-nodegraph = { workspace = true, features = ["ferroui", "physics"] }
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true }
+ferroui-themes-winui = { workspace = true }
+ferroui-markup-xaml = { workspace = true }
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+
+[features]
+default = ["skia"]
+desktop = ["dep:ferroui-desktop"]
+preview = ["dep:ferroui-headless", "dep:ferroui-skia"]
+skia = ["desktop", "ferroui-desktop/skia"]
+direct2d = ["desktop", "ferroui-desktop/direct2d-runtime-shaders", "dep:ferroui-direct2d"]
+quartz = ["desktop", "ferroui-desktop/quartz", "dep:ferroui-native"]
+quartz-metal = ["quartz", "ferroui-desktop/quartz-runtime-shaders", "dep:ferroui-quartz", "ferroui-quartz/metal", "ferroui-quartz/runtime-shaders"]
+
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-native = { workspace = true, optional = true }
+ferroui-quartz = { workspace = true, optional = true, features = ["metal", "runtime-shaders"] }
+
+[target.'cfg(windows)'.dependencies]
+ferroui-direct2d = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
+
+[[bin]]
+name = "physics-studio-preview"
+path = "preview.rs"
+test = false
+required-features = ["preview"]

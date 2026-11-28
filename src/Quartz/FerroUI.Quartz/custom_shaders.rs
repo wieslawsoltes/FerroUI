@@ -146,43 +146,85 @@ pub(crate) fn apply(surface: ffi::Ptr, effect: &ImmutableCustomEffect, area: Rec
             .clone()
     });
     let Ok(module) = module else { return };
-    let mut bytes = vec![0u8; module.size];
+    // Zero-allocation fast path for standard uniform blocks (<= 256 bytes, ~99.9% of shaders).
+    let mut stack_uniforms = [0u8; 256];
+    let mut heap_uniforms: Vec<u8> = Vec::new();
+    let bytes: &mut [u8] = if module.size <= stack_uniforms.len() {
+        &mut stack_uniforms[..module.size]
+    } else {
+        heap_uniforms.resize(module.size, 0);
+        &mut heap_uniforms
+    };
+
     let mut index = 0;
     effect.for_each_shader_uniform(
         [area.width as f32, area.height as f32],
         scale,
         &mut |_, value| {
-            let values: Vec<u8> = match value {
-                ShaderUniformValue::Float(v) => v.to_ne_bytes().to_vec(),
-                ShaderUniformValue::Int(v) => v.to_ne_bytes().to_vec(),
-                ShaderUniformValue::Float2(v) => v.into_iter().flat_map(f32::to_ne_bytes).collect(),
-                ShaderUniformValue::Float4(v) => v.into_iter().flat_map(f32::to_ne_bytes).collect(),
-            };
             let offset = module.offsets[index] as usize;
-            bytes[offset..offset + values.len()].copy_from_slice(&values);
+            match value {
+                ShaderUniformValue::Float(v) => {
+                    bytes[offset..offset + 4].copy_from_slice(&v.to_ne_bytes());
+                }
+                ShaderUniformValue::Int(v) => {
+                    bytes[offset..offset + 4].copy_from_slice(&v.to_ne_bytes());
+                }
+                ShaderUniformValue::Float2(v) => {
+                    bytes[offset..offset + 4].copy_from_slice(&v[0].to_ne_bytes());
+                    bytes[offset + 4..offset + 8].copy_from_slice(&v[1].to_ne_bytes());
+                }
+                ShaderUniformValue::Float4(v) => {
+                    bytes[offset..offset + 4].copy_from_slice(&v[0].to_ne_bytes());
+                    bytes[offset + 4..offset + 8].copy_from_slice(&v[1].to_ne_bytes());
+                    bytes[offset + 8..offset + 12].copy_from_slice(&v[2].to_ne_bytes());
+                    bytes[offset + 12..offset + 16].copy_from_slice(&v[3].to_ne_bytes());
+                }
+            }
             index += 1;
         },
     );
-    let mut children = Vec::new();
+
+    // Zero-allocation stack storage for up to MAX_SHADER_CHILDREN (4) child bitmaps.
+    let mut child_owners: [Option<ffi::Owned>; 4] = [None, None, None, None];
+    let mut child_handles: [ffi::Ptr; 4] = [std::ptr::null_mut(); 4];
+    let mut child_count = 0usize;
+    let mut overflow_owners: Vec<Option<ffi::Owned>> = Vec::new();
+    let mut overflow_handles: Vec<ffi::Ptr> = Vec::new();
+
     effect.for_each_shader_child(&mut |_, image| {
-        children.push(
-            image
-                .bitmap()
-                .and_then(|b| Bitmap::from_impl(&*b).map(Bitmap::retained_surface)),
-        );
+        let surface_opt = image
+            .bitmap()
+            .and_then(|b| Bitmap::from_impl(&*b).map(Bitmap::retained_surface));
+        let ptr = surface_opt.as_ref().map_or(std::ptr::null_mut(), |b| b.0);
+        if child_count < child_owners.len() && overflow_handles.is_empty() {
+            child_owners[child_count] = surface_opt;
+            child_handles[child_count] = ptr;
+            child_count += 1;
+        } else {
+            if overflow_handles.is_empty() {
+                for i in 0..child_count {
+                    overflow_owners.push(child_owners[i].take());
+                    overflow_handles.push(child_handles[i]);
+                }
+            }
+            overflow_owners.push(surface_opt);
+            overflow_handles.push(ptr);
+        }
     });
-    let handles: Vec<_> = children
-        .iter()
-        .map(|b| b.as_ref().map_or(std::ptr::null_mut(), |b| b.0))
-        .collect();
+
+    let (handles_ptr, handles_len) = if overflow_handles.is_empty() {
+        (child_handles.as_ptr(), child_count)
+    } else {
+        (overflow_handles.as_ptr(), overflow_handles.len())
+    };
     unsafe {
         ffi::qm_shader_apply(
             surface,
             module.pipeline.0,
             bytes.as_ptr(),
             bytes.len(),
-            handles.as_ptr(),
-            handles.len(),
+            handles_ptr,
+            handles_len,
             area.x,
             area.y,
             area.width,

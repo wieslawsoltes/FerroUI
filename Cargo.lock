@@ -2812,6 +2812,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-nodegraph"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-physics",
+ "ferroui-view",
+ "indexmap",
+ "rustc-hash 2.1.3",
+ "smallvec",
+]
+
+[[package]]
 name = "ferroui-opengl"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -2830,6 +2843,17 @@ dependencies = [
  "ferroui-controls",
  "ferroui-view",
  "serde_json",
+]
+
+[[package]]
+name = "ferroui-physics"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "naga",
+ "rustc-hash 2.1.3",
+ "smallvec",
+ "wgpu",
 ]
 
 [[package]]
@@ -5466,6 +5490,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67eabc2ef2a60eb7faa00097bd1ffdb5bd28e62bf39990626a582201b7a754e5"
 dependencies = [
  "siphasher",
+]
+
+[[package]]
+name = "physics-sandbox"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-direct2d",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-native",
+ "ferroui-nodegraph",
+ "ferroui-physics",
+ "ferroui-quartz",
+ "ferroui-skia",
+ "ferroui-themes-winui",
+ "ferroui-view",
 ]
 
 [[package]]

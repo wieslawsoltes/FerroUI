@@ -1,0 +1,54 @@
+[package]
+name = "ferroui-physics"
+description = "Hardware-accelerated 2D/UI/game physics engine for FerroUI with SIMD, wgpu compute shaders, rigid bodies, joints, particles, and UI springs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords = ["physics", "simulation", "wgpu", "simd", "ui"]
+categories = ["simulation", "game-development", "gui"]
+
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "src/lib.rs"
+
+[[bench]]
+name = "physics-step-allocations"
+path = "benches/step_allocations.rs"
+harness = false
+
+[dependencies]
+smallvec.workspace = true
+rustc-hash.workspace = true
+wgpu = { workspace = true, optional = true }
+ferroui-base = { workspace = true, optional = true }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+wgpu = { workspace = true, optional = true, features = ["vulkan", "gles"] }
+
+[target.'cfg(windows)'.dependencies]
+wgpu = { workspace = true, optional = true, features = ["dx12", "gles"] }
+
+[features]
+default = ["simd"]
+# Explicit hardware SIMD acceleration (NEON on aarch64, SSE2/AVX2 on x86_64).
+simd = []
+# Hardware-accelerated GPU compute solver via wgpu (Metal / Vulkan / DX12 / WebGPU).
+gpu = ["dep:wgpu"]
+# Zero-layout-thrash FerroUI Visual & Logical tree physics bindings via RenderTransform.
+ferroui = ["dep:ferroui-base"]
+
+[dev-dependencies]
+naga = { workspace = true, features = ["wgsl-in", "msl-out"] }
+
+[package.metadata.release]
+group = "core"
+
+[package.metadata.docs.rs]
+features = ["simd", "gpu", "ferroui"]
