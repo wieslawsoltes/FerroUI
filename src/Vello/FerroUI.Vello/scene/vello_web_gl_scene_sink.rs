@@ -305,6 +305,7 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
         texture_transform: Affine,
         alpha: f32,
         blend_mode: BlendMode,
+        quality: peniko::ImageQuality,
     ) {
         let (path, path_transform) = prepare(path, transform);
         let limit = u32::from(u16::MAX);
@@ -322,7 +323,7 @@ impl IVelloSceneSink for VelloWebGlSceneSink {
             sampler: ImageSampler {
                 x_extend: peniko::Extend::Pad,
                 y_extend: peniko::Extend::Pad,
-                quality: peniko::ImageQuality::Low,
+                quality,
                 alpha,
             },
         });
