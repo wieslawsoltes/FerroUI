@@ -473,6 +473,7 @@ name = "control-catalog"
 version = "0.6.0-preview.1"
 dependencies = [
  "custom-effects",
+ "editor-demo",
  "ferroboard-controls",
  "ferroboard-core",
  "ferroboard-core-ferro",
@@ -485,6 +486,7 @@ dependencies = [
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
+ "ferroui-edit",
  "ferroui-harfbuzz",
  "ferroui-hot-reload",
  "ferroui-livecharts",
@@ -513,6 +515,7 @@ dependencies = [
  "treedatagrid-demo",
  "unicode-normalization",
  "url",
+ "wasm-bindgen-futures",
 ]
 
 [[package]]
@@ -529,6 +532,7 @@ dependencies = [
  "ferroui-media-camera-android",
  "ferroui-media-video",
  "ferroui-media-video-android",
+ "ferroui-skia",
 ]
 
 [[package]]
@@ -545,6 +549,8 @@ dependencies = [
  "ferroui-media-camera",
  "ferroui-media-camera-browser",
  "ferroui-media-video-browser",
+ "ferroui-render3d",
+ "ferroui-skia",
  "wasm-bindgen",
 ]
 
@@ -598,6 +604,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-ios",
  "ferroui-quartz",
+ "ferroui-skia",
  "objc2",
  "objc2-core-foundation",
  "objc2-foundation",
@@ -657,6 +664,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77745e017f5edba1a9c1d854f6f3a52dac8a12dd5af5d2f54aecf61e43d80d30"
 dependencies = [
  "libm",
+]
+
+[[package]]
+name = "corvus-regex-ecma262"
+version = "0.2.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "be72de82781404398482a431a88c1d03b82d474a5fad3003cac18f5893fc71ee"
+dependencies = [
+ "aho-corasick",
+ "memchr",
 ]
 
 [[package]]
@@ -935,6 +952,45 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "75b325c5dbd37f80359721ad39aca5a29fb04c89279657cffdda8736d0c0b9d2"
 
 [[package]]
+name = "editor-demo"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-desktop",
+ "ferroui-edit",
+ "ferroui-harfbuzz",
+ "ferroui-headless",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-skia",
+ "ferroui-system",
+ "ferroui-textmate",
+ "ferroui-themes-fluent",
+ "ferroui-wayland",
+ "ferroui-win32",
+ "sample-support",
+ "windows-sys 0.61.2",
+]
+
+[[package]]
+name = "editor-demo-browser"
+version = "0.6.0-preview.1"
+dependencies = [
+ "editor-demo",
+ "ferroui-base",
+ "ferroui-browser",
+ "ferroui-controls",
+ "ferroui-edit",
+ "ferroui-fonts-inter",
+ "ferroui-themes-fluent",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
 name = "either"
 version = "1.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -992,6 +1048,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1a05365e3b1c6d1650318537c7460c6923f1abdd272ad6842baa2b509957a06"
 dependencies = [
  "num-traits",
+]
+
+[[package]]
+name = "fancy-regex"
+version = "0.19.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d301f5bf187b3c295fce6468d3875037a0bccc5f6b151c63cac2f85babf21912"
+dependencies = [
+ "bit-set 0.8.0",
+ "regex-automata",
+ "regex-syntax",
 ]
 
 [[package]]
@@ -1548,6 +1615,7 @@ dependencies = [
  "libc",
  "rust_decimal",
  "rustc-hash 2.1.3",
+ "serde_json",
  "smallvec",
  "time",
  "url",
@@ -1696,6 +1764,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "url",
 ]
 
 [[package]]
@@ -2058,6 +2127,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-edit"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-edit-core",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-native",
+ "ferroui-textmate",
+ "tokio",
+ "url",
+]
+
+[[package]]
+name = "ferroui-edit-core"
+version = "0.6.0-preview.1"
+dependencies = [
+ "corvus-regex-ecma262",
+ "fancy-regex",
+ "ferroui-system",
+ "icu_casemap",
+ "icu_normalizer",
+ "quick-xml",
+ "regex",
+ "roxmltree 0.20.0",
+ "unicode-segmentation",
+]
+
+[[package]]
 name = "ferroui-fonts-inter"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -2106,6 +2206,8 @@ dependencies = [
  "ferroui-native",
  "ferroui-skia",
  "ferroui-themes-fluent",
+ "ferroui-win32",
+ "ferroui-x11",
  "url",
 ]
 
@@ -3018,6 +3120,7 @@ dependencies = [
  "ferroui-vulkan",
  "skia-bindings",
  "skia-safe",
+ "smallvec",
  "url",
 ]
 
@@ -3089,6 +3192,29 @@ dependencies = [
  "smallvec",
  "url",
 ]
+
+[[package]]
+name = "ferroui-textmate"
+version = "0.6.0-preview.1"
+dependencies = [
+ "corvus-regex-ecma262",
+ "fancy-regex",
+ "ferroui-system",
+ "ferroui-textmate-grammars",
+ "indexmap",
+ "js-sys",
+ "onig",
+ "onig_sys",
+ "roxmltree 0.20.0",
+ "serde",
+ "serde_json",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+]
+
+[[package]]
+name = "ferroui-textmate-grammars"
+version = "0.6.0-preview.1"
 
 [[package]]
 name = "ferroui-themes-fluent"
@@ -3311,6 +3437,7 @@ dependencies = [
  "ferroui-vulkan",
  "microcom-codegen",
  "mozangle",
+ "serde_json",
  "url",
  "windows-sys 0.61.2",
 ]
@@ -4046,6 +4173,28 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "514da54e79efa36b5976232d5b3d1d8ee1b47b19ab658f1b1ebe39221696c2d8"
 
 [[package]]
+name = "icu_casemap"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a6f143e9349267b80ae071a6ec25d4797c45756d8b2671a8b24b7b25b81ab94"
+dependencies = [
+ "icu_casemap_data",
+ "icu_collections",
+ "icu_locale_core",
+ "icu_properties",
+ "icu_provider",
+ "potential_utf",
+ "writeable",
+ "zerovec",
+]
+
+[[package]]
+name = "icu_casemap_data"
+version = "2.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "71a5c321208537711696af55bc2ab5dad939e4f6e0aef92dd6a2555deceedf3a"
+
+[[package]]
 name = "icu_collections"
 version = "2.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4053,6 +4202,7 @@ checksum = "fe090a42a0d3140fed8c63263ed1fecc02422cb2f4bfe55cd8de2de1b8e105dd"
 dependencies = [
  "displaydoc",
  "potential_utf",
+ "serde",
  "utf8_iter",
  "yoke",
  "zerofrom",
@@ -4348,6 +4498,8 @@ checksum = "cc4e190f5d26ca7051642629da2c52fc03bde85a03197c99408dcd291734c855"
 dependencies = [
  "equivalent",
  "hashbrown 0.17.1",
+ "serde",
+ "serde_core",
 ]
 
 [[package]]
@@ -5200,6 +5352,28 @@ name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9f7c3e4beb33f85d45ae3e3a1792185706c8e16d043238c593331cc7cd313b50"
+
+[[package]]
+name = "onig"
+version = "6.5.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0cc3cbf698f9438986c11a880c90a6d04b9de27575afd28bbf45b154b6c709e2"
+dependencies = [
+ "bitflags 2.13.2",
+ "libc",
+ "once_cell",
+ "onig_sys",
+]
+
+[[package]]
+name = "onig_sys"
+version = "69.9.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1e68317604e77e53b85896388e1a803c1d21b74c899ec9e5e1112db90735edd7"
+dependencies = [
+ "cc",
+ "pkg-config",
+]
 
 [[package]]
 name = "ordered-channel"

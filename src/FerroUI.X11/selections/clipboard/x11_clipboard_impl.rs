@@ -12,7 +12,7 @@ use crate::selections::selection_helper::{create_event_window, TaskCompletionSou
 use crate::x11_platform::FerroX11Platform;
 use crate::x11_structs::XEventName;
 use crate::xlib::{self, Atom, PropertyMode, XEvent, XID};
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{with_chromium_clipboard_formats, ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{AsyncDataTransferExtensions, DataFormat, IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::reactive::IDisposable;
 use std::cell::{Cell, RefCell};
@@ -185,7 +185,7 @@ impl X11ClipboardImpl {
         }
 
         // Get the formats while we're in an async method, since the formats of a data transfer are synchronous.
-        let (data_formats, text_format_atoms) = self.get_data_formats_core_async().await;
+        let (mut data_formats, text_format_atoms) = self.get_data_formats_core_async().await;
         if data_formats.is_empty() {
             return Ok(None);
         }
@@ -197,6 +197,9 @@ impl X11ClipboardImpl {
         // Get the items while we're in an async method. This does not get values, except for the file format.
         let reader =
             ClipboardDataReader::new(&platform, self.selection, text_format_atoms, data_formats.clone(), owner);
+        if self.selection == self.provider.info().atoms().CLIPBOARD {
+            data_formats.extend(reader.read_web_formats(&data_formats).await);
+        }
         let items = create_items_async(&reader).await?;
         Ok(Some(ClipboardDataTransfer::new(reader, data_formats, items)))
     }
@@ -224,6 +227,14 @@ impl IClipboardImpl for X11ClipboardImpl {
     }
 
     fn set_data_async(&self, data_transfer: Rc<dyn IAsyncDataTransfer>) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        let data_transfer = if self.selection == self.provider.info().atoms().CLIPBOARD {
+            match with_chromium_clipboard_formats(data_transfer) {
+                Ok(data_transfer) => data_transfer,
+                Err(error) => return Box::pin(ready(Err(error))),
+            }
+        } else {
+            data_transfer
+        };
         self.provider.set_data_transfer(Some(data_transfer.clone()));
         self.provider.set_owner(self.handle.get());
         self.store_atoms_in_clipboard_manager(data_transfer)

@@ -198,9 +198,8 @@ def check(packages):
                     "dependency that is left out of the package)"
                 )
 
-    # A crate that is not published has no package, but a version requirement on a crate of the
-    # workspace still has to match: a pin of its own (`version = "=0.4.0"` beside the path) is not
-    # moved by set-version, and the workspace does not resolve after it.
+    # A crate that is not published has no package, but each of its workspace pins still has
+    # to match for Cargo to resolve the workspace.
     for package in packages:
         if is_published(package):
             continue
@@ -216,9 +215,50 @@ def check(packages):
     return problems
 
 
+def update_member_pins(packages, old_version, version):
+    """Move explicit inline path pins used for member-specific dependency options."""
+    directories = {os.path.dirname(package["manifest_path"]) for package in packages}
+    inline_table = re.compile(r'^([ \t]*([A-Za-z0-9_-]+)[ \t]*=[ \t]*\{)([^}\n]*)(\})', re.MULTILINE)
+    path_key = re.compile(r'\bpath\s*=\s*"([^"]+)"')
+    old_pin = re.compile(r'(\bversion\s*=\s*")=' + re.escape(old_version) + r'(")')
+    pins = 0
+    for package in packages:
+        manifest = package["manifest_path"]
+        if manifest == MANIFEST:
+            continue
+        paths = {
+            (dependency["rename"] or dependency["name"], dependency["path"])
+            for dependency in package["dependencies"]
+            if dependency.get("path") in directories and dependency["req"] == f"={old_version}"
+        }
+        if not paths:
+            continue
+        directory = os.path.dirname(manifest)
+
+        def replace_pin(match):
+            nonlocal pins
+            body = match[3]
+            path = path_key.search(body)
+            if path is None or (match[2], os.path.normpath(os.path.join(directory, path[1]))) not in paths:
+                return match[0]
+            body, count = old_pin.subn(lambda pin: f"{pin[1]}={version}{pin[2]}", body)
+            pins += count
+            return match[1] + body + match[4]
+
+        with open(manifest, encoding="utf-8") as file:
+            original = file.read()
+        updated = inline_table.sub(replace_pin, original)
+        if updated != original:
+            with open(manifest, "w", encoding="utf-8") as file:
+                file.write(updated)
+    return pins
+
+
 def set_version(version):
     if not VERSION.match(version):
         fail(f"{version!r} is not a semantic version (for example 0.1.0-preview.2 or 0.1.0)")
+    packages = metadata()["packages"]
+    old_version = workspace_version(packages)
     with open(MANIFEST, encoding="utf-8") as file:
         lines = file.read().split("\n")
 
@@ -247,8 +287,8 @@ def set_version(version):
         fail(f"found no path dependency in [workspace.dependencies] of {MANIFEST}")
     with open(MANIFEST, "w", encoding="utf-8") as file:
         file.write("\n".join(lines))
+    pins += update_member_pins(packages, old_version, version)
 
-    # `cargo metadata` resolves the workspace again, which also writes the new versions to Cargo.lock.
     packages = metadata()["packages"]
     wrong = sorted(package["name"] for package in packages if package["version"] != version)
     if wrong:
@@ -259,6 +299,7 @@ def set_version(version):
     problems = [problem for problem in check(packages) if "requirement" in problem or "semantic" in problem]
     if problems:
         fail("the workspace is not consistent after the change:\n  " + "\n  ".join(problems))
+    subprocess.run(["cargo", "update", "--workspace"], cwd=ROOT, check=True)
     print(f"{len(packages)} crates at {version}; {pins} dependency pins at ={version}")
 
 

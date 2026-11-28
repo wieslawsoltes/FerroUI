@@ -34,7 +34,8 @@
 //! effect; [`catalog_request_frame`] and [`catalog_frame_drawn`] tell when
 //! the view has drawn that state (a view is hit from what its last frame
 //! drew); [`catalog_rendering`] reports which thread drew the frames;
-//! [`catalog_memory`] how much of the memory of the module is in use; and
+//! [`catalog_memory`] how much of the memory of the module is in use;
+//! [`catalog_scene_3d`] what drew the 3D scenes of the section "3D"; and
 //! [`catalog_panic_in_frame`] makes the next frame panic.
 //! The native control demo of the browser (`EmbedSampleWeb`) is in
 //! [`embed_sample_browser`].
@@ -167,7 +168,7 @@ pub fn catalog_state() -> String {
             (text_block.text(), format!(",\"font\":{}", font(text_block.font_family())))
         } else if let Some(text_box) = visual.cast::<TextBox>() {
             (text_box.text(), format!(",\"font\":{}", font(text_box.font_family())))
-        } else if visual.cast::<Button>().is_some() || visual.get_type().name() == "QrPreview" {
+        } else if visual.cast::<Button>().is_some() || matches!(visual.get_type().name(), "QrPreview" | "Viewport3D") {
             (None, String::new())
         } else if let Some(image) = visual.cast::<Image>() {
             let source = image.source().map(|source| source.size());
@@ -277,6 +278,21 @@ pub fn catalog_rendering() -> String {
         statistics.canvases_released,
         statistics.render_thread_panics,
         FerroLocator::current().get_service::<BrowserPlatformOptions>().map_or(BrowserRenderer::Skia, |options| options.renderer).name(),
+    )
+}
+
+/// What drew the 3D scenes of the pages of the section "3D" (`Viewport3D`, #608), as a line of
+/// `name=value` pairs, for the behaviour tests: `gpu`, the scenes the Skia backend drew on the GPU
+/// (the GL executor on WebGL2, a 3D pass or a kept output) on the thread of the page, which renders
+/// in the module without threads; `cpu`, the scenes the CPU reference drew on a GPU surface; and
+/// `not_drawn`, the scenes handed to a drawing context that cannot draw them. Not a port.
+#[wasm_bindgen(js_name = catalogScene3D)]
+pub fn catalog_scene_3d() -> String {
+    format!(
+        "gpu={};cpu={};not_drawn={}",
+        ferroui_skia::scene3d_counters().scenes_drawn_on_gpu,
+        ferroui_render3d::scenes_drawn_on_cpu(),
+        ferroui_base::rendering::scene3d::scenes_not_drawn(),
     )
 }
 

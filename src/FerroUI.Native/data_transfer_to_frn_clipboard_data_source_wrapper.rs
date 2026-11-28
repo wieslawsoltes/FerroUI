@@ -1,6 +1,10 @@
 use crate::data_transfer_item_to_frn_clipboard_data_item_wrapper::DataTransferItemToFrnClipboardDataItemWrapper;
 use crate::interop::*;
+#[cfg(feature = "chromium-clipboard-map")]
+use ferroui_base::input::platform::chromium_clipboard::ChromiumClipboard;
 use ferroui_base::input::IDataTransfer;
+#[cfg(feature = "chromium-clipboard-map")]
+use ferroui_base::input::{DataFormat, DataFormatKind};
 use ferroui_microcom::{ComPtr, HResult};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -10,11 +14,85 @@ use std::rc::Rc;
 pub(crate) struct DataTransferToFrnClipboardDataSourceWrapper {
     data_transfer: RefCell<Option<Rc<dyn IDataTransfer>>>,
     items: RefCell<Option<Vec<ComPtr<IFrnClipboardDataItem>>>>,
+    /// Whether the web custom formats of a browser are published (the clipboard, not a drag;
+    /// the `chromium-clipboard-map` feature).
+    #[cfg(feature = "chromium-clipboard-map")]
+    publish_web_formats: bool,
 }
 
 impl DataTransferToFrnClipboardDataSourceWrapper {
     pub(crate) fn new(data_transfer: Rc<dyn IDataTransfer>) -> Self {
-        Self { data_transfer: RefCell::new(Some(data_transfer)), items: RefCell::new(None) }
+        Self {
+            data_transfer: RefCell::new(Some(data_transfer)),
+            items: RefCell::new(None),
+            #[cfg(feature = "chromium-clipboard-map")]
+            publish_web_formats: false,
+        }
+    }
+
+    /// The source of the clipboard: with the `chromium-clipboard-map` feature it publishes the
+    /// web custom formats too; without it, it is the source of a drag.
+    pub(crate) fn for_clipboard(data_transfer: Rc<dyn IDataTransfer>) -> Self {
+        #[cfg_attr(not(feature = "chromium-clipboard-map"), allow(unused_mut))]
+        let mut source = Self::new(data_transfer);
+        #[cfg(feature = "chromium-clipboard-map")]
+        {
+            source.publish_web_formats = true;
+        }
+        source
+    }
+
+    #[cfg(feature = "chromium-clipboard-map")]
+    fn web_items(&self) -> Vec<ComPtr<IFrnClipboardDataItem>> {
+        let transfer = self.data_transfer();
+        let source_items = transfer.items();
+        let clipboard = ChromiumClipboard::MacOs;
+        let mut web_item = if self.publish_web_formats {
+            let mut formats: Vec<_> = transfer
+                .formats()
+                .iter()
+                .filter(|format| format.kind() == DataFormatKind::Platform)
+                .cloned()
+                .collect();
+            let reserved = formats.len();
+            let first_text_item = source_items.iter().position(|item| {
+                item.formats()
+                    .iter()
+                    .any(|format| DataFormat::text() == *format)
+            });
+            source_items
+                .iter()
+                .enumerate()
+                .filter(|(index, _)| first_text_item.is_none_or(|text_index| *index == text_index))
+                .find_map(|(index, item)| {
+                    formats.truncate(reserved);
+                    formats.extend(
+                        item.formats()
+                            .iter()
+                            .filter(|format| format.kind() == DataFormatKind::Application)
+                            .cloned(),
+                    );
+                    clipboard.create_map(&formats).map(|map| (index, map))
+                })
+        } else {
+            None
+        };
+        // Chromium reads each type from the first item that offers it. Keep
+        // a text item's map and data slots together with that text.
+        source_items
+            .iter()
+            .enumerate()
+            .map(|(index, item)| {
+                let map = if web_item.as_ref().is_some_and(|(owner, _)| *owner == index) {
+                    web_item.take().map(|(_, map)| map)
+                } else {
+                    None
+                };
+                IFrnClipboardDataItem::from_impl(
+                    DataTransferItemToFrnClipboardDataItemWrapper::new(item.clone(), map),
+                )
+            })
+            .collect()
     }
 
     fn data_transfer(&self) -> Rc<dyn IDataTransfer> {
@@ -29,12 +107,15 @@ impl DataTransferToFrnClipboardDataSourceWrapper {
             return items.clone();
         }
 
+        #[cfg(not(feature = "chromium-clipboard-map"))]
         let items: Vec<ComPtr<IFrnClipboardDataItem>> = self
             .data_transfer()
             .items()
             .iter()
             .map(|item| IFrnClipboardDataItem::from_impl(DataTransferItemToFrnClipboardDataItemWrapper::new(item.clone())))
             .collect();
+        #[cfg(feature = "chromium-clipboard-map")]
+        let items = self.web_items();
         *self.items.borrow_mut() = Some(items.clone());
         if items.is_empty() {
             self.destroyed();
@@ -63,9 +144,83 @@ impl IFrnClipboardDataSourceImpl for DataTransferToFrnClipboardDataSourceWrapper
     }
 
     fn get_item(&self, index: i32) -> Result<Option<ComPtr<IFrnClipboardDataItem>>, HResult> {
-        crate::callback_base::guard(Err(HResult::FAIL), || match self.items().get(index as usize) {
-            Some(item) if index >= 0 => Ok(Some(item.clone())),
-            _ => panic!("Index was outside the bounds of the array."),
+        crate::callback_base::guard(Err(HResult::FAIL), || {
+            match self.items().get(index as usize) {
+                Some(item) if index >= 0 => Ok(Some(item.clone())),
+                _ => panic!("Index was outside the bounds of the array."),
+            }
         })
+    }
+}
+
+#[cfg(all(test, feature = "chromium-clipboard-map"))]
+mod tests {
+    use super::*;
+    use crate::frn_string::frn_string_array_to_vec;
+    use ferroui_base::input::{DataTransfer, DataTransferItem};
+    use std::ffi::c_void;
+
+    #[test]
+    fn clipboard_publishes_one_map_with_the_first_text_items_slots() {
+        let map = "org.w3.web-custom-format.map";
+        let source = DataTransfer::new();
+        let occupied = DataFormat::create_bytes_platform_format("org.w3.web-custom-format.type-0");
+        source.add(DataTransferItem::create(&occupied, Some(Rc::from([0xa5]))));
+        let item = DataTransferItem::new();
+        item.set_text(Some("ab\ncd"));
+        let marker = DataFormat::create_string_application_format("Box");
+        item.set(&marker, Some("1".to_owned()));
+        source.add(item);
+        let last = DataTransferItem::new();
+        last.set_text(Some("separate"));
+        last.set(
+            &DataFormat::create_string_application_format("Whole"),
+            Some("1".to_owned()),
+        );
+        source.add(last);
+
+        let native = IFrnClipboardDataSource::from_impl(
+            DataTransferToFrnClipboardDataSourceWrapper::for_clipboard(source.clone()),
+        );
+        assert_eq!(native.get_item_count(), 3);
+        let formats = |index| {
+            let item = native.get_item(index).unwrap().unwrap();
+            frn_string_array_to_vec(&item.provide_formats().unwrap().unwrap())
+        };
+        assert_eq!(formats(0), ["org.w3.web-custom-format.type-0"]);
+        assert_eq!(
+            formats(1),
+            [
+                "public.utf8-plain-text",
+                "net.ferroui.app.uti.Box",
+                map,
+                "org.w3.web-custom-format.type-1"
+            ]
+        );
+        assert_eq!(
+            formats(2),
+            ["public.utf8-plain-text", "net.ferroui.app.uti.Whole"]
+        );
+        let item = native.get_item(1).unwrap().unwrap();
+        let value = item
+            .get_value(Some(c"org.w3.web-custom-format.type-1"))
+            .unwrap()
+            .unwrap();
+        assert!(!value.is_string());
+        assert_eq!(value.get_byte_length(), 1);
+        let mut byte = 0u8;
+        // SAFETY: the destination is as large as the data value.
+        unsafe { value.copy_bytes_to((&mut byte as *mut u8).cast::<c_void>()) };
+        assert_eq!(byte, b'1');
+
+        let drag = IFrnClipboardDataSource::from_impl(
+            DataTransferToFrnClipboardDataSourceWrapper::new(source),
+        );
+        let item = drag.get_item(1).unwrap().unwrap();
+        let formats = item.provide_formats().unwrap().unwrap();
+        assert_eq!(
+            frn_string_array_to_vec(&formats),
+            ["public.utf8-plain-text", "net.ferroui.app.uti.Box"]
+        );
     }
 }

@@ -37,7 +37,7 @@ pub fn App(todos: Option<Signal<Todos>>, #[prop(default = String::from("/"))] pa
         Border { padding: (16.0, 24.0),
             StackPanel { max_width: 560.0, spacing: 8.0,
                 TextBlock { name: "Header", text: "todos", font_size: 64.0, font_weight: FontWeight::Thin,
-                    foreground: "#B83F45", horizontal_alignment: HorizontalAlignment::Center }
+                    foreground: rgb(0xB83F45), horizontal_alignment: HorizontalAlignment::Center }
                 TextBox { name: "NewTodo", placeholder_text: "What needs to be done?", font_size: 18.0,
                     text: draft.two_way(),
                     // Enter adds the todo (trimmed; an empty title adds nothing) and empties the field.
@@ -113,7 +113,7 @@ fn TodoItem(todo: Todo, todos: Signal<Todos>) -> Element {
     let completed = todo.completed;
 
     rsx! {
-        Grid { name: format!("Todo-{id}"), column_definitions: "Auto,*,Auto", min_height: 40.0,
+        Grid { name: format!("Todo-{id}"), column_definitions: [auto(), star(1.0), auto()], min_height: 40.0,
             // The check box of WinUI 3 is at least 120 wide; the title starts next to it here.
             CheckBox { name: format!("Done-{id}"), is_checked: completed, vertical_alignment: VerticalAlignment::Center,
                 min_width: 0.0, margin: (0.0, 0.0, 8.0, 0.0),
@@ -163,7 +163,7 @@ fn Footer(todos: Signal<Todos>, filter: Filter) -> Element {
     let (left, completed) = todos.with(|list| (list.active_count(), list.completed_count()));
 
     rsx! {
-        Grid { name: "Footer", column_definitions: "*,Auto,*", margin: (0.0, 8.0, 0.0, 0.0),
+        Grid { name: "Footer", column_definitions: [star(1.0), auto(), star(1.0)], margin: (0.0, 8.0, 0.0, 0.0),
             TextBlock { name: "ItemsLeft", text: items_left(left), vertical_alignment: VerticalAlignment::Center }
             StackPanel { Grid.column: 1, orientation: Orientation::Horizontal, spacing: 4.0,
                 {filter_link(Filter::All, filter, router)}

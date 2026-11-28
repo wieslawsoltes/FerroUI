@@ -1,9 +1,10 @@
 use super::ProviderError;
 use crate::automation::peers::AutomationPeer;
 use ferroui_base::media::Color;
-use ferroui_base::{Rect, Ref};
+use ferroui_base::{Point, Rect, Ref};
 use std::any::Any;
 use std::fmt;
+use std::ops::Range;
 use std::rc::Rc;
 
 /// Text-pattern movement units, in the order used when a provider promotes a
@@ -27,6 +28,20 @@ pub enum TextPatternRangeEndpoint {
     End = 1,
 }
 
+/// Placement of a text range in its scrolling viewport. A point is in the
+/// visual root's coordinate space, like the rectangles returned by the range.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum TextScrollPlacement {
+    TopLeft,
+    BottomRight,
+    Top,
+    Bottom,
+    Left,
+    Right,
+    Nearest,
+    Point(Point),
+}
+
 /// Formatting attributes available through the portable text pattern. Font size
 /// and paragraph measurements are in typographic points (72 points per inch).
 /// Unknown native attributes retain their identifier and return `NotSupported`.
@@ -35,6 +50,8 @@ pub enum TextAttribute {
     FontName,
     FontSize,
     FontWeight,
+    /// The native font slant, as `normal`, `italic`, or `oblique`.
+    FontStyle,
     IsItalic,
     IsReadOnly,
     IsHidden,
@@ -71,6 +88,15 @@ pub enum TextAttributeValue {
     Color(Color),
     Mixed,
     NotSupported,
+}
+
+pub type TextAttributeSet = Vec<(TextAttribute, TextAttributeValue)>;
+
+/// Effective attributes and the half-open UTF-16 range over which they apply.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TextAttributeRun {
+    pub range: Range<usize>,
+    pub attributes: TextAttributeSet,
 }
 
 /// Failures that a platform bridge can translate without parsing error strings.
@@ -139,6 +165,10 @@ pub trait ITextRangeProvider {
         attribute: TextAttribute,
     ) -> Result<TextAttributeValue, ProviderError>;
     fn get_bounding_rectangles(&self) -> Result<Vec<Rect>, ProviderError>;
+    /// Returns the live half-open UTF-16 offsets when the provider supports them.
+    fn text_offsets(&self) -> Result<Option<Range<usize>>, ProviderError> {
+        Ok(None)
+    }
     fn get_enclosing_element(&self) -> Result<Ref<AutomationPeer>, ProviderError>;
     /// `None` retrieves all text. A finite limit never splits a surrogate pair.
     fn get_text(&self, max_length: Option<usize>) -> Result<String, ProviderError>;
@@ -158,6 +188,15 @@ pub trait ITextRangeProvider {
     fn select(&self) -> Result<(), ProviderError>;
     fn add_to_selection(&self) -> Result<(), ProviderError>;
     fn remove_from_selection(&self) -> Result<(), ProviderError>;
+    /// Replaces this selected range atomically and preserves the other selections.
+    fn replace_in_selection(&self, _replacement: &dyn ITextRangeProvider) -> Result<bool, ProviderError> {
+        Ok(false)
+    }
     fn scroll_into_view(&self, align_to_top: bool) -> Result<(), ProviderError>;
+    /// Scrolls without changing the caret or selection. Returns `false` if
+    /// the provider cannot make the requested text visible.
+    fn scroll_to(&self, _placement: TextScrollPlacement) -> Result<bool, ProviderError> {
+        Ok(false)
+    }
     fn get_children(&self) -> Result<Vec<Ref<AutomationPeer>>, ProviderError>;
 }
