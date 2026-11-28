@@ -11,6 +11,15 @@ use ferroui_base::{
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::OnceLock;
+
+/// Resolves a control to the control whose automation peer stands for it in
+/// focus and hit testing ([`ControlAutomationPeer::register_automation_target`]).
+pub type AutomationTargetResolver = fn(&Ref<Control>) -> Option<Ref<Control>>;
+
+/// The resolver a library registered: `None` in an application without one, so
+/// the root peers ask nothing of the controls and no class gains a member.
+static AUTOMATION_TARGET: OnceLock<AutomationTargetResolver> = OnceLock::new();
 
 /// An automation peer which represents a [`Control`].
 ///
@@ -360,6 +369,24 @@ impl ControlAutomationPeer {
 
     /// Gets or creates an automation peer for a control: this peer for its
     /// owner, the peer of `element` otherwise.
+    /// Registers the resolver the root peers use for focus and hit testing: for
+    /// a control it returns the control whose peer represents it (an internal
+    /// presenter delegating to its owner, as the code editor's text area does),
+    /// or `None` for the control itself. The first registration of a process
+    /// stays; a later one is ignored and returns `false`.
+    pub fn register_automation_target(resolver: AutomationTargetResolver) -> bool {
+        AUTOMATION_TARGET.set(resolver).is_ok()
+    }
+
+    /// The control whose peer represents `control` in focus and hit testing:
+    /// `control` itself unless a registered resolver names another.
+    pub(crate) fn automation_target(control: Ref<Control>) -> Ref<Control> {
+        match AUTOMATION_TARGET.get() {
+            Some(resolve) => resolve(&control).unwrap_or(control),
+            None => control,
+        }
+    }
+
     pub fn get_or_create(&self, element: &Control) -> Ref<AutomationPeer> {
         if self.owner.upgrade().is_some_and(|owner| std::ptr::eq::<Control>(&*owner, element)) {
             return self.to_ref().upcast();

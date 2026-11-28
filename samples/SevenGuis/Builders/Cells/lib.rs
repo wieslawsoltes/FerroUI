@@ -21,8 +21,8 @@ const CELL_WIDTH: f64 = 80.0;
 
 /// The spreadsheet of a sheet: what the tests drive.
 pub fn cells_of(sheet: Sheet) -> Element {
-    let columns = format!("40,{}", vec![CELL_WIDTH.to_string(); COLUMNS].join(","));
-    let rows = format!("Auto,{}", vec!["24"; ROWS].join(","));
+    let columns: Vec<_> = std::iter::once(px(40.0)).chain((0..COLUMNS).map(|_| px(CELL_WIDTH))).collect();
+    let rows: Vec<_> = std::iter::once(auto()).chain((0..ROWS).map(|_| px(24.0))).collect();
     let mut grid = grid().row_definitions(&rows).column_definitions(&columns);
     for column in 0..COLUMNS {
         grid = grid.child(header(CellRef::column_name(column), 0, column as i32 + 1));
@@ -43,8 +43,8 @@ fn header(text: String, row: i32, column: i32) -> El<ferroui_controls::Border> {
     border()
         .grid_row(row)
         .grid_column(column)
-        .background("#EEEEEE")
-        .border_brush("#CCCCCC")
+        .background(rgb(0xEEEEEE))
+        .border_brush(rgb(0xCCCCCC))
         .border_thickness((0.0, 0.0, 1.0, 1.0))
         .child(text_block().text(text).horizontal_alignment(HorizontalAlignment::Center).vertical_alignment(VerticalAlignment::Center))
 }
@@ -57,7 +57,7 @@ fn cell(sheet: Sheet, cell: CellRef) -> El<ferroui_controls::Border> {
         .name(cell.to_string())
         .grid_row(cell.row as i32 + 1)
         .grid_column(cell.column as i32 + 1)
-        .border_brush("#DDDDDD")
+        .border_brush(rgb(0xDDDDDD))
         .border_thickness((0.0, 0.0, 1.0, 1.0))
         .background("White")
         .on_double_tapped(move |_| editing.set(Some(cell)))
