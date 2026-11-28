@@ -37,6 +37,7 @@ ferroui-controls = { workspace = true }
 ferroui-themes-fluent = { workspace = true }
 ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false }
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
+ferroui-progpu = { workspace = true, optional = true }
 url = { workspace = true }
 
 # The frame gate: the test services of the framework (a headless window over a compositor), the
@@ -73,5 +74,8 @@ quartz-metal = ["quartz", "ferroui-desktop/quartz-metal"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
 # `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
 vello = ["dep:ferroui-vello"]
+# The ProGPU render backend beside Skia: `FERROUI_RENDERER=progpu` then chooses it at start. It
+# builds the native engine of the backend, which needs CMake and a C++ toolchain.
+progpu = ["dep:ferroui-progpu"]
 # The framework's work counters in the frame gate: `--features counters` prints them per frame.
 counters = ["ferroui-base/perf-counters"]

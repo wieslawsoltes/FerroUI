@@ -1,3 +1,8 @@
+[submodule "third_party/ProGPU"]
+	path = third_party/ProGPU
+	url = https://github.com/wieslawsoltes/ProGPU.git
+	branch = rust/bindings
+	shallow = true
 [submodule "benchmarks/comparison/upstream"]
 	path = benchmarks/comparison/upstream
 	url = https://github.com/samoylenkodmitry/Cranpose.git

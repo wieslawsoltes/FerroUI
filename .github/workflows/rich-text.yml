@@ -55,6 +55,8 @@ jobs:
       oracle: ${{ steps.areas.outputs.oracle }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - name: Tests of the extractor and of the reader of the case tables
         run: python3 -m unittest discover -s scripts/winui-rich-text -p 'test_*.py' -v
       # The Windows check of the oracle runs only when the oracle or what it is built from changed.
@@ -79,6 +81,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - name: Check the oracle
         run: cargo check --locked -p ferroui-rich-text-oracle
@@ -98,6 +102,8 @@ jobs:
       PYTHONUTF8: 1
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
       - name: Build the oracle
         run: cargo build --locked -p ferroui-rich-text-oracle

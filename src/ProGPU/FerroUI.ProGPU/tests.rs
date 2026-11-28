@@ -1,0 +1,176 @@
+//! The engine on the device of the backend, headless.
+
+use crate::{ProGpuDevice, ProGpuEngine, TargetFormat};
+use std::rc::Rc;
+use progpu_native_sys::progpu::*;
+use progpu_native_sys::webgpu::*;
+use std::ptr;
+
+/// A device, or `None` (with a message) where no GPU is available.
+fn device() -> Option<Rc<ProGpuDevice>> {
+    match ProGpuDevice::new() {
+        Ok(device) => Some(Rc::new(device)),
+        Err(error) => {
+            eprintln!("skipped: {error}");
+            None
+        }
+    }
+}
+
+#[test]
+fn the_engine_clears_a_target_and_draws_rectangles() {
+    let Some(device) = device() else { return };
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
+    let (width, height) = (40u32, 30u32);
+    // SAFETY: the calls of the C ABIs with the handles of the device.
+    unsafe {
+        let (texture, view) = device.create_target(width, height);
+        let rect = progpu_native_rect {
+            x: 10.0,
+            y: 5.0,
+            width: 20.0,
+            height: 20.0,
+            color: progpu_native_color { r: 0.0, g: 1.0, b: 0.0, a: 1.0 },
+        };
+        let frame = progpu_native_frame {
+            struct_size: std::mem::size_of::<progpu_native_frame>() as u32,
+            width,
+            height,
+            dpi_scale: 1.0,
+            target_view: view as usize,
+            clear_color: progpu_native_color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 },
+            rects: &rect,
+            rect_count: 1,
+            draw_state: ptr::null(),
+        };
+        let mut metrics: progpu_native_frame_metrics = std::mem::zeroed();
+        metrics.struct_size = std::mem::size_of::<progpu_native_frame_metrics>() as u32;
+        let status = progpu_native_engine_render(engine.raw(), &frame, &mut metrics);
+        assert_eq!(PROGPU_NATIVE_STATUS_SUCCESS, status, "{}", engine.last_error());
+        let pixels = device.read_rgba8(texture, width, height);
+        let pixel = |x: u32, y: u32| &pixels[((y * width + x) * 4) as usize..][..4];
+        assert_eq!([0, 0, 0, 255], pixel(2, 2));
+        assert_eq!([0, 255, 0, 255], pixel(20, 15));
+        wgpuTextureViewRelease(view);
+        wgpuTextureRelease(texture);
+    }
+}
+
+#[test]
+fn a_retained_scene_renders_and_a_stable_frame_uploads_nothing() {
+    use crate::scene::{SceneBuilder, NO_INDEX};
+    let Some(device) = device() else { return };
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
+    let (width, height) = (32u32, 32u32);
+    let mut builder = SceneBuilder::new();
+    builder.clear_target(progpu_native_color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 }).unwrap();
+    let brush = builder.add_solid_brush(progpu_native_color { r: 1.0, g: 1.0, b: 0.0, a: 1.0 }, 1.0).unwrap();
+    let primitive = progpu_native_analytic_primitive {
+        kind: PROGPU_NATIVE_PRIMITIVE_ELLIPSE as u32,
+        flags: 0,
+        x: 4.0,
+        y: 4.0,
+        width: 24.0,
+        height: 24.0,
+        corner_radius: 0.0,
+        stroke_thickness: 0.0,
+        color: progpu_native_color { r: 1.0, g: 1.0, b: 0.0, a: 1.0 },
+        transform: SceneBuilder::identity_transform(),
+    };
+    let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 24.0, height: 24.0 };
+    builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
+    let (scene_id, generation) = (builder.scene_id(), builder.generation());
+    engine.update_scene(builder.build().unwrap()).unwrap();
+    let (texture, view) = device.create_target(width, height);
+    engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
+    let stable = engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
+    assert_eq!(0, stable.vertex_upload_bytes + stable.index_upload_bytes + stable.texture_upload_bytes);
+    let pixels = device.read_rgba8(texture, width, height);
+    let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
+    assert_eq!(vec![0, 0, 255, 255], pixel(1, 1), "the cleared target outside the ellipse");
+    assert_eq!(vec![255, 255, 0, 255], pixel(16, 16), "the center of the ellipse");
+    // SAFETY: the handles are owned by the test.
+    unsafe {
+        wgpuTextureViewRelease(view);
+        wgpuTextureRelease(texture);
+    }
+}
+
+/// The engine on a host's Metal device and queue renders into a host's Metal texture, wrapped for
+/// the frame: the path of a window whose platform presents its own drawables.
+#[cfg(target_os = "macos")]
+#[test]
+fn the_engine_renders_into_a_host_metal_texture_on_the_host_queue() {
+    use crate::scene::{SceneBuilder, NO_INDEX};
+    use objc2_metal::{
+        MTLCreateSystemDefaultDevice, MTLDevice, MTLPixelFormat, MTLStorageMode, MTLTextureDescriptor, MTLTextureUsage,
+    };
+    let Some(mtl_device) = MTLCreateSystemDefaultDevice() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    let mtl_queue = mtl_device.newCommandQueue().expect("a command queue");
+    let (width, height) = (24u32, 16u32);
+    // SAFETY: a descriptor of a two-dimensional texture, then the texture of the device.
+    let mtl_texture = unsafe {
+        let descriptor = MTLTextureDescriptor::texture2DDescriptorWithPixelFormat_width_height_mipmapped(
+            MTLPixelFormat::RGBA8Unorm,
+            width as usize,
+            height as usize,
+            false,
+        );
+        descriptor.setUsage(MTLTextureUsage::RenderTarget | MTLTextureUsage::ShaderRead);
+        descriptor.setStorageMode(MTLStorageMode::Private);
+        mtl_device.newTextureWithDescriptor(&descriptor).expect("a texture")
+    };
+    // SAFETY: the objects are alive for the test and retained by the device and the texture.
+    let device = unsafe {
+        ProGpuDevice::from_metal(
+            objc2::rc::Retained::as_ptr(&mtl_device) as *mut std::ffi::c_void,
+            objc2::rc::Retained::as_ptr(&mtl_queue) as *mut std::ffi::c_void,
+        )
+    }
+    .expect("the device on the Metal device");
+    let device = Rc::new(device);
+    let engine = ProGpuEngine::new(&device, TargetFormat::Rgba8).expect("the engine");
+    // SAFETY: the texture is a texture of the device's Metal device of that size and format.
+    let (texture, view) = unsafe {
+        device.wrap_metal_texture(
+            objc2::rc::Retained::as_ptr(&mtl_texture) as *mut std::ffi::c_void,
+            width,
+            height,
+            WGPUTextureFormat_RGBA8Unorm,
+            WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc,
+        )
+    }
+    .expect("the wrapped texture");
+    let mut builder = SceneBuilder::new();
+    builder.clear_target(progpu_native_color { r: 0.0, g: 0.0, b: 1.0, a: 1.0 }).unwrap();
+    let brush = builder.add_solid_brush(progpu_native_color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 }, 1.0).unwrap();
+    let primitive = progpu_native_analytic_primitive {
+        kind: PROGPU_NATIVE_PRIMITIVE_RECTANGLE as u32,
+        flags: 0,
+        x: 4.0,
+        y: 4.0,
+        width: 8.0,
+        height: 8.0,
+        corner_radius: 0.0,
+        stroke_thickness: 0.0,
+        color: progpu_native_color { r: 1.0, g: 0.0, b: 0.0, a: 1.0 },
+        transform: SceneBuilder::identity_transform(),
+    };
+    let bounds = progpu_native_image_rect { x: 4.0, y: 4.0, width: 8.0, height: 8.0 };
+    builder.draw_analytic(&[primitive], &[brush], bounds, NO_INDEX).unwrap();
+    let (scene_id, generation) = (builder.scene_id(), builder.generation());
+    engine.update_scene(builder.build().unwrap()).unwrap();
+    engine.render_scene(scene_id, generation, view, width, height, false).unwrap();
+    let pixels = device.read_rgba8(texture, width, height);
+    let pixel = |x: u32, y: u32| pixels[((y * width + x) * 4) as usize..][..4].to_vec();
+    assert_eq!(vec![0, 0, 255, 255], pixel(1, 1), "the cleared host texture");
+    assert_eq!(vec![255, 0, 0, 255], pixel(8, 8), "the rectangle in the host texture");
+    // SAFETY: the handles are owned by the test.
+    unsafe {
+        wgpuTextureViewRelease(view);
+        wgpuTextureRelease(texture);
+    }
+}

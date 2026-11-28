@@ -73,18 +73,21 @@ jobs:
       - name: Check out the report script
         uses: actions/checkout@v4
         with:
+          submodules: true
           path: tools
           sparse-checkout: scripts/perf-report.py
           sparse-checkout-cone-mode: false
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.ref }}
           path: measured
       - name: Check out the baseline
         if: inputs.baseline != ''
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.baseline }}
           path: baseline
       - uses: dtolnay/rust-toolchain@stable
@@ -189,6 +192,7 @@ jobs:
         if: matrix.tree == 'measured' || inputs.baseline != ''
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
           path: tree
       - uses: dtolnay/rust-toolchain@stable
@@ -408,6 +412,7 @@ jobs:
         if: env.MEASURE == 'true'
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ env.SIDE_REF }}
       - uses: dtolnay/rust-toolchain@stable
         if: env.MEASURE == 'true'
