@@ -3,7 +3,7 @@ use crate::TextBox;
 use ferroui_base::media::text_formatting::TextParagraphStyles;
 use ferroui_base::utilities::ReadOnlyMemory;
 use ferroui_base::input::text_input::{
-    ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
+    masked_surrounding_text, ContextMenuAction, TextInputMethodClient, TextInputMethodClientEvents, TextSelection,
 };
 use ferroui_base::input::{InputElement, TappedEventArgs};
 use ferroui_base::interactivity::RoutedEventHandlerToken;
@@ -150,7 +150,11 @@ impl TextInputMethodClient for TextBoxTextInputMethodClient {
             }
         }
 
-        text.unwrap_or_default()
+        // Deviation (DEVIATIONS.md, Input): upstream gives the input method the real text.
+        match text {
+            Some(text) if parent.password_char() != '\0' => masked_surrounding_text(&text),
+            text => text.unwrap_or_default(),
+        }
     }
 
     fn cursor_rectangle(&self) -> Rect {

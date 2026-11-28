@@ -25,3 +25,48 @@ export function applyTextInputOptions(
     set("autocomplete", "off");
     set("lang", language || null);
 }
+
+// The hidden input of a masked field is a password input, which browsers keep out of spelling,
+// suggestion and autofill services. Changing the type keeps the element, its focus and its value.
+export function applyMaskedInput(input: HTMLInputElement, masked: boolean): void {
+    const set = (name: string, value: string | null): void => {
+        if (input.getAttribute(name) === value) return;
+        if (value === null) input.removeAttribute(name);
+        else input.setAttribute(name, value);
+    };
+    set("spellcheck", "false");
+    set("autocorrect", masked ? "off" : null);
+    set("autocapitalize", masked ? "off" : "none");
+    set("autocomplete", masked ? "new-password" : null);
+    input.type = masked ? "password" : "text";
+}
+
+// The input handler forwards `insertText` and then mirrors the mask again. Any other insertion
+// (a paste, a drop, a replacement) is not forwarded, so in a masked field it would stay in the
+// element as real text.
+export function isUnforwardedMaskedInsertion(elementType: string, inputType: string): boolean {
+    return elementType === "password" &&
+        inputType.startsWith("insert") &&
+        inputType !== "insertText" &&
+        !inputType.includes("Composition");
+}
+
+type MaskedInput = Pick<HTMLInputElement, "type" | "value" | "setSelectionRange">;
+const maskedTexts = new WeakMap<MaskedInput, { value: string; start: number; end: number }>();
+
+// The last mask the framework wrote into a password input; it never holds real text.
+export function rememberMaskedText(input: MaskedInput, value: string, start: number, end: number): void {
+    if (input.type === "password") maskedTexts.set(input, { value, start, end });
+    else maskedTexts.delete(input);
+}
+
+// Composed text can stay in the element when its commit changes nothing in the framework, or
+// arrives after the end of the composition. The element goes back to the mask.
+export function restoreMaskedText(input: MaskedInput): void {
+    if (input.type !== "password") return;
+    const masked = maskedTexts.get(input);
+    const value = masked?.value ?? "";
+    if (input.value === value) return;
+    input.value = value;
+    input.setSelectionRange(masked?.start ?? 0, masked?.end ?? 0);
+}

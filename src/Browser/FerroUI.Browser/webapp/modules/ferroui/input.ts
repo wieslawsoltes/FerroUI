@@ -1,7 +1,9 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
-import { applyTextInputOptions } from "./inputOptions";
+import {
+    applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion, rememberMaskedText, restoreMaskedText
+} from "./inputOptions";
 import { ViewBox, viewBoxOf, viewPoint } from "./pointerPosition";
 import { readTextSelection, setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement, writeTextSelection } from "./textInput";
 
@@ -571,6 +573,10 @@ export class InputHelper {
 
         const beforeInputHandler = (args: InputEvent) => {
             if (isTextInputElement(args.target)) return;
+            if (isUnforwardedMaskedInsertion(element.type, args.inputType)) {
+                args.preventDefault();
+                return;
+            }
             if (legacyInput && isLegacyEdit(args) && args.inputType === "insertReplacementText") {
                 const projection = this.surroundingProjections.get(legacyInput);
                 pendingReplacement = projection && projection.value === legacyInput.value && !args.defaultPrevented
@@ -613,9 +619,7 @@ export class InputHelper {
         // their DOM default is prevented. Emoji pickers, dictation and virtual
         // keyboards can instead send insertText without a keydown. Forward the
         // insertion, never the input's potentially stale surrounding value.
-        const inputHandler = (event: Event) => {
-            const args = event as InputEvent;
-            if (isTextInputElement(args.target)) return;
+        const forwardInput = (args: InputEvent) => {
             if (typeof args.inputType !== "string" || composing || args.isComposing || args.inputType.includes("Composition")) {
                 return;
             }
@@ -648,6 +652,13 @@ export class InputHelper {
             } else if (args.inputType === "insertText" && !isCompositionCommit && args.data) {
                 FerroExports.InputHelper?.OnTextInput(topLevelId, args.data);
             }
+        };
+        const inputHandler = (event: Event) => {
+            const args = event as InputEvent;
+            if (isTextInputElement(args.target)) return;
+            forwardInput(args);
+            // Outside a composition a masked element holds only the mask the framework wrote.
+            if (!composing && !args.isComposing) restoreMaskedText(element);
         };
         element.addEventListener("input", inputHandler);
 
@@ -685,6 +696,13 @@ export class InputHelper {
                 compositionCommitTimer = setTimeout(clearCompositionCommit, 0);
             }
             args.preventDefault();
+            // Browsers differ in whether the commit reaches the element before or after this event.
+            restoreMaskedText(element);
+            if (element.type === "password") {
+                setTimeout(() => {
+                    if (!composing) restoreMaskedText(element);
+                }, 0);
+            }
         };
         element.addEventListener("compositionend", compositionEndHandler);
 
@@ -1015,8 +1033,17 @@ export class InputHelper {
         if (inputElement.value !== projected) inputElement.value = projected;
         writeTextSelection(inputElement, start, end);
         this.surroundingProjections.set(inputElement, { value: projected, selection: readTextSelection(inputElement) });
+        rememberMaskedText(inputElement, projected, start, end);
         inputElement.style.width = "20px";
         inputElement.style.width = `${inputElement.scrollWidth}px`;
+    }
+
+    public static setInputMasked(inputElement: HTMLInputElement, masked: boolean) {
+        if (!inputElement) {
+            return;
+        }
+
+        applyMaskedInput(inputElement, masked);
     }
 
     private static getModifiers(args: KeyboardEvent | PointerEvent | WheelEvent | DragEvent): number {

@@ -19,14 +19,14 @@ name = "control-catalog-browser"
 path = "program.rs"
 
 [dependencies]
-ferroui-media-browser = { workspace = true, features = ["controls", "qr"] }
-ferroui-media-video-browser.workspace = true
-ferroui-media-camera-browser.workspace = true
+ferroui-media-browser = { workspace = true, features = ["controls", "qr", "skia"] }
+ferroui-media-video-browser = { workspace = true, features = ["skia"] }
+ferroui-media-camera-browser = { workspace = true, features = ["skia"] }
 ferroui-media-camera.workspace = true
 ferroui-devtools = { workspace = true, optional = true, default-features = false, features = ["browser"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
-ferroui-browser = { workspace = true }
+ferroui-browser = { workspace = true, features = ["skia"] }
 ferroui-fonts-inter = { workspace = true }
 control-catalog = { path = "../ControlCatalog" }
 wasm-bindgen = { workspace = true }
