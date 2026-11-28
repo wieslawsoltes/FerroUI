@@ -25,8 +25,8 @@ pub trait IWaylandTextInputV3Events {
     /// - `session_token`: the session token last received via
     ///   `IWSurface::set_text_input_active`; the UI broker drops batches whose
     ///   token doesn't match its current client epoch.
-    /// - `delete_before_chars`: UTF-16 chars to delete before cursor (0 = no delete).
-    /// - `delete_after_chars`: UTF-16 chars to delete after cursor (0 = no delete).
+    /// - `delete_before_chars`: UTF-16 units to delete before the selection's start.
+    /// - `delete_after_chars`: UTF-16 units to delete after the selection's end.
     /// - `commit_text`: text to commit; `None`/empty = no commit.
     /// - `preedit_text`: new preedit text; `None`/empty = clear preedit.
     /// - `preedit_cursor_begin_char`: preedit cursor start (UTF-16 chars; -1 = hidden).

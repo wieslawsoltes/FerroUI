@@ -1,0 +1,78 @@
+[package]
+name = "editor-demo"
+description = "FerroUI editor sample with TextMate grammars, search, completion, linked snippets and folding"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+
+[lib]
+path = "lib.rs"
+
+[[bin]]
+name = "editor-demo"
+path = "main.rs"
+test = false
+
+[[test]]
+name = "editor_clipboard_macos"
+path = "tests/editor_clipboard_macos.rs"
+harness = false
+required-features = ["desktop"]
+
+[[test]]
+name = "editor_clipboard_windows"
+path = "tests/editor_clipboard_windows.rs"
+harness = false
+required-features = ["direct2d"]
+
+[features]
+default = ["desktop"]
+full-textmate-catalog = ["ferroui-textmate/bundled-grammars"]
+desktop = ["dep:ferroui-desktop", "ferroui-desktop/skia", "dep:ferroui-themes-fluent", "full-textmate-catalog"]
+direct2d = ["dep:ferroui-desktop", "ferroui-desktop/direct2d", "dep:ferroui-themes-fluent", "full-textmate-catalog"]
+headless = ["dep:ferroui-headless", "dep:ferroui-themes-fluent", "full-textmate-catalog"]
+wayland = ["dep:ferroui-wayland", "dep:ferroui-harfbuzz", "dep:ferroui-skia", "dep:ferroui-themes-fluent", "full-textmate-catalog"]
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls.workspace = true
+ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false, optional = true }
+ferroui-headless = { workspace = true, optional = true }
+ferroui-edit.workspace = true
+ferroui-textmate = { workspace = true, features = ["editor-demo-grammars"] }
+ferroui-markup-xaml.workspace = true
+ferroui-themes-fluent = { workspace = true, optional = true }
+sample-support = { path = "../SampleSupport" }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-skia = { workspace = true, optional = true }
+ferroui-wayland = { workspace = true, optional = true }
+
+[build-dependencies]
+ferroui-build.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing"] }
+ferroui-textmate = { workspace = true, features = ["bundled-grammars"] }
+
+[target.'cfg(windows)'.dev-dependencies]
+ferroui-system.workspace = true
+ferroui-win32.workspace = true
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_Security",
+    "Win32_System_JobObjects",
+    "Win32_System_StationsAndDesktops",
+    "Win32_System_SystemServices",
+    "Win32_System_Threading",
+    "Win32_UI_Controls",
+    "Win32_UI_WindowsAndMessaging",
+] }

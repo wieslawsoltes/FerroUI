@@ -1,0 +1,23 @@
+[package]
+name = "ferroui-textmate-grammars"
+description = "Optional language packages, TextMate grammars and themes for FerroUI"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+default = ["full-catalog"]
+full-catalog = []
+editor-demo = []
+
+[package.metadata.release]
+group = "controls"
