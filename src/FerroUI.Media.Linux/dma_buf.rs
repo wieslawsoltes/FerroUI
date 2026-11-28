@@ -3,7 +3,7 @@
 //! The GL route ([`NativeGlFrameProducer`]) stays the default: [`LinuxFrameSource::from_interop`]
 //! takes it wherever the renderer has a context of OpenGL. This route is tried only where it does
 //! not, and only with `FERROUI_MEDIA_DMA_BUF=1`, until a run in the Linux virtual machine has
-//! proved it. It takes single-plane XRGB and XBGR buffers with an explicit modifier. A frame that
+//! proved it. It takes NV12, XRGB and XBGR buffers with an explicit modifier. A frame that
 //! cannot be imported is refused; nothing is read on the CPU.
 
 use crate::{native::NativeFrame, unsupported};
@@ -18,6 +18,8 @@ use ferroui_media_opengl::NativeGlFrameProducer;
 pub(crate) const DRM_XR24: u32 = 0x3432_5258;
 /// `DRM_FORMAT_XBGR8888`.
 pub(crate) const DRM_XB24: u32 = 0x3432_4258;
+/// `DRM_FORMAT_NV12`.
+pub(crate) const DRM_NV12: u32 = 0x3231_564e;
 /// `DRM_FORMAT_MOD_INVALID`: the implicit layout, which this route does not take.
 const MOD_INVALID: u64 = 0x00ff_ffff_ffff_ffff;
 
@@ -34,6 +36,7 @@ fn caps_formats(pairs: &[PlatformGraphicsDrmFormat]) -> Vec<String> {
         let name = match pair.format {
             DRM_XR24 => "XR24",
             DRM_XB24 => "XB24",
+            DRM_NV12 => "NV12",
             _ => continue,
         };
         let value = if pair.modifier == 0 { name.to_owned() } else { format!("{name}:0x{:016x}", pair.modifier) };
@@ -149,7 +152,9 @@ impl ferroui_media_controls::TextureFrameImporter for NativeGlTextureImporter {
             return Err(unsupported("Frame and renderer devices differ"));
         }
         let info = native.info();
-        let (fd, stride, offset) = info.plane(0);
+        let (fd, _, offset) = info.plane(0);
+        let planes = if info.format == DRM_NV12 { 2 } else { 1 };
+        let layouts: Vec<(i32, u32, u32)> = (0..planes).map(|plane| info.plane(plane)).collect();
         let format = match info.format {
             DRM_XR24 => PlatformGraphicsExternalImageFormat::B8G8R8A8UNorm,
             _ => PlatformGraphicsExternalImageFormat::R8G8B8A8UNorm,
@@ -168,10 +173,10 @@ impl ferroui_media_controls::TextureFrameImporter for NativeGlTextureImporter {
                 dma_buf_properties: Some(PlatformGraphicsExternalImageDmaBufProperties {
                     drm_format: info.format,
                     drm_modifier: info.modifier,
-                    plane_count: 1,
-                    plane_fds: None,
-                    plane_strides: Some(vec![stride]),
-                    plane_offsets: Some(vec![offset]),
+                    plane_count: planes as i32,
+                    plane_fds: Some(layouts.iter().map(|plane| plane.0).collect()),
+                    plane_strides: Some(layouts.iter().map(|plane| plane.1).collect()),
+                    plane_offsets: Some(layouts.iter().map(|plane| plane.2).collect()),
                 }),
             },
         );
