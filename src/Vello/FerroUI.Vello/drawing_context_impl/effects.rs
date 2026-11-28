@@ -605,7 +605,7 @@ impl DrawingContextImpl {
             return true;
         }
 
-        // On the WebGL2 context of the canvas: an effect of the library, whose program compiled.
+        // On the WebGL2 context of the canvas: an effect with GLSL stages, whose program compiled.
         #[cfg(feature = "hybrid-webgl")]
         if let Some(gpu) = self.scene().web_gl_gpu() {
             if self.sink_origin == Vec2::ZERO && gpu.prepare_shader(effect) {

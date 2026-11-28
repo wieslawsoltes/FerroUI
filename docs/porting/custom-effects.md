@@ -404,8 +404,8 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   of the rotated bounds, in device pixels, where Skia scales the area to the lengths of the axes
   and rotates the result: a program whose output depends on the direction of the axes differs.
 - *The CPU mode* (and a shader effect inside a scene of the CPU renderer, and on WebGL2 an effect
-  with images or of an application) draws the CPU reference (decision 3): the content is recorded into a scene of
-  the CPU renderer over the whole area (cut to the scene above 2^24 pixels), rendered, the
+  of an application without GLSL stages) draws the CPU reference (decision 3): the content is
+  recorded into a scene of the CPU renderer over the whole area (cut to the scene above 2^24 pixels), rendered, the
   reference applied to its pixels at `layer_scale`, and the result drawn as an image with the
   opacity in effect. An effect without a reference (an application's) draws its content unchanged
   and is reported once (`report_unhandled`).
@@ -413,10 +413,12 @@ read once per type, cached by `TypeId` and registered for the prewarm under
   (`ferroui_build::shader_effects`: `translate_shader_effect_module`, `shader_effect_glsl::<T>()`,
   `write_shader_effect_glsl::<T>()`, which writes `$OUT_DIR/shader_effects/<name>.vert.glsl` and
   `.frag.glsl`, with the names naga gives the uniform blocks and the texture by their WGSL
-  bindings). The WebGL2 route of Vello draws the effects of the library that sample no image with
-  these programs (`ferroui_build::library_shader_effects`, written into the crate by its build
-  script; `web_gl/shader_programs.rs`). The page transitions and the effects of an application
-  still draw their CPU references there.
+  bindings). The WebGL2 route of Vello draws every effect of the library with these programs
+  (`ferroui_build::library_shader_effects`, written into the crate by its build script;
+  `web_gl/shader_programs.rs`), the images of the page transitions as textures of the context. An
+  application's effect joins it by writing its stages in a build script
+  (`ferroui_build::write_shader_effect_stages::<T>()`) and handing them to
+  `ShaderEffectDescription::with_glsl`; without them it draws its CPU reference there.
 
 ### 3.5 Input routing for interactive effects
 
@@ -763,8 +765,8 @@ ported as the reference set.
   for the programs that move the content (the water ripple, the flame) at most 1% of the pixels
   further than 3 levels (4 on Graphite) with a mean within 1.5. Ganesh draws the same programs as
   Graphite and raster; no pixel test of the custom effects runs on it (the GPU pixel tests of
-  `ferroui-skia` are Graphite's, on a Metal device). WebGL2 draws the CPU references until step 3
-  of the Vello route in gpu-rendering.md.
+  `ferroui-skia` are Graphite's, on a Metal device). WebGL2 draws the programs of step 3 of the
+  Vello route in gpu-rendering.md, with no pixel test in a browser yet.
 - *Comparison scenes.* `tests/FerroUI.RenderBackends.Comparison` (the crate that links both
   backends) draws each effect through the contracts only, as the render walk draws it, into render
   target bitmaps of Skia raster and of every mode of Vello that is built, at 96 and 192 DPI, holds

@@ -14,34 +14,26 @@ mod web_gl {
     use std::fmt::Write as _;
     use std::path::PathBuf;
 
-    /// The name in the GLSL of what the WGSL module binds at `binding`.
-    fn named(names: &[(u32, String)], binding: u32, what: &str, effect: &str) -> String {
-        match names.iter().find(|(bound, _)| *bound == binding) {
-            Some((_, name)) => name.clone(),
-            None => panic!("{effect}: its GLSL has no {what} at binding {binding}"),
-        }
-    }
-
     pub fn write() {
         use ferroui_build::shader_effects::library_shader_effects;
-        const UNIFORMS: u32 = 0;
-        const PASS: u32 = 1;
-        const CONTENT: u32 = 2;
         let effects = library_shader_effects().unwrap_or_else(|error| panic!("the shader effects: {error}"));
         let mut table = String::from("&[\n");
         for effect in effects {
             let glsl = &effect.glsl;
+            let bindings = glsl.bindings(effect.children);
             let _ = writeln!(
                 table,
                 "    LibraryShader {{ name: {:?}, module_hash: {}, vertex: {:?}, fragment: {:?}, \
-                 uniforms_block: {:?}, pass_block: {:?}, content: {:?}, uniforms_size: {}, offsets: &{:?} }},",
+                 uniforms_block: {:?}, pass_block: {:?}, content: {:?}, children: &{:?}, uniforms_size: {}, \
+                 offsets: &{:?} }},",
                 effect.name,
                 effect.module_hash,
                 glsl.vertex,
                 glsl.fragment,
-                named(&glsl.uniform_blocks, UNIFORMS, "uniform block", effect.name),
-                named(&glsl.uniform_blocks, PASS, "pass block", effect.name),
-                named(&glsl.textures, CONTENT, "content texture", effect.name),
+                bindings.uniforms_block,
+                bindings.pass_block,
+                bindings.content,
+                bindings.children,
                 glsl.uniforms_size,
                 glsl.uniform_offsets,
             );

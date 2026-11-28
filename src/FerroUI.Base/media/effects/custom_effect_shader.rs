@@ -185,6 +185,67 @@ pub struct ShaderEffectDescription {
     /// the same. `false` by default; not used by a content-sampling program,
     /// which composes its output with the content itself.
     pub masked_by_content: bool,
+    /// The GLSL ES 3.0 of the pass for a renderer on WebGL2, translated from
+    /// [`wgsl_module`](Self::wgsl_module) at build time by `ferroui-build`
+    /// (`write_shader_effect_stages`). `None`: the effects of the library
+    /// have theirs in the backend, and any other is drawn there by its CPU
+    /// reference.
+    pub glsl: Option<Box<ShaderEffectGlslStages>>,
+}
+
+/// The tuple `ferroui_build::write_shader_effect_stages` writes, which an
+/// effect includes and hands to [`ShaderEffectGlslStages::from_generated`]:
+/// the vertex and fragment stages, the names of the uniform block of the
+/// effect, of the block of the pass, of the content and of the children, the
+/// size of the block of the effect and the offset of each of its uniforms.
+pub type ShaderEffectGlslParts = (
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static str,
+    &'static [&'static str],
+    u32,
+    &'static [u32],
+);
+
+/// The GLSL ES 3.0 of the pass of a shader effect, and what it binds.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ShaderEffectGlslStages {
+    /// The vertex stage: a triangle over the target.
+    pub vertex: Cow<'static, str>,
+    /// The fragment stage: the program of the effect and the pass.
+    pub fragment: Cow<'static, str>,
+    /// The name of the uniform block of the effect.
+    pub uniforms_block: Cow<'static, str>,
+    /// The name of the uniform block of the pass.
+    pub pass_block: Cow<'static, str>,
+    /// The name of the sampler of the content.
+    pub content: Cow<'static, str>,
+    /// The names of the samplers of the children, in their order.
+    pub children: Vec<Cow<'static, str>>,
+    /// The size of the block of the effect in bytes.
+    pub uniforms_size: u32,
+    /// The byte offset of each uniform of the convention in that block.
+    pub uniform_offsets: Vec<u32>,
+}
+
+impl ShaderEffectGlslStages {
+    /// The stages from the file `ferroui_build::write_shader_effect_stages`
+    /// writes (`include!` it).
+    pub fn from_generated(parts: ShaderEffectGlslParts) -> Self {
+        let (vertex, fragment, uniforms_block, pass_block, content, children, uniforms_size, offsets) = parts;
+        Self {
+            vertex: vertex.into(),
+            fragment: fragment.into(),
+            uniforms_block: uniforms_block.into(),
+            pass_block: pass_block.into(),
+            content: content.into(),
+            children: children.iter().map(|name| Cow::Borrowed(*name)).collect(),
+            uniforms_size,
+            uniform_offsets: offsets.to_vec(),
+        }
+    }
 }
 
 impl ShaderEffectDescription {
@@ -200,6 +261,7 @@ impl ShaderEffectDescription {
             padding: ShaderEffectPadding::Effect,
             children: Vec::new(),
             masked_by_content: false,
+            glsl: None,
         }
     }
 
@@ -239,6 +301,13 @@ impl ShaderEffectDescription {
     /// alpha of the content before it is blended.
     pub fn with_content_mask(mut self) -> Self {
         self.masked_by_content = true;
+        self
+    }
+
+    /// The description with its GLSL ES 3.0 for WebGL2 (`glsl`), so that an
+    /// effect of an application runs on the GPU there too.
+    pub fn with_glsl(mut self, stages: ShaderEffectGlslStages) -> Self {
+        self.glsl = Some(Box::new(stages));
         self
     }
 

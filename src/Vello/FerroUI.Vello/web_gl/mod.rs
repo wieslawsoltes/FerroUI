@@ -24,8 +24,8 @@
 //! of the context ([`VelloWebGlTexture`], `frame_textures.rs`), and a layer with an effect is
 //! drawn on the context: its content rendered and copied into a texture of the pool, passed
 //! through a program of `layer_programs.rs` into another, which the scene the layer was pushed
-//! in paints with. The shader effects of the library run their GLSL ES 3.0, translated at build
-//! time (`shader_programs.rs`).
+//! in paints with. The shader effects run their GLSL ES 3.0, translated at build time
+//! (`shader_programs.rs`).
 
 mod external_objects;
 mod frame_textures;
@@ -472,8 +472,8 @@ impl VelloWebGlGpu {
         Ok(copy)
     }
 
-    /// Whether the shader effect `effect` is drawn on the context: it is one of the library's and
-    /// its program compiled (now, the first time).
+    /// Whether the shader effect `effect` is drawn on the context: it has GLSL stages, its own or
+    /// the library's, and its program compiled (now, the first time).
     pub(crate) fn prepare_shader(&self, effect: &ImmutableCustomEffect) -> bool {
         match self.state.borrow_mut().as_mut() {
             Some(state) => state.shaders.prepare(&self.gl, effect),
