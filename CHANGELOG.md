@@ -4,7 +4,41 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ## [Unreleased]
 
+## [0.6.0] - Unreleased
+
+The sixth release. No 0.5.x release came before it: the work of the 0.5.1 milestone is released here with that of 0.6.0 (owner decision, 2026-11-19), 324 merged pull requests since `v0.5.0` at the time of writing. Breaking changes of the public API were allowed again; the section "Migration" names each one and what to use instead. It adds, among the entries below:
+- web fonts on every platform and backend: `@font-face`, the CSS Font Loading API, WOFF and WOFF2, with faces loaded on demand and decoded off the UI thread (#1205);
+- 3D (`Viewport3D` and the Media3D model) drawn on the GPU in every backend (Skia Graphite on Metal, Ganesh on OpenGL and Vulkan, Vello), with 3D hit testing, interactive 3D elements, and video and visual brushes as materials (#608, steps D5 to D11; [docs/porting/media3d.md](docs/porting/media3d.md));
+- the universal C ABI with generated C++, Go, Dart and C# bindings, controls written in other languages, signals shared through memory, and a library made for one application (#636, #974; the C library is not published to crates.io);
+- WinUI controls and their WinUI Gallery pages: `TabView`, the overflow of the top pane of `NavigationView`, `ItemsView` and `ItemContainer`, `SystemBackdropElement`, `FlipView`, `TeachingTip`, `PasswordBox`, `BitmapIcon` and `ImageIcon`, the modes of `PipsPager`, `ShowPaused` and `ShowError` of `ProgressBar`, and `ItemsStretch` of `WrapPanel`;
+- a code editor: `TextEditor` on a persistent document model with TextMate grammars for 51 languages, 21 themes, folding, completion and snippets (#1051 to #1057);
+- typed forms of the declarative API: selectors, grid definitions, path geometry, setter values, bindings to view models, routes, resource keys, and control themes in Rust (#1087 to #1141);
+- the end of the idiomatic Rust work under the .NET-named control API (#423; [docs/idiomatic-rust.md](docs/idiomatic-rust.md));
+- smaller executables at their roots with no slower start-up, and faster first frames (section "Performance and size").
+
+13 crates join, so 138 are published: `ferroui-controls-flip-view`, `ferroui-controls-icons`, `ferroui-controls-items-view`, `ferroui-controls-password-box`, `ferroui-controls-split-menu`, `ferroui-controls-teaching-tip`, `ferroui-edit`, `ferroui-edit-core`, `ferroui-fonts-web`, `ferroui-fonts-web-core`, `ferroui-ident-macros`, `ferroui-textmate` and `ferroui-textmate-grammars`.
+
 ### Added
+
+- **A code editor** (#1051 to #1057, `ferroui-edit-core`, `ferroui-edit`, `ferroui-textmate`, `ferroui-textmate-grammars`, [docs/porting/editor-source-map.md](docs/porting/editor-source-map.md), [docs/porting/textmate-engine.md](docs/porting/textmate-engine.md)):
+  - `ferroui-edit-core`: persistent UTF-16 documents, anchors, undo, search, folding, completion, snippets and XSHD highlighting definitions;
+  - `ferroui-textmate`: grammar execution with Oniguruma scanning, themes and incremental tokenization; `ferroui-textmate-grammars`: 51 language packages and 21 themes with their component licenses;
+  - `ferroui-edit`: `TextEditor` and `TextArea` with input, clipboard, automation and the completion, insight and search popups; the `EditorDemo` sample with its browser host, and a catalog page;
+  - what the editor needs from the platform is linked only with it: the text ranges of an editor for VoiceOver and the tag of an input method's commit on macOS (the `text-editor` feature of `ferroui-native`), and the browser's web custom formats on the clipboard (the `chromium-clipboard-map` features of `ferroui-base` and `ferroui-native`); `ferroui-edit` turns them on;
+  - new public API in the framework: `FormattedText::draw`, `PropertyChangedObservable::has_observers`, `RawTextInputEventArgs::with_input_method_origin` and `is_from_input_method`, `input::platform::chromium_clipboard`, `web_clipboard_format` and `with_chromium_clipboard_formats`, and `TextLine::vertical_padding`, `TextParagraphProperties::minimum_line_height` and `ITextDrawingSink::draw_rounded_rectangle` (all three with defaults) in `ferroui-base`; `TextEditDelta`, `ViewGeometry`, `EmbeddedControlRunLengthError`, default methods on the text automation providers, `ControlAutomationPeer::register_automation_target` (`AutomationTargetResolver`) and `Popup::follows_placement_target_layout` / `set_follows_placement_target_layout` in `ferroui-controls`.
+
+- **Typed forms of the declarative API** (#1087 to #1141, `ferroui-view`, `ferroui-base`, the theme crates):
+  - selectors: `style(of::<Button>().class("accent").pressed())`, with `is_type`, `nesting`, `any`, `any_of` and a method for each declared pseudo-class; text selectors keep working (#1087);
+  - grid definitions: `row_definitions([auto(), star(1.0), px(40.0)])` in builders and `rsx!`, updating existing definitions in place with no text formatted or parsed (#1089);
+  - path geometry: `path!("M...")` checks path data at compile time and keeps it as static data, and `path_data()` is a fluent builder; neither links the path parser (#1093);
+  - setter values: `ctrl(KeyCode::S)`, `translate(x, y).rotate(deg)`, `shadow(..)`, `blur(..)`, `drop_shadow(..)`, `rgb(0x1E293B)`, `argb(..)` and `linear_gradient(..)` (#1095);
+  - bindings to view models: `#[derive(ViewModel)]` declares the accessors, the change notification and a typed property from one field, used as `Person::NAME.two_way()`, with no reflection and no path text (#1099);
+  - routes: `#[derive(Route)]` with `#[route("/people/:id")]` checks a pattern against its fields at compile time, with `typed_route`, `navigate_to` and `current_route` (#1101);
+  - resource keys: each theme crate has a generated `keys` module with the value type of each key; `.dynamic_resource(property, keys::Name)` and `.static_resource(..)` use them, and theme trimming reads typed keys as exact roots (#1108);
+  - control themes, control templates and resource dictionaries in Rust: `control_theme::<T>()`, `control_template`, `.template_bind(..)` and `resource_dictionary()`, producing the same objects as compiled markup (#1126);
+  - the documentation of a setter names its typed forms, compile errors of the builders say what to write, and the examples of the guides are compiled (#1141).
+
+- **Icons from a URI, and icon sources** (#1320, `ferroui-controls-icons`): `BitmapIcon.UriSource`, `BitmapIconSource` (`UriSource`, `ShowAsMonochrome`) and `ImageIconSource` (`ImageSource`), the WinUI members, available from the default XML namespace.
 
 - **High contrast** (#560, `ferroui-base`, `ferroui-controls`, `ferroui-themes-winui`, `ferroui-native`): `SystemColors` and `PlatformColorValues::system_colors`; a theme's high contrast variant (`ThemeVariant::set_high_contrast_variant`), which the application and the top levels select while the platform asks for high contrast; the WinUI theme follows the system's high contrast (`UseSystemHighContrast`, on by default) with the system colours of `Accents/SystemColors`; `DefaultPlatformSettings::set_color_values` simulates the setting. On macOS, "Increase contrast" is reported as high contrast, with the system colours under the effective appearance.
 
@@ -173,6 +207,10 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- The archive of the patched Skia binding gives every entry the commit's time, so two archives of one commit are identical (#1493, `scripts/release`).
+
+- The `ApplyStyling` benchmark checks the border thickness the theme style sets on a text box instead of a fixed value the Simple theme does not use, so the class runs in the gate again (#1494).
+
 - **Behavior change: `PinchEventArgs::angle_delta` follows its documentation** (#1234, `ferroui-base`): the value is the shortest signed turn in degrees, in the range (-180, 180], and positive for clockwise rotation. It had the opposite sign and jumped by nearly 360 degrees when a turn crossed the wrap of the angle. Code that negated the value to correct the sign should stop doing so.
 
 - **Dependency advisories**: the lock files take `rustix` 1.1.6 (RUSTSEC-2026-0486), `rustls-webpki` 0.103.16 (RUSTSEC-2026-0382), `webpki-roots` 1.0.10 (RUSTSEC-2026-0381), `libz-sys` 1.1.33 (RUSTSEC-2026-0418, RUSTSEC-2026-0544) and `tar` 0.4.46 (GHSA-3pv8-6f4r-ffg2).
@@ -197,6 +235,206 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 - **Text in a variable font is shaped and drawn at the optical size of its size** (#859, `ferroui-base`, `ferroui-skia`, `ferroui-vello`, [docs/porting/skia-native-text.md](docs/porting/skia-native-text.md), section 3): a font with an optical size axis (the system font of macOS, Segoe UI Variable) was used at one instance for every size, so large text was set wider than Core Text sets it. The run properties now take the instance at the size of the text, rounded to a whole point and clamped to the axis, one glyph typeface per instance that the texts of that size share; a family that names an optical size (`Display`, `Text`, `Small` and the like) keeps it, and a font without the axis is unchanged. A line of 68 characters in the macOS system font is 736.172 wide at 24 points and 1452.422 at 48 points, against 736.198 and 1452.422 from Core Text (before: 813.410 and 1641.164); up to 17 points it is unchanged. New: `GlyphTypeface::at_optical_size`, `IPlatformTypeface::with_variation_settings` (a provided method, `None` by default).
 
 - **The camera preview on iOS is upright in every interface orientation** (`ferroui-media-camera-apple`): the preview showed the buffers in the orientation of the sensor, a quarter turn off in a portrait interface, and did not follow the interface when the device turned. Each frame now carries the rotation the presenter applies on the GPU, from the interface orientation and the mounting of the selected camera (on iOS 17 and later, the rotation coordinator of AVFoundation, read per frame); before iOS 17 the connection rotates the buffers, and a turn during a recording waits for its end. macOS is unchanged.
+
+### Migration
+
+#### Errors are values, not panics (#971)
+
+- `IAnimator::apply` and `Animator::apply` return `Result<Option<Rc<dyn IDisposable>>, AnimationError>`.
+- `XamlIlRuntimeHelpers::deferred_transformation_factory_v1`, `_v2` and `_v3` return
+  `Result<Rc<DeferredContent>, XamlLoadError>`.
+- Removed; use the `try_` form, which returns the error: `deferred_transformation_factory_for`,
+  `StyleInclude::loaded`, `ResourceInclude::loaded`, `RelativeSourceExtension::provide_value`,
+  `OnFormFactorExtension::should_provide_option` (and that of `OnFormFactorExtensionOf<T>`),
+  `PropertyInfoAccessorFactory::create_ferro_property_accessor`, and the hidden `xaml_error_scope::throw`.
+- Behaviour: a failing `MarkupDelegate::invoke`, a failing XAML runtime member outside a load, and an
+  animation that an animator rejects in `Animation::apply` are errors on the dispatcher, fatal unless a
+  handler handles them. A run-time load returns the errors of its deferred content as `Err`.
+
+#### Property values implement `StyledValue` (#989)
+
+- The value type of a styled or attached property implements `StyledValue`. The types of the framework,
+  `Option`, handles, the standard types and enumerations declared with `ferro_markup_enum!` have it. A type
+  of an application declares `ferroui_base::styled_value!(Type);` (or `styled_enum!(Type { .. })`).
+- `FerroProperty::register*`, `StyledPropertyOptions`, `FerroObject::get_value`, `set_value`,
+  `set_value_with_priority`, `set_current_value`, `get_base_value`, `with_value`, `bind`, `bind_value`,
+  `Animator::Value` and `Transition<T>` require `T: StyledValue`. `FerroObject::try_set_value_typed` keeps
+  `T: PropertyValue`.
+- `IValueEntry::try_get_value` of a styled property fills an `Option` of the storage type (`T::Storage`).
+
+#### Converters are constructed, not written as unit structs (#1008)
+
+`BorderGapMaskConverter`, `EnumToBoolConverter`, `MenuScrollingVisibilityConverter`,
+`PlatformKeyGestureConverter`, `StringFormatConverter` and `TreeViewItemIndentConverter` of
+`ferroui_controls::converters` are `#[non_exhaustive]`.
+
+| Before | After |
+|---|---|
+| `BorderGapMaskConverter` | `BorderGapMaskConverter::new()` or `::default()` |
+| `EnumToBoolConverter` | `EnumToBoolConverter::new()` or `::default()` |
+| `PlatformKeyGestureConverter` | `PlatformKeyGestureConverter::new()` or `::default()` |
+| `StringFormatConverter` | `StringFormatConverter::new()` or `::default()` |
+| `MenuScrollingVisibilityConverter` | `MenuScrollingVisibilityConverter::instance()` or `::default()` |
+| `TreeViewItemIndentConverter` | `TreeViewItemIndentConverter::instance()` or `::default()` |
+
+A pattern on one of them outside the crate is written `BorderGapMaskConverter { .. }`. Markup is unchanged.
+
+#### Control themes and templates (#1112)
+
+An element of a template no longer receives the setters of its templated parent's control theme. A theme
+that relied on this sets the element with a nested style, `^ /template/ TypeName`. Themes whose target is a
+base class of an element in their own template can look different.
+
+#### Declarative typed forms (#1087, #1089, #1108, #1126)
+
+- `style` takes `impl IntoSelector` (#1087). Literals, `&String` and `String` work as before; a `&&str`
+  argument or `style` used as a `fn(&str)` value no longer compiles.
+- `GridDefinitions::row_definitions` and `column_definitions` take `impl IntoGridLengths` instead of `&str`
+  (#1089); text works as before. `row_definitions(text)` sets `GridDefinitionSizes` and no longer
+  `GridDefinitionsText::rows_property()` (likewise for columns): code that read the text back gets `None`.
+- `PropValue` has the new variants `Resource` (#1108), `TemplateValue` and `TemplateBinding`, and
+  `PropValue::Resource` the field `priority` (#1126): an exhaustive `match` needs arms.
+- `SourceReferences` (`ferroui-build-scan`) has two new public fields (#1108): a struct literal needs
+  `..Default::default()`.
+
+#### Code editor prerequisites (#1057)
+
+- `ferroui-native`: the inherent `raw_text_input_event` helper of the top-level is no longer public and
+  takes the origin of the text (keyboard or input method).
+
+#### Platforms and build
+
+- `ferroui-freedesktop` exposes the types of zbus 6 (#1030): `DBusHelper`, `DBusCallError::DBus`,
+  `with_connection`, `new_top_level` and the input method wrappers. `DBusHelper::with_object_server` takes
+  and returns `zbus::connection::Builder` without a `Result`. Depend on `zbus = "6"`; use `zbus::block_on`
+  in place of `zbus::blocking`.
+- Executables on macOS and iOS have no export trie (#1083). An application whose plug-ins resolve names
+  from its executable sets `executable-exports = true`.
+
+#### Generated-code runtime and metadata models
+
+- `rt::method_delegate` takes a plain function and no longer accepts a closure that captures (#1091); the
+  XAML emitter never writes one.
+- `MarkupReferencesModel` has a new public field, `classes` (#1003), and `TypeModel` a new public field,
+  `not_created_on` (#1011): build them with `..Default::default()` or `TypeModel::new`.
+
+#### Public structs and enums with new members
+
+- `Scene3DChange` has a new variant, `Output` (#1114): an exhaustive `match` needs an arm.
+- `ferroui_livecharts::GeoMarker` has two new public fields (#1127) and `HitRegion` the field
+  `label_parts` (#1138): struct literals need `..Default::default()` or `..`.
+
+#### C ABI and bindings
+
+The C ABI (`ferroui-capi`) and the generated bindings are not published to crates.io; these are changes against the previews.
+
+- The type and property IDs of the C ABI are assigned in sorted order, so a new class or property moves the
+  IDs after it and changes the API fingerprint (#1130, #1131, #1174, #1180): C clients are rebuilt against
+  the new header.
+- `ferroui-capi` built with `--no-default-features` leaves out the tables of types (#979); code that looks
+  classes up by name without the desktop platform builds with `--no-default-features --features type-tables`.
+- Bindings generated from this release call `ferro_selection_fingerprint()` in their start check (#981) and
+  need a library that exports it.
+- Osprey bindings: getters return plain values (#969), and the `Attr` union has a new variant `AttrBind`
+  (#972), which a `match` over `Attr` handles.
+
+### Performance and size
+
+Numbers as the pull requests report them (macOS on Apple silicon unless stated; sizes are stripped files).
+
+#### Binary size
+
+- Hello world (`samples/HelloWorld`, release) went from 20,529,288 bytes to 17,758,584 bytes through the
+  roots work of #612: class initialisation reached only through the class's own use (#1006, -579,464 bytes,
+  -2.8 %), interface casts of page transitions and converters registered by construction (#1008,
+  -1,385,976 bytes, -6.9 %), setter targets from `Setter.Value` (#1014, -102,640 bytes), state mappers
+  (#1016, -563,520 bytes, -3.1 %) and the tool tip service (#1017, -139,104 bytes).
+- The property store stack (#989, #1010, #1013, #1015): hello world -362 kB (-1.95 %), the WinUI Gallery
+  -1.08 MB (-1.89 %), the control catalog -1.40 MB (-1.85 %) at #1015.
+- Compiled markup shared helpers (#963): the code statements of the four themes -10.4 %; the control catalog
+  in `dist` 63.37 MB to 61.80 MB (-2.5 %).
+- Executables without an export trie (#1083): `hello-world` `dist` -64,432 bytes (-0.46 %).
+- A style written as text no longer keeps every control (#790): a declarative application 30.53 MB to
+  23.05 MB (-7.5 MB).
+- C ABI (#979, #981): a statically linked `hello_world.c` from 36.97 MB to 20.12 MB; a library made for one
+  application adds 0.04 MB to its program instead of 19.83 MB.
+- Rejected after measurement and recorded: every crate at `opt-level = "z"` (-50 % size, +29 % start-up,
+  #877); identical code folding beyond the defaults (#1001, docs/binary-size.md 5.6).
+
+#### Start-up and frames
+
+- Pipelines compiled on a thread pool and asked for from a record when the platform starts (#784, #789): the
+  first paint of a sampled first start from 814 ms to 259 ms, then to 137 ms. Shader libraries made ahead
+  for Metal ship with the crate (#794), so a first start on macOS does not wait for the shader compiler.
+- Packed row tables of deferred theme resources (#878): start-up of `hello_window` 217 to 186 ms,
+  `themed_window` Simple 288 to 250 ms, Fluent 346 to 304 ms, the control catalog 636 to 614 ms (median of 9).
+- An inherited value is raised only where something can hear it (#863): `Propagation.theme_variant` -49.8 %,
+  `font_family` and `font_weight` -10.6 %, `switch_theme_variant` -9.7 %.
+- Size limits of an element made in measure and arrange (#751): panel measure and arrange of 1,000 children
+  -6.7 to -10.5 %.
+- A panel removes a lost child at its index (#781): 4,000 children 21.9 to 4.95 ms.
+- Graphite on the GPU (#1388 to #1391): frame boundaries and periodic cleanup, pipelined bands submitted at
+  the next frame start, unchanged bands skipped, and band workers that spin then park.
+- The C ABI frames cost what changed (#969): one changed text block of a 100-element frame 21.6 µs to
+  3.18 µs; a bound slot store (#972) 3.05 µs to 52.5 ns.
+- The Skia drawing context (#1382 to #1386): the transform is read back from the canvas only when it is
+  asked for after a restore, and the DPI post transform is inverted once; rounded rectangles are built on
+  the stack, equal corners without shadows use Skia's round rectangle call, and rounded clips without
+  rounding are rectangle clips; solid fills and undashed strokes set only the paint values that changed;
+  images, gradients, dashed strokes and the drawing context of a frame no longer allocate per draw or per
+  frame; a cached glyph run takes the lock of its text blob cache once instead of twice.
+- Vulkan (#1367, #1368, #1370): up to two frames in flight with no per-frame wait on the GPU and no command
+  buffer, fence or vector made per frame; barriers of the present path use the stages of their layouts, the
+  present waits for the acquired image at the transfer stage, and a frame of the swap chain's size and
+  format is copied instead of blitted; Skia on Vulkan keeps the window's wrapped surface across frames and
+  submits a frame once instead of twice.
+- WrapPanel arranges the items of a line in one loop again (#1501): `SizeChange.wrap` and
+  `Text.narrow_and_lay_out` are back at their earlier instruction counts (1,472,226 to 1,440,723 and
+  788,877 to 772,879 instructions an operation) after the `ItemsStretch` work of #1313.
+
+#### Known trades
+
+Costs this release keeps for what it gains, measured on macOS (Apple M1).
+
+- **The shared type check of a boxed comparison** (#1102, the size work of #566): the comparison of two
+  boxed values calls one out-of-line type check shared by every value type, so that each typed copy is
+  small. Each comparison pays one call for it: `property_subsystem::BoxedCompare` `equal` 55.2 to 63.2
+  instructions an operation (+14.5 %), `different` 57.2 to 65.2, `different_type` 51.2 to 57.2,
+  `not_a_number` 57.2 to 65.2, `nullable` 62.2 to 70.2. An inline check for the common scalar types gave
+  the instructions back but grew hello world `dist` `__text` by 2,856 bytes and was not adopted (#1502).
+- **Element layers** (#739): rarely used state of an element is kept behind one word, which made the
+  elements smaller and moved `Border` from the allocator's 2,048-byte block to the 1,792-byte block (1,280
+  bytes in this release). Reads across 10,000 elements that also reach the heap buffers of their value
+  stores take up to 2.2 times as long with the same instructions: `ControlRead.inherited_held` 10.4 to
+  11.7 ns before, 23.9 to 24.7 ns now; `non_copy_value` +60 %, `inherited_unheld` +72 %, `attached_unset`
+  +41 %, `unset_beside_values` +33 %, `trees::Propagation.is_visible` +20 %. With 16 elements the reads
+  are unchanged. The cost follows the stride of the elements in memory, not the code: the same build with
+  `Border` padded into a 2,048 or 4,096-byte block reads at the earlier speed, and at 1,536 or 1,792 bytes
+  it does not; padding would cost every element 60 % more memory. Follow-up: #1503.
+- **The GPU context before the window opens** (#789): the platform makes the render context when it
+  starts, so that the pipelines of the record compile while the application builds its first screen. The
+  "Window opened" line of `themed_window` comes about 3 % later than in 0.5.0 (Simple 207.4 to 212.7 ms,
+  +3.06 % [+1.64, +3.83]; Fluent +2.58 %; the median of 40 paired starts and its 95 % interval), and the
+  first frame is drawn at the same time as in 0.5.0 (Simple 249.1 to 249.3 ms, +0.57 % [-0.94, +0.97];
+  Fluent +0.24 % [-2.93, +1.89]).
+
+### Still landing
+
+<!-- release-0.6.0-pending: the entries of the pull requests below are added when they land, and this section is removed before the release. -->
+
+- The ribbon.
+- WebGL2 effects of the Vello backend and the media frames on the GPU (#575).
+- Binary size (#306).
+
+<!-- /release-0.6.0-pending -->
+
+### Known limitations
+
+- **Vello stays optional.** Skia is the default backend; Vello is experimental ([docs/porting/vello-backend.md](docs/porting/vello-backend.md)).
+- **The native renderers are experimental.** `ferroui-quartz` and `ferroui-direct2d` are opt-in backends ([docs/porting/quartz-prototype.md](docs/porting/quartz-prototype.md), [docs/porting/windows-native-renderer.md](docs/porting/windows-native-renderer.md)).
+- **Portable media is an initial implementation**; the verification of each platform and the outstanding native work are recorded in [docs/media/README.md](docs/media/README.md).
+- **3D** is at the steps of #608 that [docs/porting/media3d.md](docs/porting/media3d.md) records as done; the ProGPU mapping and browser WebGPU are not in this release. Vello hybrid-webgl 3D is in it only if the WebGL2 stack of the Vello backend lands before the release ("Still landing"); this line is settled with that section.
+- **The C ABI is not published.** `ferroui-capi` and the generated bindings are built from the repository ([docs/c-abi.md](docs/c-abi.md)).
 
 ## [0.5.0] - 2026-11-14
 
@@ -1136,6 +1374,7 @@ The preview makes the framework available as crates so that it can be tried outs
 - **Tests of the published crates.** The packages hold the sources of the tests but not the test fonts and images of the Skia backend; the test suites are run from the repository.
 
 [Unreleased]: https://github.com/wieslawsoltes/FerroUI/compare/v0.5.0...main
+[0.6.0]: https://github.com/wieslawsoltes/FerroUI/compare/v0.5.0...main
 [0.5.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.5.0
 [0.4.0]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0
 [0.4.0-preview.1]: https://github.com/wieslawsoltes/FerroUI/releases/tag/v0.4.0-preview.1
