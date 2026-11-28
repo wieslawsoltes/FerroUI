@@ -1,0 +1,6 @@
+<ContentPage xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ControlCatalog.Pages.FerroEditPage"
+             Header="FerroEdit">
+  <Border Name="DemoHost" />
+</ContentPage>

@@ -67,7 +67,20 @@ impl PartialEq for Browser {
 
 /// The route of the page of the crate `name`.
 pub fn details_path(name: &str) -> String {
-    format!("/crate/{name}")
+    CrateRoute { name: name.to_string() }.to_path()
+}
+
+/// The route of the search.
+#[derive(Route)]
+#[route("/")]
+pub struct SearchRoute;
+
+/// The route of the page of a crate.
+#[derive(Route)]
+#[route("/crate/:name")]
+pub struct CrateRoute {
+    /// The name of the crate.
+    pub name: String,
 }
 
 /// Searches `term` (trimmed already): no crates for an empty term, at once; otherwise the crates
@@ -90,9 +103,8 @@ pub fn App(browser: Option<Browser>, #[prop(default = String::from("/"))] path: 
     let browser = use_hook(move || browser.unwrap_or_else(|| Browser::new(default_search_service())));
     let (search, details) = (browser.clone(), browser);
     let routes = vec![
-        route("/", move |_| rsx! { SearchPage { browser: search.clone() } }),
-        route("/crate/:name", move |found| {
-            let name = found.param("name").unwrap_or_default().to_string();
+        typed_route::<SearchRoute>(move |_| rsx! { SearchPage { browser: search.clone() } }),
+        typed_route::<CrateRoute>(move |CrateRoute { name }| {
             rsx! { DetailsPage { browser: details.clone(), name } }
         }),
     ];
@@ -114,7 +126,7 @@ fn SearchPage(browser: Browser) -> Element {
     let results = use_future(term.clone(), move |term: &String| search_crates(service.clone(), term.clone()));
 
     rsx! {
-        Grid { row_definitions: "Auto,*", column_definitions: "Auto,*",
+        Grid { row_definitions: [auto(), star(1.0)], column_definitions: [auto(), star(1.0)],
             TextBlock { text: "Search for: ", font_size: 16.0, font_weight: FontWeight::SemiBold,
                 vertical_alignment: VerticalAlignment::Center }
             TextBox { name: "Search", Grid.column: 1, margin: (6.0, 0.0, 0.0, 0.0),
@@ -179,9 +191,9 @@ fn result_item(krate: CrateSearchMetadata, browser: Browser, router: Router) -> 
             background: "Transparent", padding: 0.0,
             on_click: move |_| {
                 browser.remember(krate.clone());
-                router.navigate(&details_path(&krate.name));
+                router.navigate_to(&CrateRoute { name: krate.name.clone() });
             },
-            Grid { column_definitions: "Auto,*",
+            Grid { column_definitions: [auto(), star(1.0)],
                 {badge(&name, 48.0)}
                 StackPanel { Grid.column: 1, margin: 6.0, vertical_alignment: VerticalAlignment::Center,
                     TextBlock { text: title, font_size: 14.0, font_weight: FontWeight::SemiBold }
@@ -198,7 +210,7 @@ fn result_item(krate: CrateSearchMetadata, browser: Browser, router: Router) -> 
 fn badge(name: &str, size: f64) -> Element {
     let letter: String = name.chars().next().map(|first| first.to_uppercase().collect()).unwrap_or_default();
     rsx! {
-        Border { margin: 6.0, width: size, height: size, corner_radius: 8.0, background: "#B7410E",
+        Border { margin: 6.0, width: size, height: size, corner_radius: 8.0, background: rgb(0xB7410E),
             horizontal_alignment: HorizontalAlignment::Center, vertical_alignment: VerticalAlignment::Center,
             TextBlock { text: letter, font_size: size * 0.45, font_weight: FontWeight::SemiBold, foreground: "White",
                 horizontal_alignment: HorizontalAlignment::Center, vertical_alignment: VerticalAlignment::Center }
@@ -248,11 +260,11 @@ fn crate_details(krate: CrateSearchMetadata, router: Router) -> Element {
                 on_click: move |_| {
                     // Back to the page before, or to the search when the browser started here.
                     if !router.navigate_back() {
-                        router.navigate_and_reset("/");
+                        router.navigate_and_reset_to(&SearchRoute);
                     }
                 },
                 "Back" }
-            Grid { column_definitions: "Auto,*",
+            Grid { column_definitions: [auto(), star(1.0)],
                 {badge(&krate.name, 64.0)}
                 StackPanel { Grid.column: 1, margin: 6.0, vertical_alignment: VerticalAlignment::Center,
                     TextBlock { name: "CrateName", text: krate.name.clone(), font_size: 24.0, font_weight: FontWeight::SemiBold }
@@ -286,7 +298,7 @@ fn failure(error: ErrorInfo, router: Router) -> Element {
             TextBlock { name: "ErrorMessage", text: message, text_wrapping: TextWrapping::Wrap }
             StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
                 Button { name: "TryAgain", on_click: move |_| error.reset(), "Try again" }
-                Button { name: "BackToSearch", on_click: move |_| router.navigate_and_reset("/"), "Back to the search" }
+                Button { name: "BackToSearch", on_click: move |_| router.navigate_and_reset_to(&SearchRoute), "Back to the search" }
             }
         }
     }

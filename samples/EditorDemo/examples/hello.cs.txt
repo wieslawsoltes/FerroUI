@@ -1,0 +1,25 @@
+// FerroUI editor: C# TextMate grammar and the same shared editing services.
+// Unicode positions remain stable: café, Ελληνικά, 日本語, 😀.
+using System;
+
+class Program
+{
+    #region Greeting
+    static string Greeting(string name)
+    {
+        return $"Hello, {name}!";
+    }
+    #endregion
+
+    #region Entry point
+    static void Main()
+    {
+        foreach (var name in new[] { "FerroUI", "C#", "😀" })
+        {
+            Console.WriteLine(Greeting(name));
+        }
+    }
+    #endregion
+}
+
+// Ctrl+Space opens completion at the caret. Enter or Tab commits the item.
