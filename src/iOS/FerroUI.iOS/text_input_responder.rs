@@ -1366,7 +1366,7 @@ mod uikit {
             self.ivars().is_in_update.set(true);
             log("Triggering text input");
             self.send(|keyboard_device, view| {
-                vec![Rc::new(RawTextInputEventArgs::new(keyboard_device, 0, view.input_root(), text))]
+                vec![Rc::new(RawTextInputEventArgs::new(keyboard_device, 0, view.input_root(), text).with_input_method_origin())]
             });
             self.ivars().is_in_update.set(false);
         }

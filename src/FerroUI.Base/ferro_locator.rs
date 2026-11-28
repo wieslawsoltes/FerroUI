@@ -105,6 +105,12 @@ impl FerroLocator {
         RegistrationHelper { locator: self, _service: PhantomData }
     }
 
+    /// Removes the local registration for `T`, revealing any inherited service.
+    pub fn unbind<T: ?Sized + 'static>(&self) -> bool {
+        let removed = self.registry.borrow_mut().remove(&TypeId::of::<T>());
+        removed.is_some()
+    }
+
     /// Registers `constant` as the service of its own type.
     pub fn bind_to_self<T: 'static>(&self, constant: Rc<T>) -> &FerroLocator {
         self.bind::<T>().to_constant(constant)

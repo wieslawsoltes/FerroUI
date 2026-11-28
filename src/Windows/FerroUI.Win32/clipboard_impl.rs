@@ -9,6 +9,7 @@ use crate::interop::unmanaged_methods::{
     self, close_clipboard, empty_clipboard, ole_flush_clipboard, ole_get_clipboard, open_clipboard, HRESULT,
 };
 use crate::ole_data_object_to_data_transfer_wrapper::OleDataObjectToDataTransferWrapper;
+use crate::web_clipboard;
 use crate::win32_com::IDataObject;
 use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
@@ -154,7 +155,7 @@ impl IClipboardImpl for ClipboardImpl {
                     let Some(proxy) = (unsafe { ComPtr::from_raw(data_object as *mut IDataObject) }) else {
                         return Ok(None);
                     };
-                    let wrapper = OleDataObjectToDataTransferWrapper::new(&proxy);
+                    let wrapper = OleDataObjectToDataTransferWrapper::new_clipboard(&proxy);
 
                     if wrapper.try_formats()?.is_empty() {
                         wrapper.dispose();
@@ -180,8 +181,10 @@ impl IClipboardImpl for ClipboardImpl {
         Box::pin(async move {
             Dispatcher::ui_thread().verify_access();
 
+            let formats = data_transfer.try_formats()?;
+            let data_transfer = data_transfer.to_synchronous(LogArea::WIN32_PLATFORM);
             let (wrapper, data_object) =
-                DataTransferToOleDataObjectWrapper::new(data_transfer.to_synchronous(LogArea::WIN32_PLATFORM));
+                DataTransferToOleDataObjectWrapper::new(web_clipboard::publish(data_transfer, &formats));
             let mut i = OLE_RETRY_COUNT;
 
             loop {

@@ -98,9 +98,8 @@ impl RootAtSpiNode {
         .unwrap_or_default()
     }
 
-    #[allow(dead_code)] // A member of the reference that nothing of it calls.
-    pub(crate) fn point_to_client(&self, point: PixelPoint) -> Point {
-        self.with_window_impl(|window| window.point_to_client(point)).unwrap_or_default()
+    pub(crate) fn point_to_client(&self, point: PixelPoint) -> Option<Point> {
+        self.with_window_impl(|window| window.point_to_client(point))
     }
 
     fn on_root_focus_changed(&self, node: &Rc<AtSpiNode>) {

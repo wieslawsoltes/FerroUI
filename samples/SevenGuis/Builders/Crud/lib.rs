@@ -59,8 +59,8 @@ pub fn crud() -> Element {
     };
 
     grid()
-        .row_definitions("Auto,*,Auto")
-        .column_definitions("*,*")
+        .row_definitions([auto(), star(1.0), auto()])
+        .column_definitions([star(1.0), star(1.0)])
         .margin(16.0)
         .child(
             stack_panel()
@@ -82,8 +82,8 @@ pub fn crud() -> Element {
                 .grid_row(1)
                 .grid_column(1)
                 .margin((8.0, 0.0, 0.0, 0.0))
-                .row_definitions("Auto,Auto")
-                .column_definitions("Auto,*")
+                .row_definitions([auto(), auto()])
+                .column_definitions([auto(), star(1.0)])
                 .children(field("Name:", name, 0))
                 .children(field("Surname:", surname, 1)),
         )

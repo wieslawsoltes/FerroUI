@@ -55,7 +55,7 @@ pub fn Crud() -> Element {
     let has_selection = move || selected_person.get().is_some();
 
     rsx! {
-        Grid { row_definitions: "Auto,*,Auto", column_definitions: "*,*", margin: 16.0,
+        Grid { row_definitions: [auto(), star(1.0), auto()], column_definitions: [star(1.0), star(1.0)], margin: 16.0,
             StackPanel { orientation: Orientation::Horizontal, spacing: 8.0, margin: (0.0, 0.0, 0.0, 8.0),
                 TextBlock { text: "Filter prefix:", vertical_alignment: VerticalAlignment::Center }
                 TextBox { name: "Prefix", width: 120.0, text: prefix.two_way() }
@@ -64,7 +64,7 @@ pub fn Crud() -> Element {
                 { for_each(move || filtered.get(), |person| person.id, |person| rsx! { ListBoxItem { content: person.label() } }) }
             }
             Grid { Grid.row: 1, Grid.column: 1, margin: (8.0, 0.0, 0.0, 0.0),
-                row_definitions: "Auto,Auto", column_definitions: "Auto,*",
+                row_definitions: [auto(), auto()], column_definitions: [auto(), star(1.0)],
                 TextBlock { text: "Name:", vertical_alignment: VerticalAlignment::Center }
                 TextBox { name: "Name", Grid.column: 1, text: name.two_way() }
                 TextBlock { text: "Surname:", Grid.row: 1, vertical_alignment: VerticalAlignment::Center }
