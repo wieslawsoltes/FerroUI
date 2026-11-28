@@ -1,0 +1,10 @@
+<!-- Native host for unchanged-source MvvmTests.cs scenarios, 9755e281. -->
+<StackPanel xmlns="https://github.com/ferroui">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+</StackPanel>

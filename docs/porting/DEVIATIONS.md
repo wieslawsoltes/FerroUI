@@ -1821,6 +1821,18 @@ The 3D scenes of #608 ([media3d.md](media3d.md)) are not part of the reference: 
 | `ImmediateRenderer.Render` pushes the opacity of every visual. | No opacity state is pushed for an opacity of exactly 1 (`immediate_renderer.rs`). | Performance | The state does nothing, and a backend whose opacity is a layer would allocate one for every visual. |
 | No such member. | `IDrawingContextImpl::prefers_bounded_effect_targets` (default `false`, `true` in the Direct2D drawing context): the graph of a composition effect brush and the coverage of a painted brush are evaluated in scratch targets of the size of the brush. | API (addition) | A pushed layer of that backend has the size of the whole target; the other backends keep drawing in place. |
 
+### FerroRibbon (`components/FerroRibbon/`)
+
+Every public ribbon type is in the default XML namespace (#1062), so one name has one type.
+
+| Source | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `Model.RibbonScreenTip`, the data model, shares its name with the control `Controls.RibbonScreenTip`. | The data model is `RibbonScreenTipModel` in Rust and in markup; the control keeps its name. There is no alias. | Behaviour | Both namespaces are mapped to the default XML namespace, where one name would bind to whichever type comes first. The name also matches the other `*Model` types. | #1062 |
+| `Orientation` numbers Vertical 0 and Horizontal 1, and an enum keeps a number without a name. | The ribbon uses the framework's `Orientation`: Horizontal 0, Vertical 1. A number without a name is refused by markup. Named values are unchanged. | Behaviour | One type per name in the default XML namespace. | #1062 |
+| `ContentDialogButton` keeps a number without a name, which selects no button. | The ribbon uses the framework's enum. A number without a name is refused by markup. | Behaviour | One type per name in the default XML namespace. | #1062 |
+| The ribbon's `BitmapIcon` loads `ms-appx`, `ms-appdata`, `http`, scale-qualified and deferred URIs and exposes `load_error`. | The public `BitmapIcon` is the framework's, which loads `file:` and asset URIs. The ribbon's icon presenter and menus keep those forms through an internal element; a `BitmapIcon` placed outside them does not. `load_error` is no longer public. | Behaviour | One type per name in the default XML namespace. | #1062 |
+| `FontIcon.IsTextScaleFactorEnabled`, `FontIconSource.IsTextScaleFactorEnabled`. | Not available on the framework's icons. | Missing | FerroUI has no text scale factor (`winui-controls.md`). | #1062 |
+
 ## Corrected divergences
 
 Places where the port did work that upstream does not do, or did it differently, and a later change made it match upstream again. They are kept here so a regression can be recognised. Extra allocations and copies on hot paths belong here too: `PORTING-GUIDE.md` rules out allocations on hot paths that upstream avoids.

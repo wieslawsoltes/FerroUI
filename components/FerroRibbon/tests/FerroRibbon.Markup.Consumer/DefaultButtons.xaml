@@ -1,0 +1,6 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
+ <local:ConsumerDialogHost DefaultButton="None" OptionalDefaultButton="{x:Null}" />
+ <local:ConsumerDialogHost DefaultButton="{x:Static ContentDialogButton.Primary}" OptionalDefaultButton="Close" />
+ <local:ConsumerDialogHost DefaultButton="Secondary" OptionalDefaultButton="{x:Static ContentDialogButton.None}" />
+ <local:ConsumerDialogHost DefaultButton="Close" OptionalDefaultButton="Secondary" />
+</StackPanel>

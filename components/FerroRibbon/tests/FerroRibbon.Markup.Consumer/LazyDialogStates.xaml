@@ -1,0 +1,8 @@
+<local:ConsumerDialogHost xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer"
+ PrimaryButtonText="Apply" SecondaryButtonText="Other" CloseButtonText="Cancel"
+ PrimaryButtonStyle="{StaticResource BaseStyle}" SecondaryButtonStyle="{StaticResource BaseStyle}" CloseButtonStyle="{StaticResource BaseStyle}">
+ <local:ConsumerDialogHost.Resources>
+  <ControlTheme x:Key="BaseStyle" TargetType="Button"><Setter Property="MinHeight" Value="31.5" /></ControlTheme>
+  <ControlTheme x:Key="AccentButtonStyle" TargetType="Button"><Setter Property="MinHeight" Value="43.25" /></ControlTheme>
+ </local:ConsumerDialogHost.Resources>
+</local:ConsumerDialogHost>

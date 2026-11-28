@@ -2,7 +2,8 @@
 
 use crate::placement::{image_rect, measure};
 use crate::{register_types, BitmapIcon, BitmapIconSource, ImageIcon, ImageIconSource};
-use ferroui_base::media::{DrawingContext, IImage};
+use ferroui_base::media::{DrawingContext, IImage, ImageLoadHandler};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::platform::{AssetAssembly, AssetStream, IAssetLoader};
 use ferroui_base::utilities::{Uri, UriKind, UriRef};
 use ferroui_base::{Rect, Size, StaticType};
@@ -54,6 +55,26 @@ impl IImage for EmptyImage {
     fn draw(&self, _context: &mut DrawingContext<'_>, _source_rect: Rect, _dest_rect: Rect) {}
     fn as_any(&self) -> &dyn Any {
         self
+    }
+}
+
+/// An image that reports its load when the test says so.
+#[derive(Default)]
+struct LaterImage {
+    handler: RefCell<Option<ImageLoadHandler>>,
+}
+
+impl IImage for LaterImage {
+    fn size(&self) -> Size {
+        Size::new(16.0, 16.0)
+    }
+    fn draw(&self, _context: &mut DrawingContext<'_>, _source_rect: Rect, _dest_rect: Rect) {}
+    fn as_any(&self) -> &dyn Any {
+        self
+    }
+    fn subscribe_load(&self, handler: ImageLoadHandler) -> Option<Subscription> {
+        self.handler.replace(Some(handler));
+        None
     }
 }
 
@@ -179,4 +200,19 @@ fn an_image_icon_source_creates_and_updates_its_icons() {
     assert!(icon.source().is_some_and(|shown| Rc::ptr_eq(&shown, &image)));
     source.set_image_source(None);
     assert!(icon.source().is_none());
+}
+
+#[test]
+fn an_image_icon_measures_again_when_its_source_finishes_loading() {
+    let _application = UnitTestApplication::start(TestServices::styled_window());
+    let image = Rc::new(LaterImage::default());
+    let icon = ImageIcon::new();
+    icon.set_source(Some(image.clone() as Rc<dyn IImage>));
+    icon.measure(Size::new(50.0, 50.0));
+    assert!(icon.is_measure_valid());
+
+    let handler = image.handler.borrow().clone().expect("the icon watches the load");
+    handler(&Ok(()));
+
+    assert!(!icon.is_measure_valid());
 }

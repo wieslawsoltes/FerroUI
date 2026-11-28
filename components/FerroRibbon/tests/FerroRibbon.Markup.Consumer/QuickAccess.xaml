@@ -1,0 +1,10 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
+ <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
+ <local:ConsumerRibbon x:Name="RibbonRoot" x:DataType="local:CommandViewModel" CanFloatGroups="True" QuickAccessPosition="BelowRibbon" ShowQuickAccessLabels="True" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
+  <Ribbon.DataContext><local:CommandViewModel /></Ribbon.DataContext>
+  <Ribbon.QuickAccessToolBar><local:ConsumerQuickAccessToolBar ShowCustomizeButton="False"><RibbonButton Id="save" Label="Save" Command="{Binding Command}" CommandParameter="{Binding Value}" /></local:ConsumerQuickAccessToolBar></Ribbon.QuickAccessToolBar>
+  <Ribbon.QuickAccessCandidateIds><x:String>cut</x:String></Ribbon.QuickAccessCandidateIds>
+  <RibbonTab Header="Home" KeyTip="H"><RibbonGroup Header="Tools" FloatingPosition="12,24"><RibbonButton Id="cut" Label="Cut" Command="{Binding Command}" CommandParameter="{Binding Value}" /></RibbonGroup></RibbonTab>
+ </local:ConsumerRibbon>
+ <TextBlock Text="{Binding ElementName=RibbonRoot,Path=QuickAccessToolBar.Items.Count}" />
+</StackPanel>

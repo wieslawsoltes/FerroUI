@@ -16,8 +16,8 @@ use ferroui_base::input::InputElement;
 use ferroui_base::data::{BindingMode, TemplateBinding};
 use ferroui_base::layout::{HorizontalAlignment, LayoutHelper, VerticalAlignment};
 use ferroui_base::media::{
-    Brushes, DrawingImage, FlowDirection, FontStyle, GeometryDrawing, IImage, RectangleGeometry, TextAlignment,
-    TextDecorations, TextTrimming, TextWrapping,
+    Brushes, DrawingImage, FlowDirection, FontManager, FontStyle, GeometryDrawing, IImage, RectangleGeometry,
+    TextAlignment, TextDecorations, TextTrimming, TextWrapping,
 };
 use ferroui_base::{Rect, Ref, Size, StyledElement, Thickness, Visual};
 use std::rc::Rc;
@@ -38,6 +38,24 @@ fn inlines_of(inlines: impl IntoIterator<Item = Ref<crate::documents::Inline>>) 
 
 fn infinity() -> Size {
     Size::new(f64::INFINITY, f64::INFINITY)
+}
+
+/// Text blocks with the same typeface, size and brush share their run properties, and so the
+/// glyph typeface those found once; a change of the fonts lets the shared ones go, so that a
+/// block made again (a web font face that loaded, a collection added, removed or replaced)
+/// finds its typeface with the new fonts.
+#[test]
+fn shared_run_properties_are_let_go_when_the_fonts_change() {
+    let _scope = test_scope();
+    let _text = TextTestScope::new();
+    let first = text_block("Shared");
+    let kept = first.default_run_properties();
+    assert!(Rc::ptr_eq(&kept, &text_block("Shared").default_run_properties()));
+
+    FontManager::current().invalidate_glyph_typefaces();
+    let after = text_block("Shared").default_run_properties();
+    assert!(!Rc::ptr_eq(&kept, &after));
+    assert!(Rc::ptr_eq(&after, &text_block("Shared").default_run_properties()));
 }
 
 /// A new foreground is laid out from the kept runs: nothing is shaped again.

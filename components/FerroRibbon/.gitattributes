@@ -1,0 +1,1 @@
+tests/fixtures/** -text -filter -whitespace -diff

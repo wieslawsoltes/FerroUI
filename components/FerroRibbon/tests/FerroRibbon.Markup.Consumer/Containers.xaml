@@ -1,0 +1,21 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/SimpleItems.xaml" />
+        <ResourceInclude Source="ferres://FerroRibbon/Themes/Buttons.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </StackPanel.Resources>
+  <RibbonButtonGroup x:Name="Buttons">
+    <RibbonButton x:Name="First" Label="First" />
+    <RibbonButton Label="Second" />
+  </RibbonButtonGroup>
+  <RibbonStackPanel Orientation="Vertical" Spacing="7.5">
+    <RibbonButton Label="Stacked" />
+    <RibbonLabel Label="Label" />
+  </RibbonStackPanel>
+  <TextBlock Text="{Binding #Buttons.Items.Count}" />
+  <TextBlock Text="{Binding #Buttons.Items[0].Name}" />
+</StackPanel>
